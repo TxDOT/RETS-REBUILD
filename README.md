@@ -7,10 +7,17 @@ Vue = v3.3.11
 Vuetify = v3.4.10
 
 
-To check if node is installed on you machine. Open terminal/command prompt and type node -v
+To check if node is installed on you machine. Open terminal/command prompt and type `node -v`
 If it is not installed proceed to https://nodejs.org/en and download the latest version
 
 Verify that node is installed by opening terminal/command prompt and type `node -v`
+The response should display the node version number ex. v21.5.0
 
-To install Vue, use Vite (https://vitejs.dev/guide/) to install dependencies
+Once Node is installed:
+Install Vue, use Vite (https://vitejs.dev/guide/) to install dependencies
+
+Open terminal/command prompt cd to the directory you wishand type `npm create vite@latest`
+
+
+
 
