@@ -8,7 +8,7 @@ Vuetify = v3.4.10<br>
 
 Install Node onto machine.<br>
 To check if Node is installed on you machine. Open terminal/command prompt and type `node -v`<br>
-If it is not installed or to update Node proceed to https://nodejs.org/en and download the latest version<br>
+If it is not installed or to update Node, proceed to https://nodejs.org/en and download the latest version<br>
 
 Verify that node is installed by opening terminal/command prompt and type `node -v`<br>
 The response should display the node version number ex. v21.5.0
