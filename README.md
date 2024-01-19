@@ -1,5 +1,5 @@
 # RETS-REBUILD
-Modifying the current RETS App using Vue/Vuetify with Framework
+Modifying the current RETS App using Vue/Vuetify Framework
 
 Requirements:<br>
 Node >= v21.5.0<br>
