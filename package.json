@@ -1,0 +1,21 @@
+{
+  "name": "rets-rebuild-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@arcgis/core": "^4.28.10",
+    "vue": "^3.3.11",
+    "vuetify": "^3.4.10"
+  },
+  "devDependencies": {
+    "@mdi/font": "^7.4.47",
+    "@vitejs/plugin-vue": "^4.5.2",
+    "vite": "^5.0.8"
+  }
+}
