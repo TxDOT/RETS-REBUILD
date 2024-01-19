@@ -6,7 +6,7 @@ Node >= v21.5.0<br>
 Vue = v3.3.11<br>
 Vuetify = v3.4.10<br>
 
-
+Install node onto machine.<br>
 To check if node is installed on you machine. Open terminal/command prompt and type `node -v`<br>
 If it is not installed proceed to https://nodejs.org/en and download the latest version<br>
 
