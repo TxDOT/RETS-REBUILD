@@ -14,9 +14,7 @@ Verify that node is installed by opening terminal/command prompt and type `node 
 The response should display the node version number ex. v21.5.0
 
 Once Node is installed:
-Install Vue, use Vite (https://vitejs.dev/guide/) to install dependencies
-
-Open terminal/command prompt cd to the directory you wishand type `npm create vite@latest`
+Create a branch
 
 
 
