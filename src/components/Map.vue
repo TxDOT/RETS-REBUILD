@@ -1,5 +1,7 @@
 <template app>
-    <div id="viewDiv"></div>
+    <div id="viewDiv">
+        <div>test</div>
+    </div>
     
 
 </template>
