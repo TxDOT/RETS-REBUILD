@@ -22,8 +22,6 @@ export const retsLayer =  new FeatureLayer({
     visible: true,
     outFields: ["*"],
     definitionExpression: `GIS_ANLST = 'David Prosack' and STAT = 'Not Started'`,
-    popupEnabled: true,
-    popupTemplate: template,
 })
 
 //Dark Vector Tile construction
