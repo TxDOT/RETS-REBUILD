@@ -3,7 +3,6 @@ import Map from "@arcgis/core/Map.js";
 import MapView from "@arcgis/core/views/MapView.js";
 import VectorTileLayer from "@arcgis/core/layers/VectorTileLayer.js"
 import Basemap from "@arcgis/core/Basemap.js";
-import Zoom from "@arcgis/core/widgets/Zoom.js";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer.js";
 import OAuthInfo from "@arcgis/core/identity/OAuthInfo.js";
 import esriId from "@arcgis/core/identity/IdentityManager.js";
@@ -23,8 +22,6 @@ export const retsLayer =  new FeatureLayer({
     visible: true,
     outFields: ["*"],
     definitionExpression: `GIS_ANLST = 'David Prosack' and STAT = 'Not Started'`,
-    popupEnabled: true,
-    editingEnabled: true
 })
 
 //Dark Vector Tile construction
@@ -49,19 +46,11 @@ export const view = new MapView({
     center: [-100, 31.5],
     highlightOptions: {
         color: "orange"
-    },
-})
-
-//add zoom button -- need to look at
-export const zoom = new Zoom({
-    view: view,
-    layout: "vertical",
+    }
 })
 
 //add feature layers to the map
-map.addMany([retsLayer])
-//add zoom to the top right corner -- need to look at
-view.ui.add(zoom, "top-right")
+map.add(retsLayer)
+
 //remove attribution and zoom information
 view.ui.remove("attribution");
-view.ui.remove("zoom")  
