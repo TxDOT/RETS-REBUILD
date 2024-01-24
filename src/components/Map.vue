@@ -1,7 +1,5 @@
 <template app>
-    <div id="viewDiv">
-        <div id="popupContainer"></div>
-    </div>
+    <div id="viewDiv"></div>
     
 
 </template>
