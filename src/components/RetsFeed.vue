@@ -1,16 +1,16 @@
 <template>
     <v-navigation-drawer width="200" height="100" permanent color="black">
         <v-list height="100%" id="icons-top" >
-            <v-list-item v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" active-class="test">  
+            <v-list-item v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" active-class="btn-left-brder" :active="tool.isActive">  
                 <template v-slot:prepend>
-                    <v-icon size="large" :icon="tool.icon" :color="tool.color"></v-icon>
+                    <v-icon size="30" :icon="tool.icon" :color="tool.color"></v-icon>
                 </template>
             </v-list-item>
         </v-list>
         <v-list id="icons-bottom">
-            <v-list-item v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @click="tool.action()" active-class="test">
+            <v-list-item v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @click="tool.action()" active-class="btn-left-brder" >
                 <template v-slot:prepend>
-                    <v-icon size="large" :icon="tool.icon" :color="tool.color"></v-icon>
+                    <v-icon size="30" :icon="tool.icon" :color="tool.color" start></v-icon>
                 </template>
             </v-list-item>
         </v-list>
@@ -32,13 +32,12 @@
                 tester: false,
                 retsToolsTop: [
                                {title:"Test", icon: 'mdi-menu', color: "white", action: () =>{
-                                    this.test = !this.tester
-                                    console.log(!this.tester)
-                                    document.getElementById("container").style.width = document.getElementById("container").style.width === "0%" ? "30%" : "0%"
+                                    this.isActive = !this.tester
+                                    document.getElementById("container").style.width = document.getElementById("container").style.width === "0%" ? "25%" : "0%"
                                     document.getElementById("feed-banner").style.padding = document.getElementById("container").style.width  === "0%" ? "0px" : "10px"
-                                }
+                                }, isActive: this.tester
                                },  
-                               {title:"Test", icon: 'mdi-map-marker-outline', color: "#318CE7", action: () =>{
+                               {title:"Test", icon: 'mdi-map-marker-outline', color: "#4472C4", action: () =>{
                                 console.log("Hey2")
                                }, isActive: false},
                                {title:"Test", icon: 'mdi-chart-pie', color: "white", action: () =>{
@@ -88,13 +87,15 @@
 <style>
 
     .v-list > .v-list-item{
-        padding-bottom: 1.5rem !important;
+        padding-bottom: 3rem !important;
+        height: 2.3rem;
         /* font-size: 1.5rem; */
     }
 
     .v-list-item:hover{
         cursor: pointer;
         background-color: rgba(128,128,128,.3);
+
     }
 
     #icons-bottom{
@@ -117,7 +118,11 @@
         overflow-y: hidden;
     }
 
-    .test{
-        border-left: 5px solid blue !important;
+    .btn-left-brder{
+        border-left: 5px solid #4472C4 !important;
+    }
+    .nav-bar-btn{
+        height: 2rem;
+        width: 100%;
     }
 </style>

@@ -4,24 +4,17 @@ import MapView from "@arcgis/core/views/MapView.js";
 import VectorTileLayer from "@arcgis/core/layers/VectorTileLayer.js"
 import Basemap from "@arcgis/core/Basemap.js";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer.js";
-import OAuthInfo from "@arcgis/core/identity/OAuthInfo.js";
-import esriId from "@arcgis/core/identity/IdentityManager.js";
-
-//used to register ESRI Application so users can access map
-export const authentication = new OAuthInfo({
-    appId: "mzUb97L38u61Wa4a",
-    popup: false,
-    popupCallbackUrl: "http://localhost:5173/"
-})
-
-esriId.registerOAuthInfos([authentication]);
 
 //Rets Layer construction
-export const retsLayer =  new FeatureLayer({
-    url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadway_Edits_Tracking/FeatureServer/0",
+export const retsLayer = new FeatureLayer({
+    url: "https://testportal.txdot.gov/createags/rest/services/RETS_REF/FeatureServer/0",//"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadway_Edits_Tracking/FeatureServer/0",
     visible: true,
     outFields: ["*"],
-    definitionExpression: `GIS_ANLST = 'David Prosack' and STAT = 'Not Started'`,
+    popupEnabled: true,
+    portalItem:{
+        url: "f37dfee631244e80b12c4c6271066317"
+    }
+
 })
 
 //Dark Vector Tile construction
@@ -49,6 +42,16 @@ export const view = new MapView({
     }
 })
 
+// Layer.fromPortalItem({
+//     portalItem: {
+//       // autocasts as new PortalItem()
+//       id: "f37dfee631244e80b12c4c6271066317",
+//       portal:{
+//         url: "https://testportal.txdot.gov/create"
+//       }
+//     },
+
+//   }).then(lyr => map.add(lyr))
 //add feature layers to the map
 map.add(retsLayer)
 

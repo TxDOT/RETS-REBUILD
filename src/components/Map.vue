@@ -1,7 +1,5 @@
 <template app>
-    <div id="viewDiv">
-        <div>test</div>
-    </div>
+    <div id="viewDiv"></div>
     
 
 </template>
@@ -10,18 +8,19 @@
 //import functions
 //import {queryRetsTable} from './utility.js'
 import {view} from './map-Init.js'
-import {hoverHighlight} from './utility.js'
 //import ESRI JS ESM class
 export default{
     name: "Map",
         mounted(){
             //1.Check to see if user is signed in. If not sign them in without using the popup
             //2. If user is signed in, get username and set retLayer definition and load map
-
+            
             view.container = this.$el
-            hoverHighlight()
             
         },
+        methods:{
+
+        }
     }
 </script>
 
