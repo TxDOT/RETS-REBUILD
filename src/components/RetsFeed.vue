@@ -1,4 +1,4 @@
-<template>
+<template style="overflow-y:hidden;">
     <v-navigation-drawer width="200" height="100" permanent color="black">
         <v-list height="100%" id="icons-top" >
             <v-list-item v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" active-class="btn-left-brder" :active="tool.isActive">  
@@ -33,8 +33,7 @@
                 retsToolsTop: [
                                {title:"Test", icon: 'mdi-menu', color: "white", action: () =>{
                                     this.isActive = !this.tester
-                                    document.getElementById("container").style.width = document.getElementById("container").style.width === "0%" ? "25%" : "0%"
-                                    document.getElementById("feed-banner").style.padding = document.getElementById("container").style.width  === "0%" ? "0px" : "10px"
+                                    document.getElementById("container").style.display = document.getElementById("container").style.display === "none" ? "block" : "none"
                                 }, isActive: this.tester
                                },  
                                {title:"Test", icon: 'mdi-map-marker-outline', color: "#4472C4", action: () =>{
@@ -85,13 +84,6 @@
 </script>
 
 <style>
-
-    .v-list > .v-list-item{
-        padding-bottom: 3rem !important;
-        height: 2.3rem;
-        /* font-size: 1.5rem; */
-    }
-
     .v-list-item:hover{
         cursor: pointer;
         background-color: rgba(128,128,128,.3);
@@ -124,5 +116,8 @@
     .nav-bar-btn{
         height: 2rem;
         width: 100%;
+    }
+    .v-color-picker-swatches{
+        overflow-y: hidden !important;
     }
 </style>
