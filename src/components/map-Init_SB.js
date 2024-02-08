@@ -12,11 +12,13 @@ import Search from "@arcgis/core/widgets/Search.js";
         export const retsLayer = new FeatureLayer({url: "https://testportal.txdot.gov/createags/rest/services/RETS_REF/FeatureServer/0",//"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadway_Edits_Tracking/FeatureServer/0",
         visible: true,
         outFields: ["*"],
-        // definitionExpression: `GIS_ANLST = 'Sam Bogle' and STAT = 'Not Started'`,
+        //definitionExpression: `GIS_ANLST = 'Sam Bogle' and STAT = 'Not Started'`,
         popupEnabled: true,
         portalItem:{url: "f37dfee631244e80b12c4c6271066317"
         }
+
         })
+
         //Dark Vector Tile construction
         export const darkVectorTile = new VectorTileLayer({url: "https://www.arcgis.com/sharing/rest/content/items/4bd376c56f314bc5a36446630db604a6/resources/styles/root.json"
         })
@@ -35,39 +37,47 @@ import Search from "@arcgis/core/widgets/Search.js";
         center: [-100, 31.5]
         //highlightOptions: {color} ,"orange"
         })
-        export const searchWidget = new Search({
-           view: view,
-           includeDefaultSources: true,
-           sources:
-           {
-            url: "https://testportal.txdot.gov/createags/rest/services/RETS_REF/FeatureServer/0",
-            name: "FeatureLayer",
-            zoomScale: 500000
-           }
-          });
-          // Adds the search widget below other elements in the top right corner of the view
-         view.ui.add(searchWidget, {
-           position: "top-right",
-           index: 2
-         });
-         export const ZoomWidget = new Zoom({
-          view: view
-         }); 
-         view.ui.add(ZoomWidget, {
-          position: "top-right",
-          index: 3
-        });
-        export const homeWidget = new Home({
-          view: view
+
+        //export const searchWidget = new Search({
+         //   view: view
+          //});
+          // Adds the search widget below other elements in
+          // the top left corner of the view
+         // view.ui.add(searchWidget, {
+           // position: "top-left",
+           // index: 2
+         // });
+
+        //let view = new MapView({
+           // container: "viewDiv",
+           // map: map
+        //});
+
+        let zoom = new Zoom({
+            view: view
         });
 
-        //adds the home widget to the top right corner of the MapView
+        let homeWidget = new Home({
+            view: view,
+            viewpoint: new Viewpoint()
+        });
+
+        // adds the home widget to the top right corner of the MapView
         view.ui.add(homeWidget, "top-right");
-        // map.add(retsLayer);
+        map.add(retsLayer);
+// Layer.fromPortalItem({
+            //     portalItem: {
+            //       // autocasts as new PortalItem()
+            //       id: "f37dfee631244e80b12c4c6271066317",
+            //       portal:{
+            //         url: "https://testportal.txdot.gov/create"
+            //       }
+            //     },
+            //   }).then(lyr => map.add(lyr))
+            //add feature layers to the map
+            //map.add(retsLayer)
+            //remove attribution and zoom information
+      //  }
 
-      //add feature layers to the map
-            map.add(retsLayer)
-
-      //remove attribution and zoom information
-        view.ui.remove("attribution")
-        // </></>
+//remove attribution and zoom information
+        //view.ui.remove("attribution");</></>
