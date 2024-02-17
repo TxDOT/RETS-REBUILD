@@ -4,6 +4,11 @@
   height: 1.8rem !important;
 }
 
+.main-button-style{
+  border-style: 2px solid white !important;
+  border-radius: 0%;
+}
+
 .secondary-button{
   padding: 5px !important;
   margin-right: 5px;
@@ -28,13 +33,65 @@
 }
 
 .main-color{
-    color: #4472C4;
+    color: #4472C4 !important;
 }
-
 
 .subtitle-text{
   position: absolute;
   font-size: .6rem !important;
   bottom: 0px !important;
   padding: 0px !important;
+}
+
+.v-icon{
+  cursor: pointer;
+}
+
+.cardDiv{
+  margin: 10px !important;
+  font-size:10px !important;
+}
+
+.v-text-field{
+  color: white !important; 
+}
+
+.v-field__input{
+  font-size:  13px;
+}
+
+.v-label{
+  font-size: 13px !important;
+}
+
+.date-picker{
+  bottom: 17vh !important;
+  left: calc(74px + 25%) !important;
+  z-index: 999 !important;
+  position: fixed;
+}
+
+.gem-search{
+  top: 34rem;
+  min-height: 4rem;
+  max-height: 9rem;
+  position: fixed;
+  display: flex;
+  left: 5rem;
+  width: 5rem;
+  background-color: #404040;
+  display: none;
+  z-index: 999;
+}
+
+.gem-task{
+  color: #4472C4;
+  margin: 1px;
+  padding-left: 5px;
+  display: block;
+}
+
+.gem-task:hover{
+  border:1px solid white;
+  cursor: pointer;
 }

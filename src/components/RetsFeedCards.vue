@@ -10,14 +10,14 @@
             </v-row>
             <v-row id="feed-row">
                 <v-banner id="feed-banner" lines="two" density="default" min-width="0%">
-                    <p id="banner-txt">Activity Feed</p>
+                    <p id="banner-txt">{{activityBanner}}</p>
                     <template v-slot:actions>
                         <v-select single-line class="banner-btn" center-affix prepend-inner-icon="mdi-filter" :items="filterOptions" multiple flat chips>
                         </v-select>
                     </template>
                 </v-banner>
             </v-row>
-            <v-row id="search-feed">
+            <v-row id="search-feed" v-if="!isDetailsPage">
                 <v-text-field label="Search..." rounded="0" prepend-inner-icon="mdi-magnify"></v-text-field>
             </v-row>
 
@@ -38,7 +38,7 @@
                         </v-card-text>
 
                         <v-card-text class="route-name">
-                            {{ rd.RTE_NM }}
+                            {{ rd.RTE_NM ?? null }}
                         </v-card-text>
 
                         <div style="position: relative; bottom: 10px; width: 80%;">
@@ -53,6 +53,7 @@
                     </v-card>
                 </v-row>
             </div>
+            <div class="card-feed-div" v-if="isNoRets"><p>No RETS for you!</p></div>
         </v-col>
         <RetsDetailPage v-if="isDetailsPage" :retsInfo="send" @close-detail="enableFeed"/>
     </v-container>
@@ -64,6 +65,7 @@ import {clickRetsPoint, zoomTo} from './utility.js'
 import Query from "@arcgis/core/rest/support/Query.js";
 import {appConstants} from '../common/constant.js'
 import RetsDetailPage from './RetsDetail.vue'
+import {getUserId} from './login.js'
 
 export default{
     name: "RetsCards",
@@ -81,7 +83,9 @@ export default{
             flagColor: "",
             timer: "",
             isDetailsPage: false,
-            send: null
+            isNoRets: false,
+            send: null,
+            activityBanner: "Activity Feed"
         }
     },
     mounted(){
@@ -91,6 +95,7 @@ export default{
     methods:{
         enableFeed(e){
             this.isDetailsPage = e
+            this.activityBanner = "Activity Feed"
         },
         double(road){
             this.send = road
@@ -98,6 +103,7 @@ export default{
             this.timer=""
             console.log("double click")
             this.isDetailsPage = true
+            this.activityBanner = `RETS ${road.RETS_ID}`
         },
         zoomToRetsPt(retsId){
             clearTimeout(this.timer)
@@ -143,21 +149,29 @@ export default{
 
     computed:{
         queryLayer:{
-            get(){
+            async get(){
+                const user = await getUserId()
                 const query = new Query()
-                query.where = `RETS_ID < 13 `
+                query.where = `GIS_ANALYST = '${user}'`
                 query.orderByFields = ["EDIT_DT"]
                 query.outFields = ["*"]
                 query.returnGeometry = true
-                retsLayer.queryFeatures(query).then(obj => {
-                    obj.features.forEach((x) => {
-                        this.roadObj.push(x.attributes)
-                        this.roadFullData.push({
-                            id: x.attributes.RETS_ID,
-                            geom: [x.geometry.x, x.geometry.y]
-                        })
+                retsLayer.queryFeatures(query)
+                    .then(obj => {
+                        if(obj.features.length){
+                            obj.features.forEach((x) => {
+                                this.roadObj.push(x.attributes)
+                                this.roadFullData.push({
+                                    id: x.attributes.RETS_ID,
+                                    geom: [x.geometry.x, x.geometry.y]
+                                })
+                            })
+                            return
+                        }
+                        this.isDetailsPage = false
+                        this.isNoRets = true
                     })
-                })
+                    .catch((err)=> console.log(err))
             }
         }
     }
@@ -166,7 +180,7 @@ export default{
 
 <style scoped>
     #container{
-        width: 25%;
+        width: 50vh;
         height: 100%;
         background-color: black;
         position: absolute;
@@ -207,7 +221,7 @@ export default{
         position: relative;
         top: 9.5rem;
         min-height: 2rem;
-        max-height: 46rem;
+        max-height: 75vh;
         width: 100%;
         display:flex;
         flex-direction: column;
@@ -305,7 +319,7 @@ export default{
     .color-picker{
         position: absolute;
         background-color: black;
-        left: 25.7rem;
+        left: 92%;
         top: 3.4rem;
         width: 6%;
         /* top right bottom left */

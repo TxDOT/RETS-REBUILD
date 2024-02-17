@@ -28,3 +28,11 @@ function outlineFeedCards(res){
 
 
 export const zoomTo = (geom) => view.goTo({center: [geom[0], geom[1]], scale: 30000})
+
+export function getGEMTasks(){
+
+    return [4516, 89, 1789]
+    //getGemTasks when user types in #gem-search
+}
+
+

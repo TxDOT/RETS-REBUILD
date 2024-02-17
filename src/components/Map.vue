@@ -1,5 +1,6 @@
 <template app>
-    <div id="viewDiv"></div>
+    <div id="viewDiv">
+    </div>
     
 
 </template>
@@ -11,17 +12,17 @@ import {view} from './map-Init.js'
 //import ESRI JS ESM class
 export default{
     name: "Map",
-        mounted(){
+    mounted(){
             //1.Check to see if user is signed in. If not sign them in without using the popup
             //2. If user is signed in, get username and set retLayer definition and load map
             
             view.container = this.$el
             
         },
-        methods:{
+    methods:{
 
-        }
     }
+}
 </script>
 
 <style>
