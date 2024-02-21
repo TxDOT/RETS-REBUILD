@@ -65,7 +65,7 @@ export default{
         queryLayer:{
             get(){
                 const query = new Query()
-                query.where = `RETS_ID < 10`
+                query.where = ``
                 query.outFields = ["*"]
                 query.returnGeometry = true
                 retsLayer.queryFeatures(query).then(obj => {
