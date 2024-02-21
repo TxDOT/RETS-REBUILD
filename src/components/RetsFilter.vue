@@ -26,7 +26,7 @@
         data(){
             return{
                 filterSort: [
-                             {title: "Date: Newest to Oldest", sortType: "asc", append:}, 
+                             {title: "Date: Newest to Oldest", sortType: "asc"}, 
                              {title: "Date: Oldest to Newest", sortType: "desc"},
                              {title: "Status: Ascending", sortType: "asc"}, 
                              {title: "Status: Descending", sortType: "desc"}
