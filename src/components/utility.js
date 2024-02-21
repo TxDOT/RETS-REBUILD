@@ -35,4 +35,3 @@ export function getGEMTasks(){
     //getGemTasks when user types in #gem-search
 }
 
-

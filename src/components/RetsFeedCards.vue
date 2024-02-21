@@ -10,30 +10,48 @@
             </v-row>
             <v-row id="feed-row">
                 <v-banner id="feed-banner" lines="two" density="default" min-width="0%">
-                    <p id="banner-txt">{{activityBanner}}</p>
-                    <template v-slot:actions>
-                        <v-select single-line class="banner-btn" center-affix prepend-inner-icon="mdi-filter" :items="filterOptions" multiple flat chips>
-                        </v-select>
-                    </template>
+                    <div style="width: 100%;">
+                        <div class="banner-txt">
+                        <p>{{activityBanner}}</p>
+                        <v-btn v-if="isDetailsPage" icon="mdi-pencil-outline" density="compact" flat id="renameRets"></v-btn>
+                        </div>
+
+                        <div v-if="isDetailsPage" id="detailsHeaderIcon">
+                            <v-btn icon="mdi-paperclip" density="compact" flat @click="uploadAttachment = !uploadAttachment"></v-btn>
+                            <v-btn density="compact" flat @click="changeColor(roadObj[0].RETS_ID);" id="flagBtnDetails">
+                                <template v-slot:prepend>
+                                    <v-icon size="25px" :color="roadObj.flagColor" icon="mdi-flag" style="position: relative; left: 7px; bottom: 2px"></v-icon>
+                                </template>
+                            </v-btn>
+                            <v-col class="details-color-picker" v-if="flagClickedId === roadObj[0].RETS_ID" v-click-outside="closeFlagDiv">
+                                <v-icon size="20px" v-for="i in 6" icon="mdi-flag" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])"></v-icon>
+                            </v-col>    
+                            <v-btn icon="mdi-exclamation" density="compact" flat style="color:red"></v-btn>
+                        </div>
+
+                        <div v-if="!isDetailsPage">
+                            <v-btn icon="mdi-filter" class="banner-btn" flat @click="isfilter = !isfilter">
+                            </v-btn>
+                        </div>
+                    </div>
                 </v-banner>
             </v-row>
             <v-row id="search-feed" v-if="!isDetailsPage">
                 <v-text-field label="Search..." rounded="0" prepend-inner-icon="mdi-magnify"></v-text-field>
             </v-row>
 
-            <!-- <v-color-picker icon="mdi-flag"  hide-canvas show-swatches hide-sliders hide-inputs :swatches="swatchColor" color="black" ></v-color-picker> -->
             <div class="card-feed-div" v-if="!isDetailsPage">
                 <v-row class="rets-card-row" v-for="(rd, road) in roadObj" :key="rd" :value="road">
                     <v-btn elevation="0" @click="changeColor(rd.RETS_ID);" class="flag-btn" size="small" max-width=".5px" density="compact" variant="plain" slim>
                         <template v-slot:prepend>
-                            <v-icon size="medium" :id="`${rd.RETS_ID}Icon`">mdi-flag</v-icon>
+                            <v-icon size="medium" :id="`${rd.RETS_ID}Icon`" :color="roadObj.flagColor">mdi-flag</v-icon>
                         </template>
                     </v-btn>
                     <v-col class="color-picker" v-if="flagClickedId === rd.RETS_ID" v-click-outside="closeFlagDiv">
-                        <v-icon size="medium" v-for="i in 6" icon="mdi-flag" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])"></v-icon>
+                        <v-icon size="medium" v-for="i in 6" icon="mdi-flag" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" ></v-icon>
                     </v-col>    
                     <v-card :id="rd.RETS_ID" :title="rd.JB_TYPE" :style="{borderLeft: `7px solid ${colorTable[rd.STAT]}`}" hover v-ripple class="card" @click="zoomToRetsPt(rd.RETS_ID)" @dblclick="double(rd);">
-                        <v-card-text style="padding:0px; position: relative; bottom: 7px; width: 80%;">
+                        <v-card-text style="" id="retsCard">
                             RETS {{rd.RETS_ID }}
                         </v-card-text>
 
@@ -57,6 +75,16 @@
         </v-col>
         <RetsDetailPage v-if="isDetailsPage" :retsInfo="send" @close-detail="enableFeed"/>
     </v-container>
+    <v-card v-if="uploadAttachment" class="card attachCard"> 
+        <div class="cardDiv" id="dragndrop" @drop="dropAttachment($event)" @dragover="dragover()" @click="fileAttach()" @dragleave="dragLeave()">
+            <v-card-title>Upload Attachment</v-card-title>
+            <div>
+                <v-card-text>Drag and drop attachment or click to add attachment</v-card-text>
+            </div>
+        </div>
+    </v-card>
+    <Filter v-if="isfilter"/>
+
 </template>
 
 <script>
@@ -66,10 +94,11 @@ import Query from "@arcgis/core/rest/support/Query.js";
 import {appConstants} from '../common/constant.js'
 import RetsDetailPage from './RetsDetail.vue'
 import {getUserId} from './login.js'
+import Filter from './RetsFilter.vue'
 
 export default{
     name: "RetsCards",
-    components: {RetsDetailPage}, 
+    components: {RetsDetailPage, Filter}, 
     data(){
         return{
             filterOptions: appConstants.RetsStatus,
@@ -85,7 +114,10 @@ export default{
             isDetailsPage: false,
             isNoRets: false,
             send: null,
-            activityBanner: "Activity Feed"
+            activityBanner: "Activity Feed",
+            flagColor: '',
+            uploadAttachment: false,
+            isfilter: false,
         }
     },
     mounted(){
@@ -113,23 +145,12 @@ export default{
                 zoomTo(test.geom)
                 console.log("single click")
             },250)
-
-  
-
-
         },
 
         returnDateFormat(e){
             //10/29/2023 09:11am
             const date = new Date(e)
-            const month = date.getMonth()+1
-            const day = date.getDate()
-            const year = date.getFullYear()
-
-            const hours = date.getHours()
-            const minutes = new String(date.getMinutes()).padStart(2, '0')
-            const ampm = hours >= 12 ? 'pm' : 'am'
-            return `${month}/${day}/${year} ${hours}:${minutes} ${ampm}`
+            return `${date.toLocaleString('en-US')}`
         },
         changeColor(id){
             this.flagClickedId = ""
@@ -139,12 +160,29 @@ export default{
         },
         assignColorToFlag(clr){
             console.log(clr)
-            document.getElementById(`${this.flagClickedId}Icon`).style.color = clr
+            //document.getElementById(`${this.flagClickedId}Icon`).style.color = clr
             this.flagClickedId = ""
+            this.roadObj.flagColor = clr
         },
         closeFlagDiv(){
             this.flagClickedId = ""
+        },
+        fileAttach(){
+            console.log("hey")
+            const input = document.createElement('input')
+            input.type = 'file',
+            input.click()
+        },
+        dragover(){
+            document.getElementById("dragndrop").style.color = "green"
+        },
+        dragLeave(){
+            document.getElementById("dragndrop").style.color = "white"
+        },
+        dropAttachment(event){
+            console.log(event)
         }
+
     },
 
     computed:{
@@ -179,6 +217,15 @@ export default{
 </script>
 
 <style scoped>
+
+    .attachCard{
+        position: relative; 
+        width: 20%; 
+        top: 35%; 
+        left: 50%; 
+        height: 45% !important;
+        width: 25% !important;
+    }
     #container{
         width: 50vh;
         height: 100%;
@@ -227,11 +274,6 @@ export default{
         flex-direction: column;
         overflow-y: auto;
         overflow-x: hidden;
-        scroll-behavior: smooth;
-        scrollbar-width: thin;
-    }
-    ::-webkit-scrollbar {
-        width: 10px;
     }
 
     #container-header{
@@ -246,13 +288,17 @@ export default{
     .banner-btn{
         position: relative;
         bottom: 2.5rem;
+        float: right;
     }
-    #banner-txt{
+    .banner-txt{
         position: relative;
-        bottom: 35.5px;
+        bottom: 0.5px;
         font-weight: bold;
         font-size: 23px;
         left: 5px;
+        display: flex;
+        flex-direction: row;
+        justify-items: end;
     }
     #add-new-btn{
         position: absolute;
@@ -330,9 +376,45 @@ export default{
         z-index: 9999;
     }
 
+    .details-color-picker{
+        position: fixed; 
+        display: flex; 
+        flex-direction: column; 
+        z-index: 9999; 
+        width:2.3%; 
+        float: right;
+        margin-left: 2.2rem;
+        background-color: black;
+    }
 
-    /* .v-row + .v-row{
-        padding-bottom: 0rem !important;
-        padding-top: 0rem !important;
-    } */
+    #flagBtnDetails{
+        padding: 1px !important;
+        margin: 15px !important;
+        min-width: 15px !important;
+    }
+
+    #renameRets{
+        color: gray;
+        left: 5px;
+        bottom: 5px;
+    }
+
+    #detailsHeaderIcon{
+        float: right;
+        position: relative;
+        bottom: 3rem;
+    }
+
+    #dragndrop{
+        height: 95%;
+        width: 95%;
+        border: 1px solid #4472C4;
+    }
+    
+    #retsCard{
+        padding:0px; 
+        position: relative; 
+        bottom: 7px; 
+        width: 80%;
+    }
 </style>

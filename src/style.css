@@ -1,3 +1,12 @@
+*{
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
 .main-button{
   padding-left: .5rem !important;
   padding-right: .5rem !important;
@@ -6,7 +15,8 @@
 
 .main-button-style{
   border-style: 2px solid white !important;
-  border-radius: 0%;
+  border-radius: 0% !important;
+  padding: 50px;
 }
 
 .secondary-button{

@@ -1,8 +1,10 @@
 <template>
     <!-- details section -->
+    <detailsAlert v-if="isAlert" :alertsTextInfo="alertTextInfo"/>
     <div id="container-div">
-        <v-card id="details-page" style="padding-bottom: 26.5rem; font-size: 1px !important;">
-            <div class="cardDiv" style="position: relative; top: 1rem;"> 
+        
+        <v-card id="details-page">
+            <div class="cardDiv"> 
                 <v-btn-toggle selected-class="active-button" variant="plain" mandatory v-model="isBtnSet">
                     <v-btn flat class="secondary-button" @click="this.isDetails = true; this.isMetadata = false">Details</v-btn>
                     <v-btn flat class="secondary-button" @click="this.isMetadata = true; this.isDetails = false">Metadata</v-btn>
@@ -20,10 +22,8 @@
                 <span class="gem-task" @click="addGemChip(i)">{{ i }}</span>
             </span>
         </div>
-        <v-divider></v-divider>
         <!-- history section -->
-        <div>
-
+        <div >
             <v-card class="history-card">
                 <v-card-title >History</v-card-title>
                 <v-text-field class="search-history" label="Search..." rounded="0" prepend-inner-icon="mdi-magnify" density="compact"></v-text-field>
@@ -46,18 +46,17 @@
             <v-btn-toggle>
                 <v-btn variant="plain" flat>Delete</v-btn>
                 <v-btn class="secondary-button" variant="plain" flat>Cancel</v-btn>
-                <v-btn @click="sendToParent" variant="elevated">Save</v-btn>
+                <v-btn @click="sendToParent" variant="elevated" class="main-button-style">Save</v-btn>
             </v-btn-toggle>
         </div>
     </div>
-    <v-container v-if="editText" style="position: absolute; bottom: 50%; left: 70vh; background-color:black">
-        <v-textarea variant="filled" lable="label" auto-grow v-model="editNotes" label="Make a Comment"></v-textarea>
-        <!-- <v-btn-toggle style="position:relative; float:right; left: 12px;"> -->
-            <v-btn variant="plain" @click="deleteNote">Delete</v-btn>
-            <v-btn variant="plain" @click="closeNote">Cancel</v-btn>
-            <v-btn variant="outlined" class="main-button-style" @click="saveNote">Save</v-btn>
-        <!-- </v-btn-toggle> -->
-
+    <v-container v-if="editText" style="" id="commentDiv">
+        <v-textarea variant="filled" auto-grow v-model="editNotes" label="Make a Comment"></v-textarea>
+            <div style="position: relative; float: right; left: 13px;">
+                <v-btn variant="plain" @click="deleteNote" class="secondary-button">Delete</v-btn>
+                <v-btn variant="plain" @click="closeNote" class="secondary-button">Cancel</v-btn>
+                <v-btn variant="outlined" class="main-button-style" @click="saveNote">Save</v-btn>
+            </div>
     </v-container>
 
 </template>
@@ -67,12 +66,15 @@
     import DetailsCard from './detailsCard.vue'
     import MetadataCard from './metadataCard.vue'
     import {getGEMTasks} from './utility.js'
+    import detailsAlert from './detailsAlert.vue'
+
     export default{
         name: "RetsDetailPage",
-        components: {editHistoryNotes, DetailsCard, MetadataCard},
+        components: {editHistoryNotes, DetailsCard, MetadataCard, detailsAlert},
         props: {
             retsInfo: Object,
-            taskGem: Number 
+            taskGem: Number,
+            alertInfo: Object,
         },
         emits:['close-detail'],
         data(){
@@ -90,7 +92,9 @@
                 editNotes: '',
                 noteIndex: 0,
                 gemTask: [],
-                sendGemTaskNum: null
+                sendGemTaskNum: null,
+                isAlert: false,
+                alertTextInfo: {"text": "Note Saved", "color": "#70ad47"}
             }
         },
         mounted(){
@@ -118,6 +122,9 @@
             saveNote(){
                 this.histNotes[this.noteIndex].notes = this.editNotes
                 this.editText = false
+                this.alertTextInfo = {"text": "Note Saved", "color": "#70ad47", "toggle": true}
+                this.isAlert = true
+                
             },
             deleteNote(){
                 this.histNotes.splice(this.noteIndex, 1)
@@ -141,12 +148,27 @@
     position: relative !important;
     bottom: 1rem !important;
 }
+
+div .cardDiv{
+    position: relative; 
+    top: 1rem;
+}
+
+#commentDiv{
+    position: absolute; 
+    bottom: 50%; 
+    left: 70vh; 
+    background-color:black
+}
+
 #details-page{
     position: relative;
     height: 400px !important;
     width: 100% !important;
     bottom: 1rem;
     border-radius: 0px;
+    padding-bottom: 26.5rem; 
+    font-size: 1px !important;
 }
 #container-div{
     position: relative;
@@ -184,9 +206,9 @@
 
 #trigger-buttons{
     position: relative;
-    /* top: 1vh; */
+    bottom: 1vh;
     left: 14px;
-    padding-bottom: 1rem;
+    padding-bottom: 1.5rem;
     width: 100%;
     justify-content: right;
     display: flex;
@@ -233,11 +255,10 @@
     line-height: 5px !important;
 
 }
-
 .history-card{
     position:relative; 
     height: 16.5rem; 
-    bottom: 0.5rem; 
+    bottom: 0.7rem; 
     border-radius: 0%; 
     overflow-y: auto;
 }
