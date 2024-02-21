@@ -1,8 +1,8 @@
 import OAuthInfo from "@arcgis/core/identity/OAuthInfo.js";
 import esriId from "@arcgis/core/identity/IdentityManager.js";
 import {retsLayer} from './map-Init.js'
- import { view } from "./map-Init.js";
-import MapView from "@arcgis/core/layers/FeatureLayer.js";
+import { view } from "./map-Init.js";
+
 
 const authen = new OAuthInfo({
   appId: "qzqSMtBVUMsAt2Is",
@@ -14,24 +14,24 @@ const authen = new OAuthInfo({
 })
 
 export function login(){
-    esriId.registerOAuthInfos([authen]);
+  esriId.registerOAuthInfos([authen]);
 
-    esriId.checkSignInStatus(authen.portalUrl)
-        .then((x) => console.log(x)) //already signed in
-        .catch(() => signIn()) //not signed in; proceed to sign in 
+  esriId.checkSignInStatus(authen.portalUrl)
+    .then((x) => console.log(x)) //already signed in
+    .catch(() => signIn()) //not signed in; proceed to sign in 
 }
 
 async function signIn(){ 
   const userId = await getUserId()
-  retsLayer.definitionExpression = `(STAT = 1 OR STAT = 2)`
+  retsLayer.definitionExpression = `(STAT = 1 OR STAT = 2) and (GIS_ANALYST = '${userId}')`
   //`(GIS_ANALYST = '') AND (STAT = 1 OR STAT = 2)`
   retsLayer
-  .when(() => {
-    return retsLayer.queryExtent();
-  })
-  .then((response) => {
-    view.goTo(response.extent);
-  });
+    .when(() => {
+      return retsLayer.queryExtent();
+    })
+    .then((response) => {
+      view.goTo(response.extent);
+    });
   
 
 }
