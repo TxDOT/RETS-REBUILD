@@ -45,7 +45,7 @@ export let roadwaysRenderer = {
 
 //Rets Layer construction
 export const retsLayer = new FeatureLayer({
-  url: "https://testportal.txdot.gov/createags/rest/services/RETS_REF/FeatureServer/0",
+  url: "https://testportal.txdot.gov/createags/rest/services/RETS/FeatureServer/0",
   visible: true,
   outFields: ["*"],
   renderer: retsPointRenderer,
