@@ -17,13 +17,13 @@ export function login(){
   esriId.registerOAuthInfos([authen]);
 
   esriId.checkSignInStatus(authen.portalUrl)
-    .then((x) => console.log(x)) //already signed in
+    .then((x) => setDefExpRets(x.userId)) //already signed in
     .catch(() => signIn()) //not signed in; proceed to sign in 
 }
 
 async function signIn(){ 
   const userId = await getUserId()
-  retsLayer.definitionExpression = `(STAT = 1 OR STAT = 2) and (GIS_ANALYST = '${userId}')`
+  setDefExpRets(userId)
   //`(GIS_ANALYST = '') AND (STAT = 1 OR STAT = 2)`
   retsLayer
     .when(() => {
@@ -32,9 +32,9 @@ async function signIn(){
     .then((response) => {
       view.goTo(response.extent);
     });
-  
-
 }
+
+const setDefExpRets = (userId) =>  retsLayer.definitionExpression = `(GIS_ANALYST = '${userId}') AND (STAT = 1 OR STAT = 2)`
 
 export async function getUserId(){
   const user = await esriId.getCredential(authen.portalUrl + "/sharing/rest",{

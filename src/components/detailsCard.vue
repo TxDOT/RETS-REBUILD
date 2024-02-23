@@ -1,4 +1,5 @@
 <template>
+    <div style="margin-right: 10px; margin-left: 10px;">
         <v-row align="start" no-gutters dense style="position: relative; bottom: .5rem;">
             <v-col cols="4" offset="0">
                 <v-autocomplete :items="activityList" label="Activity" variant="underlined" density="compact" flat v-model="infoRets.ACTIVITY"></v-autocomplete>
@@ -52,19 +53,19 @@
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom: 6.1rem;">
             <v-col cols="12" offset="0">
-                <v-textarea label="Description" no-resize variant="underlined" class="rets-description" rows="2" v-model="infoRets.DESC_"></v-textarea>
+                <v-textarea label="Description" no-resize variant="underlined" class="rets-description" rows="3" v-model="infoRets.DESC_"></v-textarea>
             </v-col>
         </v-row>
-        <v-row align="center" style="position: relative; bottom:8.5rem;">
-            <v-col cols="5" offset="0">
-                <v-btn icon="mdi-plus" variant="plain" @click="displayGemSearch"></v-btn>
+        <v-row align="center" style="position: relative; bottom: 9.1rem; ">
+            <v-col cols="5" offset="0" style="z-index: 999;">
+                <v-btn icon="mdi-plus" variant="plain" @click="displayGemSearch" style="top: 9px;"></v-btn>
                 <div id="chips">
                     <v-chip 
                         v-for="i in gemTasks"
                         closable
                         color="#4472C4"
                         density="compact"
-                        variant="elevated"
+                        variant="elevated" 
                         rounded="0"
                         pill
                         size="default"
@@ -74,16 +75,17 @@
                 </v-chip>
                 </div>
             </v-col>
-            <v-col @click="isDatePicker = !isDatePicker" style="cursor: pointer;">
-                <div class="deadline-div">
+            <div class="cardDiv" id="outerDeadlineDiv" >
+                <div class="deadline-div" @click="isDatePicker = !isDatePicker" style="cursor: pointer;">
                     <v-text-field prepend-icon="mdi-timer-outline" disabled density="compact" variant="plain" class="date-select"> {{ datePicker }}</v-text-field>
-                </div>
-            </v-col>
-                <div class="date-picker" v-if="isDatePicker">
-                    <v-date-picker v-model="datePicked"></v-date-picker>
-                </div>
-        </v-row>
+                 </div>
+            </div>
 
+            <div class="date-picker" v-if="isDatePicker">
+                <v-date-picker v-model="datePicked"></v-date-picker>
+            </div>
+        </v-row>
+    </div>
 </template>
 
 <script>
@@ -128,7 +130,7 @@
             },
             displayGemSearch(){
                 document.querySelectorAll(".gem-search")[0].style.display =  document.querySelectorAll(".gem-search")[0].style.display === "block" ? "none" : "block"
-            }
+            },
         },
         watch:{
             datePicked:{
@@ -156,6 +158,11 @@
     bottom: 1rem;
     border-radius: 0px;
     
+}
+
+#outerDeadlineDiv{
+    position: absolute;
+    width: 100%;
 }
 .number-field{
     position: relative;
@@ -197,12 +204,11 @@
     padding-top: 7px !important;
 }
 .deadline-div{
-    width: 100%;
     position: relative;
-    left: 19px;
-    margin-right: 15px;
+    margin-right: 0px;
     padding-top: 0px;
-    bottom: .5rem;
+    bottom: 0rem;
+    float: right;
 }
 
 #chips{

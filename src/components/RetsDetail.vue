@@ -15,7 +15,7 @@
 
             </div>
         </v-card>
-        <div class="gem-search">
+        <div class="gem-search" >
             <v-icon icon="mdi-magnify" id="gem-search-icon"></v-icon>
             <input type="text" id="gem-id">
             <span id="show-gem-tasks" v-for="i in gemTask">
@@ -26,7 +26,7 @@
         <div >
             <v-card class="history-card">
                 <v-card-title >History</v-card-title>
-                <v-text-field class="search-history" label="Search..." rounded="0" prepend-inner-icon="mdi-magnify" density="compact"></v-text-field>
+                <v-text-field class="search-history" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" density="compact"></v-text-field>
                 <div class="cardDiv">
                     <v-row v-for="(note, i) in histNotes" :key="i" style="padding-bottom: 1rem;">
                         <v-banner v-model="note[i]" id="history-notes" density="compact">
@@ -45,7 +45,7 @@
         <div id="trigger-buttons">
             <v-btn-toggle>
                 <v-btn variant="plain" flat>Delete</v-btn>
-                <v-btn class="secondary-button" variant="plain" flat>Cancel</v-btn>
+                <v-btn @click="sendToParent" class="secondary-button" variant="plain" flat>Cancel</v-btn>
                 <v-btn @click="sendToParent" variant="elevated" class="main-button-style">Save</v-btn>
             </v-btn-toggle>
         </div>
@@ -121,10 +121,11 @@
             },
             saveNote(){
                 this.histNotes[this.noteIndex].notes = this.editNotes
+                this.histNotes[this.noteIndex].author = this.retsInfo.logInUser
+                this.histNotes[this.noteIndex].time = new Date().toLocaleDateString('en-US')
                 this.editText = false
                 this.alertTextInfo = {"text": "Note Saved", "color": "#70ad47", "toggle": true}
                 this.isAlert = true
-                
             },
             deleteNote(){
                 this.histNotes.splice(this.noteIndex, 1)
@@ -138,6 +139,9 @@
             },
             addGemChip(gemId){
                 this.sendGemTaskNum = gemId
+            },
+            closeGEMTask(){
+                document.querySelectorAll(".gem-search")[0].style.display = "none"
             }
         }
     }
@@ -261,6 +265,8 @@ div .cardDiv{
     bottom: 0.7rem; 
     border-radius: 0%; 
     overflow-y: auto;
+    margin-right: 10px;
+    margin-left: 10px;
 }
 
 .search-history{

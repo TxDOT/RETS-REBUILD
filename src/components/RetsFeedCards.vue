@@ -18,39 +18,41 @@
 
                         <div v-if="isDetailsPage" id="detailsHeaderIcon">
                             <v-btn icon="mdi-paperclip" density="compact" flat @click="uploadAttachment = !uploadAttachment"></v-btn>
-                            <v-btn density="compact" flat @click="changeColor(roadObj[0].RETS_ID);" id="flagBtnDetails">
+                            <v-btn density="compact" flat @click="changeColor(currRoad.RETS_ID);" id="flagBtnDetails">
                                 <template v-slot:prepend>
-                                    <v-icon size="25px" :color="roadObj.flagColor" icon="mdi-flag" style="position: relative; left: 7px; bottom: 2px"></v-icon>
+                                    <v-icon size="25px" :id="`${currRoad.RETS_ID}Icon`" :color="currRoad.flagColor" icon="mdi-flag" style="position: relative; left: 7px; bottom: 2px"></v-icon>
                                 </template>
                             </v-btn>
-                            <v-col class="details-color-picker" v-if="flagClickedId === roadObj[0].RETS_ID" v-click-outside="closeFlagDiv">
+                            <v-col class="details-color-picker" v-if="flagClickedId === currRoad.RETS_ID" v-click-outside="closeFlagDiv">
                                 <v-icon size="20px" v-for="i in 6" icon="mdi-flag" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])"></v-icon>
                             </v-col>    
                             <v-btn icon="mdi-exclamation" density="compact" flat style="color:red"></v-btn>
                         </div>
 
                         <div v-if="!isDetailsPage">
-                            <v-btn icon="mdi-filter" class="banner-btn" flat @click="isfilter = !isfilter">
-                            </v-btn>
+                            <v-btn icon="mdi-filter" class="banner-btn" flat @click="isfilter = !isfilter"></v-btn>
+                            <div class="filter-notification-bubble" v-if="numFilters.filterTotal > 0">
+                                <p style="font-size: 16.5px; position: relative; left: 21%; bottom: 1px;"><b>{{ numFilters.filterTotal}}</b></p>
+                            </div>
                         </div>
                     </div>
                 </v-banner>
             </v-row>
             <v-row id="search-feed" v-if="!isDetailsPage">
-                <v-text-field label="Search..." rounded="0" prepend-inner-icon="mdi-magnify"></v-text-field>
+                <v-text-field density="compact" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify"></v-text-field>
             </v-row>
 
             <div class="card-feed-div" v-if="!isDetailsPage">
                 <v-row class="rets-card-row" v-for="(rd, road) in roadObj" :key="rd" :value="road">
                     <v-btn elevation="0" @click="changeColor(rd.RETS_ID);" class="flag-btn" size="small" max-width=".5px" density="compact" variant="plain" slim>
                         <template v-slot:prepend>
-                            <v-icon size="medium" :id="`${rd.RETS_ID}Icon`" :color="roadObj.flagColor">mdi-flag</v-icon>
+                            <v-icon size="medium" :id="`${rd.RETS_ID}Icon`" :color="rd.flagColor">mdi-flag</v-icon>
                         </template>
                     </v-btn>
                     <v-col class="color-picker" v-if="flagClickedId === rd.RETS_ID" v-click-outside="closeFlagDiv">
                         <v-icon size="medium" v-for="i in 6" icon="mdi-flag" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" ></v-icon>
                     </v-col>    
-                    <v-card :id="rd.RETS_ID" :title="rd.JB_TYPE" :style="{borderLeft: `7px solid ${colorTable[rd.STAT]}`}" hover v-ripple class="card" @click="zoomToRetsPt(rd.RETS_ID)" @dblclick="double(rd);">
+                    <v-card :id="rd.RETS_ID" :title="rd.JB_TYPE" :style="{borderLeft: `7px solid ${colorTable[rd.STAT] ? colorTable[rd.STAT]: 'Red'}`}" hover v-ripple class="card" @click="zoomToRetsPt(rd.RETS_ID)" @dblclick="double(rd);">
                         <v-card-text style="" id="retsCard">
                             RETS {{rd.RETS_ID }}
                         </v-card-text>
@@ -59,7 +61,7 @@
                             {{ rd.RTE_NM ?? null }}
                         </v-card-text>
 
-                        <div style="position: relative; bottom: 10px; width: 80%;">
+                        <div style="position: relative; bottom: 10px; width: 100%;">
                             <p class="text-concat">
                                 {{ rd.DESC_ ? rd.DESC_ : "If description is empty does it need to be worked ?" }}
                             </p>
@@ -83,7 +85,7 @@
             </div>
         </div>
     </v-card>
-    <Filter v-if="isfilter"/>
+    <Filter v-if="isfilter" @filter-set="changeNumFilter" :filterPros="numFilters"/>
 
 </template>
 
@@ -98,12 +100,16 @@ import Filter from './RetsFilter.vue'
 
 export default{
     name: "RetsCards",
-    components: {RetsDetailPage, Filter}, 
+    components: {RetsDetailPage, Filter},
+    props: {
+        filterPros: Object
+    },
     data(){
         return{
             filterOptions: appConstants.RetsStatus,
             colorTable: appConstants.CardColorMap,
             roadObj: [],
+            currRoad: {},
             roadFullData: [],
             isColorPicked: false,
             pickColor: "blue",
@@ -118,6 +124,8 @@ export default{
             flagColor: '',
             uploadAttachment: false,
             isfilter: false,
+            loggedInUser: '',
+            numFilters: {}
         }
     },
     mounted(){
@@ -130,7 +138,9 @@ export default{
             this.activityBanner = "Activity Feed"
         },
         double(road){
-            this.send = road
+            console.log(road)
+            road.logInUser = this.loggedInUser 
+            this.send = this.currRoad = road
             clearTimeout(this.timer)
             this.timer=""
             console.log("double click")
@@ -160,9 +170,13 @@ export default{
         },
         assignColorToFlag(clr){
             console.log(clr)
-            //document.getElementById(`${this.flagClickedId}Icon`).style.color = clr
-            this.flagClickedId = ""
-            this.roadObj.flagColor = clr
+            console.log(this.flagClickedId)
+            document.getElementById(`${this.flagClickedId}Icon`).style.color = clr
+            
+            console.log(this.roadObj)
+            this.roadObj.find(rd => rd.RETS_ID === this.flagClickedId).flagColor = clr
+            this.isColorPicked = false;
+            this.closeFlagDiv()
         },
         closeFlagDiv(){
             this.flagClickedId = ""
@@ -181,16 +195,27 @@ export default{
         },
         dropAttachment(event){
             console.log(event)
+        },
+        changeNumFilter(filter){
+            console.log(filter)
+            this.numFilters = filter
+            this.isfilter = false
+        },
+        searchRetsCards(){
+            //searchCards
+            //maybe it will be best to concatentate values to a string and search via that
+            //filter rets cards
+            //highlight text in cards that match serach text
         }
-
     },
 
     computed:{
         queryLayer:{
             async get(){
                 const user = await getUserId()
+                this.loggedInUser = user
                 const query = new Query()
-                query.where = `GIS_ANALYST = '${user}'`
+                query.where = `(GIS_ANALYST = '${user}') AND (STAT = 1 OR STAT = 2)`
                 query.orderByFields = ["EDIT_DT"]
                 query.outFields = ["*"]
                 query.returnGeometry = true
@@ -228,13 +253,12 @@ export default{
     }
     #container{
         width: 50vh;
-        height: 100%;
+        height: 100vh;
         background-color: black;
         position: absolute;
         left: 74px;
         padding: 0px;
     }
-
     #feed-row{
         position: absolute;
         top: 36px;
@@ -245,6 +269,7 @@ export default{
         font-size: 20px;
         height: 50px;
         padding-bottom: 5px;
+        top: 10px;
     }
 
     .v-icon{
@@ -256,24 +281,23 @@ export default{
     }
     .rets-card-row{
         position: relative;
-        top: 0rem;
-        height: 150px;
-        width: 100% !important;
+        bottom: 1.5rem;
+        width: 104% !important;
         padding: 0px 0px 0px 10px;
         display: block !important;
-        margin-top: 1px !important;
-    }
+        height: 105px;
 
+    }
     .card-feed-div{
         position: relative;
-        top: 9.5rem;
-        min-height: 2rem;
-        max-height: 75vh;
+        top: 9.3rem;
         width: 100%;
-        display:flex;
+        display: flex;
         flex-direction: column;
         overflow-y: auto;
         overflow-x: hidden;
+        min-height: 28vh;
+        max-height: 82vh;
     }
 
     #container-header{
@@ -317,7 +341,7 @@ export default{
         position: absolute;
         height: 5px;
         width: 100%;
-        top: 6rem;
+        top: 100px;
         border-radius: 0px;
         padding: 0px 10px 10px 10px;
     }
@@ -341,7 +365,7 @@ export default{
         top: 0.5rem;
         width: 21%;
         padding: 0px;
-        font-size: .8rem;
+        font-size: 14px;
     }
     
     .text-concat {
@@ -416,5 +440,22 @@ export default{
         position: relative; 
         bottom: 7px; 
         width: 80%;
+        font-size: 15px;
+    }
+    .filter-notification-bubble{
+        position: relative;
+        width: 1.2rem;
+        background-color: red;
+        height: 1.2rem;
+        float: right;
+        bottom: 1rem;
+        left: 2.5rem;
+        border-radius: 50%;
+    }
+
+   .card-feed-div > .v-row{
+        margin-top: 0px;
+        margin-bottom: 0px;
+        flex: none;
     }
 </style>

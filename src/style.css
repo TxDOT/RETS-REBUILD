@@ -76,7 +76,7 @@
 
 .date-picker{
   bottom: 17vh !important;
-  left: calc(74px + 25%) !important;
+  left: calc(74px + 50vh) !important;
   z-index: 999 !important;
   position: fixed;
 }
