@@ -2,9 +2,8 @@ import OAuthInfo from "@arcgis/core/identity/OAuthInfo.js";
 import esriId from "@arcgis/core/identity/IdentityManager.js";
 import {retsLayer} from './map-Init.js'
 import { view } from "./map-Init.js";
-import {getDomainValues} from './utility.js'
+import {getDomainValues, getDistinctAttributeValues} from './utility.js'
 import { appConstants } from "../common/constant.js";
-
 
 const authen = new OAuthInfo({
   appId: "qzqSMtBVUMsAt2Is",
@@ -26,7 +25,6 @@ export function login(){
 async function signIn(){ 
   const userId = await getUserId()
   setDefExpRets(userId)
-  //`(GIS_ANALYST = '') AND (STAT = 1 OR STAT = 2)`
   retsLayer
     .when(() => {
 
@@ -35,7 +33,7 @@ async function signIn(){
           appConstants[layer.prop].push({"name" : x.name, "value": x.code})
         })
       })
-  
+      getDistinctAttributeValues('ACTV')
       return retsLayer.queryExtent();
     })
     .then((response) => {
@@ -44,8 +42,10 @@ async function signIn(){
 }
 
 const setDefExpRets = (userId) => {
+  if(appConstants.defaultUserValue.length) return
   appConstants.defaultUserValue.push({"name": "Username", "value": `${userId}`})
   retsLayer.definitionExpression = `(GIS_ANALYST = '${userId}') AND (STAT = 1 OR STAT = 2)`
+  return
 }
 
 export async function getUserId(){
@@ -55,6 +55,7 @@ export async function getUserId(){
 
   return user.userId
 }
+
 
 
 

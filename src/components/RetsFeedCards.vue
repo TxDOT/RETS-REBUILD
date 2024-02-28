@@ -31,8 +31,8 @@
 
                         <div v-if="!isDetailsPage">
                             <v-btn icon="mdi-filter" class="banner-btn" flat @click="isfilter = !isfilter"></v-btn>
-                            <div class="filter-notification-bubble" v-if="numFilters.filterTotal > 0">
-                                <p style="font-size: 16.5px; position: relative; left: 21%; bottom: 1px;"><b>{{ numFilters.filterTotal}}</b></p>
+                            <div class="filter-notification-bubble" v-if="retsFilters.filterTotal > 0">
+                                <p style="font-size: 16.5px; position: relative; left: 21%; bottom: 1px;"><b>{{ retsFilters.filterTotal}}</b></p>
                             </div>
                         </div>
                     </div>
@@ -58,7 +58,7 @@
                         </v-card-text>
 
                         <v-card-text class="route-name">
-                            {{ rd.RTE_NM ?? null }}
+                            {{ rd.RTE_NM ?? "Route name not provided" }}
                         </v-card-text>
 
                         <div style="position: relative; bottom: 10px; width: 100%;">
@@ -85,18 +85,16 @@
             </div>
         </div>
     </v-card>
-    <Filter v-if="isfilter" @filter-set="changeNumFilter" :filterPros="numFilters"/>
+    <Filter v-if="isfilter" @filter-set="changeNumFilter" :filterPros="retsFilters"/>
 
 </template>
 
 <script>
-import {clickRetsPoint, zoomTo, filterMapActivityFeed} from './utility.js'
-import {retsLayer} from './map-Init.js'
+import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import RetsDetailPage from './RetsDetail.vue'
 import {getUserId} from './login.js'
 import Filter from './RetsFilter.vue'
-import Query from "@arcgis/core/rest/support/Query.js";
 
 export default{
     name: "RetsCards",
@@ -125,10 +123,9 @@ export default{
             uploadAttachment: false,
             isfilter: false,
             loggedInUser: '',
-            numFilters: {"CREATE_DT": "Date: Newest to Oldest", "JB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
+            retsFilters: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, "JB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
                          "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, "GIS_ANALYST": appConstants.defaultUserValue, 
                          "filterTotal": 3},
-            rerun: false,
         }
     },
     beforeMount(){
@@ -141,12 +138,10 @@ export default{
             this.activityBanner = "Activity Feed"
         },
         double(road){
-            console.log(road)
             road.logInUser = this.loggedInUser 
             this.send = this.currRoad = road
             clearTimeout(this.timer)
             this.timer=""
-            console.log("double click")
             this.isDetailsPage = true
             this.activityBanner = `RETS ${road.RETS_ID}`
         },
@@ -156,7 +151,6 @@ export default{
             this.timer = setTimeout(()=>{
                 const test = this.roadFullData.find(rts => rts.id === retsId)
                 zoomTo(test.geom)
-                console.log("single click")
             },250)
         },
 
@@ -168,15 +162,10 @@ export default{
         changeColor(id){
             this.flagClickedId = ""
             this.flagClickedId = id
-            console.log(id)
             this.isColorPicked = true;
         },
         assignColorToFlag(clr){
-            console.log(clr)
-            console.log(this.flagClickedId)
             document.getElementById(`${this.flagClickedId}Icon`).style.color = clr
-            
-            console.log(this.roadObj)
             this.roadObj.find(rd => rd.RETS_ID === this.flagClickedId).flagColor = clr
             this.isColorPicked = false;
             this.closeFlagDiv()
@@ -185,7 +174,6 @@ export default{
             this.flagClickedId = ""
         },
         fileAttach(){
-            console.log("hey")
             const input = document.createElement('input')
             input.type = 'file',
             input.click()
@@ -200,10 +188,9 @@ export default{
             console.log(event)
         },
         changeNumFilter(filter){
-            console.log(filter)
-            this.numFilters = filter
+            this.retsFilters = filter
             this.isfilter = false
-            this.rerun = true
+            this.setActivityFeed()
         },
         searchRetsCards(){
             //searchCards
@@ -211,74 +198,58 @@ export default{
             //filter rets cards
             //highlight text in cards that match serach text
         },
-        async querysLayer(){
-            const filter = await filterMapActivityFeed(this.numFilters)
-            console.log(this.numFilters)
+        async setActivityFeed(){
+            const filter = await filterMapActivityFeed(this.retsFilters)
             this.roadObj = []
-                console.log('heelo')
-                const query = new Query()
-                console.log(filter)
-                query.where = `${filter}`
-                query.orderByFields = ["EDIT_DT"]
-                query.outFields = ["*"]
-                query.returnGeometry = true
-                retsLayer.queryFeatures(query).then(obj => {
-                if(obj.features.length){
-                    obj.features.forEach((x) => {
-                        //console.log(x)
-                        this.roadObj.push(x.attributes)
-                        this.roadFullData.push({
-                            id: x.attributes.RETS_ID,
-                            geom: [x.geometry.x, x.geometry.y]
+            const query = filter
+            const orderField = `${this.retsFilters.CREATE_DT.filter} ${this.retsFilters.CREATE_DT.sortType}`
+            getQueryLayer(query, orderField)
+                .then(obj => {
+                    if(obj.features.length){
+                        obj.features.forEach((x) => {
+                            this.roadObj.push(x.attributes)
+                            this.roadFullData.push({
+                                id: x.attributes.RETS_ID,
+                                geom: [x.geometry.x, x.geometry.y]
+                            })
                         })
-                    })
-                    this.rerun = false
-                    return
-                }
-                this.isDetailsPage = false
-                this.isNoRets = true
+                        
+                        return
+                    }
+                    this.isDetailsPage = false
+                    this.isNoRets = true
+                    
                 })
-                .catch((err)=> console.log(err))
+                .catch((err)=> {
+                    
+                    console.log(err)
+                })
         }
     },
 
-    watch:{
-        rerun:{
-            handler: function(){
-                this.querysLayer()
-                console.log('toggled')
-            },
-            immediate: true
-        }
-    },
     computed:{
         queryLayer:{
             async get(){
-                this.roadObj = []
-                console.log('heelo')
                 const user = await getUserId()
                 this.loggedInUser = user
-                this.numFilters.loggedInUser = user
-                const query = new Query()
-                query.where = `(GIS_ANALYST = '${user}') AND (STAT = 1 OR STAT = 2)`
-                query.orderByFields = ["EDIT_DT"]
-                query.outFields = ["*"]
-                query.returnGeometry = true
-                retsLayer.queryFeatures(query).then(obj => {
-                if(obj.features.length){
-                    obj.features.forEach((x) => {
-                        //console.log(x)
-                        this.roadObj.push(x.attributes)
-                        this.roadFullData.push({
-                            id: x.attributes.RETS_ID,
-                            geom: [x.geometry.x, x.geometry.y]
+                this.retsFilters.loggedInUser = user
+                const queryString = `(GIS_ANALYST = '${user}') AND (STAT = 1 OR STAT = 2)`
+                const orderField = "CREATE_DT DESC"
+                getQueryLayer(queryString, orderField)
+                .then(obj => {
+                    if(obj.features.length){
+                        obj.features.forEach((x) => {
+                            this.roadObj.push(x.attributes)
+                            this.roadFullData.push({
+                                id: x.attributes.RETS_ID,
+                                geom: [x.geometry.x, x.geometry.y]
+                            })
                         })
+                        return
+                    }
+                    this.isDetailsPage = false
+                    this.isNoRets = true
                     })
-                    return
-                }
-                this.isDetailsPage = false
-                this.isNoRets = true
-                })
                 .catch((err)=> console.log(err))
             },
         }
@@ -410,9 +381,13 @@ export default{
     }
     .route-name{
         position: absolute;
-        left: 73.5%;
+        right: 3.5vh;
+        float: right;
         top: 0.5rem;
-        width: 21%;
+        justify-content: end;
+        width: 61%;
+        display: flex;
+        flex-direction: row;
         padding: 0px;
         font-size: 14px;
     }

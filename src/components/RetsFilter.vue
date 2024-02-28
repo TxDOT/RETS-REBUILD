@@ -4,7 +4,7 @@
             <div class="cardDiv regain">
                 <v-card-title style="position: relative; bottom:.5rem;">Filter Activity Feed</v-card-title>
                 <v-row no-gutters >
-                    <v-select :items="filterSort" item-title="title" style="position: relative;" density="compact" label="Sort" variant="underlined" v-model="filterPros.CREATE_DT"></v-select>
+                    <v-select :items="filterSort" item-title="title" item-value="sortType" return-object style="position: relative;" density="compact" label="Sort" variant="underlined" v-model="filterPros.CREATE_DT"></v-select>
                 </v-row>
               
                 <v-row no-gutters dense >
@@ -12,8 +12,12 @@
                     </v-select>
                 </v-row>
             
-                <v-row no-gutters dense >
-                    <v-select label="Date" chips closable-chips variant="underlined" density="compact" v-model="filterPros.EDIT_DT" ></v-select>
+                <v-row no-gutters dense id="date">
+                    <v-select label="Date" chips closable-chips variant="underlined" density="compact" v-model="filterPros.EDIT_DT" hide-no-data @click="isDate = !isDate">
+                        <template v-slot:chip="{item}">
+                            <v-chip closable @click:close="closeDateChip()">{{ item.props.title}}</v-chip>
+                        </template>
+                    </v-select>
                 </v-row>
                 
                 <v-row no-gutters dense>
@@ -22,7 +26,7 @@
                 </v-row>
        
                 <v-row no-gutters dense >
-                    <v-select :items="filterActivity" label="Activity" chips closable-chips variant="underlined" density="compact" v-model="filterPros.ACTV"></v-select>
+                    <v-select :items="filterActivity" item-title="value" item-value="value" return-object multiple label="Activity" chips closable-chips variant="underlined" density="compact" v-model="filterPros.ACTV"></v-select>
                 </v-row>
 
                 <v-row no-gutters dense > 
@@ -57,12 +61,16 @@
                             <v-btn id="restoreDefault" variant="plain" @click="restoreDefault()">Restore Default</v-btn>
                         </div>
                     </div>
-
-      
-
-          
-
         </v-card>
+    </div>
+    <div style="position: absolute; left: calc(50vh + 47vh + 74px); top: 21.5%;" v-if="isDate">
+
+            <v-date-picker class="date" multiple hide-header v-model="selectDate" @update:modelValue="selectDates()" tile width="300"></v-date-picker>
+                
+        
+        <div style="position: relative; bottom: 3.3rem; ">
+            <v-checkbox label="Current Year" style="position: relative; z-index: 9999; float: right; margin-bottom: 15px; margin-right: 15px" v-model="currentYear"></v-checkbox>
+        </div>
     </div>
 </template>
 
@@ -77,60 +85,97 @@
         data(){
             return{
                 filterSort: [
-                             {title: "Date: Newest to Oldest", sortType: "asc"}, 
-                             {title: "Date: Oldest to Newest", sortType: "desc"},
-                             {title: "Status: Ascending", sortType: "asc"}, 
-                             {title: "Status: Descending", sortType: "desc"}
+                             {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, 
+                             {title: "Date: Oldest to Newest", sortType: "ASC", filter: "CREATE_DT"},
+                             {title: "Status: Ascending", sortType: "ASC", filter: "STAT"}, 
+                             {title: "Status: Descending", sortType: "DESC", filter: "STAT"}
                             ],
                 filterJobType: ["Roadway Edit and Asset Update", "Asset Only", "Basemap"],
                 filterStatus: appConstants.statDomainValues,
-                filterActivity: ["Stuff 1", "Stuff 2"],
                 filterDistrict: appConstants.districtDomainValues,
                 filterCounty: appConstants.countyDomainValues,
                 filterUser: appConstants.defaultUserValue,
+                filterActivity: appConstants.activityList,
                 numFilters: 0,
-                defaultUser: '',
-                defaultStatus: ["Not Started", "In Progress", "Not Ready", "On Hold"],
-                defaultSort: "Date: Newest to Oldest",
-                defaultFilter: {"CREATE_DT": "Date: Newest to Oldest", "JB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
+                defaultFilter: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, "JB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
                          "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, "GIS_ANALYST": appConstants.defaultUserValue, 
-                         "filterTotal": 3}
+                         "filterTotal": 3},
+                isDate: false,
+                selectDate: null,
+                currentYear: null,
             }
-        },
-        mounted(){
-            console.log(appConstants.statDomainValues)
         },
         methods:{
             cancelFilter(){
                 this.calcFilterDiff()
                 this.$emit('filter-set', this.filterPros)
+                return
             },
             setFilterNumber(){
                 this.calcFilterDiff()
                 this.$emit('filter-set', this.filterPros)
                 filterMapActivityFeed(this.filterPros)
+                return
             },
             addNumFilter(){
                 this.numFilters++
+                return
             },  
             calcFilterDiff(){
                 const filterValues = Object.values(this.filterPros).filter(x => x)
-                console.log(this.filterPros)
                 filterValues.forEach((x) => {
                     if(x.length){
+                        console.log(x)
                         this.addNumFilter()
                     }
                 })
                 this.filterPros.filterTotal = this.numFilters
+                return
             },
             restoreDefault(){
-                this.defaultUser = this.filterPros.loggedInUser
-                console.log(this.defaultUser)
+                this.defaultFilter.loggedInUser = appConstants.defaultUserValue[0].value
                 filterMapActivityFeed(this.defaultFilter)
                 this.$emit('filter-set', this.defaultFilter)
+                return
             },
+            selectDates(){
+                if(this.selectDate.length > 2 ) return
+                if(this.selectDate.length === 2){
+                    this.selectDate.sort((a,b) => a - b)
+                    this.filterPros.EDIT_DT = `${this.selectDate[0].toLocaleDateString('en-US')} - ${this.selectDate[1].toLocaleDateString('en-US')}`
+                    return
+                }
+
+                this.filterPros.EDIT_DT = `${this.selectDate[0].toLocaleDateString('en-US')}`
+                return
+            },
+            closeDateChip(){
+                this.selectDate = null
+                this.filterPros.EDIT_DT = null
+                return
+            }
 
         },
+        watch:{
+            currentYear:{
+                handler: function(){
+                    if(this.currentYear){
+                        this.selectDate = []
+                        this.filterPros.EDIT_DT = null
+                        const year = new Date().getFullYear()
+                        const constrctBegDate = new Date(`January 01, ${year}`)
+                        const constrctEndDate = new Date(`December 31, ${year}`)
+                        this.selectDate = [constrctBegDate, constrctEndDate]
+                        this.selectDates()
+                        return
+                    }
+                    //this.filterPros.EDIT_DT = null
+                    this.selectDate = []
+                    return
+                },
+                immediate: true
+            }
+        }
 
     }
 </script>
@@ -149,15 +194,6 @@
         overflow-y: auto;
     }
 
-    .v-row{
-        /* margin-bottom: 0% !important;
-        margin-top: 0% !important;
-        padding-bottom: 0% !important;
-        bottom: 1rem !important;
-        position: relative;
-        height: 44px !important; */
-    }
-
     .v-btn + .v-btn {
         margin-left: 10px;
     }
@@ -168,5 +204,30 @@
         text-decoration: underline;
         color: #4472C4;
         right: 1rem;
+    }
+    .date {
+        display: block !important;
+        padding-top: 0px !important;
+        padding-bottom: 0px !important;
+        padding-inline-start: 0px !important;
+        padding-inline-end: 0px !important;
+        row-gap: 0px !important;
+        justify-content: left !important;
+        
+    }
+
+    .date >>> .v-date-picker-controls{
+        row-gap: 0px !important;
+        justify-content: left !important;
+        padding-top: 0px !important;
+        padding-bottom: 0px !important;
+    }
+
+    .date >>> .v-date-picker-month{
+        padding: 0px 0px 0px !important;
+    }
+
+   .date >>> .v-date-picker-month .v-date-picker-month__days{
+        row-gap: 0px !important;
     }
 </style>

@@ -22,6 +22,7 @@ export const appConstants = {
     districtDomainValues: [],
     countyDomainValues:[],
     userDomainValues:[],
-    defaultStatValues: [{ name: "Not Started", value: 1 },{ name: "In Progress", value: 2 },{ name: "On Hold", value: 4 }],
-    defaultUserValue:[]
+    defaultStatValues: [{ name: "Not Started", value: 1 },{ name: "In Progress", value: 2 }],
+    defaultUserValue:[],
+    activityList: []
 }
