@@ -2,6 +2,8 @@ import OAuthInfo from "@arcgis/core/identity/OAuthInfo.js";
 import esriId from "@arcgis/core/identity/IdentityManager.js";
 import {retsLayer} from './map-Init.js'
 import { view } from "./map-Init.js";
+import {getDomainValues} from './utility.js'
+import { appConstants } from "../common/constant.js";
 
 
 const authen = new OAuthInfo({
@@ -27,6 +29,13 @@ async function signIn(){
   //`(GIS_ANALYST = '') AND (STAT = 1 OR STAT = 2)`
   retsLayer
     .when(() => {
+
+      [{name: 'STAT', prop: "statDomainValues"}, {name: 'DIST_NM', prop: "districtDomainValues"}, {name: 'CNTY_NM', prop: "countyDomainValues"}].forEach((layer) => {
+        getDomainValues(layer.name).codedValues.forEach((x) => {
+          appConstants[layer.prop].push({"name" : x.name, "value": x.code})
+        })
+      })
+  
       return retsLayer.queryExtent();
     })
     .then((response) => {
@@ -34,7 +43,10 @@ async function signIn(){
     });
 }
 
-const setDefExpRets = (userId) =>  retsLayer.definitionExpression = `(GIS_ANALYST = '${userId}') AND (STAT = 1 OR STAT = 2)`
+const setDefExpRets = (userId) => {
+  appConstants.defaultUserValue.push({"name": "Username", "value": `${userId}`})
+  retsLayer.definitionExpression = `(GIS_ANALYST = '${userId}') AND (STAT = 1 OR STAT = 2)`
+}
 
 export async function getUserId(){
   const user = await esriId.getCredential(authen.portalUrl + "/sharing/rest",{
@@ -43,7 +55,6 @@ export async function getUserId(){
 
   return user.userId
 }
-
 
 
 

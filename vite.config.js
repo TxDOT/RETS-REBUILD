@@ -7,6 +7,6 @@ export default defineConfig({
   assetsInclude:['**/*.svg'],
   //base: '/apps/statewide_mapping/rets_rebuild/',
   server:{
-    host: "<not my computer name>"
+    host: ""
   }
 })

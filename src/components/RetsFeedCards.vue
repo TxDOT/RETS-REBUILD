@@ -12,8 +12,8 @@
                 <v-banner id="feed-banner" lines="two" density="default" min-width="0%">
                     <div style="width: 100%;">
                         <div class="banner-txt">
-                        <p>{{activityBanner}}</p>
-                        <v-btn v-if="isDetailsPage" icon="mdi-pencil-outline" density="compact" flat id="renameRets"></v-btn>
+                            <p>{{activityBanner}}</p>
+                            <v-btn v-if="isDetailsPage" icon="mdi-pencil-outline" density="compact" flat id="renameRets"></v-btn>
                         </div>
 
                         <div v-if="isDetailsPage" id="detailsHeaderIcon">
@@ -90,13 +90,13 @@
 </template>
 
 <script>
+import {clickRetsPoint, zoomTo, filterMapActivityFeed} from './utility.js'
 import {retsLayer} from './map-Init.js'
-import {clickRetsPoint, zoomTo} from './utility.js'
-import Query from "@arcgis/core/rest/support/Query.js";
 import {appConstants} from '../common/constant.js'
 import RetsDetailPage from './RetsDetail.vue'
 import {getUserId} from './login.js'
 import Filter from './RetsFilter.vue'
+import Query from "@arcgis/core/rest/support/Query.js";
 
 export default{
     name: "RetsCards",
@@ -125,10 +125,13 @@ export default{
             uploadAttachment: false,
             isfilter: false,
             loggedInUser: '',
-            numFilters: {}
+            numFilters: {"CREATE_DT": "Date: Newest to Oldest", "JB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
+                         "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, "GIS_ANALYST": appConstants.defaultUserValue, 
+                         "filterTotal": 3},
+            rerun: false,
         }
     },
-    mounted(){
+    beforeMount(){
         this.queryLayer
         clickRetsPoint()
     },  
@@ -200,42 +203,84 @@ export default{
             console.log(filter)
             this.numFilters = filter
             this.isfilter = false
+            this.rerun = true
         },
         searchRetsCards(){
             //searchCards
             //maybe it will be best to concatentate values to a string and search via that
             //filter rets cards
             //highlight text in cards that match serach text
+        },
+        async querysLayer(){
+            const filter = await filterMapActivityFeed(this.numFilters)
+            console.log(this.numFilters)
+            this.roadObj = []
+                console.log('heelo')
+                const query = new Query()
+                console.log(filter)
+                query.where = `${filter}`
+                query.orderByFields = ["EDIT_DT"]
+                query.outFields = ["*"]
+                query.returnGeometry = true
+                retsLayer.queryFeatures(query).then(obj => {
+                if(obj.features.length){
+                    obj.features.forEach((x) => {
+                        //console.log(x)
+                        this.roadObj.push(x.attributes)
+                        this.roadFullData.push({
+                            id: x.attributes.RETS_ID,
+                            geom: [x.geometry.x, x.geometry.y]
+                        })
+                    })
+                    this.rerun = false
+                    return
+                }
+                this.isDetailsPage = false
+                this.isNoRets = true
+                })
+                .catch((err)=> console.log(err))
         }
     },
 
+    watch:{
+        rerun:{
+            handler: function(){
+                this.querysLayer()
+                console.log('toggled')
+            },
+            immediate: true
+        }
+    },
     computed:{
         queryLayer:{
             async get(){
+                this.roadObj = []
+                console.log('heelo')
                 const user = await getUserId()
                 this.loggedInUser = user
+                this.numFilters.loggedInUser = user
                 const query = new Query()
                 query.where = `(GIS_ANALYST = '${user}') AND (STAT = 1 OR STAT = 2)`
                 query.orderByFields = ["EDIT_DT"]
                 query.outFields = ["*"]
                 query.returnGeometry = true
-                retsLayer.queryFeatures(query)
-                    .then(obj => {
-                        if(obj.features.length){
-                            obj.features.forEach((x) => {
-                                this.roadObj.push(x.attributes)
-                                this.roadFullData.push({
-                                    id: x.attributes.RETS_ID,
-                                    geom: [x.geometry.x, x.geometry.y]
-                                })
-                            })
-                            return
-                        }
-                        this.isDetailsPage = false
-                        this.isNoRets = true
+                retsLayer.queryFeatures(query).then(obj => {
+                if(obj.features.length){
+                    obj.features.forEach((x) => {
+                        //console.log(x)
+                        this.roadObj.push(x.attributes)
+                        this.roadFullData.push({
+                            id: x.attributes.RETS_ID,
+                            geom: [x.geometry.x, x.geometry.y]
+                        })
                     })
-                    .catch((err)=> console.log(err))
-            }
+                    return
+                }
+                this.isDetailsPage = false
+                this.isNoRets = true
+                })
+                .catch((err)=> console.log(err))
+            },
         }
     }
 }
@@ -275,6 +320,10 @@ export default{
     .v-icon{
         position: relative;
         text-align: center;
+    }
+
+    .v-card{
+        background-color: rgba(255,0,0,0);
     }
     .mdi-menu-down{
         display: none;
@@ -445,7 +494,7 @@ export default{
     .filter-notification-bubble{
         position: relative;
         width: 1.2rem;
-        background-color: red;
+        background-color:#4472C4;
         height: 1.2rem;
         float: right;
         bottom: 1rem;
