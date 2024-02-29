@@ -26,17 +26,17 @@
                 </v-row>
        
                 <v-row no-gutters dense >
-                    <v-select :items="filterActivity" item-title="value" item-value="value" return-object multiple label="Activity" chips closable-chips variant="underlined" density="compact" v-model="filterPros.ACTV"></v-select>
+                    <v-autocomplete :items="filterActivity" item-title="value" item-value="value" return-object multiple label="Activity" chips closable-chips variant="underlined" density="compact" v-model="filterPros.ACTV"></v-autocomplete>
                 </v-row>
 
                 <v-row no-gutters dense > 
-                    <v-select :items="filterDistrict" item-title="name" item-value="value" return-object multiple label="District" chips closable-chips variant="underlined" density="compact" v-model="filterPros.DIST_NM"></v-select>
+                    <v-autocomplete :items="filterDistrict" item-title="name" item-value="value" return-object multiple label="District" chips closable-chips variant="underlined" density="compact" v-model="filterPros.DIST_NM"></v-autocomplete>
                 </v-row>
                 <v-row no-gutters dense >
-                    <v-select :items="filterCounty" item-title="name" item-value="value" return-object multiple label="County" chips closable-chips variant="underlined" density="compact" v-model="filterPros.CNTY_NM"></v-select>
+                    <v-autocomplete :items="filterCounty" item-title="name" item-value="value" return-object multiple label="County" chips closable-chips variant="underlined" density="compact" v-model="filterPros.CNTY_NM"></v-autocomplete>
                 </v-row>
                 <v-row no-gutters dense >
-                    <v-select :items="filterUser" item-title="value" item-value="value" return-object label="Users" multiple chips closable-chips variant="underlined" density="compact" v-model="filterPros.GIS_ANALYST"></v-select>
+                    <v-autocomplete :items="filterUser" item-title="value" item-value="value" return-object label="Users" multiple chips closable-chips variant="underlined" density="compact" v-model="filterPros.GIS_ANALYST"></v-autocomplete>
                 </v-row>
 
                 <v-expansion-panels flat variant="accordion">
@@ -216,18 +216,18 @@
         
     }
 
-    .date >>> .v-date-picker-controls{
+    .date :deep(.v-date-picker-controls){
         row-gap: 0px !important;
         justify-content: left !important;
         padding-top: 0px !important;
         padding-bottom: 0px !important;
     }
 
-    .date >>> .v-date-picker-month{
+    .date :deep(.v-date-picker-month){
         padding: 0px 0px 0px !important;
     }
 
-   .date >>> .v-date-picker-month .v-date-picker-month__days{
+   .date :deep(.v-date-picker-month) .v-date-picker-month__days{
         row-gap: 0px !important;
     }
 </style>

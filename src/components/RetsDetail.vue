@@ -26,10 +26,10 @@
         <div >
             <v-card class="history-card">
                 <v-card-title >History</v-card-title>
-                <v-text-field class="search-history" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" density="compact"></v-text-field>
+                <v-text-field class="search-history" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" density="compact" v-model="searchHistoryFilter"></v-text-field>
                 <div class="cardDiv">
-                    <v-row v-for="(note, i) in histNotes" :key="i" style="padding-bottom: 1rem;">
-                        <v-banner v-model="note[i]" id="history-notes" density="compact">
+                    <v-row v-for="(note, i) in histNotes" :key="i" style="padding-bottom: 1rem;" :id="note.index">
+                        <v-banner v-model="note[i]" id="history-notes" density="compact" :id="note.index">
                             <v-banner-text>
                                 {{ note.notes }} <span style="font-size: 10px; color: grey;">{{ note.author }} {{ note.time }}</span>
                             </v-banner-text>
@@ -42,11 +42,14 @@
                 </div>
             </v-card>
         </div>
-        <div id="trigger-buttons">
-            <v-btn-toggle>
-                <v-btn variant="plain" flat>Delete</v-btn>
-                <v-btn @click="sendToParent" class="secondary-button" variant="plain" flat>Cancel</v-btn>
-                <v-btn @click="sendToParent" variant="elevated" class="main-button-style">Save</v-btn>
+        <div>
+            <div style="position: relative; float: left; margin-left: 10px; font-size: 11px; display: flex; flex-wrap: wrap;">
+                <v-checkbox label="Asset Only Job" density="compact"></v-checkbox>
+            </div>
+            <v-btn-toggle id="trigger-buttons" density="compact">
+                    <v-btn @click="deleteRets" variant="plain" flat size="small">Delete</v-btn>
+                    <v-btn @click="sendToParent" class="secondary-button" variant="plain" flat size="small">Cancel</v-btn>
+                    <v-btn @click="sendToParent" variant="elevated" class="main-button-style" size="small">Save</v-btn>
             </v-btn-toggle>
         </div>
     </div>
@@ -65,7 +68,7 @@
     import editHistoryNotes from './EditHistoryNotes.vue'
     import DetailsCard from './detailsCard.vue'
     import MetadataCard from './metadataCard.vue'
-    import {getGEMTasks} from './utility.js'
+    import {getGEMTasks, searchCards} from './utility.js'
     import detailsAlert from './detailsAlert.vue'
 
     export default{
@@ -86,15 +89,16 @@
                                'Sprint 2', 'Sprint 3', 'Sprint 4', 'Sprint 5', 'Toll', 'TxDOTConnect', 'Urban Area Interaction'],
                 isBtnSet: 0,
                 relatedRets: ["Not Started", "On Hold", "Completed"],
-                histNotes: [{notes: "please  make sure this gets done before the EOM", author: "cbardash", time: "10/29/2023",  USER_TAG: 0}, 
-                            {notes: "Priority field updated", author: "cbardash", time: "10/29/2023", USER_TAG: null}],
+                histNotes: [{notes: "please  make sure this gets done before the EOM", author: "cbardash", time: "10/29/2023",  USER_TAG: 0, index: 0}, 
+                            {notes: "Priority field updated", author: "cbardash", time: "10/29/2023", USER_TAG: null, index: 1}],
                 editText: false,
                 editNotes: '',
                 noteIndex: 0,
                 gemTask: [],
                 sendGemTaskNum: null,
                 isAlert: false,
-                alertTextInfo: {"text": "Note Saved", "color": "#70ad47"}
+                alertTextInfo: {"text": "Note Saved", "color": "#70ad47"},
+                searchHistoryFilter: ''
             }
         },
         mounted(){
@@ -108,6 +112,10 @@
             })
         },
         methods:{
+            deleteRets(){
+                this.retsInfo.isDelete = true
+                this.$emit('close-detail', this.retsInfo)
+            },
             sendToParent(){
                 this.$emit('close-detail', false)
             },
@@ -143,6 +151,18 @@
             closeGEMTask(){
                 document.querySelectorAll(".gem-search")[0].style.display = "none"
             }
+        },
+        watch:{
+            searchHistoryFilter:{
+                handler: function(){
+                    if(this.searchHistoryFilter.length){
+                        searchCards(this.histNotes, this.searchHistoryFilter, "index")
+                        return
+                    }
+
+                },
+                immediate:true
+            }
         }
     }
 </script>
@@ -167,19 +187,20 @@ div .cardDiv{
 
 #details-page{
     position: relative;
-    height: 400px !important;
-    width: 100% !important;
-    bottom: 1rem;
+    height: 434px !important;
+    bottom: .5rem;
     border-radius: 0px;
     padding-bottom: 26.5rem; 
     font-size: 1px !important;
+    margin-right: 10px;
+    margin-left: 10px;
 }
 #container-div{
     position: relative;
     top: 8.2rem;
     height: 890vh;
     min-height: 0% !important;
-    max-height: 90% !important;
+    max-height: 87% !important;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
@@ -209,18 +230,13 @@ div .cardDiv{
 }
 
 #trigger-buttons{
+    padding-top: .5rem;
     position: relative;
-    bottom: 1vh;
-    left: 14px;
-    padding-bottom: 1.5rem;
-    width: 100%;
-    justify-content: right;
-    display: flex;
-    flex-direction: row;
+    float: right;
 }
 
 .v-btn{
-    margin-right: 15px;
+    margin-right: 10px;
 }
 
 .new-proposed-route{
@@ -261,8 +277,8 @@ div .cardDiv{
 }
 .history-card{
     position:relative; 
-    height: 16.5rem; 
-    bottom: 0.7rem; 
+    height: 18rem; 
+    bottom: 0.2rem; 
     border-radius: 0%; 
     overflow-y: auto;
     margin-right: 10px;
@@ -271,7 +287,7 @@ div .cardDiv{
 
 .search-history{
     position:relative; 
-    bottom: 13px; 
+    bottom: 8px; 
     margin-left: 10px; 
     margin-right: 10px;
 }

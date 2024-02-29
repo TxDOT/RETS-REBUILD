@@ -15,15 +15,15 @@ export function clickRetsPoint(){
 function outlineFeedCards(res){
     res.forEach((x) => {
         //set card outline
-        document.getElementById(`${x.graphic.attributes.RETS_ID}`).classList.add('highlight-card')
+        document.getElementById(`${x.graphic.attributes.OBJECTID}`).classList.add('highlight-card')
         //zoom to card in feed
         const zoomToCard = document.createElement('a')
-        zoomToCard.href = `#${x.graphic.attributes.RETS_ID}`
+        zoomToCard.href = `#${x.graphic.attributes.OBJECTID}Card`
         zoomToCard.click()
         //remove card outline
-        // setTimeout(()=>{
-        //     document.getElementById(`${x.graphic.attributes.RETS_ID}`).classList.remove('highlight-card')
-        // },500)
+        setTimeout(()=>{
+            document.getElementById(`${x.graphic.attributes.OBJECTID}`).classList.remove('highlight-card')
+        },5000)
     })
     return;
 }
@@ -106,6 +106,28 @@ export function getQueryLayer(whereString, orderFields){
     query.returnGeometry = true
     
     return retsLayer.queryFeatures(query)
+}
 
-        
+
+export function searchCards(cardArr, string, index){
+    console.log(string)
+    if(!string.length){
+        cardArr.forEach(x => document.getElementById(`${x[index]}`).classList.add('showCards'))
+        return
+    }
+    cardArr.forEach((x) => {
+        const a = Object.values(x).find(t => String(t).includes(string))
+        if(a){
+            document.getElementById(`${x[index]}`).classList.add('showCards')
+        }
+        else{
+            document.getElementById(`${x[index]}`).classList.remove('showCards')
+            document.getElementById(`${x[index]}`).classList.add('hideCards')
+        }
+    })
+
+    // returnCards.forEach((x) => document.getElementById(`${x.RETS_ID}`).classList.add('.showCard'))
+
+    // console.log(document.getElementsByClassName('showCard'))
+    
 }

@@ -1,11 +1,11 @@
 <template>
-    <div style="margin-right: 10px; margin-left: 10px;">
+    <div>
         <v-row align="start" no-gutters dense style="position: relative; bottom: .5rem;">
             <v-col cols="4" offset="0">
-                <v-autocomplete :items="activityList" label="Activity" variant="underlined" density="compact" flat v-model="infoRets.ACTIVITY"></v-autocomplete>
+                <v-autocomplete :items="activityList" label="Activity" variant="underlined" density="compact" flat v-model="infoRets.ACTV"></v-autocomplete>
             </v-col>
             <v-col cols="4" offset="3">
-                <v-text-field label="Route" density="compact" class="number-field" variant="underlined" :disabled="this.infoRets.ACTIVITY === 'Minute Order' || this.infoRets.ACTIVITY === 'TxDOTConnect' ? false : true" :v-model="infoRets.ACTIVITY === 'Minute Order' ? infoRets.MO_NBR : infoRets.MO_NBR">
+                <v-text-field label="Route" density="compact" class="number-field" variant="underlined" :disabled="this.infoRets.ACTV === 'Minute Order' || this.infoRets.ACTV === 'TxDOTConnect' ? false : true" :v-model="infoRets.ACTV === 'Minute Order' ? infoRets.MO_NBR : infoRets.MO_NBR">
                     <template v-slot:append-inner >
                         <v-icon icon="mdi-paperclip" small class="number-field-icon" @click="paperClipFunc"></v-icon>
                     </template>
@@ -43,7 +43,7 @@
                 <v-btn variant="plain" icon="mdi-magnify-plus-outline"></v-btn>
             </v-col>
             <v-col cols="1" offset="0">
-                <v-btn variant="plain" icon="mdi-cannabis"></v-btn>
+                <v-btn variant="plain" icon="mdi-cursor-default"></v-btn>
             </v-col>
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom:5.7rem;">
@@ -109,13 +109,12 @@
             }
         },
         mounted(){
-            console.log(this.infoRets)
             const milliDate = new Date(this.infoRets.DEADLINE)
             this.datePicker = this.setDate(milliDate)
         },
         methods:{
             paperClipFunc(){
-                this.infoRets.ACTIVITY === 'Minute Order' ? window.open(`https://publicdocs.txdot.gov/minord/mosearch/Pages/Minute-Order-Search-Results.aspx#k=${this.infoRets.MO_NBR}`, '_blank') :
+                this.infoRets.ACTV === 'Minute Order' ? window.open(`https://publicdocs.txdot.gov/minord/mosearch/Pages/Minute-Order-Search-Results.aspx#k=${this.infoRets.MO_NBR}`, '_blank') :
                                                             window.open(`https://txdot.sharepoint.com/sites/division-tpp/DM-Admin/Lists/Data%20Request/EditForm.aspx?ID=${1138}`, '_blank')
             
 

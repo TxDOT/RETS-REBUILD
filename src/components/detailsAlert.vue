@@ -1,5 +1,7 @@
 <template>
-    <v-alert v-model="alert" border="start" :border-color="borderColor" :text="borderText" closable id="detailsAlert"></v-alert>
+    <v-alert v-model="alert" border="start" :border-color="borderColor" id="detailsAlert">
+        <p style="position: relative; display: flex; justify-content: left; padding-bottom: 0px;">{{ borderText }}</p>
+    </v-alert>
 </template>
 
 <script>
@@ -17,6 +19,7 @@
         },
         mounted(){
             console.log(this.alertsTextInfo)
+
         },
         // methods:{
         //     test(){
@@ -29,6 +32,10 @@
                     this.borderColor = this.alertsTextInfo.color
                     this.borderText = this.alertsTextInfo.text
                     this.alert = this.alertsTextInfo.toggle
+
+                    setTimeout(()=>{
+                        this.alert = false
+                    },2000)
                 },
                 immediate: true
             }
@@ -39,11 +46,12 @@
 <style scoped>
     #detailsAlert{
         position: absolute;
-        top:6rem;
+        top:6.2rem;
         z-index: 9999;
-        width: 100%;
         border-radius: 0%;
         background-color: rgba(84,130,53);
-        height: 59px;
+        height: 44px;
+        margin: 10px;
+        width: 95.5%;
     }
 </style>

@@ -20,11 +20,11 @@
                             <v-btn icon="mdi-paperclip" density="compact" flat @click="uploadAttachment = !uploadAttachment"></v-btn>
                             <v-btn density="compact" flat @click="changeColor(currRoad.RETS_ID);" id="flagBtnDetails">
                                 <template v-slot:prepend>
-                                    <v-icon size="25px" :id="`${currRoad.RETS_ID}Icon`" :color="currRoad.flagColor" icon="mdi-flag" style="position: relative; left: 7px; bottom: 2px"></v-icon>
+                                    <v-icon size="25px" :id="`${currRoad.RETS_ID}Icon`" :color="currRoad.flagColor" :icon="currRoad.flagColor ? changeFlagIcon(currRoad.flagColor) : 'mdi-flag-outline' " style="position: relative; left: 7px; bottom: 2px"></v-icon>
                                 </template>
                             </v-btn>
                             <v-col class="details-color-picker" v-if="flagClickedId === currRoad.RETS_ID" v-click-outside="closeFlagDiv">
-                                <v-icon size="20px" v-for="i in 6" icon="mdi-flag" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])"></v-icon>
+                                <v-icon size="20px" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])"></v-icon>
                             </v-col>    
                             <v-btn icon="mdi-exclamation" density="compact" flat style="color:red"></v-btn>
                         </div>
@@ -39,21 +39,21 @@
                 </v-banner>
             </v-row>
             <v-row id="search-feed" v-if="!isDetailsPage">
-                <v-text-field density="compact" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify"></v-text-field>
+                <v-text-field density="compact" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" v-model="actvFeedSearch"></v-text-field>
             </v-row>
 
             <div class="card-feed-div" v-if="!isDetailsPage">
-                <v-row class="rets-card-row" v-for="(rd, road) in roadObj" :key="rd" :value="road">
+                <v-row class="rets-card-row" v-for="(rd, road) in roadObj" :key="rd" :value="road" :id="rd.RETS_ID">
                     <v-btn elevation="0" @click="changeColor(rd.RETS_ID);" class="flag-btn" size="small" max-width=".5px" density="compact" variant="plain" slim>
                         <template v-slot:prepend>
-                            <v-icon size="medium" :id="`${rd.RETS_ID}Icon`" :color="rd.flagColor">mdi-flag</v-icon>
+                            <v-icon size="medium" :id="`${rd.RETS_ID}Icon`" :color="rd.flagColor" :icon="rd.flagColor ? changeFlagIcon(rd.flagColor) : 'mdi-flag-outline'"></v-icon>
                         </template>
                     </v-btn>
                     <v-col class="color-picker" v-if="flagClickedId === rd.RETS_ID" v-click-outside="closeFlagDiv">
-                        <v-icon size="medium" v-for="i in 6" icon="mdi-flag" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" ></v-icon>
+                        <v-icon size="medium" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" ></v-icon>
                     </v-col>    
-                    <v-card :id="rd.RETS_ID" :title="rd.JB_TYPE" :style="{borderLeft: `7px solid ${colorTable[rd.STAT] ? colorTable[rd.STAT]: 'Red'}`}" hover v-ripple class="card" @click="zoomToRetsPt(rd.RETS_ID)" @dblclick="double(rd);">
-                        <v-card-text style="" id="retsCard">
+                    <v-card :id="rd.RETS_ID ? `${rd.RETS_ID}Card` : null" :title="rd.JB_TYPE" :style="{borderLeft: `7px solid ${colorTable[rd.STAT] ? colorTable[rd.STAT]: 'Red'}`}" hover v-ripple class="card" @click="zoomToRetsPt(rd.RETS_ID)" @dblclick="double(rd, road);">
+                        <v-card-text id="retsCard">
                             RETS {{rd.RETS_ID }}
                         </v-card-text>
 
@@ -90,7 +90,7 @@
 </template>
 
 <script>
-import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer} from './utility.js'
+import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer, searchCards} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import RetsDetailPage from './RetsDetail.vue'
 import {getUserId} from './login.js'
@@ -111,7 +111,7 @@ export default{
             roadFullData: [],
             isColorPicked: false,
             pickColor: "blue",
-            swatchColor: ['', '#FF0000', '#FF7F00', '#FFFF00', '#4472C4', '#008000', '#FFFFFF'],
+            swatchColor: ['', '#FF0000', '#FF7F00', '#FFFF00', '#008000', '#4472C4', '#B75CFF', '#FFFFFF'],
             flagClickedId: "",
             flagColor: "",
             timer: "",
@@ -119,6 +119,7 @@ export default{
             isNoRets: false,
             send: null,
             activityBanner: "Activity Feed",
+            actvFeedSearch: "",
             flagColor: '',
             uploadAttachment: false,
             isfilter: false,
@@ -134,11 +135,19 @@ export default{
     },  
     methods:{
         enableFeed(e){
+            console.log(e)
+            if(e.isDelete){
+                this.roadObj.splice(e.index, 1)
+                this.isDetailsPage = false
+                this.activityBanner = "Activity Feed"
+                return
+            }
             this.isDetailsPage = e
             this.activityBanner = "Activity Feed"
         },
-        double(road){
+        double(road, index){
             road.logInUser = this.loggedInUser 
+            road.index = index
             this.send = this.currRoad = road
             clearTimeout(this.timer)
             this.timer=""
@@ -224,9 +233,27 @@ export default{
                     
                     console.log(err)
                 })
+        },
+        changeFlagIcon(color){
+            if(color === '#FFFFFF'){
+                return 'mdi-flag-outline'
+            }
+            return 'mdi-flag'
+        }
+
+    },
+    watch:{
+        actvFeedSearch:{
+            handler: function(){
+                if(this.actvFeedSearch.length){
+                    searchCards(this.roadObj, this.actvFeedSearch, "RETS_ID")
+                    return
+                }
+
+            },
+            immediate: true
         }
     },
-
     computed:{
         queryLayer:{
             async get(){
@@ -303,10 +330,8 @@ export default{
         position: relative;
         bottom: 1.5rem;
         width: 104% !important;
-        padding: 0px 0px 0px 10px;
-        display: block !important;
+        padding: 5px 0px 0px 10px;
         height: 105px;
-
     }
     .card-feed-div{
         position: relative;
@@ -404,7 +429,7 @@ export default{
 
     .flag-btn{
         font-size: 10px;
-        top: 1.8rem;
+        top: 1.6rem;
         left: 90%;
         z-index: 999;
         width: 1px !important;
