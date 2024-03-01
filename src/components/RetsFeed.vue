@@ -72,25 +72,23 @@
  
 
                 retsToolsBottom: [
-                               {title:"Test", icon: 'mdi-select-multiple', color: "white", name: "Select", action: () =>{
+                               {title:"Select", icon: 'mdi-select-multiple', color: "white", name: "Select", action: () =>{
                                 this.handleSelectTool();
                                }},
-                               {title:"Test", icon: 'mdi-map-marker', color: "white", name: "Jump to", action: () =>{
-                                this.handleToolClick({name: "Jump To"});
+                               {title:"JumpTo", icon: 'mdi-map-marker', color: "white", name: "Jump to", action: () =>{
+                                this.handleJumpToTool();
                                }},
-                               {title:"Test", icon: 'mdi-format-list-bulleted-type', color: "white", name: "Legend", action: () =>{
+                               {title:"Legend", icon: 'mdi-format-list-bulleted-type', color: "white", name: "Legend", action: () =>{
                                 this.handleLegendTool();
                                }},
-                               {title:"Test", icon: 'mdi-map-legend', color: "white", name: "Basemaps", action: () =>{
+                               {title:"Basemap", icon: 'mdi-map-legend', color: "white", name: "Basemaps", action: () =>{
                                 this.handleBasemapTool();
                                }},
                                {title:"Test", icon: 'mdi-cog', color: "white", name: "Settings", action: () =>{
                                 console.log("Hey11")
                                }}
                             ],
-                            //legend: null,
-                            isLegendVisibile: true,
-                            //basemaptoggle: true,
+                            isLegendVisible: true,
 
             }
                 },
@@ -112,31 +110,6 @@
                 
                 methods: {
 
-                    // ... your existing methods ...
-
-                    handleToolClick(tool) {
-                    switch (tool.name) {
-                        case "Create":
-                        this.handleCreatetTool();
-                        break;
-                        case "Select":
-                        this.handleSelectTool();
-                        break;
-                        case "Jump to":
-                        this.handleJumpToTool();
-                        break;
-                        case "Legend":
-                        this.handleLegendTool();
-                        break;
-                        case "Basemap":
-                        this.handleBasemapTool();
-                        break;
-                        // Add more cases for other tools
-                        default:
-                        break;
-                    }
-                    },
-
                     handleCreatetTool() {
                     // Add your Sketch widget functionality for the "Select" tool here
                     // if (this.sketchWidget) {
@@ -146,31 +119,10 @@
                     // }
                     // },
 
-                   
-
-                    
 
                     },
 
                     handleSelectTool() {
-
-                        // //this.sketchWidget.creationMode = "update";
-                        // // this.sketchWidget.create("rectangle");
-                        // // console.log("mode: ", this.sketchWidget.creationMode)
-                        // this.sketchWidget.on("create", function (event) {
-                        //     if (event.state === "complete" && event.tool === "rectangle") {
-                        //     // Handle the selected graphics (customize as needed)
-                        //     handleSelectedGraphics(event.graphic);
-                        //     }
-                        // });
-
-                        // function handleSelectedGraphics(graphic) {
-                        //     // Handle the selected graphics, for example, print their geometry type
-                        //     var geometryType = graphic.geometry ? graphic.geometry.type : "N/A";
-                        //     console.log(geometryType)
-                        // }
-
-                        // Activate the "select by rectangle" tool
 
                         
                         this.sketchWidget.create("rectangle");
@@ -180,14 +132,8 @@
 
                     },
 
-                    
-
-                    
-                    
-
                     handleJumpToTool() {
-                    // Add your functionality for the "Jump to" tool here
-                    console.log("Jump to tool clicked");
+                        //
                     },
 
                     handleLegendTool() {
@@ -282,13 +228,6 @@
                              activeBasemap: darkVTBasemap,
 
                          });
-
-                        // this.basemap.watch("nextBasemap", (newValue) => {
-                        //     console.log("Basemap toggled to:", newValue);
-                        // });
-
-                        // this.basemap.container = "basemapToggleContainer"; // Specify the container ID or element
-                        // view.ui.add(this.basemap, "top-right");
 
 
                     }
