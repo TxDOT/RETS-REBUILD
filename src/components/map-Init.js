@@ -11,46 +11,83 @@ import BasemapToggle from "@arcgis/core/widgets/BasemapToggle.js";
 import WMTSLayer from "@arcgis/core/layers/WMTSLayer.js";
 import LabelClass from "@arcgis/core/layers/support/LabelClass.js";
 import Sketch from "@arcgis/core/widgets/Sketch.js";
+import Extent from "@arcgis/core/geometry/Extent.js";
+import { appConstants } from "../common/constant"; 
+import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer.js";
+import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol.js";
+import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer.js";
 
-export let retsPointRenderer = {
-  type: "simple",
-  symbol: {
-    type: "simple-marker",
-    size: 8,
-    outline: {
-      color: "white",
-      width: 0.
-    }
-  },
-  visualVariables: [{
-    type: "color",
-      field: "STAT",
-      stops: [
-        {value: 1, color: "rgb(255, 102, 255)"},
-        {value: 2, color: "rgb(52, 255, 52)"},
-        {value: 3, color: "rgb(255, 128, 0)"},
-      ]
-  }]
-}
 
-export let roadwaysRenderer = {
-  type: "simple",
-  symbol: {
-    type: "simple-line",
-    width: 0,
-    opacity: 0,
-    color: [255,255,255,255]
-  }
-}
 
-//Rets Layer construction
-export const retsLayer = new FeatureLayer({
-  url: "https://testportal.txdot.gov/createags/rest/services/RETS/FeatureServer/0",
-  visible: true,
-  outFields: ["*"],
-  renderer: retsPointRenderer,
-  editingEnabled: true, 
-})
+
+
+
+
+
+        export let retsPointRenderer = new UniqueValueRenderer({
+          field: "STAT", // Field based on which the symbology will be categorized
+          uniqueValueInfos: [
+            {
+              value: "1",
+              symbol: new SimpleMarkerSymbol({
+                size: 8,
+                color: appConstants.CardColorMap[1],
+                outline: {
+                  color: "white",
+                  width: 0
+                }
+              }),
+              label: "Not Started"
+            },
+            {
+              value: "2",
+              symbol: new SimpleMarkerSymbol({
+                size: 8,
+                color: appConstants.CardColorMap[3],
+                outline: {
+                  color: "white",
+                  width: 0
+                }
+              }),
+              label: "Complete"
+            },
+            {
+              value: "3",
+              symbol: new SimpleMarkerSymbol({
+                size: 8,
+                color: appConstants.CardColorMap[2],
+                outline: {
+                  color: "white",
+                  width: 0
+                }
+              }),
+              label: "in Progress"
+            },
+
+            // Add more unique value info objects as needed...
+          ]
+
+         });
+
+        
+         export let roadwaysRenderer = {
+          type: "simple",
+          symbol: {
+            type: "simple-line",
+            width: 0,
+            opacity: 0,
+            color: "transparent"
+          }
+         }
+        //Rets Layer construction
+        export const retsLayer = new FeatureLayer({
+          url: "https://testportal.txdot.gov/createags/rest/services/RETS/FeatureServer/0",
+          visible: true,
+          outFields: ["*"],
+          renderer: retsPointRenderer,
+          editingEnabled: true,
+          
+        })
 
 
 //TxDotRoaways Layer construction
@@ -61,21 +98,31 @@ export const TxDotRoaways = new FeatureLayer ({
 })
 
 
-//Creates label class for RETS points
-const retsLabelclass = new LabelClass({
-  labelExpressionInfo : {expression: "$feature.RETS_ID"},
-  symbol: {
-    type: "text",
-    color: "white",
-  },
-  labelPlacement: "above-right",
-  minScale: 20000,
-})
+         //Creates label class for RETS points
+         const retsLabelclass = new LabelClass({
+          labelExpressionInfo : {expression: "$feature.RETS_ID"},
+          symbol: {
+            type: "text",
+            color: "white",
+            font: {
+              size: 12
+            }
+          },
+          labelPlacement: "above-right",
+          minScale: 200000,
+        })
+        //Applies label class to rets layer
+        retsLayer.labelingInfo = [retsLabelclass];
 
-//Applies label class to rets layer
-retsLayer.labelingInfo = [retsLabelclass];
-     
-////////////////////////////////////////////BASEMAPS//////////////////////////////////////////////////////////////////////////
+        export const sketchLayer = new GraphicsLayer({
+
+        });
+        
+  
+
+
+        
+        ////////////////////////////////////////////BASEMAPS//////////////////////////////////////////////////////////////////////////
         
 //Dark Vector Tile construction
 export const darkVectorTile = new VectorTileLayer({
@@ -98,24 +145,35 @@ export const lightVTBasemap = new Basemap({
   baseLayers: lightVectorTile
 })
 
-//Imagery Layer construction
-export const imageryTxdot = new WMTSLayer({
-  url: "https://txgi.tnris.org/login/path/food-paul-zebra-shirt/wmts/1.0.0/WMTSCapabilities.xml"
-})
+        //Imagery Layer construction
+        export const imageryTxdot = new WMTSLayer({
+          url: "https://txgi.tnris.org/login/path/bucket-armada-virtual-lobby/wmts/1.0.0/WMTSCapabilities.xml",
+          //url: "https://txgi.tnris.org/login/path/food-paul-zebra-shirt/wmts/1.0.0/WMTSCapabilities.xml"
+        })
 
 //Created imagery basemap
 export const imageryBasemap = new Basemap({
   baseLayers: imageryTxdot
 })
+        //Created imagery basemap
+        export const imageryBasemap = new Basemap({
+          baseLayers: [imageryTxdot]
+        })
 
-//add  basemap to the map
-export const map = new Map({
-  basemap: darkVTBasemap,
-})
+        export var sketchWidget = new Sketch({
+          layer: retsLayer, // Replace with your actual feature layer
+          view: view, // Replace with your actual map view
+          // Other configuration options for the Sketch widget
+          creationMode: "single"
+      });
 
-//add feature layers to the map
-map.add(retsLayer)
-map.add(TxDotRoaways)
+        
+
+
+        //add  basemap to the map
+        export const map = new Map({
+          basemap: darkVTBasemap,
+        })
 
 //add  map to the mapview, set zoom and center of screen when the application loads
 export const view = new MapView({
@@ -141,36 +199,61 @@ const basemaptoggle = new BasemapToggle({
   view: view,
   nextBasemap: imageryBasemap,
 })
-
-//create search widget
-export const searchWidget = new Search({
-  view: view,
-  includeDefaultSources: false,
-  sources:
-  [
-    {
-      name: "RETS ID",
-      layer: retsLayer, 
-      placeholder: "City, County, District, Route",
-      zoomScale: 5000,
-      searchFields: ["RETS_ID","RTE_NM","CNTY_NM","DIST_NM","GIS_ANALYST","GRID_ANALYST","DIST_ANALYST","MO_NBR","ACTIVITY"],
-      displayField: "RETS_ID",
-      exactMatch: false,
-      outFields: ["RETS_ID"],
-      minSuggestCharacters: 0,  
-    },
-  ]
-});
+        //add  map to the mapview, set zoom and center of screen when the application loads
+        export var view = new MapView({
+          map: map,
+          zoom: 6,
+          //center: [-100, 31.5],
+          // spatialReference: {
+          //   wkid: 4326
+          // }
+        })
         
-//creates search widget
-export const ZoomWidget = new Zoom({
-  view: view
-});
+        
 
-//creates home widget
-export const homeWidget = new Home({
-  view: view
-});
+        //add feature layers to the map
+        map.add(retsLayer)
+        map.add(TxDotRoaways)
+        map.add(sketchLayer);
+
+
+        //create search widget
+        export const searchWidget = new Search({
+           view: view,
+           includeDefaultSources: false,
+           sources:
+           [
+            {
+              name: "RETS ID",
+              layer: retsLayer, 
+              placeholder: "City, County, District, Route",
+              zoomScale: 5000,
+              searchFields: ["RETS_ID","RTE_NM","CNTY_NM","DIST_NM","GIS_ANALYST","GRID_ANALYST","DIST_ANALYST","MO_NBR","ACTIVITY"],
+              displayField: "RETS_ID",
+              exactMatch: false,
+              outFields: ["RETS_ID"],
+              minSuggestCharacters: 0,
+              
+             },
+           ]
+
+           
+          });
+
+            
+          export var homeWidget  = new Home({
+            view: view,
+                    });
+
+
+          
+        
+          //creates search widget
+         export const ZoomWidget = new Zoom({
+          view: view
+         });
+
+         
 
 // Adds the search widget below other elements in the top right corner of the view
 view.ui.add(searchWidget, {
@@ -183,16 +266,19 @@ view.ui.add(ZoomWidget, {
   position: "top-right",
   index: 3
 });
+         //adds zoom widget to map 
+         view.ui.add(ZoomWidget, {
+          position: "top-right",
+          index: 3
 
-//adds the home widget to the top right corner of the MapView
-view.ui.add(homeWidget, "top-right");
+        });
 
-//adds the toggle widget to the bottom right corner of the MapView
-view.ui.add(basemaptoggle, "bottom-right")
+        view.ui.add(homeWidget, {
+          position: "top-right",
+          index: 3
 
-//adds the sketch widget to the bottom right corner of the MapView
-view.ui.add(sketch, "bottom-right")
+        });
 
-//remove attribution and zoom information
-view.ui.remove("attribution")
-// </></>
+      //remove attribution and zoom information
+        view.ui.remove("attribution")
+        // </></>
