@@ -1,7 +1,9 @@
 import OAuthInfo from "@arcgis/core/identity/OAuthInfo.js";
 import esriId from "@arcgis/core/identity/IdentityManager.js";
-import {retsLayer} from './map-Init.js'
+import { retsLayer} from './map-Init.js'
 import { view } from "./map-Init.js";
+import Home from "@arcgis/core/widgets/Home.js";
+
 
 
 const authen = new OAuthInfo({
@@ -23,14 +25,15 @@ export function login(){
 
 async function signIn(){ 
   const userId = await getUserId()
-  retsLayer.definitionExpression = `(STAT = 1 OR STAT = 2) and (GIS_ANALYST = '${userId}')`
+  retsLayer.definitionExpression = `GIS_ANALYST = '${userId}'`
   //`(GIS_ANALYST = '') AND (STAT = 1 OR STAT = 2)`
-  retsLayer
+  retsLayer, view
     .when(() => {
       return retsLayer.queryExtent();
     })
     .then((response) => {
       view.goTo(response.extent);
+      
     });
   
 
@@ -43,54 +46,4 @@ export async function getUserId(){
 
   return user.userId
 }
-
-
-
-
-
-
-
-
-
-
-
-
-// import OAuthInfo from "@arcgis/core/identity/OAuthInfo.js";
-// import esriId from "@arcgis/core/identity/IdentityManager.js";
-// import { retsLayer } from "./map-Init";
-
-// export function login(){
-//     const authen = new OAuthInfo({
-//         appId: "qzqSMtBVUMsAt2Is",
-//         popup: false,
-//         expiration: 10080,
-//         preserveUrlHash: true,
-//         popupCallbackUrl: "http://l-ds755x3.dot.state.tx.us:5173/",//"http:localhost:5173",
-//         portalUrl: "https://testportal.txdot.gov/create"
-//     })
-    
-//     esriId.registerOAuthInfos([authen]);
-    
-//     console.log(authen)
-//     esriId.checkSignInStatus(authen.portalUrl)
-//         .then((x) => console.log(x))
-//         .catch(() => signIn(authen)) 
-
-
-
-
-// }
-
-
-// function signIn(auth){ 
-//     esriId.getCredential(auth.portalUrl + "/sharing/rest",{
-//       oAuthPopupConfirmation: false,
-//       authorizedCrossOriginDomains:['http://127.0.0.1:5173']
-//     }).then((x)=>{
-//       console.log(x.userId)
-//       retsLayer.definitionExpression = `GIS_ANALYST = 'DPROSACK'`
-//       retsLayer.minScale = 200
-//     })
-// }
-
 

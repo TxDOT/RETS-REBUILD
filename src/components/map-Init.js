@@ -11,45 +11,77 @@ import BasemapToggle from "@arcgis/core/widgets/BasemapToggle.js";
 import WMTSLayer from "@arcgis/core/layers/WMTSLayer.js";
 import LabelClass from "@arcgis/core/layers/support/LabelClass.js";
 import Sketch from "@arcgis/core/widgets/Sketch.js";
+import Extent from "@arcgis/core/geometry/Extent.js";
+import { appConstants } from "../common/constant"; 
+import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer.js";
+import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol.js";
+import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer.js";
 
 
 
 
 
-        export let retsPointRenderer = {
-          type: "simple",
-          symbol: {
-            type: "simple-marker",
-            size: 8,
-            outline: {
-              color: "white",
-              width: 0.
-            }
-          },
-          visualVariables: [{
-            type: "color",
-            field: "STAT",
-            stops: [
-              {value: 1, color: "rgb(255, 102, 255)"},
-              {value: 2, color: "rgb(52, 255, 52)"},
-              {value: 3, color: "rgb(255, 128, 0)"},
-            ]
-          }]
 
-         }
 
+
+        export let retsPointRenderer = new UniqueValueRenderer({
+          field: "STAT", // Field based on which the symbology will be categorized
+          uniqueValueInfos: [
+            {
+              value: "1",
+              symbol: new SimpleMarkerSymbol({
+                size: 8,
+                color: appConstants.CardColorMap[1],
+                outline: {
+                  color: "white",
+                  width: 0
+                }
+              }),
+              label: "Not Started"
+            },
+            {
+              value: "2",
+              symbol: new SimpleMarkerSymbol({
+                size: 8,
+                color: appConstants.CardColorMap[3],
+                outline: {
+                  color: "white",
+                  width: 0
+                }
+              }),
+              label: "Complete"
+            },
+            {
+              value: "3",
+              symbol: new SimpleMarkerSymbol({
+                size: 8,
+                color: appConstants.CardColorMap[2],
+                outline: {
+                  color: "white",
+                  width: 0
+                }
+              }),
+              label: "in Progress"
+            },
+
+            // Add more unique value info objects as needed...
+          ]
+
+         });
+
+        
          export let roadwaysRenderer = {
           type: "simple",
           symbol: {
             type: "simple-line",
             width: 0,
             opacity: 0,
-            color: [255,255,255,255]
+            color: "transparent"
           }
          }
         //Rets Layer construction
         export const retsLayer = new FeatureLayer({
-          url: "https://testportal.txdot.gov/createags/rest/services/RETS_REF/FeatureServer/0",
+          url: "https://testportal.txdot.gov/createags/rest/services/RETS/FeatureServer/0",
           visible: true,
           outFields: ["*"],
           renderer: retsPointRenderer,
@@ -73,13 +105,21 @@ import Sketch from "@arcgis/core/widgets/Sketch.js";
           symbol: {
             type: "text",
             color: "white",
+            font: {
+              size: 12
+            }
           },
           labelPlacement: "above-right",
-          minScale: 20000,
+          minScale: 200000,
         })
-
         //Applies label class to rets layer
         retsLayer.labelingInfo = [retsLabelclass];
+
+        export const sketchLayer = new GraphicsLayer({
+
+        });
+        
+  
 
 
         
@@ -109,13 +149,23 @@ import Sketch from "@arcgis/core/widgets/Sketch.js";
 
         //Imagery Layer construction
         export const imageryTxdot = new WMTSLayer({
-          url: "https://txgi.tnris.org/login/path/food-paul-zebra-shirt/wmts/1.0.0/WMTSCapabilities.xml"
+          url: "https://txgi.tnris.org/login/path/bucket-armada-virtual-lobby/wmts/1.0.0/WMTSCapabilities.xml",
+          //url: "https://txgi.tnris.org/login/path/food-paul-zebra-shirt/wmts/1.0.0/WMTSCapabilities.xml"
         })
 
         //Created imagery basemap
         export const imageryBasemap = new Basemap({
-          baseLayers: imageryTxdot
+          baseLayers: [imageryTxdot]
         })
+
+        export var sketchWidget = new Sketch({
+          layer: retsLayer, // Replace with your actual feature layer
+          view: view, // Replace with your actual map view
+          // Other configuration options for the Sketch widget
+          creationMode: "single"
+      });
+
+        
 
 
         //add  basemap to the map
@@ -123,38 +173,23 @@ import Sketch from "@arcgis/core/widgets/Sketch.js";
           basemap: darkVTBasemap,
         })
 
+        //add  map to the mapview, set zoom and center of screen when the application loads
+        export var view = new MapView({
+          map: map,
+          zoom: 6,
+          //center: [-100, 31.5],
+          // spatialReference: {
+          //   wkid: 4326
+          // }
+        })
+        
+        
+
         //add feature layers to the map
         map.add(retsLayer)
         map.add(TxDotRoaways)
+        map.add(sketchLayer);
 
-
-
-        //add  map to the mapview, set zoom and center of screen when the application loads
-        export const view = new MapView({
-          map: map,
-          zoom: 6,
-          center: [-100, 31.5]
-        })
-
-
-
-        let sketch = new Sketch({
-          layer: retsLayer,
-          view: view,
-          snappingOptions:{
-            enabled: true,
-            featureSources: [{layer: TxDotRoaways, enabled: true}]
-          }
-        });
-
-
-
-
-        //create basemap toggle widget
-        const basemaptoggle = new BasemapToggle({
-          view: view,
-          nextBasemap: imageryBasemap,
-        })
 
         //create search widget
         export const searchWidget = new Search({
@@ -178,16 +213,21 @@ import Sketch from "@arcgis/core/widgets/Sketch.js";
 
            
           });
+
+            
+          export var homeWidget  = new Home({
+            view: view,
+                    });
+
+
+          
         
           //creates search widget
          export const ZoomWidget = new Zoom({
           view: view
          });
 
-         //creates home widget
-        export const homeWidget = new Home({
-          view: view
-        });
+         
 
         // Adds the search widget below other elements in the top right corner of the view
          view.ui.add(searchWidget, {
@@ -199,19 +239,14 @@ import Sketch from "@arcgis/core/widgets/Sketch.js";
          view.ui.add(ZoomWidget, {
           position: "top-right",
           index: 3
+
         });
 
-        //adds the home widget to the top right corner of the MapView
-        view.ui.add(homeWidget, "top-right");
+        view.ui.add(homeWidget, {
+          position: "top-right",
+          index: 3
 
-        //adds the toggle widget to the bottom right corner of the MapView
-        view.ui.add(basemaptoggle, "bottom-right")
-
-        //adds the sketch widget to the bottom right corner of the MapView
-        view.ui.add(sketch, "bottom-right")
-
-
-
+        });
 
       //remove attribution and zoom information
         view.ui.remove("attribution")

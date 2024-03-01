@@ -1,4 +1,4 @@
-import {view, retsLayer} from './map-Init'
+import {view, retsLayer, homeWidget} from './map-Init'
 
 export function clickRetsPoint(){
     view.on("click", (event)=>{
@@ -33,5 +33,17 @@ export function getGEMTasks(){
 
     return [4516, 89, 1789]
     //getGemTasks when user types in #gem-search
+}
+
+export function home(){
+    //cancels the initial viewpoint
+    homeWidget.cancelGo()
+    homeWidget.on("go", ()=>{
+        retsLayer.queryExtent()
+            .then((resp) =>{
+                    //sets the view to the extent of the geometry
+                view.goTo(resp.extent)
+            })
+    })
 }
 

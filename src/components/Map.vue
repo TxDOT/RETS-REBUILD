@@ -9,6 +9,7 @@
 //import functions
 //import {queryRetsTable} from './utility.js'
 import {view} from './map-Init.js'
+import {home} from './utility.js'
 //import ESRI JS ESM class
 export default{
     name: "Map",
@@ -17,7 +18,7 @@ export default{
             //2. If user is signed in, get username and set retLayer definition and load map
             
             view.container = this.$el
-            
+            home();
         },
     methods:{
 

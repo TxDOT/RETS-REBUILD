@@ -190,7 +190,7 @@ export default{
             async get(){
                 const user = await getUserId()
                 const query = new Query()
-                query.where = `GIS_ANALYST = '${user}'`
+                query.where = `(GIS_ANALYST = '${user}')`
                 query.orderByFields = ["EDIT_DT"]
                 query.outFields = ["*"]
                 query.returnGeometry = true
