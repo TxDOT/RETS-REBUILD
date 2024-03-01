@@ -5,7 +5,7 @@
                 <v-autocomplete :items="activityList" label="Activity" variant="underlined" density="compact" flat v-model="infoRets.ACTV"></v-autocomplete>
             </v-col>
             <v-col cols="4" offset="3">
-                <v-text-field label="Route" density="compact" class="number-field" variant="underlined" :disabled="this.infoRets.ACTV === 'Minute Order' || this.infoRets.ACTV === 'TxDOTConnect' ? false : true" :v-model="infoRets.ACTV === 'Minute Order' ? infoRets.MO_NBR : infoRets.MO_NBR">
+                <v-text-field label="Number" density="compact" class="number-field" variant="underlined" :disabled="this.infoRets.ACTV === 'Minute Order' || this.infoRets.ACTV === 'TxDOTConnect' ? false : true" :v-model="infoRets.ACTV === 'Minute Order' ? infoRets.MO_NBR : infoRets.MO_NBR">
                     <template v-slot:append-inner >
                         <v-icon icon="mdi-paperclip" small class="number-field-icon" @click="paperClipFunc"></v-icon>
                     </template>
@@ -14,7 +14,7 @@
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom: 1.3rem;">
             <v-col cols="3" offset="0" style="position: relative; bottom: 5px !important;">
-                <v-text-field label="Number" variant="underlined" v-model="infoRets.RTE_NM"></v-text-field>
+                <v-text-field label="Route" variant="underlined" v-model="infoRets.RTE_NM" :rules="[valueRequired]" id="route"></v-text-field>
             </v-col>
             <v-col cols="4" offset="4">
                 <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" v-model="infoRets.DFO">
@@ -37,7 +37,7 @@
         </v-row>       
         <v-row align="center" no-gutters dense style="position: relative; bottom: 5.4rem;">
             <v-col cols="8" offset="0">
-                <v-text-field label="Related Rets" variant="underlined" class="related-rets" v-model="infoRets.RELATED_RETS" ></v-text-field>
+                <v-text-field label="Related RETS" variant="underlined" class="related-rets" v-model="infoRets.RELATED_RETS" ></v-text-field>
             </v-col>
             <v-col cols="1" offset="2">
                 <v-btn variant="plain" icon="mdi-magnify-plus-outline"></v-btn>
@@ -48,7 +48,7 @@
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom:5.7rem;">
             <v-col cols="12" offset="0">
-                <v-autocomplete label="Status" variant="underlined" density="compact" class="rets-status" :items="relatedRets" v-model="infoRets.STAT"></v-autocomplete>
+                <v-autocomplete label="Status" variant="underlined" density="compact" class="rets-status" :items="detailsStat" item-title="name" item-value="value" v-model="infoRets.STAT"></v-autocomplete>
             </v-col>
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom: 6.1rem;">
@@ -89,6 +89,8 @@
 </template>
 
 <script>
+import { appConstants } from '../common/constant'
+
     export default{
         name: "DetailsCard",
         props: {
@@ -100,12 +102,13 @@
                 activityList: ['CRI', 'GSC Review', 'HPMS Sample Review', 'Interstate Project', 'Minute Order', 
                                'OSOSRE', 'Proposed FC', 'Recover Minute Order', 'ROW Crowdsource', 'Sprint 1',
                                'Sprint 2', 'Sprint 3', 'Sprint 4', 'Sprint 5', 'Toll', 'TxDOTConnect', 'Urban Area Interaction'],
-                relatedRets: ["Not Started", "On Hold", "Completed"],
                 gemTasks: [],
                 isDatePicker: false,
                 datePicked: null,
                 datePicker: '',
-                disabledRoute: false
+                disabledRoute: false,
+                disableSave: false,
+                detailsStat: appConstants.statDomainValues
             }
         },
         mounted(){
@@ -113,6 +116,14 @@
             this.datePicker = this.setDate(milliDate)
         },
         methods:{
+            valueRequired(e){
+                if(!e.length){
+                    this.$emit("disable-save", true)
+                    return `Wrong :(`
+                }
+                this.$emit("disable-save", false)
+                return
+            },
             paperClipFunc(){
                 this.infoRets.ACTV === 'Minute Order' ? window.open(`https://publicdocs.txdot.gov/minord/mosearch/Pages/Minute-Order-Search-Results.aspx#k=${this.infoRets.MO_NBR}`, '_blank') :
                                                             window.open(`https://txdot.sharepoint.com/sites/division-tpp/DM-Admin/Lists/Data%20Request/EditForm.aspx?ID=${1138}`, '_blank')
@@ -150,6 +161,12 @@
 </script>
 
 <style scoped>
+:deep(#route-messages){
+    position: absolute !important;
+    width: 55px !important;
+    left: 120px !important;
+    bottom: 1.5rem
+}
 #details-page{
     position: relative;
     height: 400px !important;

@@ -28,7 +28,7 @@ async function signIn(){
   retsLayer
     .when(() => {
 
-      [{name: 'STAT', prop: "statDomainValues"}, {name: 'DIST_NM', prop: "districtDomainValues"}, {name: 'CNTY_NM', prop: "countyDomainValues"}].forEach((layer) => {
+      [{name: 'JOB_TYPE', prop: "jobTypeDomainValues"},{name: 'STAT', prop: "statDomainValues"}, {name: 'DIST_NM', prop: "districtDomainValues"}, {name: 'CNTY_NM', prop: "countyDomainValues"}].forEach((layer) => {
         getDomainValues(layer.name).codedValues.forEach((x) => {
           appConstants[layer.prop].push({"name" : x.name, "value": x.code})
         })

@@ -121,7 +121,10 @@ map.add(TxDotRoaways)
 export const view = new MapView({
   map: map,
   zoom: 6,
-  center: [-100, 31.5]
+  center: [-100, 31.5],
+  ui: {
+    components: ["attribution"]
+  }
 })
 
 let sketch = new Sketch({

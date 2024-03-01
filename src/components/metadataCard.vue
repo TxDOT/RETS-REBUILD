@@ -18,6 +18,7 @@
         <v-row>
             <v-autocomplete :items="countyMetadata" item-title="name" item-value="value" label="County" flat variant="underlined" density="compact" rounded="0" v-model="infoRets.CNTY_NM"></v-autocomplete>
         </v-row>
+
     </div>
 </template>
 

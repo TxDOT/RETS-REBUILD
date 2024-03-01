@@ -1,4 +1,4 @@
-import {view, retsLayer} from './map-Init'
+import {view, retsLayer, homeWidget} from './map-Init'
 import Query from "@arcgis/core/rest/support/Query.js";
 import { appConstants } from "../common/constant.js";
 
@@ -18,7 +18,7 @@ function outlineFeedCards(res){
         document.getElementById(`${x.graphic.attributes.OBJECTID}`).classList.add('highlight-card')
         //zoom to card in feed
         const zoomToCard = document.createElement('a')
-        zoomToCard.href = `#${x.graphic.attributes.OBJECTID}Card`
+        zoomToCard.href = `#${x.graphic.attributes.OBJECTID}`
         zoomToCard.click()
         //remove card outline
         setTimeout(()=>{
@@ -43,7 +43,7 @@ export async function filterMapActivityFeed(filterOpt){
     for(let [key, value] of Object.entries(filterOpt)){
         if(!value || key === 'CREATE_DT' || key === 'filterTotal' || !value.length || key==='loggedInUser') continue
         if(value){
-            if(key === "GIS_ANALYST" || key === 'STAT' || key === 'DIST_NM' || key === 'CNTY_NM' || key === 'ACTV'){
+            if(key === "GIS_ANALYST" || key === 'STAT' || key === 'DIST_NM' || key === 'CNTY_NM' || key === 'ACTV' || key === 'JOB_TYPE'){
                 retsDefinitionExpressionArr.push(`${key} in (${processDomainArr(value)})`)
                 continue
             }
@@ -110,14 +110,14 @@ export function getQueryLayer(whereString, orderFields){
 
 
 export function searchCards(cardArr, string, index){
-    console.log(string)
-    if(!string.length){
-        cardArr.forEach(x => document.getElementById(`${x[index]}`).classList.add('showCards'))
-        return
-    }
+    // if(!string.length){
+    //     cardArr.forEach(x => document.getElementById(`${x[index]}`).classList.add('showCards'))
+    //     return
+    // }
     cardArr.forEach((x) => {
         const a = Object.values(x).find(t => String(t).includes(string))
         if(a){
+            console.log(x)
             document.getElementById(`${x[index]}`).classList.add('showCards')
         }
         else{
@@ -125,9 +125,16 @@ export function searchCards(cardArr, string, index){
             document.getElementById(`${x[index]}`).classList.add('hideCards')
         }
     })
-
-    // returnCards.forEach((x) => document.getElementById(`${x.RETS_ID}`).classList.add('.showCard'))
-
-    // console.log(document.getElementsByClassName('showCard'))
     
+}
+
+export function home(){
+    homeWidget.cancelGo()
+    homeWidget.on("go", ()=>{
+        
+        retsLayer.queryExtent()
+            .then((resp) =>{
+                view.goTo(resp.extent)
+            })
+    })
 }

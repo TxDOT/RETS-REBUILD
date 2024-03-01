@@ -52,7 +52,7 @@
                     <v-col class="color-picker" v-if="flagClickedId === rd.RETS_ID" v-click-outside="closeFlagDiv">
                         <v-icon size="medium" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" ></v-icon>
                     </v-col>    
-                    <v-card :id="rd.RETS_ID ? `${rd.RETS_ID}Card` : null" :title="rd.JB_TYPE" :style="{borderLeft: `7px solid ${colorTable[rd.STAT] ? colorTable[rd.STAT]: 'Red'}`}" hover v-ripple class="card" @click="zoomToRetsPt(rd.RETS_ID)" @dblclick="double(rd, road);">
+                    <v-card :id="rd.RETS_ID" :style="{borderLeft: `7px solid ${colorTable[rd.STAT] ? colorTable[rd.STAT]: 'Red'}`}" hover v-ripple class="card" @click="zoomToRetsPt(rd.RETS_ID)" @dblclick="double(rd, road);">
                         <v-card-text id="retsCard">
                             RETS {{rd.RETS_ID }}
                         </v-card-text>
@@ -124,9 +124,9 @@ export default{
             uploadAttachment: false,
             isfilter: false,
             loggedInUser: '',
-            retsFilters: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, "JB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
+            retsFilters: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, "JOB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
                          "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, "GIS_ANALYST": appConstants.defaultUserValue, 
-                         "filterTotal": 3},
+                         "filterTotal": 2},
         }
     },
     beforeMount(){
@@ -222,7 +222,7 @@ export default{
                                 geom: [x.geometry.x, x.geometry.y]
                             })
                         })
-                        
+                        this.isNoRets = false
                         return
                     }
                     this.isDetailsPage = false
@@ -249,7 +249,12 @@ export default{
                     searchCards(this.roadObj, this.actvFeedSearch, "RETS_ID")
                     return
                 }
-
+                const getHideLength = document.getElementsByClassName("hideCards")
+                if(getHideLength.length){
+                    for(let i=0; i < getHideLength.length; i++ ){
+                        document.getElementById(getHideLength[i].id).classList.remove('hideCards')
+                    }   
+                }
             },
             immediate: true
         }

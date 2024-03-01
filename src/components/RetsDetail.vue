@@ -10,7 +10,7 @@
                     <v-btn flat class="secondary-button" @click="this.isMetadata = true; this.isDetails = false">Metadata</v-btn>
                 </v-btn-toggle>
         
-                <DetailsCard v-if="isDetails" :infoRets="retsInfo" :taskGem="sendGemTaskNum"/>
+                <DetailsCard v-if="isDetails" :infoRets="retsInfo" :taskGem="sendGemTaskNum" @disable-save="disableSave"/>
                 <MetadataCard v-if="isMetadata" :infoRets="retsInfo"/>
 
             </div>
@@ -49,7 +49,7 @@
             <v-btn-toggle id="trigger-buttons" density="compact">
                     <v-btn @click="deleteRets" variant="plain" flat size="small">Delete</v-btn>
                     <v-btn @click="sendToParent" class="secondary-button" variant="plain" flat size="small">Cancel</v-btn>
-                    <v-btn @click="sendToParent" variant="elevated" class="main-button-style" size="small">Save</v-btn>
+                    <v-btn @click="sendToParent" variant="elevated" class="main-button-style" size="small" :disabled="saveDisable">Save</v-btn>
             </v-btn-toggle>
         </div>
     </div>
@@ -98,7 +98,8 @@
                 sendGemTaskNum: null,
                 isAlert: false,
                 alertTextInfo: {"text": "Note Saved", "color": "#70ad47"},
-                searchHistoryFilter: ''
+                searchHistoryFilter: '',
+                saveDisable: false
             }
         },
         mounted(){
@@ -112,6 +113,9 @@
             })
         },
         methods:{
+            disableSave(bool){
+                this.saveDisable = bool
+            },
             deleteRets(){
                 this.retsInfo.isDelete = true
                 this.$emit('close-detail', this.retsInfo)

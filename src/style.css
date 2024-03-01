@@ -116,3 +116,11 @@
 .showCards{
   display: block !important;
 }
+.highlight-card{
+  position: relative;
+  animation: fade 2500ms ease-out forwards;
+  transform: scale(1);
+  background-color: rgba(9, 107, 219, 0.7);
+  top: 0rem;
+  width: 100%;
+}

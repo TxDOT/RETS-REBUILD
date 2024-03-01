@@ -9,6 +9,7 @@
 //import functions
 //import {queryRetsTable} from './utility.js'
 import {view} from './map-Init.js'
+import {home} from './utility.js'
 //import ESRI JS ESM class
 export default{
     name: "Map",
@@ -17,7 +18,7 @@ export default{
             //2. If user is signed in, get username and set retLayer definition and load map
             
             view.container = this.$el
-            
+            home()
         },
     methods:{
 
@@ -29,9 +30,9 @@ export default{
     #viewDiv{
         position: absolute;
         height: 100%;
-        width: 100%;
+        width: calc(100% - 74px);
         top: 0;
-        left: 0;
+        left: 74px;
         /* overflow-y: hidden; */
     }
 
@@ -40,6 +41,10 @@ export default{
         top: 50%;
         display: block;
         width: 23%;
+    }
+
+    .esri-view {
+        --esri-view-outline-color: none !important;
     }
 
 </style>

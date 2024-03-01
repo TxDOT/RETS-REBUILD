@@ -8,7 +8,7 @@
                 </v-row>
               
                 <v-row no-gutters dense >
-                    <v-select :items="filterJobType" multiple chips closable-chips density="compact" label="Job Type" variant="underlined" v-model="filterPros.JB_TYPE">
+                    <v-select :items="filterJobType" item-title="name" item-value="value" return-object multiple chips closable-chips density="compact" label="Job Type" variant="underlined" v-model="filterPros.JOB_TYPE">
                     </v-select>
                 </v-row>
             
@@ -90,14 +90,14 @@
                              {title: "Status: Ascending", sortType: "ASC", filter: "STAT"}, 
                              {title: "Status: Descending", sortType: "DESC", filter: "STAT"}
                             ],
-                filterJobType: ["Roadway Edit and Asset Update", "Asset Only", "Basemap"],
+                filterJobType: appConstants.jobTypeDomainValues,
                 filterStatus: appConstants.statDomainValues,
                 filterDistrict: appConstants.districtDomainValues,
                 filterCounty: appConstants.countyDomainValues,
                 filterUser: appConstants.defaultUserValue,
                 filterActivity: appConstants.activityList,
                 numFilters: 0,
-                defaultFilter: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, "JB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
+                defaultFilter: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, "JOB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
                          "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, "GIS_ANALYST": appConstants.defaultUserValue, 
                          "filterTotal": 3},
                 isDate: false,
