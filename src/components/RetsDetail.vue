@@ -1,5 +1,23 @@
 <template>
     <!-- details section -->
+    <div id="detailsHeaderDiv">
+        <div id="detailsHeaderIcon">
+            <v-btn icon="mdi-paperclip" density="compact" flat @click="uploadAttachment = !uploadAttachment"></v-btn>
+            <v-btn density="compact" flat @click="changeColor(retsInfo.RETS_ID);" id="flagBtnDetails">
+                <template v-slot:prepend>
+                    <v-icon size="25px" :id="`${retsInfo.RETS_ID}Icon`" :color="retsInfo.flagColor" :icon="retsInfo.flagColor ? changeFlagIcon(retsInfo.flagColor) : 'mdi-flag-outline' " style="position: relative; left: 7px; bottom: 2px"></v-icon>
+                </template>
+            </v-btn>
+            <v-col class="details-color-picker" v-if="flagClickedId === retsInfo.RETS_ID" v-click-outside="closeFlagDiv">
+                <v-icon size="20px" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])"></v-icon>
+            </v-col>
+            <v-btn-toggle v-model="retsInfo.PRIO" density="compact">
+                <v-btn icon="mdi-exclamation" density="compact" flat style="color:red" ></v-btn>
+            </v-btn-toggle>   
+        </div>
+    </div>
+
+
     <detailsAlert v-if="isAlert" :alertsTextInfo="alertTextInfo"/>
     <div id="container-div">
         
@@ -48,7 +66,7 @@
             </div>
             <v-btn-toggle id="trigger-buttons" density="compact">
                     <v-btn @click="deleteRets" variant="plain" flat size="small">Delete</v-btn>
-                    <v-btn @click="sendToParent" class="secondary-button" variant="plain" flat size="small">Cancel</v-btn>
+                    <v-btn @click="cancelDetailsMetadata" class="secondary-button" variant="plain" flat size="small">Cancel</v-btn>
                     <v-btn @click="sendToParent" variant="elevated" class="main-button-style" size="small" :disabled="saveDisable">Save</v-btn>
             </v-btn-toggle>
         </div>
@@ -68,8 +86,9 @@
     import editHistoryNotes from './EditHistoryNotes.vue'
     import DetailsCard from './detailsCard.vue'
     import MetadataCard from './metadataCard.vue'
-    import {getGEMTasks, searchCards} from './utility.js'
+    import {getGEMTasks, searchCards, removeHighlight} from './utility.js'
     import detailsAlert from './detailsAlert.vue'
+    import {updateRETSPT, deleteRETSPT} from './crud.js'
 
     export default{
         name: "RetsDetailPage",
@@ -99,11 +118,13 @@
                 isAlert: false,
                 alertTextInfo: {"text": "Note Saved", "color": "#70ad47"},
                 searchHistoryFilter: '',
-                saveDisable: false
+                saveDisable: false,
+                flagClickedId: "",
+                flagColor: "",
+                swatchColor: ['', '#FF0000', '#FF7F00', '#FFFF00', '#008000', '#4472C4', '#B75CFF', '#FFFFFF'],
             }
         },
         mounted(){
-            console.log(this.retsInfo)
             const gem = document.getElementById('gem-id')
             gem.addEventListener("keyup", (event) =>{
                 if(event.target.value.length > 1){
@@ -111,17 +132,46 @@
                     return
                 }
             })
+            console.log(this.retsInfo)
         },
         methods:{
+            closeFlagDiv(){
+                this.flagClickedId = ""
+            },
+            changeFlagIcon(color){
+                if(color === '#FFFFFF'){
+                    return 'mdi-flag-outline'
+                }
+                return 'mdi-flag'
+            },
+            assignColorToFlag(clr){
+                document.getElementById(`${this.flagClickedId}Icon`).style.color = clr
+                this.retsInfo.flagColor = clr
+                this.isColorPicked = false;
+                this.closeFlagDiv()
+            },
+            changeColor(id){
+                this.flagClickedId = ""
+                this.flagClickedId = id
+                this.isColorPicked = true;
+            },
             disableSave(bool){
                 this.saveDisable = bool
             },
             deleteRets(){
                 this.retsInfo.isDelete = true
+                deleteRETSPT(this.retsInfo)
+                removeHighlight(this.retsInfo)
                 this.$emit('close-detail', this.retsInfo)
             },
             sendToParent(){
+                updateRETSPT(this.retsInfo)
                 this.$emit('close-detail', false)
+                
+            },
+            cancelDetailsMetadata(){
+                this.$emit('close-detail', false)
+                removeHighlight(this.retsInfo)
             },
             openNote(note, index){
                 this.editText = true
@@ -201,7 +251,7 @@ div .cardDiv{
 }
 #container-div{
     position: relative;
-    top: 8.2rem;
+    top: 5.2rem;
     height: 890vh;
     min-height: 0% !important;
     max-height: 87% !important;
@@ -212,6 +262,7 @@ div .cardDiv{
     scroll-behavior: smooth;
     scrollbar-width: thin;
     padding-bottom: 50px !important;
+    width:100%;
 }
 
 .number-field{
@@ -322,6 +373,26 @@ div .cardDiv{
     position: absolute;
     font-size: 18px;
 }
+#detailsHeaderDiv{
+    width: 40%;
+    position: relative;
+    height: 54px;
+    top: 40px;
+    float: right;
+}
+#detailsHeaderIcon{
+    float: right;
+}
 
+.details-color-picker{
+        position: fixed; 
+        display: flex; 
+        flex-direction: column; 
+        z-index: 9999; 
+        width:2.3%; 
+        float: right;
+        margin-left: 2.2rem;
+        background-color: black;
+    }
 
 </style>

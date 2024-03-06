@@ -7,7 +7,7 @@
             <v-col cols="4" offset="3">
                 <v-text-field label="Number" density="compact" class="number-field" variant="underlined" :disabled="this.infoRets.ACTV === 'Minute Order' || this.infoRets.ACTV === 'TxDOTConnect' ? false : true" :v-model="infoRets.ACTV === 'Minute Order' ? infoRets.MO_NBR : infoRets.MO_NBR">
                     <template v-slot:append-inner >
-                        <v-icon icon="mdi-paperclip" small class="number-field-icon" @click="paperClipFunc"></v-icon>
+                        <v-icon icon="mdi-paperclip" small class="number-field-icon" @click="paperClipFunc" ></v-icon>
                     </template>
                 </v-text-field>
             </v-col>
@@ -17,9 +17,9 @@
                 <v-text-field label="Route" variant="underlined" v-model="infoRets.RTE_NM" :rules="[valueRequired]" id="route"></v-text-field>
             </v-col>
             <v-col cols="4" offset="4">
-                <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" v-model="infoRets.DFO">
+                <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" v-model="infoRets.DFO" :rules="[onlyNumbers]">
                     <template v-slot:append-inner >
-                        <v-icon icon="mdi-drag-variant" small class="number-field-icon" @click="crossHairFunc"></v-icon>
+                        <v-btn id="dfoCrosshair" variant="plain" density="compact" class="number-field-icon"><v-icon icon="mdi-drag-variant" small  @click="crossHairFunc"></v-icon></v-btn>
                     </template>
                 </v-text-field>
             </v-col>
@@ -37,10 +37,15 @@
         </v-row>       
         <v-row align="center" no-gutters dense style="position: relative; bottom: 5.4rem;">
             <v-col cols="8" offset="0">
-                <v-text-field label="Related RETS" variant="underlined" class="related-rets" v-model="infoRets.RELATED_RETS" ></v-text-field>
+                <v-autocomplete label="Related RETS" chip closable-chips no-filter multiple variant="underlined" class="related-rets" v-model="infoRets.RELATED_RETS" :items="RETSData" item-title="name" item-value="name" return-object @update:search="gimmeRETS($event)" @update:modelValue="addGraphic($event)">
+                    <template v-slot:chip="{item}">
+                        <v-chip closable @click:close="closeRelatedRetsChip(item)">{{item.props.title}}</v-chip>
+                    </template>
+                </v-autocomplete>
+
             </v-col>
             <v-col cols="1" offset="2">
-                <v-btn variant="plain" icon="mdi-magnify-plus-outline"></v-btn>
+                <v-btn variant="plain" icon="mdi-magnify-plus-outline" @click="zoomToRETS"></v-btn>
             </v-col>
             <v-col cols="1" offset="0">
                 <v-btn variant="plain" icon="mdi-cursor-default"></v-btn>
@@ -48,12 +53,12 @@
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom:5.7rem;">
             <v-col cols="12" offset="0">
-                <v-autocomplete label="Status" variant="underlined" density="compact" class="rets-status" :items="detailsStat" item-title="name" item-value="value" v-model="infoRets.STAT"></v-autocomplete>
+                <v-autocomplete auto-select-first label="Status" variant="underlined" density="compact" class="rets-status" :items="detailsStat" item-title="name" item-value="value" v-model="infoRets.STAT"></v-autocomplete>
             </v-col>
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom: 6.1rem;">
             <v-col cols="12" offset="0">
-                <v-textarea label="Description" no-resize variant="underlined" class="rets-description" rows="3" v-model="infoRets.DESC_"></v-textarea>
+                <v-textarea label="Description" no-resize variant="underlined" class="rets-description" rows="3" v-model="infoRets.DESC_" :rules="[valueRequired]"></v-textarea>
             </v-col>
         </v-row>
         <v-row align="center" style="position: relative; bottom: 9.1rem; ">
@@ -69,7 +74,7 @@
                         rounded="0"
                         pill
                         size="default"
-                        class="gem-chip"
+                        class="gem-chip",
                     >
                     {{ i }}
                 </v-chip>
@@ -90,6 +95,7 @@
 
 <script>
 import { appConstants } from '../common/constant'
+import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets} from './utility.js'
 
     export default{
         name: "DetailsCard",
@@ -108,20 +114,56 @@ import { appConstants } from '../common/constant'
                 datePicker: '',
                 disabledRoute: false,
                 disableSave: false,
-                detailsStat: appConstants.statDomainValues
+                detailsStat: appConstants.statDomainValues,
+                ogValues: {},
+                RETSData: [],
             }
         },
         mounted(){
+            this.infoRets.RELATED_RETS ? this.splitAndAddRelatedRets(this.infoRets.RELATED_RETS) : null
+            this.ogValues = this.infoRets
             const milliDate = new Date(this.infoRets.DEADLINE)
             this.datePicker = this.setDate(milliDate)
+            this.initDataCheck()
+            
         },
         methods:{
+            splitAndAddRelatedRets(relatedRets){
+                if(typeof relatedRets !== "object") return
+                console.log(relatedRets)
+                const splitString = relatedRets.split(",")
+                this.infoRets.RELATED_RETS = splitString
+                splitString.forEach((ret)=>{
+                    this.gimmeRETS(ret, `RETS_ID = ${ret}`)
+                    console.log(this.RETSData)
+                    //this.addGraphic(this.RETSData[0])
+                })
+            },
+            initDataCheck(){
+                // if Route, status or description; save button disabled
+                let item = [this.infoRets.RTE_NM, this.infoRets.STAT, this.infoRets.DESC_].find(x => !x)
+                if(!item){
+                    this.sendDisabledSave(true)
+                }
+            },
             valueRequired(e){
                 if(!e.length){
-                    this.$emit("disable-save", true)
+                    this.sendDisabledSave(true)
                     return `Wrong :(`
                 }
-                this.$emit("disable-save", false)
+                this.sendDisabledSave(false)
+                return
+            },
+            sendDisabledSave(bool){
+                this.$emit("disable-save", bool)
+            },
+            onlyNumbers(i){
+                let convert = Number(i)
+                if(!convert){
+                    this.sendDisabledSave(true)
+                    return `Whoa! Numbers are more my vibe!`
+                }
+                this.sendDisabledSave(false)
                 return
             },
             paperClipFunc(){
@@ -141,6 +183,41 @@ import { appConstants } from '../common/constant'
             displayGemSearch(){
                 document.querySelectorAll(".gem-search")[0].style.display =  document.querySelectorAll(".gem-search")[0].style.display === "block" ? "none" : "block"
             },
+            async gimmeRETS(a, string){
+                if(a.length){
+                    const queryString = string ?? `RETS_ID >= ${a}`
+                    const query = {"whereString" : queryString, "out": ['RETS_ID', 'JOB_TYPE', 'OBJECTID']}
+                    try{
+                        const retsid = await getQueryLayer(query, 'RETS_ID', 5)
+                        this.RETSData.length = 0
+                        retsid.features.forEach((x) => {
+                            this.RETSData.push({name: x.attributes.RETS_ID, oid: x.attributes.OBJECTID, jobType: x.attributes.JOB_TYPE, geometry: [x.geometry.x, x.geometry.y]})
+                        })
+                        if(string){
+                            this.addGraphic(this.RETSData)
+                            return
+                        }
+                    }
+                    catch(err){
+                        console.log("incorrect Query")
+                    }
+
+                    
+                    return
+                }
+            },
+            addGraphic(e){
+                addRelatedRetsToMap(e.at(-1))
+            },
+            zoomToRETS(){
+                console.log(this.infoRets.RELATED_RETS)
+                zoomToRelatedRets(this.infoRets.RELATED_RETS)
+            },
+            closeRelatedRetsChip(ret){
+                removeRelatedRetsFromMap(ret)
+                const retsPos =  this.infoRets.RELATED_RETS.findIndex(x => x.oid === ret.raw.oid)
+                this.infoRets.RELATED_RETS.splice(retsPos,1)
+            }
         },
         watch:{
             datePicked:{
@@ -156,7 +233,8 @@ import { appConstants } from '../common/constant'
                     this.gemTasks.push(this.taskGem)
                 },
             },
-        }
+        },
+
     }
 </script>
 
@@ -189,8 +267,14 @@ import { appConstants } from '../common/constant'
 }
 
 .number-field-icon{
-    font-size: 18px;
-    top: .2rem
+    font-size: 17px;
+}
+#dfoCrosshair{
+    position: relative;
+    float: right;
+    padding: 0% !important;
+    margin: 0% !important;
+    min-width: 0px !important;
 }
 
 .dropdwn-field{

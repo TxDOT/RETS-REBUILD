@@ -99,7 +99,7 @@
                 numFilters: 0,
                 defaultFilter: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, "JOB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
                          "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, "GIS_ANALYST": appConstants.defaultUserValue, 
-                         "filterTotal": 3},
+                         "filterTotal": 2},
                 isDate: false,
                 selectDate: null,
                 currentYear: null,
@@ -122,20 +122,33 @@
                 return
             },  
             calcFilterDiff(){
-                const filterValues = Object.values(this.filterPros).filter(x => x)
-                filterValues.forEach((x) => {
-                    if(x.length){
-                        console.log(x)
+                console.log(2)
+                const ignoreField = ['CREATE_DT', 'filterTotal', 'loggedInUser']
+                for(const [key,value] of Object.entries(this.filterPros)){
+                    console.log(key)
+                    if(ignoreField.includes(key) || !value) continue
+                    if(value.length){
+                        console.log(1)
                         this.addNumFilter()
                     }
-                })
+                }
+
                 this.filterPros.filterTotal = this.numFilters
                 return
             },
             restoreDefault(){
                 this.defaultFilter.loggedInUser = appConstants.defaultUserValue[0].value
+                this.filterPros.CREATE_DT = this.defaultFilter.CREATE_DT
+                this.filterPros.JOB_TYPE = this.defaultFilter.JOB_TYPE
+                this.filterPros.EDIT_DT = this.defaultFilter.EDIT_DT
+                this.filterPros.STAT = this.defaultFilter.STAT
+                this.filterPros.ACTV = this.defaultFilter.ACTV
+                this.filterPros.DIST_NM = this.defaultFilter.DIST_NM
+                this.filterPros.CNTY_NM = this.defaultFilter.CNTY_NM
+                this.filterPros.GIS_ANALYST = this.defaultFilter.GIS_ANALYST
+                this.filterPros.filterTotal = this.defaultFilter.filterTotal
+                
                 filterMapActivityFeed(this.defaultFilter)
-                this.$emit('filter-set', this.defaultFilter)
                 return
             },
             selectDates(){

@@ -11,7 +11,6 @@ import BasemapToggle from "@arcgis/core/widgets/BasemapToggle.js";
 import WMTSLayer from "@arcgis/core/layers/WMTSLayer.js";
 import LabelClass from "@arcgis/core/layers/support/LabelClass.js";
 import Sketch from "@arcgis/core/widgets/Sketch.js";
-import Extent from "@arcgis/core/geometry/Extent.js";
 import { appConstants } from "../common/constant"; 
 import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer.js";
 import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol.js";
@@ -76,7 +75,7 @@ export const retsLayer = new FeatureLayer({
   visible: true,
   outFields: ["*"],
   renderer: retsPointRenderer,
-  editingEnabled: true,  
+  editingEnabled: true,
 })
 
 //TxDotRoaways Layer construction
@@ -104,7 +103,8 @@ const retsLabelclass = new LabelClass({
 retsLayer.labelingInfo = [retsLabelclass];
 
 export const sketchLayer = new GraphicsLayer({});
-        
+
+export const retsGraphicLayer = new GraphicsLayer({});
 ////////////////////////////////////////////BASEMAPS//////////////////////////////////////////////////////////////////////////
         
 //Dark Vector Tile construction
@@ -139,13 +139,6 @@ export const imageryBasemap = new Basemap({
   baseLayers: [imageryTxdot]
 })
 
-export var sketchWidget = new Sketch({
-  layer: retsLayer, // Replace with your actual feature layer
-  view: view, // Replace with your actual map view
-  // Other configuration options for the Sketch widget
-  creationMode: "single"
-});
-
 //add  basemap to the map
 export const map = new Map({
   basemap: darkVTBasemap,
@@ -158,8 +151,19 @@ export const view = new MapView({
   center: [-100, 31.5],
   ui: {
     components: ["attribution"]
+  },
+  highlightOptions:{
+    color: '#00FFCC',
+    fillOpacity: 1
   }
 })
+
+export var sketchWidget = new Sketch({
+  layer: retsLayer, // Replace with your actual feature layer
+  view: view, // Replace with your actual map view
+  // Other configuration options for the Sketch widget
+  creationMode: "single"
+});
 
 let sketch = new Sketch({
   layer: retsLayer,
@@ -177,7 +181,7 @@ const basemaptoggle = new BasemapToggle({
 })    
 
 //add feature layers to the map
-map.add(retsLayer)
+map.addMany([retsLayer, retsGraphicLayer])
 map.add(TxDotRoaways)
 map.add(sketchLayer);
 

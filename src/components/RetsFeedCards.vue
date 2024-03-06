@@ -16,19 +16,6 @@
                             <v-btn v-if="isDetailsPage" icon="mdi-pencil-outline" density="compact" flat id="renameRets"></v-btn>
                         </div>
 
-                        <div v-if="isDetailsPage" id="detailsHeaderIcon">
-                            <v-btn icon="mdi-paperclip" density="compact" flat @click="uploadAttachment = !uploadAttachment"></v-btn>
-                            <v-btn density="compact" flat @click="changeColor(currRoad.RETS_ID);" id="flagBtnDetails">
-                                <template v-slot:prepend>
-                                    <v-icon size="25px" :id="`${currRoad.RETS_ID}Icon`" :color="currRoad.flagColor" :icon="currRoad.flagColor ? changeFlagIcon(currRoad.flagColor) : 'mdi-flag-outline' " style="position: relative; left: 7px; bottom: 2px"></v-icon>
-                                </template>
-                            </v-btn>
-                            <v-col class="details-color-picker" v-if="flagClickedId === currRoad.RETS_ID" v-click-outside="closeFlagDiv">
-                                <v-icon size="20px" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])"></v-icon>
-                            </v-col>    
-                            <v-btn icon="mdi-exclamation" density="compact" flat style="color:red"></v-btn>
-                        </div>
-
                         <div v-if="!isDetailsPage">
                             <v-btn icon="mdi-filter" class="banner-btn" flat @click="isfilter = !isfilter"></v-btn>
                             <div class="filter-notification-bubble" v-if="retsFilters.filterTotal > 0">
@@ -43,7 +30,7 @@
             </v-row>
 
             <div class="card-feed-div" v-if="!isDetailsPage">
-                <v-row class="rets-card-row" v-for="(rd, road) in roadObj" :key="rd" :value="road" :id="rd.RETS_ID">
+                <v-row class="rets-card-row" v-for="(rd, road) in roadObj" :key="rd" :value="road" :id="rd.OBJECTID">
                     <v-btn elevation="0" @click="changeColor(rd.RETS_ID);" class="flag-btn" size="small" max-width=".5px" density="compact" variant="plain" slim>
                         <template v-slot:prepend>
                             <v-icon size="medium" :id="`${rd.RETS_ID}Icon`" :color="rd.flagColor" :icon="rd.flagColor ? changeFlagIcon(rd.flagColor) : 'mdi-flag-outline'"></v-icon>
@@ -52,7 +39,7 @@
                     <v-col class="color-picker" v-if="flagClickedId === rd.RETS_ID" v-click-outside="closeFlagDiv">
                         <v-icon size="medium" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" ></v-icon>
                     </v-col>    
-                    <v-card :id="rd.RETS_ID" :style="{borderLeft: `7px solid ${colorTable[rd.STAT] ? colorTable[rd.STAT]: 'Red'}`}" hover v-ripple class="card" @click="zoomToRetsPt(rd.RETS_ID)" @dblclick="double(rd, road);">
+                    <v-card :id="rd.RETS_ID-rd.OBJECTID" :style="{borderLeft: `7px solid ${colorTable[rd.STAT] ? colorTable[rd.STAT]: 'Red'}`}" hover v-ripple class="card" @click="zoomToRetsPt(rd.RETS_ID)" @dblclick="double(rd, road);">
                         <v-card-text id="retsCard">
                             RETS {{rd.RETS_ID }}
                         </v-card-text>
@@ -70,6 +57,10 @@
                         <v-card-subtitle class="subtitle-text main-color">
                             Created by {{ rd.CREATE_NM ? rd.CREATE_NM : "If Create Name is empty is it really created" }} {{ rd.CREATE_DT ? returnDateFormat(rd.CREATE_DT) : returnDateFormat(rd.EDIT_DT)}}
                         </v-card-subtitle>
+                        <div>
+                            <v-icon icon="mdi-exclamation" id="cardPRIO" v-if="rd.PRIO === 0"></v-icon>
+                        </div>
+                        
                     </v-card>
                 </v-row>
             </div>
@@ -90,15 +81,15 @@
 </template>
 
 <script>
-import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer, searchCards} from './utility.js'
+import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer, searchCards, highlightRETSPoint} from './utility.js'
 import {appConstants} from '../common/constant.js'
-import RetsDetailPage from './RetsDetail.vue'
 import {getUserId} from './login.js'
 import Filter from './RetsFilter.vue'
+import RetsDetailPage from './RetsDetail.vue'
 
 export default{
     name: "RetsCards",
-    components: {RetsDetailPage, Filter},
+    components: {Filter, RetsDetailPage},
     props: {
         filterPros: Object
     },
@@ -135,13 +126,13 @@ export default{
     },  
     methods:{
         enableFeed(e){
-            console.log(e)
             if(e.isDelete){
                 this.roadObj.splice(e.index, 1)
                 this.isDetailsPage = false
                 this.activityBanner = "Activity Feed"
                 return
             }
+            this.setActivityFeed()
             this.isDetailsPage = e
             this.activityBanner = "Activity Feed"
         },
@@ -153,13 +144,16 @@ export default{
             this.timer=""
             this.isDetailsPage = true
             this.activityBanner = `RETS ${road.RETS_ID}`
+            const roadGeom = this.roadFullData.find(rts => rts.id === road.RETS_ID)
+            highlightRETSPoint(roadGeom)
+            //this.zoomToRetsPt(road)
         },
         zoomToRetsPt(retsId){
             clearTimeout(this.timer)
             this.timer = ""
             this.timer = setTimeout(()=>{
-                const test = this.roadFullData.find(rts => rts.id === retsId)
-                zoomTo(test.geom)
+                const zoomToRETS = this.roadFullData.find(rts => rts.id === retsId)
+                zoomTo(zoomToRETS.geom)
             },250)
         },
 
@@ -201,16 +195,10 @@ export default{
             this.isfilter = false
             this.setActivityFeed()
         },
-        searchRetsCards(){
-            //searchCards
-            //maybe it will be best to concatentate values to a string and search via that
-            //filter rets cards
-            //highlight text in cards that match serach text
-        },
         async setActivityFeed(){
             const filter = await filterMapActivityFeed(this.retsFilters)
             this.roadObj = []
-            const query = filter
+            const query = {"whereString": `${filter}`}
             const orderField = `${this.retsFilters.CREATE_DT.filter} ${this.retsFilters.CREATE_DT.sortType}`
             getQueryLayer(query, orderField)
                 .then(obj => {
@@ -219,6 +207,7 @@ export default{
                             this.roadObj.push(x.attributes)
                             this.roadFullData.push({
                                 id: x.attributes.RETS_ID,
+                                OBJECTID: x.attributes.OBJECTID,
                                 geom: [x.geometry.x, x.geometry.y]
                             })
                         })
@@ -239,14 +228,14 @@ export default{
                 return 'mdi-flag-outline'
             }
             return 'mdi-flag'
-        }
+        },
 
     },
     watch:{
         actvFeedSearch:{
             handler: function(){
                 if(this.actvFeedSearch.length){
-                    searchCards(this.roadObj, this.actvFeedSearch, "RETS_ID")
+                    searchCards(this.roadObj, this.actvFeedSearch, "OBJECTID")
                     return
                 }
                 const getHideLength = document.getElementsByClassName("hideCards")
@@ -265,8 +254,8 @@ export default{
                 const user = await getUserId()
                 this.loggedInUser = user
                 this.retsFilters.loggedInUser = user
-                const queryString = `(GIS_ANALYST = '${user}') AND (STAT = 1 OR STAT = 2)`
-                const orderField = "CREATE_DT DESC"
+                const queryString = {"whereString": `(GIS_ANALYST = '${user}') AND (STAT = 1 OR STAT = 2)`}
+                const orderField = "PRIO, CREATE_DT DESC"
                 getQueryLayer(queryString, orderField)
                 .then(obj => {
                     if(obj.features.length){
@@ -274,6 +263,7 @@ export default{
                             this.roadObj.push(x.attributes)
                             this.roadFullData.push({
                                 id: x.attributes.RETS_ID,
+                                OBJECTID: x.attributes.OBJECTID,
                                 geom: [x.geometry.x, x.geometry.y]
                             })
                         })
@@ -454,16 +444,6 @@ export default{
         z-index: 9999;
     }
 
-    .details-color-picker{
-        position: fixed; 
-        display: flex; 
-        flex-direction: column; 
-        z-index: 9999; 
-        width:2.3%; 
-        float: right;
-        margin-left: 2.2rem;
-        background-color: black;
-    }
 
     #flagBtnDetails{
         padding: 1px !important;
@@ -475,12 +455,6 @@ export default{
         color: gray;
         left: 5px;
         bottom: 5px;
-    }
-
-    #detailsHeaderIcon{
-        float: right;
-        position: relative;
-        bottom: 3rem;
     }
 
     #dragndrop{
@@ -511,5 +485,10 @@ export default{
         margin-top: 0px;
         margin-bottom: 0px;
         flex: none;
+    }
+    #cardPRIO{
+        float: right;
+        color: red;
+        top: 1rem;
     }
 </style>

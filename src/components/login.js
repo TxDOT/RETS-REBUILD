@@ -10,7 +10,6 @@ const authen = new OAuthInfo({
   popup: false,
   expiration: 10080,
   preserveUrlHash: true,
-  popupCallbackUrl: "http://l-ds755x3.dot.state.tx.us:5173",
   portalUrl: "https://testportal.txdot.gov/create"
 })
 

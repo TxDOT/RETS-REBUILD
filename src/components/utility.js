@@ -1,28 +1,76 @@
-import {view, retsLayer, homeWidget} from './map-Init'
+import {view, retsLayer, homeWidget, retsGraphicLayer} from './map-Init'
 import Query from "@arcgis/core/rest/support/Query.js";
+import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant.js";
 
 export function clickRetsPoint(){
     view.on("click", (event)=>{
-        view.hitTest(event, {include: retsLayer}).then((evt) =>{
-            if(!evt.results.length) return
-            outlineFeedCards(evt.results)
+        view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt) =>{
+            if(!evt.results.length){
+                removeHighlight("a", true)
+                return
+            }
+
+            evt.results[0].graphic.attributes.RETS_ID ? outlineFeedCards(evt.results) : null
+            removeHighlight("a", true)
+            evt.results.forEach(rest => highlightRETSPoint(rest.graphic.attributes))
+            // highlightRETSPoint(evt.results)
             return;
         })
     })
 }
 
+export function hoverRetsPoint(){
+    view.on("pointer-move", (event)=>{
+        view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt) =>{
+            if(!evt.results.length){
+                document.getElementById("viewDiv").style.cursor = "default"
+                return
+            }
+            document.getElementById("viewDiv").style.cursor = "pointer"
+            return;
+        })
+    })
+}
+
+export function highlightRETSPoint(feature){
+    //checks and waits for retsLayer featureLayerView
+    view.whenLayerView(retsLayer)
+        .then((lyrView) => {
+            //highlights Point by giving OBJECTID
+            lyrView.highlight(feature.OBJECTID)
+            
+        })
+}
+
+export function removeHighlight(feature, removeAll){
+    view.whenLayerView(retsLayer)
+        .then((lyrView) => {
+            if(removeAll){
+                lyrView._highlightIds.clear()
+                return
+            }
+            //highlights Point by giving OBJECTID
+            if(lyrView._highlightIds.has(feature.OBJECTID)){
+                lyrView._highlightIds.delete(feature.OBJECTID)
+                return
+            }
+            return
+        })
+}
+
 function outlineFeedCards(res){
     res.forEach((x) => {
         //set card outline
-        document.getElementById(`${x.graphic.attributes.OBJECTID}`).classList.add('highlight-card')
+        document.getElementById(`${x.graphic.attributes.RETS_ID-x.graphic.attributes.OBJECTID}`).classList.add('highlight-card')
         //zoom to card in feed
+
         const zoomToCard = document.createElement('a')
-        zoomToCard.href = `#${x.graphic.attributes.OBJECTID}`
+        zoomToCard.href = `#${x.graphic.attributes.RETS_ID-x.graphic.attributes.OBJECTID}`
         zoomToCard.click()
         //remove card outline
         setTimeout(()=>{
-            document.getElementById(`${x.graphic.attributes.OBJECTID}`).classList.remove('highlight-card')
+            document.getElementById(`${x.graphic.attributes.RETS_ID-x.graphic.attributes.OBJECTID}`).classList.remove('highlight-card')
         },5000)
     })
     return;
@@ -75,7 +123,7 @@ export function getDistinctAttributeValues(field){
     query.outFields = [`${field}`]
     query.returnGeometry = false,
     query.returnDistinctValues = true
-    
+
     retsLayer.queryFeatures(query)
         .then((item) => {
             item.features.forEach(x => appConstants.activityList.push({"name": "ACTV", "value": x.attributes.ACTV}))
@@ -97,14 +145,15 @@ export function processDomainArr(domain){
     return holdArr
 }
 
-export function getQueryLayer(whereString, orderFields){
+export function getQueryLayer(newQuery, orderFields, count){
 
     const query = new Query()
-    query.where = `${whereString}`
+    query.where = `${newQuery.whereString}`
     query.orderByFields = [`${orderFields}`]
-    query.outFields = ["*"]
+    query.outFields = newQuery.out ??= ["*"]
     query.returnGeometry = true
-    
+    query.num = count ??= 20000
+
     return retsLayer.queryFeatures(query)
 }
 
@@ -117,7 +166,6 @@ export function searchCards(cardArr, string, index){
     cardArr.forEach((x) => {
         const a = Object.values(x).find(t => String(t).includes(string))
         if(a){
-            console.log(x)
             document.getElementById(`${x[index]}`).classList.add('showCards')
         }
         else{
@@ -125,7 +173,7 @@ export function searchCards(cardArr, string, index){
             document.getElementById(`${x[index]}`).classList.add('hideCards')
         }
     })
-    
+    return
 }
 
 export function home(){
@@ -137,4 +185,45 @@ export function home(){
                 view.goTo(resp.extent)
             })
     })
+    return
+}
+
+export function addRelatedRetsToMap(rets){
+    const graphicPt = {
+        type: "point",
+        longitude: rets.geometry[0],
+        latitude: rets.geometry[1],
+    }
+    
+    const graphicSymb = {
+        type: "simple-marker",
+        color: appConstants.CardColorMap[`${rets.jobType}`],
+        size: 8,
+        outline:{
+            width:1.5,
+            color: "cyan"
+        }
+    }
+    
+    retsGraphicLayer.add(
+        new Graphic({
+            geometry: graphicPt,
+            symbol: graphicSymb,
+            attributes: {OBJECTID: rets.oid}
+        })
+    )
+    return
+}
+
+export function removeRelatedRetsFromMap(rets){
+    const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === rets.raw.oid)
+    retsGraphicLayer.removeMany(findGraphic)
+    return
+}
+
+export function zoomToRelatedRets(relatedRets){
+
+    const groupOfRets = retsGraphicLayer.graphics.items.filter(item => item.OBJECTID === relatedRets.oid)
+    console.log(groupOfRets)
+    view.goTo(groupOfRets, {easing: "ease-in"})
 }
