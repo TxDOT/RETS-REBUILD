@@ -107,6 +107,8 @@ retsLayer.labelingInfo = [retsLabelclass];
 export const sketchLayer = new GraphicsLayer({});
 
 export const retsGraphicLayer = new GraphicsLayer({});
+
+export const graphics = new GraphicsLayer({});
 ////////////////////////////////////////////BASEMAPS//////////////////////////////////////////////////////////////////////////
         
 //Dark Vector Tile construction
@@ -183,12 +185,6 @@ let sketch = new Sketch({
     featureSources: [{layer: TxDotRoaways, enabled: true}]
   }
 });
-
-//create basemap toggle widget
-const basemaptoggle = new BasemapToggle({
-  view: view,
-  nextBasemap: imageryBasemap,
-})    
 
 //create search widget
 export const searchWidget = new Search({

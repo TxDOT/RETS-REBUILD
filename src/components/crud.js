@@ -8,8 +8,9 @@ export async function addRETSPT(retsObj){
 }
 
 export async function updateRETSPT(retsObj){
-    retsObj.RELATED_RETS = retsObj.RELATED_RETS.map(x => x.name).toString()
-    let esriUpdateGraphic = createGraphic(retsObj)
+    console.log(retsObj)
+    retsObj.attributes.RELATED_RETS = retsObj.attributes.RELATED_RETS.map(x => x.name).toString()
+    let esriUpdateGraphic = createGraphic(retsObj.attributes)
     await retsLayer.applyEdits({
         updateFeatures: [esriUpdateGraphic]
     })

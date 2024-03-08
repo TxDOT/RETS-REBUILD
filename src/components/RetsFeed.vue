@@ -86,7 +86,7 @@
     import LegendViewModel from "@arcgis/core/widgets/Legend/LegendViewModel.js";
     import Graphic from "@arcgis/core/Graphic.js";
     import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, TxDotRoaways, retsLayer, view} from '../components/map-Init.js';
-    import {logAttributes, highlightRETSPoint, removeHighlight} from '../components/utility.js'
+    import {highlightRETSPoint, removeHighlight} from '../components/utility.js'
     import {addRETSPT} from '../components/crud.js'
     
 
@@ -275,8 +275,7 @@
                                                     }
 
                                                     for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                                          highlightRETSPoint(selectedFeatures[i].attributes);  
-                                                          logAttributes(selectedFeatures[i].attributes);  
+                                                          highlightRETSPoint(selectedFeatures[i].attributes);
                                                           
 
                 
