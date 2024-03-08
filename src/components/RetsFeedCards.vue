@@ -95,7 +95,9 @@ export default{
     components: {Filter, RetsDetailPage},
     props: {
         filterPros: Object,
+        addrets:Number
     },
+    components: {RetsDetailPage, Filter}, 
     data(){
         return{
             filterOptions: appConstants.RetsStatus,
@@ -213,42 +215,10 @@ export default{
         },
         dropAttachment(event){
             console.log(event)
-        },
-        changeNumFilter(filter){
-            this.retsFilters = filter
-            this.isfilter = false
-            this.setActivityFeed()
-        },
-        changeFlagIcon(color){
-            if(color === '#FFFFFF'){
-                return 'mdi-flag-outline'
-            }
-            return 'mdi-flag'
-        },
+        }
 
     },
-    watch:{
-        actvFeedSearch:{
-            handler: function(){
-                if(this.actvFeedSearch.length){
-                    searchCards(this.roadObj, this.actvFeedSearch, "OBJECTID")
-                    return
-                }
-                const getHideLength = document.getElementsByClassName("hideCards")
-                if(getHideLength.length){
-                    for(let i=0; i < getHideLength.length; i++ ){
-                        document.getElementById(getHideLength[i].id).classList.remove('hideCards')
-                    }   
-                }
-            },
-            immediate: true
-        },
-        counter:{
-            handler: function(){
-                console.log(this.counter)
-            }
-        },
-    },
+
     computed:{
         queryLayer:{
             async get(){

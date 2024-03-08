@@ -1,8 +1,8 @@
 import { retsLayer } from "./map-Init";
 import Graphic from "@arcgis/core/Graphic.js";
 
-function addRETSPT(){
-    retsLayer.applyEdits({
+export async function addRETSPT(retsObj){
+    return retsLayer.applyEdits({
         addFeatures: [retsObj]
     })
 }
