@@ -47,3 +47,38 @@ export function home(){
     })
 }
 
+export function logAttributes(feature) {
+    view.whenLayerView(retsLayer)
+        .then((lyrView) => {
+            console.log(feature.OBJECTID)
+
+        })
+}
+
+export function highlightRETSPoint(feature){
+    //checks and waits for retsLayer featureLayerView
+    view.whenLayerView(retsLayer)
+        .then((lyrView) => {
+            //highlights Point by giving OBJECTID
+            lyrView.highlight(feature.OBJECTID)
+
+        })
+}
+
+export function removeHighlight(feature, removeAll){
+    view.whenLayerView(retsLayer)
+        .then((lyrView) => {
+            if(removeAll){
+                lyrView._highlightIds.clear()
+                return
+            }
+            //highlights Point by giving OBJECTID
+            if(lyrView._highlightIds.has(feature.OBJECTID)){
+                lyrView._highlightIds.delete(feature.OBJECTID)
+                return
+            }
+            return
+        })
+}
+
+

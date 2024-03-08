@@ -25,7 +25,7 @@ export function login(){
 
 async function signIn(){ 
   const userId = await getUserId()
-  retsLayer.definitionExpression = `GIS_ANALYST = '${userId}'`
+  retsLayer.definitionExpression = `(GIS_ANALYST = '${userId}')  AND (STAT = 1 OR STAT = 2 OR STAT = 3)`
   //`(GIS_ANALYST = '') AND (STAT = 1 OR STAT = 2)`
   retsLayer, view
     .when(() => {

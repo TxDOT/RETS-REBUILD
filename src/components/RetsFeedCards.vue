@@ -99,6 +99,7 @@ import Filter from './RetsFilter.vue'
 export default{
     name: "RetsCards",
     components: {RetsDetailPage, Filter}, 
+    props: {addrets:Number} ,
     data(){
         return{
             filterOptions: appConstants.RetsStatus,
@@ -183,6 +184,14 @@ export default{
             console.log(event)
         }
 
+    },
+    watch:{
+        addrets:{
+            handler:function(){
+                console.log(this.addrets)
+            },
+            immediate: true
+        }
     },
 
     computed:{

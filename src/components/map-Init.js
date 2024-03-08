@@ -7,15 +7,15 @@ import FeatureLayer from "@arcgis/core/layers/FeatureLayer.js";
 import Zoom from "@arcgis/core/widgets/Zoom.js";
 import Home from "@arcgis/core/widgets/Home.js";
 import Search from "@arcgis/core/widgets/Search.js";
-import BasemapToggle from "@arcgis/core/widgets/BasemapToggle.js";
 import WMTSLayer from "@arcgis/core/layers/WMTSLayer.js";
 import LabelClass from "@arcgis/core/layers/support/LabelClass.js";
-import Sketch from "@arcgis/core/widgets/Sketch.js";
-import Extent from "@arcgis/core/geometry/Extent.js";
 import { appConstants } from "../common/constant"; 
 import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer.js";
 import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol.js";
+import WebTileLayer from "@arcgis/core/layers/WebTileLayer.js";
+import OpenStreetMapLayer from "@arcgis/core/layers/OpenStreetMapLayer.js";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer.js";
+import TileInfo from "@arcgis/core/layers/support/TileInfo.js";
 
 
 
@@ -61,13 +61,43 @@ import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer.js";
                   width: 0
                 }
               }),
-              label: "in Progress"
+              label: "In Progress"
             },
-
-            // Add more unique value info objects as needed...
+            {
+              value: "4",
+              symbol: new SimpleMarkerSymbol({
+                size: 8,
+                color: appConstants.CardColorMap[4],
+                outline: {
+                  color: "white",
+                  width: 0
+                }
+              }),
+              label: "On Hold"
+            },
+            {
+              value: "5",
+              symbol: new SimpleMarkerSymbol({
+                size: 8,
+                color: appConstants.CardColorMap[5],
+                outline: {
+                  color: "white",
+                  width: 0
+                }
+              }),
+              label: "Not Ready"
+            },
           ]
-
          });
+
+         export const createretssym = new SimpleMarkerSymbol({
+          size: 8,
+                color: appConstants.CardColorMap[1],
+                outline: {
+                  color: "white",
+                  width: 0
+                },
+         })
 
         
          export let roadwaysRenderer = {
@@ -79,6 +109,8 @@ import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer.js";
             color: "transparent"
           }
          }
+
+
         //Rets Layer construction
         export const retsLayer = new FeatureLayer({
           url: "https://testportal.txdot.gov/createags/rest/services/RETS/FeatureServer/0",
@@ -88,6 +120,11 @@ import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer.js";
           editingEnabled: true,
           
         })
+
+        export const graphics = new GraphicsLayer({
+          
+                            
+        });
 
 
         //TxDotRoaways Layer construction
@@ -114,81 +151,95 @@ import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer.js";
         })
         //Applies label class to rets layer
         retsLayer.labelingInfo = [retsLabelclass];
-
-        export const sketchLayer = new GraphicsLayer({
-
-        });
         
   
 
 
         
-        ////////////////////////////////////////////BASEMAPS//////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////BASEMAPS AND LAYERS//////////////////////////////////////////////////////////////////////////
         
         //Dark Vector Tile construction
         export const darkVectorTile = new VectorTileLayer({
           url: "https://www.arcgis.com/sharing/rest/content/items/4bd376c56f314bc5a36446630db604a6/resources/styles/root.json"
         })
-
-        //Add Vector Tile as a basemap
+        //Dark Vector Tile basemap construction
         export const darkVTBasemap = new Basemap({
           baseLayers: darkVectorTile
         })
-
        
         //Light Vector Tile construction
         export const lightVectorTile = new VectorTileLayer({
-          url: "https://tiles.arcgis.com/tiles/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Vector_Tile_Basemap/VectorTileServer",
+          url: "https://www.arcgis.com/sharing/rest/content/items/507a9905e7154ce484617c7327ee8bc4/resources/styles/root.json",
           labelsVisible: true,
         })
-
-        //Add Vector Tile as a basemap
+        //Light Vector Tile basemap construction
         export const lightVTBasemap = new Basemap({
           baseLayers: lightVectorTile
+        })
+
+        //Standard Vector Tile construction
+        export const standardVectorTile = new VectorTileLayer({
+          url: "https://tiles.arcgis.com/tiles/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Vector_Tile_Basemap/VectorTileServer"
+        })
+
+        //Standard Vector Tile basemap construction
+        export const standardVTBasemap = new Basemap({
+          baseLayers: standardVectorTile
         })
 
         //Imagery Layer construction
         export const imageryTxdot = new WMTSLayer({
           url: "https://txgi.tnris.org/login/path/bucket-armada-virtual-lobby/wmts/1.0.0/WMTSCapabilities.xml",
-          //url: "https://txgi.tnris.org/login/path/food-paul-zebra-shirt/wmts/1.0.0/WMTSCapabilities.xml"
+          view: view,
         })
 
-        //Created imagery basemap
+        //Imagery Layer basemap construction
         export const imageryBasemap = new Basemap({
           baseLayers: [imageryTxdot]
         })
 
-        export var sketchWidget = new Sketch({
-          layer: retsLayer, // Replace with your actual feature layer
-          view: view, // Replace with your actual map view
-          // Other configuration options for the Sketch widget
-          creationMode: "single"
-      });
+        //Google Web Tile construction
+        export const googleVectorTile = new WebTileLayer({
+          urlTemplate: 
+          "https://mt1.google.com/vt/lyrs=r&x={col}&y={row}&z={level}",
+        })
 
-        
+        //Google Web Tile basemap construction
+        export const googleVTBasemap = new Basemap({
+          baseLayers: googleVectorTile
+        })
 
+        //Open Street Map Layer construction
+        export const OSMBasemap = new OpenStreetMapLayer({
+          visible: true,                  
+          name: "osm"                
+        })
 
-        //add  basemap to the map
+        //Open Street Map basemap construction
+        export const OSMVTBasemap = new Basemap({
+          baseLayers: OSMBasemap
+        })
+
+        //add  Dark Tile basemap to the map as default
         export const map = new Map({
           basemap: darkVTBasemap,
         })
 
-        //add  map to the mapview, set zoom and center of screen when the application loads
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        //add  map to the mapview
         export var view = new MapView({
           map: map,
           zoom: 6,
-          //center: [-100, 31.5],
-          // spatialReference: {
-          //   wkid: 4326
-          // }
+          constraints: {
+               lods: TileInfo.create().lods //property to allow a mapview center to the imagery basemap
+             }
         })
-        
-        
 
         //add feature layers to the map
         map.add(retsLayer)
         map.add(TxDotRoaways)
-        map.add(sketchLayer);
+        map.add(graphics)
 
 
         //create search widget
@@ -210,14 +261,12 @@ import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer.js";
               
              },
            ]
-
-           
           });
 
             
           export var homeWidget  = new Home({
             view: view,
-                    });
+            });
 
 
           
@@ -225,23 +274,24 @@ import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer.js";
           //creates search widget
          export const ZoomWidget = new Zoom({
           view: view
-         });
+          });
 
          
 
-        // Adds the search widget below other elements in the top right corner of the view
+        // Adds the search widget to the top right corner of the view
          view.ui.add(searchWidget, {
            position: "top-right",
            index: 2
          });
 
-         //adds zoom widget to map 
+         // Adds the zoom widget to the top right corner of the view
          view.ui.add(ZoomWidget, {
           position: "top-right",
           index: 3
 
         });
 
+        // Adds the search widget to the top right corner of the view
         view.ui.add(homeWidget, {
           position: "top-right",
           index: 3
