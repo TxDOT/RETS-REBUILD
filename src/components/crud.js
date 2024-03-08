@@ -7,17 +7,16 @@ function addRETSPT(){
     })
 }
 
-export function updateRETSPT(retsObj){
-    console.log(retsObj)
+export async function updateRETSPT(retsObj){
+    retsObj.RELATED_RETS = retsObj.RELATED_RETS.map(x => x.name).toString()
     let esriUpdateGraphic = createGraphic(retsObj)
-    retsLayer.applyEdits({
+    await retsLayer.applyEdits({
         updateFeatures: [esriUpdateGraphic]
     })
-    .then(() => console.log(`${retsObj.RETS_ID} has been updated`))
-    .catch(err => console.log(err))
 }
 
 export function deleteRETSPT(retsObj){
+    retsObj.RELATED_RETS = retsObj.RELATED_RETS.map(x => x.name.RETS_ID).toString()
     let esriDelGraphic = createGraphic(retsObj)
     retsLayer.applyEdits({
         deleteFeatures: [esriDelGraphic]

@@ -30,35 +30,35 @@
             </v-row>
 
             <div class="card-feed-div" v-if="!isDetailsPage">
-                <v-row class="rets-card-row" v-for="(rd, road) in roadObj" :key="rd" :value="road" :id="rd.OBJECTID">
-                    <v-btn elevation="0" @click="changeColor(rd.RETS_ID);" class="flag-btn" size="small" max-width=".5px" density="compact" variant="plain" slim>
+                <v-row class="rets-card-row" v-for="(rd, road) in roadObj" :key="rd" :value="road" :id="rd.attributes.OBJECTID">
+                    <v-btn elevation="0" @click="changeColor(rd.attributes.RETS_ID);" class="flag-btn" size="small" max-width=".5px" density="compact" variant="plain" slim>
                         <template v-slot:prepend>
-                            <v-icon size="medium" :id="`${rd.RETS_ID}Icon`" :color="rd.flagColor" :icon="rd.flagColor ? changeFlagIcon(rd.flagColor) : 'mdi-flag-outline'"></v-icon>
+                            <v-icon size="medium" :id="`${rd.attributes.RETS_ID}Icon`" :color="rd.attributes.flagColor" :icon="rd.attributes.flagColor ? changeFlagIcon(rd.attributes.flagColor) : 'mdi-flag-outline'"></v-icon>
                         </template>
                     </v-btn>
-                    <v-col class="color-picker" v-if="flagClickedId === rd.RETS_ID" v-click-outside="closeFlagDiv">
+                    <v-col class="color-picker" v-if="flagClickedId === rd.attributes.RETS_ID" v-click-outside="closeFlagDiv">
                         <v-icon size="medium" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" ></v-icon>
                     </v-col>    
-                    <v-card :id="rd.RETS_ID-rd.OBJECTID" :style="{borderLeft: `7px solid ${colorTable[rd.STAT] ? colorTable[rd.STAT]: 'Red'}`}" hover v-ripple class="card" @click="zoomToRetsPt(rd.RETS_ID)" @dblclick="double(rd, road);">
+                    <v-card :id="rd.attributes.RETS_ID-rd.attributes.OBJECTID" :style="{borderLeft: `7px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple class="card" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road);">
                         <v-card-text id="retsCard">
-                            RETS {{rd.RETS_ID }}
+                            RETS {{rd.attributes.RETS_ID }}
                         </v-card-text>
 
                         <v-card-text class="route-name">
-                            {{ rd.RTE_NM ?? "Route name not provided" }}
+                            {{ rd.attributes.RTE_NM ?? "Route name not provided" }}
                         </v-card-text>
 
                         <div style="position: relative; bottom: 10px; width: 100%;">
                             <p class="text-concat">
-                                {{ rd.DESC_ ? rd.DESC_ : "If description is empty does it need to be worked ?" }}
+                                {{ rd.attributes.DESC_ ? rd.attributes.DESC_ : "If description is empty does it need to be worked ?" }}
                             </p>
                         </div>
 
                         <v-card-subtitle class="subtitle-text main-color">
-                            Created by {{ rd.CREATE_NM ? rd.CREATE_NM : "If Create Name is empty is it really created" }} {{ rd.CREATE_DT ? returnDateFormat(rd.CREATE_DT) : returnDateFormat(rd.EDIT_DT)}}
+                            Created by {{ rd.attributes.CREATE_NM ? rd.attributes.CREATE_NM : "If Create Name is empty is it really created" }} {{ rd.attributes.CREATE_DT ? returnDateFormat(rd.attributes.CREATE_DT) : returnDateFormat(rd.attributes.EDIT_DT)}}
                         </v-card-subtitle>
                         <div>
-                            <v-icon icon="mdi-exclamation" id="cardPRIO" v-if="rd.PRIO === 0"></v-icon>
+                            <v-icon icon="mdi-exclamation" id="cardPRIO" v-if="rd.attributes.PRIO === 0"></v-icon>
                         </div>
                         
                     </v-card>
@@ -81,17 +81,20 @@
 </template>
 
 <script>
-import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer, searchCards, highlightRETSPoint} from './utility.js'
+import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer, searchCards, highlightRETSPoint, toggleRelatedRets, getHighlightGraphic} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {getUserId} from './login.js'
 import Filter from './RetsFilter.vue'
 import RetsDetailPage from './RetsDetail.vue'
+import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
+import {store} from './store.js'
+import {view, retsGraphicLayer} from './map-Init.js'
 
 export default{
     name: "RetsCards",
     components: {Filter, RetsDetailPage},
     props: {
-        filterPros: Object
+        filterPros: Object,
     },
     data(){
         return{
@@ -99,7 +102,6 @@ export default{
             colorTable: appConstants.CardColorMap,
             roadObj: [],
             currRoad: {},
-            roadFullData: [],
             isColorPicked: false,
             pickColor: "blue",
             swatchColor: ['', '#FF0000', '#FF7F00', '#FFFF00', '#008000', '#4472C4', '#B75CFF', '#FFFFFF'],
@@ -118,42 +120,64 @@ export default{
             retsFilters: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, "JOB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
                          "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, "GIS_ANALYST": appConstants.defaultUserValue, 
                          "filterTotal": 2},
+            count: 0
         }
     },
     beforeMount(){
         this.queryLayer
         clickRetsPoint()
-    },  
+    },
+    mounted(){
+        reactiveUtils.on(() => view.popup, "trigger-action",
+        async (event) => {
+        // Execute the measureThis() function if the measure-this action is clicked
+        if (event.action.id === "open-details") {
+            console.log(event)
+            console.log('open details')
+            const returnHighlight = await getHighlightGraphic()
+            const graphicOid = returnHighlight._highlightIds.keys().next().value
+            const returnGraphic = retsGraphicLayer.graphics.items.find(ret => ret.attributes.OBJECTID === graphicOid)
+            this.double({attributes: returnGraphic.attributes, geometry: [returnGraphic.geometry.x, returnGraphic.geometry.y]}, 1)
+        }
+        }
+  );
+    },
     methods:{
-        enableFeed(e){
+        test(){
+            console.log('hello')
+        },
+        async enableFeed(e){
+            console.log(e)
+            toggleRelatedRets(e[0].attributes.retsId ?? e[0].attributes.RETS_ID, false)
             if(e.isDelete){
                 this.roadObj.splice(e.index, 1)
-                this.isDetailsPage = false
                 this.activityBanner = "Activity Feed"
                 return
             }
-            this.setActivityFeed()
-            this.isDetailsPage = e
+            await this.setActivityFeed
+            this.isDetailsPage = e[1]
             this.activityBanner = "Activity Feed"
+            return
         },
         double(road, index){
-            road.logInUser = this.loggedInUser 
-            road.index = index
+            console.log(road)
+            road.attributes.logInUser = this.loggedInUser 
+            road.attributes.index = index
             this.send = this.currRoad = road
             clearTimeout(this.timer)
             this.timer=""
             this.isDetailsPage = true
-            this.activityBanner = `RETS ${road.RETS_ID}`
-            const roadGeom = this.roadFullData.find(rts => rts.id === road.RETS_ID)
-            highlightRETSPoint(roadGeom)
-            //this.zoomToRetsPt(road)
+            this.activityBanner = `RETS ${road.attributes.RETS_ID}`
+            highlightRETSPoint(road.attributes)
+            this.zoomToRetsPt(road)
+            toggleRelatedRets(road.attributes.RETS_ID, true)
         },
-        zoomToRetsPt(retsId){
+        zoomToRetsPt(rets){
             clearTimeout(this.timer)
             this.timer = ""
             this.timer = setTimeout(()=>{
-                const zoomToRETS = this.roadFullData.find(rts => rts.id === retsId)
-                zoomTo(zoomToRETS.geom)
+                const zoomToRETS = rets.geometry
+                zoomTo(zoomToRETS)
             },250)
         },
 
@@ -169,7 +193,7 @@ export default{
         },
         assignColorToFlag(clr){
             document.getElementById(`${this.flagClickedId}Icon`).style.color = clr
-            this.roadObj.find(rd => rd.RETS_ID === this.flagClickedId).flagColor = clr
+            this.roadObj.find(rd => rd.attributes.RETS_ID === this.flagClickedId).flagColor = clr
             this.isColorPicked = false;
             this.closeFlagDiv()
         },
@@ -195,34 +219,6 @@ export default{
             this.isfilter = false
             this.setActivityFeed()
         },
-        async setActivityFeed(){
-            const filter = await filterMapActivityFeed(this.retsFilters)
-            this.roadObj = []
-            const query = {"whereString": `${filter}`}
-            const orderField = `${this.retsFilters.CREATE_DT.filter} ${this.retsFilters.CREATE_DT.sortType}`
-            getQueryLayer(query, orderField)
-                .then(obj => {
-                    if(obj.features.length){
-                        obj.features.forEach((x) => {
-                            this.roadObj.push(x.attributes)
-                            this.roadFullData.push({
-                                id: x.attributes.RETS_ID,
-                                OBJECTID: x.attributes.OBJECTID,
-                                geom: [x.geometry.x, x.geometry.y]
-                            })
-                        })
-                        this.isNoRets = false
-                        return
-                    }
-                    this.isDetailsPage = false
-                    this.isNoRets = true
-                    
-                })
-                .catch((err)=> {
-                    
-                    console.log(err)
-                })
-        },
         changeFlagIcon(color){
             if(color === '#FFFFFF'){
                 return 'mdi-flag-outline'
@@ -246,7 +242,12 @@ export default{
                 }
             },
             immediate: true
-        }
+        },
+        counter:{
+            handler: function(){
+                console.log(this.counter)
+            }
+        },
     },
     computed:{
         queryLayer:{
@@ -260,12 +261,7 @@ export default{
                 .then(obj => {
                     if(obj.features.length){
                         obj.features.forEach((x) => {
-                            this.roadObj.push(x.attributes)
-                            this.roadFullData.push({
-                                id: x.attributes.RETS_ID,
-                                OBJECTID: x.attributes.OBJECTID,
-                                geom: [x.geometry.x, x.geometry.y]
-                            })
+                            this.roadObj.push({attributes:x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                         })
                         return
                     }
@@ -274,7 +270,47 @@ export default{
                     })
                 .catch((err)=> console.log(err))
             },
+        },
+        setActivityFeed:{
+            async get(){
+                const filter = await filterMapActivityFeed(this.retsFilters)
+                this.roadObj = []
+                const query = {"whereString": `${filter}`}
+                const orderField = `${this.retsFilters.CREATE_DT.filter} ${this.retsFilters.CREATE_DT.sortType}`
+                getQueryLayer(query, orderField)
+                    .then(obj => {
+                        if(obj.features.length){
+                            obj.features.forEach((x) => {
+                                this.roadObj.push({attributes:x.attributes, geometry: [x.geometry.x, x.geometry.y]})
+                            })
+                            this.isNoRets = false
+                            return
+                        }
+                        this.isDetailsPage = false
+                        this.isNoRets = true
+                        
+                    })
+                    .catch((err)=> {
+                        
+                        console.log(err)
+                    })
+            }
+
+        },
+        counter:{
+            get(){
+                return store.count
+            },
+            set(val){
+                this.count = val
+            }
+        },
+        hello:{
+            get(){
+                return this.initRetsResults
+            }
         }
+       
     }
 }
 </script>

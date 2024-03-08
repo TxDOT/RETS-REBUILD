@@ -3,6 +3,7 @@ import Query from "@arcgis/core/rest/support/Query.js";
 import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant.js";
 
+import {store} from './store.js'
 export function clickRetsPoint(){
     view.on("click", (event)=>{
         view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt) =>{
@@ -10,12 +11,11 @@ export function clickRetsPoint(){
                 removeHighlight("a", true)
                 return
             }
-
-            evt.results[0].graphic.attributes.RETS_ID ? outlineFeedCards(evt.results) : null
+            outlineFeedCards(evt.results)
             removeHighlight("a", true)
-            evt.results.forEach(rest => highlightRETSPoint(rest.graphic.attributes))
+            evt.results.forEach(rest => rest.graphic.layer.title ? highlightRETSPoint(rest.graphic.attributes) : highlightGraphicPt(rest.graphic.attributes))
             // highlightRETSPoint(evt.results)
-            return;
+            return evt.results[0].graphic.attributes.RETS_ID;
         })
     })
 }
@@ -43,6 +43,17 @@ export function highlightRETSPoint(feature){
         })
 }
 
+function highlightGraphicPt(feature){
+    view.whenLayerView(retsGraphicLayer)
+        .then((lyrView) => {
+            lyrView.highlight(feature.OBJECTID)
+        })
+}
+
+export async function getHighlightGraphic(){
+    return await view.whenLayerView(retsGraphicLayer)
+}
+
 export function removeHighlight(feature, removeAll){
     view.whenLayerView(retsLayer)
         .then((lyrView) => {
@@ -62,6 +73,7 @@ export function removeHighlight(feature, removeAll){
 function outlineFeedCards(res){
     res.forEach((x) => {
         //set card outline
+        if(!document.getElementById(`${x.graphic.attributes.RETS_ID-x.graphic.attributes.OBJECTID}`)) return
         document.getElementById(`${x.graphic.attributes.RETS_ID-x.graphic.attributes.OBJECTID}`).classList.add('highlight-card')
         //zoom to card in feed
 
@@ -164,13 +176,13 @@ export function searchCards(cardArr, string, index){
     //     return
     // }
     cardArr.forEach((x) => {
-        const a = Object.values(x).find(t => String(t).includes(string))
+        const a = Object.values(x.attributes).find(t => String(t).includes(string))
         if(a){
-            document.getElementById(`${x[index]}`).classList.add('showCards')
+            document.getElementById(`${x.attributes[index]}`).classList.add('showCards')
         }
         else{
-            document.getElementById(`${x[index]}`).classList.remove('showCards')
-            document.getElementById(`${x[index]}`).classList.add('hideCards')
+            document.getElementById(`${x.attributes[index]}`).classList.remove('showCards')
+            document.getElementById(`${x.attributes[index]}`).classList.add('hideCards')
         }
     })
     return
@@ -188,7 +200,9 @@ export function home(){
     return
 }
 
-export function addRelatedRetsToMap(rets){
+export function addRelatedRetsToMap(rets){ 
+    if(retsGraphicLayer.graphics.items.find(ret => ret.attributes.OBJECTID === rets.oid)) return
+
     const graphicPt = {
         type: "point",
         longitude: rets.geometry[0],
@@ -204,26 +218,69 @@ export function addRelatedRetsToMap(rets){
             color: "cyan"
         }
     }
+
+    const pointGraphic = new Graphic({
+        geometry: graphicPt,
+        symbol: graphicSymb,
+        attributes: {
+            ...rets.fullData,
+            retsId: rets.retsid
+        },
+        popupTemplate:{
+            title: `${rets.fullData.RTE_NM}`,
+            content: `${rets.fullData.DESC_}`,
+            actions: [{title: "Open", id:"open-details"}]
+        }
+    })
+
+    const textGraphic = new Graphic({
+        geometry: graphicPt,
+        symbol: {
+            type: "text",
+            color: "white",
+            haloColor: "black",
+            haloSize: "1px",
+            text: rets.name,
+            xoffset: 3,
+            yoffset: 3
+        },
+        attributes: {
+            OBJECTID: rets.oid,
+            retsId: rets.retsid
+        },
+
+    })
     
-    retsGraphicLayer.add(
-        new Graphic({
-            geometry: graphicPt,
-            symbol: graphicSymb,
-            attributes: {OBJECTID: rets.oid}
-        })
-    )
+    retsGraphicLayer.addMany([pointGraphic, textGraphic])
     return
 }
 
-export function removeRelatedRetsFromMap(rets){
-    const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === rets.raw.oid)
+export function removeRelatedRetsFromMap(retsoid){
+    const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === retsoid)
     retsGraphicLayer.removeMany(findGraphic)
     return
 }
 
 export function zoomToRelatedRets(relatedRets){
-
     const groupOfRets = retsGraphicLayer.graphics.items.filter(item => item.OBJECTID === relatedRets.oid)
-    console.log(groupOfRets)
     view.goTo(groupOfRets, {easing: "ease-in"})
 }
+
+export const toggleRelatedRets = (retsid, visibility) =>  {
+    const returnGraphics = retsGraphicLayer.graphics.items.filter(item => item.attributes.retsId === retsid)
+    console.log(returnGraphics)
+    returnGraphics.forEach(x => x.visible = visibility)
+    return
+}
+
+export function returnDFO(roadName, dfo){
+    //query for road
+    //find dfo placement on the road
+        //find segment point is on (two points) => before, end
+        //take beginning measure and find delta between beginning and placed point
+        //return new dfo
+}
+
+// export function openDetailsFromGraphic(){
+    
+//}

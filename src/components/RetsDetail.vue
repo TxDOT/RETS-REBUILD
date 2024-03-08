@@ -20,7 +20,6 @@
 
     <detailsAlert v-if="isAlert" :alertsTextInfo="alertTextInfo"/>
     <div id="container-div">
-        
         <v-card id="details-page">
             <div class="cardDiv"> 
                 <v-btn-toggle selected-class="active-button" variant="plain" mandatory v-model="isBtnSet">
@@ -29,8 +28,7 @@
                 </v-btn-toggle>
         
                 <DetailsCard v-if="isDetails" :infoRets="retsInfo" :taskGem="sendGemTaskNum" @disable-save="disableSave"/>
-                <MetadataCard v-if="isMetadata" :infoRets="retsInfo"/>
-
+                <!-- <MetadataCard v-if="isMetadata" :infoRets="retsInfo"/> -->
             </div>
         </v-card>
         <div class="gem-search" >
@@ -86,7 +84,7 @@
     import editHistoryNotes from './EditHistoryNotes.vue'
     import DetailsCard from './detailsCard.vue'
     import MetadataCard from './metadataCard.vue'
-    import {getGEMTasks, searchCards, removeHighlight} from './utility.js'
+    import {getGEMTasks, searchCards, removeHighlight, removeRelatedRetsFromMap} from './utility.js'
     import detailsAlert from './detailsAlert.vue'
     import {updateRETSPT, deleteRETSPT} from './crud.js'
 
@@ -132,7 +130,6 @@
                     return
                 }
             })
-            console.log(this.retsInfo)
         },
         methods:{
             closeFlagDiv(){
@@ -161,17 +158,20 @@
             deleteRets(){
                 this.retsInfo.isDelete = true
                 deleteRETSPT(this.retsInfo)
-                removeHighlight(this.retsInfo)
-                this.$emit('close-detail', this.retsInfo)
+                removeRelatedRetsFromMap(this.retsInfo.OBJECTID)
+                removeHighlight(this.retsInfo, true)
+                this.$emit('close-detail', [this.retsInfo, false])
             },
-            sendToParent(){
-                updateRETSPT(this.retsInfo)
-                this.$emit('close-detail', false)
+            async sendToParent(){
+                await updateRETSPT(this.retsInfo)
+                removeHighlight(this.retsInfo, true)
+                this.$emit('close-detail', [this.retsInfo, false])
                 
             },
             cancelDetailsMetadata(){
-                this.$emit('close-detail', false)
-                removeHighlight(this.retsInfo)
+                console.log(this.retsInfo)
+                this.$emit('close-detail', [this.retsInfo, false])
+                removeHighlight(this.retsInfo, true)
             },
             openNote(note, index){
                 this.editText = true
@@ -217,7 +217,7 @@
                 },
                 immediate:true
             }
-        }
+        },
     }
 </script>
 
@@ -248,6 +248,7 @@ div .cardDiv{
     font-size: 1px !important;
     margin-right: 10px;
     margin-left: 10px;
+    overflow-y: auto;
 }
 #container-div{
     position: relative;
