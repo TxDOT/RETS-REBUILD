@@ -4,7 +4,7 @@
             <v-row class="main-color">
                 <header id="container-header">RETS Dashboard</header>
                 <v-btn prepend-icon="mdi-plus" color="#4472C4" rounded="0" id="add-new-btn" class="main-button">
-                    <p class="text-btn">new</p>
+                    <p class="text-btn">{{store.taskGem}}</p>
                 </v-btn>
                 
             </v-row>
@@ -81,7 +81,7 @@
 </template>
 
 <script>
-import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer, searchCards, highlightRETSPoint, toggleRelatedRets, getHighlightGraphic} from './utility.js'
+import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer, searchCards, highlightRETSPoint, toggleRelatedRets, getHighlightGraphic, removeHighlight} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {getUserId} from './login.js'
 import Filter from './RetsFilter.vue'
@@ -122,7 +122,8 @@ export default{
             retsFilters: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, "JOB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
                          "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, "GIS_ANALYST": appConstants.defaultUserValue, 
                          "filterTotal": 2},
-            count: 0
+            count: 0,
+            store
         }
     },
     beforeMount(){
@@ -134,10 +135,11 @@ export default{
         async (event) => {
         // Execute the measureThis() function if the measure-this action is clicked
         if (event.action.id === "open-details") {
-            console.log(event)
-            console.log('open details')
+            console.log(store.clickedGraphic)
+            removeHighlight("a", true)
             const returnHighlight = await getHighlightGraphic()
-            const graphicOid = returnHighlight._highlightIds.keys().next().value
+            console.log(returnHighlight)
+            const graphicOid = store.clickedGraphic
             const returnGraphic = retsGraphicLayer.graphics.items.find(ret => ret.attributes.OBJECTID === graphicOid)
             this.double({attributes: returnGraphic.attributes, geometry: [returnGraphic.geometry.x, returnGraphic.geometry.y]}, 1)
         }
@@ -218,7 +220,23 @@ export default{
         }
 
     },
-
+    watch:{
+        actvFeedSearch:{
+            handler: function(){
+                if(this.actvFeedSearch.length){
+                    searchCards(this.roadObj, this.actvFeedSearch, "OBJECTID")
+                    return
+                }
+                const getHideLength = document.getElementsByClassName("hideCards")
+                if(getHideLength.length){
+                    for(let i=0; i < getHideLength.length; i++ ){
+                        document.getElementById(getHideLength[i].id).classList.remove('hideCards')
+                    }   
+                }
+            },
+            immediate: true
+        },
+    },
     computed:{
         queryLayer:{
             async get(){
@@ -265,22 +283,8 @@ export default{
                         console.log(err)
                     })
             }
+        },
 
-        },
-        counter:{
-            get(){
-                return store.count
-            },
-            set(val){
-                this.count = val
-            }
-        },
-        hello:{
-            get(){
-                return this.initRetsResults
-            }
-        }
-       
     }
 }
 </script>

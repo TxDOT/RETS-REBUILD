@@ -28,7 +28,7 @@
                 </v-btn-toggle>
         
                 <DetailsCard v-if="isDetails" :infoRets="retsInfo" :taskGem="sendGemTaskNum" @disable-save="disableSave"/>
-                <!-- <MetadataCard v-if="isMetadata" :infoRets="retsInfo"/> -->
+                <MetadataCard v-if="isMetadata" :infoRets="retsInfo"/>
             </div>
         </v-card>
         <div class="gem-search" >

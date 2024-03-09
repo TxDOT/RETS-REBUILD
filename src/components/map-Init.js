@@ -177,14 +177,14 @@ export var sketchWidget = new Sketch({
 });
         
 
-let sketch = new Sketch({
-  layer: retsLayer,
-  view: view,
-  snappingOptions:{
-    enabled: true,
-    featureSources: [{layer: TxDotRoaways, enabled: true}]
-  }
-});
+// let sketch = new Sketch({
+//   layer: retsLayer,
+//   view: view,
+//   snappingOptions:{
+//     enabled: true,
+//     featureSources: [{layer: TxDotRoaways, enabled: true}]
+//   }
+// });
 
 //create search widget
 export const searchWidget = new Search({

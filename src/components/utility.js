@@ -2,22 +2,29 @@ import {view, retsLayer, homeWidget, retsGraphicLayer} from './map-Init'
 import Query from "@arcgis/core/rest/support/Query.js";
 import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant.js";
-
 import {store} from './store.js'
+
 export function clickRetsPoint(){
-    view.on("click", (event)=>{
-        view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt) =>{
-            if(!evt.results.length){
+    try{
+        view.on("click", (event)=>{
+            console.log(event)
+            view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt) =>{
+                if(!evt.results.length){
+                    removeHighlight("a", true)
+                    return
+                }
+                outlineFeedCards(evt.results)
                 removeHighlight("a", true)
-                return
-            }
-            outlineFeedCards(evt.results)
-            removeHighlight("a", true)
-            evt.results.forEach(rest => rest.graphic.layer.title ? highlightRETSPoint(rest.graphic.attributes) : highlightGraphicPt(rest.graphic.attributes))
-            // highlightRETSPoint(evt.results)
-            return evt.results[0].graphic.attributes.RETS_ID;
+                evt.results.forEach(rest => rest.graphic.layer.title ? highlightRETSPoint(rest.graphic.attributes) : highlightGraphicPt(rest.graphic.attributes))
+                // highlightRETSPoint(evt.results)
+                return evt.results[0].graphic.attributes.RETS_ID;
+            })
         })
-    })
+    }
+    catch(err){
+        console.log(err)
+    }
+
 }
 
 export function hoverRetsPoint(){
@@ -46,6 +53,8 @@ export function highlightRETSPoint(feature){
 function highlightGraphicPt(feature){
     view.whenLayerView(retsGraphicLayer)
         .then((lyrView) => {
+            console.log(feature)
+            store.clickedGraphic = feature.OBJECTID
             lyrView.highlight(feature.OBJECTID)
         })
 }
@@ -267,6 +276,8 @@ export function zoomToRelatedRets(relatedRets){
 }
 
 export const toggleRelatedRets = (retsid, visibility) =>  {
+    console.log(retsid)
+    console.log(retsGraphicLayer)
     const returnGraphics = retsGraphicLayer.graphics.items.filter(item => item.attributes.retsId === retsid)
     console.log(returnGraphics)
     returnGraphics.forEach(x => x.visible = visibility)
