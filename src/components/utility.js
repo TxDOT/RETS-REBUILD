@@ -7,7 +7,6 @@ import {store} from './store.js'
 export function clickRetsPoint(){
     try{
         view.on("click", (event)=>{
-            console.log(event)
             view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt) =>{
                 if(!evt.results.length){
                     removeHighlight("a", true)
@@ -53,7 +52,6 @@ export function highlightRETSPoint(feature){
 function highlightGraphicPt(feature){
     view.whenLayerView(retsGraphicLayer)
         .then((lyrView) => {
-            console.log(feature)
             store.clickedGraphic = feature.OBJECTID
             lyrView.highlight(feature.OBJECTID)
         })
@@ -210,7 +208,15 @@ export function home(){
 }
 
 export function addRelatedRetsToMap(rets){ 
-    if(retsGraphicLayer.graphics.items.find(ret => ret.attributes.OBJECTID === rets.oid)) return
+    const graphicInArr = retsGraphicLayer.graphics.items.find(ret => ret.attributes.OBJECTID === rets.oid)
+    if(graphicInArr){
+        return
+    }    
+    
+    // a.retsid.concat(', ', rets.RETS_ID)
+        // console.log(a)
+
+    
 
     const graphicPt = {
         type: "point",
@@ -233,7 +239,7 @@ export function addRelatedRetsToMap(rets){
         symbol: graphicSymb,
         attributes: {
             ...rets.fullData,
-            retsId: rets.retsid
+            retsId: rets.name
         },
         popupTemplate:{
             title: `${rets.fullData.RTE_NM}`,
@@ -255,7 +261,7 @@ export function addRelatedRetsToMap(rets){
         },
         attributes: {
             OBJECTID: rets.oid,
-            retsId: rets.retsid
+            retsId: rets.name
         },
 
     })
@@ -264,6 +270,11 @@ export function addRelatedRetsToMap(rets){
     return
 }
 
+export function turnAllVisibleGraphicsOff(){
+    const isVisible = retsGraphicLayer.graphics.items.filter(x => x.visible === true)
+    isVisible.forEach(vis => vis.visible = false)
+    return
+}
 export function removeRelatedRetsFromMap(retsoid){
     const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === retsoid)
     retsGraphicLayer.removeMany(findGraphic)
@@ -273,15 +284,18 @@ export function removeRelatedRetsFromMap(retsoid){
 export function zoomToRelatedRets(relatedRets){
     const groupOfRets = retsGraphicLayer.graphics.items.filter(item => item.OBJECTID === relatedRets.oid)
     view.goTo(groupOfRets, {easing: "ease-in"})
+    return
 }
 
-export const toggleRelatedRets = (retsid, visibility) =>  {
+export const toggleRelatedRets = (retsid) =>  {
     console.log(retsid)
-    console.log(retsGraphicLayer)
-    const returnGraphics = retsGraphicLayer.graphics.items.filter(item => item.attributes.retsId === retsid)
-    console.log(returnGraphics)
-    returnGraphics.forEach(x => x.visible = visibility)
-    return
+    const parseRets = JSON.parse(retsid)
+    const newRetsId = typeof retsid === "object" ? parseRets.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID) : parseRets.attributes.RELATED_RETS.split(",")
+    turnAllVisibleGraphicsOff()
+    newRetsId.forEach((ret) =>{
+        let a = retsGraphicLayer.graphics.items.filter(item => item.attributes.retsId === Number(ret))
+        a.forEach(x => x.visible = true)
+    })
 }
 
 export function returnDFO(roadName, dfo){

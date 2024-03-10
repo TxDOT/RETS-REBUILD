@@ -3,8 +3,8 @@
         <v-col class="d-flex flex-wrap ga-2" align-self="start">
             <v-row class="main-color">
                 <header id="container-header">RETS Dashboard</header>
-                <v-btn prepend-icon="mdi-plus" color="#4472C4" rounded="0" id="add-new-btn" class="main-button">
-                    <p class="text-btn">{{store.taskGem}}</p>
+                <v-btn prepend-icon="mdi-plus" color="#4472C4" rounded="0" id="add-new-btn" class="main-button" @click="alert('This isnt hooked up.  Which add button is the one?')">
+                    <p class="text-btn">New</p>
                 </v-btn>
                 
             </v-row>
@@ -13,7 +13,9 @@
                     <div style="width: 100%;">
                         <div class="banner-txt">
                             <p>{{activityBanner}}</p>
-                            <v-btn v-if="isDetailsPage" icon="mdi-pencil-outline" density="compact" flat id="renameRets"></v-btn>
+                            <div id="retsSubtitle"><v-text-field v-if="isSubtitle" label="Enter a subtitle" id="retsSubtitle"></v-text-field></div>
+                            
+                            <v-btn v-if="isDetailsPage" icon="mdi-pencil-outline" density="compact" flat id="renameRets" @click="displaySubtitle($event)"></v-btn>
                         </div>
 
                         <div v-if="!isDetailsPage">
@@ -78,10 +80,25 @@
     </v-card>
     <Filter v-if="isfilter" @filter-set="changeNumFilter" :filterPros="retsFilters"/>
 
+    <v-card style="position: relative; float: center; width: 25%; left: 40%; top: 30%; margin: 15px;" color="black" v-if="unsavedChanges">
+        <v-card-title>Discard unsaved changes?</v-card-title>
+        <v-divider style="margin-left: 15px; margin-right: 15px; color:white;"></v-divider>
+        <v-card-text>
+            If you proceed your chagnes will be discarded.
+        </v-card-text>
+        <div style="margin: 15px;">
+            <div style="float: right; margin-bottom: 15px;">
+                <v-btn variant="plain" @click="cancelReturn">Cancel & Return</v-btn>
+                <v-btn variant="outlined" style="border-radius: 0%;" @click="proceed">Proceeed</v-btn>
+            </div>
+        </div>
+        
+    </v-card>
+
 </template>
 
 <script>
-import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer, searchCards, highlightRETSPoint, toggleRelatedRets, getHighlightGraphic, removeHighlight} from './utility.js'
+import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer, searchCards, highlightRETSPoint, turnAllVisibleGraphicsOff, toggleRelatedRets, getHighlightGraphic, removeHighlight} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {getUserId} from './login.js'
 import Filter from './RetsFilter.vue'
@@ -110,10 +127,13 @@ export default{
             flagClickedId: "",
             flagColor: "",
             timer: "",
+            currentValues: "",
             isDetailsPage: false,
             isNoRets: false,
             send: null,
             activityBanner: "Activity Feed",
+            isSubtitle: false,
+            isRetsActivated: true,
             actvFeedSearch: "",
             flagColor: '',
             uploadAttachment: false,
@@ -123,7 +143,9 @@ export default{
                          "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, "GIS_ANALYST": appConstants.defaultUserValue, 
                          "filterTotal": 2},
             count: 0,
-            store
+            store,
+            stageData: 0,
+            unsavedChanges: false
         }
     },
     beforeMount(){
@@ -132,27 +154,62 @@ export default{
     },
     mounted(){
         reactiveUtils.on(() => view.popup, "trigger-action",
-        async (event) => {
-        // Execute the measureThis() function if the measure-this action is clicked
-        if (event.action.id === "open-details") {
-            console.log(store.clickedGraphic)
-            removeHighlight("a", true)
-            const returnHighlight = await getHighlightGraphic()
-            console.log(returnHighlight)
-            const graphicOid = store.clickedGraphic
-            const returnGraphic = retsGraphicLayer.graphics.items.find(ret => ret.attributes.OBJECTID === graphicOid)
-            this.double({attributes: returnGraphic.attributes, geometry: [returnGraphic.geometry.x, returnGraphic.geometry.y]}, 1)
-        }
-        }
-  );
+            async (event) => {
+                if (event.action.id === "open-details") {
+                    removeHighlight("a", true)
+                    await getHighlightGraphic()
+                    const graphicOid = store.clickedGraphic
+                    const returnGraphic = retsGraphicLayer.graphics.items.find(ret => ret.attributes.OBJECTID === graphicOid)
+                    this.stageData = {attributes: returnGraphic.attributes, geometry: [returnGraphic.geometry.x, returnGraphic.geometry.y]}
+                    this.checkChanges()
+                    
+                    
+                }
+        });
     },
     methods:{
-        test(){
-            console.log('hello')
+        alert(s){
+            window.alert(s)
         },
+        proceed(){
+            this.unsavedChanges = false
+            this.double({attributes: this.stageData.attributes, geometry: [this.stageData.geometry.x, this.stageData.geometry.y]}, 1)
+        },
+        cancelReturn(){
+            this.unsavedChanges = false
+            //do nothing
+        },
+        displaySubtitle(e){ 
+            this.isSubtitle = true
+            console.log(e)
+        },
+        checkChanges(){
+            const beforeAtt = JSON.parse(store.currentInfo)
+            const afterAtt = JSON.parse(JSON.stringify(this.currRoad))
+            console.log(afterAtt)
+            let issue = 0
+            for(const [key, value] of Object.entries(beforeAtt.attributes)){
+                if(key==='RELATED_RETS'){
+                    continue
+                }
+                if(value !== afterAtt.attributes[key]){
+                    this.unsavedChanges = true
+                    console.log(beforeAtt)
+                    console.log(afterAtt)
+                    issue++
+                    return
+                }
+            }
+            console.log("done")
+            issue === 0 ? this.double({attributes: this.stageData.attributes, geometry: [this.stageData.geometry.x, this.stageData.geometry.y]}, 1) : null
+        },
+        processBanner(i){
+            console.log(i)
+        },
+
         async enableFeed(e){
             console.log(e)
-            toggleRelatedRets(e[0].attributes.retsId ?? e[0].attributes.RETS_ID, false)
+            turnAllVisibleGraphicsOff()
             if(e.isDelete){
                 this.roadObj.splice(e.index, 1)
                 this.activityBanner = "Activity Feed"
@@ -171,10 +228,10 @@ export default{
             clearTimeout(this.timer)
             this.timer=""
             this.isDetailsPage = true
-            this.activityBanner = `RETS ${road.attributes.RETS_ID}`
+            this.activityBanner = `${road.attributes.RETS_ID}`
             highlightRETSPoint(road.attributes)
             this.zoomToRetsPt(road)
-            toggleRelatedRets(road.attributes.RETS_ID, true)
+            toggleRelatedRets(JSON.stringify(road))
         },
         zoomToRetsPt(rets){
             clearTimeout(this.timer)
@@ -236,6 +293,13 @@ export default{
             },
             immediate: true
         },
+        addrets:{
+            handler: function(){
+
+            },
+            immediate: true
+        }
+        
     },
     computed:{
         queryLayer:{
@@ -279,7 +343,6 @@ export default{
                         
                     })
                     .catch((err)=> {
-                        
                         console.log(err)
                     })
             }
@@ -290,7 +353,7 @@ export default{
 </script>
 
 <style scoped>
-
+    #retsSubtitle{}
     .attachCard{
         position: relative; 
         width: 20%; 

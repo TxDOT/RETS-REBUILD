@@ -95,8 +95,8 @@
 
 <script>
 import { appConstants } from '../common/constant'
-import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets, zoomTo, toggleRelatedRets} from './utility.js'
-
+import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets, zoomTo} from './utility.js'
+import {store} from './store.js'
     export default{
         name: "DetailsCard",
         props: {
@@ -117,7 +117,7 @@ import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRela
                 detailsStat: appConstants.statDomainValues,
                 ogValues: {},
                 RETSData: [],
-                
+                store
             }
         },
         beforeMount(){
@@ -132,18 +132,15 @@ import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRela
         },
         methods:{
             zoomToRelateRet(geom){
-                console.log()
                 zoomTo(geom)
             },
             splitAndAddRelatedRets(relatedRets){
-                if(typeof relatedRets === "object"){
-                    console.log(relatedRets)
+                if(typeof relatedRets === "object" || !relatedRets.length){
                     // relatedRets.map((ret)=>{
                     //     this.gimmeRETS(ret, `RETS_ID = ${ret}`)
                     // })
                     return
                 }
-                console.log(relatedRets)
                 const splitString = relatedRets.split(",")
                 this.infoRets.attributes.RELATED_RETS = []
                 splitString.map((ret)=>{
@@ -153,13 +150,12 @@ import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRela
             },
             initDataCheck(){
                 // if Route, status or description; save button disabled
-                let item = [this.infoRets.attributes.RTE_NM, this.infoRets.attributes.STAT, this.infoRets.attributes.DESC_].find(x => !x)
-                if(item){
+                let item = [this.infoRets.attributes.RTE_NM, this.infoRets.attributes.STAT, this.infoRets.attributes.DESC_].filter(x => !x)
+                if(item.length > 0){
                     this.sendDisabledSave(true)
                 }
             },
             valueRequired(e){
-                if(!e) return
                 if(!e.length){
                     this.sendDisabledSave(true)
                     return `Wrong :(`
@@ -188,7 +184,6 @@ import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRela
             
 
                 console.log("paperclip clicked")
-                console.log(this.infoRets.attributes)
             },
             crossHairFunc(){
                 console.log('crosshair clicked')
@@ -200,6 +195,7 @@ import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRela
                 document.querySelectorAll(".gem-search")[0].style.display =  document.querySelectorAll(".gem-search")[0].style.display === "block" ? "none" : "block"
             },
             async gimmeRETS(a, string){
+                console.log(a, string)
                 if(a.length){
                     const queryString = string ?? `RETS_ID >= ${a}`
                     const query = {"whereString" : queryString}
@@ -225,9 +221,7 @@ import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRela
                 }
             },
             addGraphic(e){
-                console.log(e)
                 e = typeof e === "object" ? e : this.splitAndAddRelatedRets(this.infoRets.attributes.RELATED_RETS)
-                console.log(e)
                 addRelatedRetsToMap(e.at(-1))
             },
             zoomToRETS(){
@@ -236,7 +230,6 @@ import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRela
             closeRelatedRetsChip(ret){
                 console.log(ret)
                 removeRelatedRetsFromMap(ret.raw?.name)
-                console.log(this.infoRets)
                 const retsPos = this.infoRets.attributes.RELATED_RETS.findIndex(x => x.name === Number(ret.raw?.name))
                 this.infoRets.attributes.RELATED_RETS.splice(retsPos,1)
             },
@@ -255,12 +248,16 @@ import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRela
                     this.gemTasks.push(this.taskGem)
                 },
             },
-            'infoRets.attributes.RETS_ID':{
-                handler: function(n, o){
-                    console.log(n,o)
+            'infoRets.attributes.RETS_ID':{ //<= neccessary?
+                handler: function(n,o){
+                    store.currentInfo = JSON.stringify(this.infoRets)
+                    console.log("new", n)
+                    console.log("old", o)
                     this.splitAndAddRelatedRets(this.infoRets.attributes.RELATED_RETS)
-                    toggleRelatedRets(o)
+                    // toggleRelatedRets(o, false)
+                    // toggleRelatedRets(n, true)
                 },
+                immediate: true
             }
         },
 

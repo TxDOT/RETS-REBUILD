@@ -124,3 +124,10 @@
   top: 0rem;
   width: 100%;
 }
+#retsSubtitle{
+  position: relative;
+  width: 27% !important;
+  padding: 0%;
+  height: 10px !important;
+  bottom: 1rem !important;
+}

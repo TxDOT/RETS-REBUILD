@@ -85,7 +85,7 @@
     import Legend from "@arcgis/core/widgets/Legend.js";
     import LegendViewModel from "@arcgis/core/widgets/Legend/LegendViewModel.js";
     import Graphic from "@arcgis/core/Graphic.js";
-    import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, TxDotRoaways, retsLayer, view} from '../components/map-Init.js';
+    import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, TxDotRoaways, retsLayer, view, retsGraphicLayer} from '../components/map-Init.js';
     import {highlightRETSPoint, removeHighlight} from '../components/utility.js'
     import {addRETSPT} from '../components/crud.js'
     
@@ -95,7 +95,7 @@
         name: "RetsFeed",
         data(){
             return{
-                addrets2: 1,
+                addrets2: null,
                 basemapcard: false,
                 jumptocard:false,
                 tester: false,
@@ -109,24 +109,12 @@
                                     document.getElementById("container").style.display === "none" ? "block" : "none"
                                 }, isActive: this.tester,
                                },  
-                               {title:"Test", icon: 'mdi-plus', color: "#4472C4", action: () =>{
-                                this.handleCreateTool();
+                               {title:"Test", icon: 'mdi-plus', color: "#4472C4", action: async () =>{
+                                const graphicAdd = await this.handleCreateTool();
+                                this.processAddPt(graphicAdd)
                                }},
-                            //    {title:"Test", icon: 'mdi-chart-pie', color: "white", action: () =>{
-                            //     console.log("Hey3")
-                            //    }, isActive: false},
-                            //    {title:"Test", icon: 'mdi-currency-btc', color: "white", action: () =>{
-                            //     console.log("Hey4")
-                            //    }, isActive: false},
-                            //    {title:"Test", icon: 'mdi-filter', color: "white", action: () =>{
-                            //     console.log("Hey5")
-                            //    }, isActive: false},
-                            //    {title:"Test", icon: 'mdi-bell-outline', color: "white", action: () =>{
-                            //     console.log("Hey6")
-                            //    }, isActive: false}
                             ],
  
-
                 retsToolsBottom: [
                                {title:"Select", icon: 'mdi-select-multiple', color: "white", name: "Select", action: () =>{
                                 this.handleSelectTool();
@@ -151,6 +139,7 @@
                                 },
                                {title:"Legend", icon: 'mdi-format-list-bulleted-type', color: "white", name: "Legend", action: () =>{
                                 this.handleLegendTool();
+                                this.addrets2 = 2
                                },
                                hover:(i) => 
                                     {
@@ -182,7 +171,7 @@
                             
 
             }
-                },
+        },
                 computed:{
                     test:{
                         get(){
@@ -205,42 +194,42 @@
                     mouseleavejumpto(){
                         this.jumptocard = false;
                     },
-                    handleCreateTool() {
-                    this.sketchWidgetcreate
-                    this.sketchWidgetcreate.create("point")
-                    this.sketchWidgetcreate.on("create", async function(event){
-                        if(event.state === "complete") {
-                            // Get the point geometry from the sketch
-                            const pointGeometry = event.graphic.geometry;
+                    async processAddPt(newPointGraphic){
+                        try{
+                            console.log(newPointGraphic)
+                            const objectid = await addRETSPT(newPointGraphic)
+                            const obj = objectid.addFeatureResults[0].objectId
+                            this.addrets2 = obj
+                            return
+                        }
+                        catch(err){
+                            console.log(err)
+                        }
+                    },
+                    async handleCreateTool() {
+                        let newPromise = new Promise((res, rej) =>{
+                            this.sketchWidgetcreate
+                            this.sketchWidgetcreate.create("point")
+                            this.sketchWidgetcreate.on("create", (event) =>{
+                                if(event.state === "complete") {
+                                    // Get the point geometry from the sketch
+                                    const pointGeometry = event.graphic.geometry;
 
-                            // Create a new graphic with the point geometry
-                            const newPointGraphic = new Graphic({
-                                geometry: pointGeometry,
-                                spatialReference: {
-                                    wkid: 3857
+                                    // Create a new graphic with the point geometry
+                                    const newPointGraphic = new Graphic({
+                                        geometry: pointGeometry,
+                                        spatialReference: {
+                                            wkid: 3857
+                                        }
+                                    });
+
+                                    event.graphic.symbol = createretssym;
+                                    res(newPointGraphic)
                                 }
-                            });
+                            })
+                        })
 
-                            event.graphic.symbol = createretssym;
-
-
-                            try{
-                                const objectid = await addRETSPT(newPointGraphic)
-                                const obj = objectid.addFeatureResults[0].objectId
-                                console.log(objectid)
-                                this.addrets2 = obj
-                            }
-                            catch(err){
-                                console.log(err)
-                            }
-
-                            
-                            }
-                    })
-
-
-
-
+                        return await newPromise
                     },
 
                     handleSelectTool() { 

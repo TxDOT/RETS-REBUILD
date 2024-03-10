@@ -222,6 +222,11 @@
 </script>
 
 <style scoped>
+#flagBtnDetails{
+    padding: 1px !important;
+    margin: 15px !important;
+    min-width: 15px !important;
+}
 .cardDiv .v-btn-toggle{
     position: relative !important;
     bottom: 1rem !important;

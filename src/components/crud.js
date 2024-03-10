@@ -9,15 +9,19 @@ export async function addRETSPT(retsObj){
 
 export async function updateRETSPT(retsObj){
     console.log(retsObj)
-    retsObj.attributes.RELATED_RETS = retsObj.attributes.RELATED_RETS.map(x => x.name).toString()
-    let esriUpdateGraphic = createGraphic(retsObj.attributes)
+    if(retsObj.attributes.RELATED_RETS){
+        retsObj.attributes.RELATED_RETS = retsObj.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID).toString()
+    }
+    let esriUpdateGraphic = createGraphic(retsObj)
     await retsLayer.applyEdits({
         updateFeatures: [esriUpdateGraphic]
     })
 }
 
 export function deleteRETSPT(retsObj){
-    retsObj.RELATED_RETS = retsObj.RELATED_RETS.map(x => x.name.RETS_ID).toString()
+    if(retsObj.attributes.RELATED_RETS){
+        retsObj.attributes.RELATED_RETS = retsObj.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID).toString()
+    }
     let esriDelGraphic = createGraphic(retsObj)
     retsLayer.applyEdits({
         deleteFeatures: [esriDelGraphic]
@@ -33,6 +37,6 @@ function createGraphic(retsObj){
     delete retsObj.retsPt
 
     return new Graphic({
-        attributes: retsObj
+        attributes: retsObj.attributes
     })
 }
