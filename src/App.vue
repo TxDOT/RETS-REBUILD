@@ -47,4 +47,5 @@ export default{
   overflow-y: hidden !important;
 }
 
+
 </style>

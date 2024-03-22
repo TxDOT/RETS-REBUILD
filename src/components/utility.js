@@ -4,6 +4,7 @@ import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant.js";
 import {store} from './store.js'
 import {getDFOFromGRID} from './crud.js'
+import { addRETSPT } from './crud.js';
 
 export function clickRetsPoint(){
     try{
@@ -81,17 +82,17 @@ export function removeHighlight(feature, removeAll){
 function outlineFeedCards(res){
     res.forEach((x) => {
         //set card outline
-        if(!document.getElementById(`${x.graphic.attributes.RETS_ID-x.graphic.attributes.OBJECTID}`)) return
-        document.getElementById(`${x.graphic.attributes.RETS_ID-x.graphic.attributes.OBJECTID}`).classList.add('highlight-card')
+        if(!document.getElementById(`${x?.graphic.attributes.RETS_ID-x?.graphic.attributes.OBJECTID}`)) return
+        document.getElementById(`${x?.graphic.attributes.RETS_ID-x?.graphic.attributes.OBJECTID}`).classList.add('highlight-card')
         //zoom to card in feed
 
         const zoomToCard = document.createElement('a')
         zoomToCard.href = `#${x.graphic.attributes.RETS_ID-x.graphic.attributes.OBJECTID}`
         zoomToCard.click()
         //remove card outline
-        setTimeout(()=>{
-            document.getElementById(`${x.graphic.attributes.RETS_ID-x.graphic.attributes.OBJECTID}`).classList.remove('highlight-card')
-        },5000)
+        // setTimeout(()=>{
+        //     document.getElementById(`${x.graphic.attributes.RETS_ID-x.graphic.attributes.OBJECTID}`).classList.remove('highlight-card')
+        // },5000)
     })
     return;
 }
@@ -344,3 +345,130 @@ export function getUniqueQueryValues(layer, constantsProp){
             item.features.forEach(x => constantsProp.push(x.attributes))
         })
 }
+export function highlightpoints(event){
+     // Get the rectangle geometry
+     var rectangleGeometry = event.graphic.geometry;
+     // Query for points within the rectangle
+     var query = retsLayer.createQuery();
+     query.geometry = rectangleGeometry;
+     retsLayer.queryFeatures(query)
+
+}
+
+
+
+export function createtool(sketchWidgetcreate, createretssym) {
+    return new Promise((resolve, reject) => {
+      sketchWidgetcreate.create("point");
+      sketchWidgetcreate.on("create", (event) => {
+        if (event.state === "complete") {
+          const pointGeometry = event.graphic.geometry;
+          const newPointGraphic = new Graphic({
+            geometry: pointGeometry,
+            spatialReference: { wkid: 3857 }
+          });
+  
+          event.graphic.symbol = createretssym;
+          resolve(newPointGraphic);
+        }
+      });
+    });
+  }
+
+  var testshift = false;
+  window.addEventListener("keydown", (event)=>{
+      testshift = event.key
+  });
+  window.addEventListener("keyup", (event) => {
+    testshift = false
+  });
+  export function selecttool(isSelectEnabled, sketchWidgetselect, clearSelection, graphics){
+    if(isSelectEnabled === true){ 
+        var state = clearSelection
+        sketchWidgetselect.create("rectangle");
+        state = !state
+        sketchWidgetselect
+        .on("create", function (event) 
+            {
+            if (event.state === "complete")
+                {
+                   
+                    // Get the rectangle geometry
+                    var rectangleGeometry = event.graphic.geometry;
+                    // Query for points within the rectangle
+                    var query = retsLayer.createQuery();
+                    query.geometry = rectangleGeometry;
+                    retsLayer.queryFeatures(query)
+                    .then(function (result) 
+                            {
+                                // Access the selected features
+                                var selectedFeatures = result.features;
+
+                                if (state === true && testshift != "Shift"){
+                                    console.log('true')
+                                    for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                      removeHighlight(selectedFeatures[i].attributes,state);  
+
+                                      
+                                    }
+                                    for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                        highlightRETSPoint(selectedFeatures[i].attributes);
+                                        
+  
+                                  }   
+                                  console.log(selectedFeatures) 
+                                  //outlineFeedCards(selectedFeatures);
+                                  graphics.removeAll() 
+                                   return 
+                                }
+                                
+                                 if(state === true && testshift === "Shift"){
+                                    console.log('false')
+
+                                    for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                        highlightRETSPoint(selectedFeatures[i].attributes);
+                                        
+  
+  
+                                  }    
+                                  graphics.removeAll();
+                                  return
+                                }
+
+
+                                
+                                
+
+                            });
+
+                            
+                            
+                }
+
+        });
+
+        isSelectEnabled = !isSelectEnabled; 
+    }
+    else{
+        isSelectEnabled = !isSelectEnabled;
+        sketchWidgetselect.cancel()
+        clearSelection = !clearSelection
+            
+    }
+    
+    
+    return
+  }
+
+  export async function handleaddrets(newPointGraphic, addrets){
+    try{
+        console.log(newPointGraphic)
+        const obj = await addRETSPT(newPointGraphic)
+        const objectid = obj.addFeatureResults[0].objectId
+        addrets = objectid
+        return
+    }
+    catch(err){
+        console.log(err)
+    }
+  }

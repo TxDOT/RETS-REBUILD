@@ -18,11 +18,12 @@ import ShowChanges from './showChanges.vue'
 //import ESRI JS ESM class
 export default{
     name: "Map",
-    components: {ShowChanges},
     data(){
         return{
+            isActOpen: true,
+            shift: 250,
             show: true
-        }
+        };
     },
     mounted(){
             //1.Check to see if user is signed in. If not sign them in without using the popup
@@ -32,7 +33,27 @@ export default{
             hoverRetsPoint();
     },
     methods:{
+        togglemenu(){   
+            
+            var currentCenter = view.center.clone();
+            var screenPoint = view.toScreen(currentCenter);
+            var newCenter;    
+            if (this.isActOpen === true){
 
+                 this.isActOpen =! this.isActOpen
+                screenPoint.x = screenPoint.x + this.shift; // Adjust the x coordinate by the desired amount of pixels
+                var newCenter = view.toMap(screenPoint); // Convert back to map coordinates
+                view.goTo(newCenter)
+                
+            }
+            else{
+                 this.isActOpen =! this.isActOpen
+                screenPoint.x = screenPoint.x - this.shift; // Adjust the x coordinate by the desired amount of pixels
+                var newCenter = view.toMap(screenPoint); // Convert back to map coordinates
+                view.goTo(newCenter)                
+            }
+            
+        }
     }
 }
 </script>
@@ -57,5 +78,7 @@ export default{
     .esri-view {
         --esri-view-outline-color: none !important;
     }
+
+
 
 </style>

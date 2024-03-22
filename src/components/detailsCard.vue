@@ -292,7 +292,7 @@ import {store} from './store.js'
     position: relative;
     height: 400px !important;
     width: 100vh !important;
-    bottom: 1rem;
+    bottom: rem;
     border-radius: 0px;
     
 }

@@ -3,7 +3,8 @@
         <v-col class="d-flex flex-wrap ga-2" align-self="start">
             <v-row class="main-color">
                 <header id="container-header">RETS Dashboard</header>
-                <v-btn prepend-icon="mdi-plus" color="#4472C4" rounded="0" id="add-new-btn" class="main-button" @click="alert('This isnt hooked up.  Which add button is the one?')">
+                <v-btn v-for="(tool, i) in addbutton" :key="i" :value="tool" @click="tool.action()" prepend-icon="mdi-plus" color="#4472C4" rounded="0" id="add-new-btn" class="main-button" >
+                    <!-- @click="handlecreate"> -->
                     <p class="text-btn">New</p>
                 </v-btn>
                 
@@ -101,7 +102,7 @@
 </template>
 
 <script>
-import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer, searchCards, highlightRETSPoint, turnAllVisibleGraphicsOff, toggleRelatedRets, getHighlightGraphic, removeHighlight} from './utility.js'
+import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer, searchCards, highlightRETSPoint, turnAllVisibleGraphicsOff, toggleRelatedRets, getHighlightGraphic, removeHighlight, createtool, handleaddrets} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {getUserId} from './login.js'
 import Filter from './RetsFilter.vue'
@@ -109,6 +110,9 @@ import RetsDetailPage from './RetsDetail.vue'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import {store} from './store.js'
 import {view, retsGraphicLayer} from './map-Init.js'
+import RetsFeed from './RetsFeed.vue'
+import { sketchWidgetcreate, createretssym } from './map-Init.js'
+import {addRETSPT} from '../components/crud.js'
 
 
 export default{
@@ -121,6 +125,7 @@ export default{
     components: {RetsDetailPage, Filter}, 
     data(){
         return{
+            addrets: null,
             filterOptions: appConstants.RetsStatus,
             colorTable: appConstants.CardColorMap,
             roadObj: [],
@@ -151,7 +156,18 @@ export default{
             store,
             stageData: 0,
             unsavedChanges: false,
-            showChanges: false
+            showChanges: false,
+            isCreateEnabled: true,
+            addbutton: [
+                {title:"New", action: async () =>{
+                                const graphicAdd = await this.handlecreate();
+                                if (graphicAdd){
+                                    this.processAddPt(graphicAdd)
+                                }
+                                
+                }}
+                          
+],
         }
     },
     beforeMount(){
@@ -173,6 +189,19 @@ export default{
         });
     },
     methods:{
+        async processAddPt(newPointGraphic){
+                        try{
+                            console.log(newPointGraphic)
+                            const obj = await addRETSPT(newPointGraphic)
+                            const objectid = obj.addFeatureResults[0].objectId
+                            this.addrets = objectid
+                            return
+                        }
+                        catch(err){
+                            console.log(err)
+                        }
+                         //handleaddrets(newPointGraphic, this.addrets);
+                    },
         alert(s){
             window.alert(s)
         },
@@ -251,6 +280,21 @@ export default{
             this.zoomToRetsPt(road)
             toggleRelatedRets(JSON.stringify(road))
         },
+        async addretss(){
+            const querystring = {"whereString":`OBJECTID = ${this.addrets}`}
+            try{const querypromise = await getQueryLayer(querystring, "PRIO, CREATE_DT DESC")
+                if (querypromise.features.length){
+                    querypromise.features.forEach(
+                        (feat)=> this.double({attributes:feat.attributes,geometry:[feat.geometry.x,feat.geometry.y]})
+                    )
+                }
+
+            }
+            catch(error){
+                console.log(error)
+            }
+        }
+        ,
         zoomToRetsPt(rets){
             clearTimeout(this.timer)
             this.timer = ""
@@ -310,6 +354,24 @@ export default{
             }
             return 'mdi-flag'
         },
+        async handlecreate(){
+            if (this.isCreateEnabled === true) {
+                this.isCreateEnabled = !this.isCreateEnabled;
+                //console.log("true")
+                const newPointGraphic = await createtool(sketchWidgetcreate, createretssym);
+                // Process the newPointGraphic as needed
+                this.isCreateEnabled = !this.isCreateEnabled;
+                return newPointGraphic
+                            
+                } 
+            else {
+                sketchWidgetcreate.cancel();
+                this.isCreateEnabled = !this.isCreateEnabled;
+                //console.log("false")
+                }
+
+
+        }
 
     },
     watch:{
@@ -344,6 +406,12 @@ export default{
                 setTimeout(()=>{
                    // this.filterPros.attributes.RTE_NM = word
                 },1000)
+            }
+        },
+        addrets:{
+            handler: async function(){
+                console.log(this.addrets)
+                await this.addretss()
             },
             immediate: true
         }
@@ -407,6 +475,9 @@ export default{
         padding: 0px;
         margin-left: 10px;
         bottom: .4rem;
+    }
+    #retsSubtitle{
+        /*  */
     }
     .attachCard{
         position: relative; 
@@ -618,4 +689,6 @@ export default{
         color: red;
         top: 1rem;
     }
+
+
 </style>

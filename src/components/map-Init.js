@@ -17,6 +17,8 @@ import WebTileLayer from "@arcgis/core/layers/WebTileLayer.js";
 import OpenStreetMapLayer from "@arcgis/core/layers/OpenStreetMapLayer.js";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer.js";
 import TileInfo from "@arcgis/core/layers/support/TileInfo.js";
+import Legend from "@arcgis/core/widgets/Legend";
+import LegendViewModel from "@arcgis/core/widgets/Legend/LegendViewModel";
 
 export let retsPointRenderer = new UniqueValueRenderer({
  field: "STAT", // Field based on which the symbology will be categorized
@@ -128,8 +130,6 @@ const retsLabelclass = new LabelClass({
 //Applies label class to rets layer
 retsLayer.labelingInfo = [retsLabelclass];
 
-export const sketchLayer = new GraphicsLayer({});
-
 export const retsGraphicLayer = new GraphicsLayer({});
 
 export const graphics = new GraphicsLayer({});
@@ -147,7 +147,7 @@ export const darkVTBasemap = new Basemap({
  
 //Light Vector Tile construction
 export const lightVectorTile = new VectorTileLayer({
-  url: "https://tiles.arcgis.com/tiles/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Vector_Tile_Basemap/VectorTileServer",
+  url: "https://www.arcgis.com/sharing/rest/content/items/507a9905e7154ce484617c7327ee8bc4/resources/styles/root.json",
   labelsVisible: true,
 })
 
@@ -189,26 +189,11 @@ export const view = new MapView({
     fillOpacity: 1
   },
   constraints: {
-    lods: TileInfo.create().lods //property to allow a mapview center to the imagery basemap
-  }
+    lods: TileInfo.create().lods, //property to allow a mapview center to the imagery basemap
+    rotationEnabled: false,
+  },
 })
 
-export var sketchWidget = new Sketch({
-  layer: retsLayer, // Replace with your actual feature layer
-  view: view, // Replace with your actual map view
-  // Other configuration options for the Sketch widget
-  creationMode: "single"
-});
-        
-
-// let sketch = new Sketch({
-//   layer: retsLayer,
-//   view: view,
-//   snappingOptions:{
-//     enabled: true,
-//     featureSources: [{layer: TxDotRoaways, enabled: true}]
-//   }
-// });
 
 //create search widget
 export const searchWidget = new Search({
@@ -221,7 +206,7 @@ export const searchWidget = new Search({
       layer: retsLayer, 
       placeholder: "City, County, District, Route",
       zoomScale: 5000,
-      searchFields: ["RETS_ID","RTE_NM","CNTY_NM","DIST_NM","GIS_ANALYST","GRID_ANALYST","DIST_ANALYST","MO_NBR","ACTIVITY"],
+      searchFields: ["RETS_ID","RTE_NM","CNTY_NM","DIST_NM","GIS_ANALYST","GRID_ANALYST","DIST_ANALYST","ACTV"],
       displayField: "RETS_ID",
       exactMatch: false,
       outFields: ["RETS_ID"],
@@ -239,17 +224,58 @@ export const ZoomWidget = new Zoom({
   view: view
 });
 
+export const legendWidget = new Legend({
+  view: view,
+  viewModel: new LegendViewModel 
+  ({
+      view: view,
+      layerInfos:
+          [
+              {
+                  title: false,
+                  layer: retsLayer,
+              
+              }
+          ]
+  }),
+  style : {
+      type: "card",
+      layout: "side-by-side"
+  },
+  headingLevel: 0,
+  id: "esrilegend",
+  visible: false,
+});
+ export const sketchWidgetselect = new Sketch({
+  layer: graphics, // Replace with your actual feature layer
+  view: view,
+  creationMode: "continuous", // Replace with your actual map view
+  // defaultUpdateOptions: {
+  //     tool: "transform"
+  // }
+
+});
+
+export const sketchWidgetcreate = new Sketch({
+  layer: graphics, // Replace with your actual feature layer
+  view: view,
+  creationMode: "single", // Replace with your actual map view
+  snappingOptions: {
+      enabled: true,
+      featureSources: [{layer: TxDotRoaways, enabled: true}]
+  },
+
+
+});
+
+
 // Adds the search widget below other elements in the top right corner of the view
 view.ui.add(searchWidget, {
   position: "top-right",
-  index: 2
+  index: 2,
+  container: "searchcont",
 });
 
-//adds zoom widget to map 
-view.ui.add(ZoomWidget, {
-  position: "top-right",
-  index: 3
-});
 
 //adds zoom widget to map 
 view.ui.add(ZoomWidget, {
@@ -261,6 +287,9 @@ view.ui.add(homeWidget, {
   position: "top-right",
   index: 3
 });
+view.ui.add(legendWidget, {
+  position: "bottom-right"
+})    
 
 //remove attribution and zoom information
 view.ui.remove("attribution")
@@ -311,3 +340,8 @@ map.addMany([retsLayer, TxDotRoaways, sketchLayer, graphics, retsGraphicLayer])
 //remove attribution and zoom information
 view.ui.remove("attribution")
 // </></>
+view.on("drag", ["Shift"], (event) => {
+  event.stopPropagation();
+});
+
+
