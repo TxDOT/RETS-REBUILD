@@ -383,7 +383,7 @@ export function createtool(sketchWidgetcreate, createretssym) {
   
                                   }   
                                   console.log(selectedFeatures) 
-                                  outlineFeedCards(selectedFeatures);
+                                  //outlineFeedCards(selectedFeatures);
                                   graphics.removeAll() 
                                    return 
                                 }
