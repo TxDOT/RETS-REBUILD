@@ -1,9 +1,9 @@
 import OAuthInfo from "@arcgis/core/identity/OAuthInfo.js";
 import esriId from "@arcgis/core/identity/IdentityManager.js";
-import { retsLayer} from './map-Init.js'
-import { view } from "./map-Init.js";
-import {getDomainValues, getDistinctAttributeValues} from './utility.js'
+import { retsLayer, view, TxDotRoaways, retsUserRole } from './map-Init.js'
+import {getDomainValues, getDistinctAttributeValues, returnHistory, getUniqueQueryValues} from './utility.js'
 import { appConstants } from "../common/constant.js";
+import router from '../router/index.js'
 
 const authen = new OAuthInfo({
   appId: "qzqSMtBVUMsAt2Is",
@@ -14,14 +14,29 @@ const authen = new OAuthInfo({
 })
 
 export function login(){
-  esriId.registerOAuthInfos([authen]);
+  try{
+    esriId.registerOAuthInfos([authen]);
+    console.log(authen.portalUrl)
+    esriId.checkSignInStatus(authen.portalUrl)
+      .then((x) => setDefExpRets(x.userId)) //already signed in
+      .catch(() => signIn()) //not signed in; proceed to sign in 
+  }
+  catch(err){
+    console.log(err)
+  }
 
-  esriId.checkSignInStatus(authen.portalUrl)
-    .then((x) => setDefExpRets(x.userId)) //already signed in
-    .catch(() => signIn()) //not signed in; proceed to sign in 
+  // try{
+  //   return setDefExpRets(getUserId.userId)
+  // } 
+  // catch{
+  //   signIn()
+
+  // }
+    //.then((x) => setDefExpRets(x.userId)) //already signed in
+    //.catch(() => signIn()) //not signed in; proceed to sign in 
 }
 
-async function signIn(){ 
+export async function signIn(){ 
   const userId = await getUserId()
   setDefExpRets(userId)
   retsLayer
@@ -32,11 +47,17 @@ async function signIn(){
           appConstants[layer.prop].push({"name" : x.name, "value": x.code})
         })
       })
+
       getDistinctAttributeValues('ACTV')
+      getUniqueQueryValues(retsUserRole, appConstants.userRoles)
+      createLayerViews()
+
       return retsLayer.queryExtent();
     })
     .then((response) => {
+      router.push('/map')
       view.goTo(response.extent);
+      
     });
 }
 
@@ -54,4 +75,27 @@ export async function getUserId(){
 
   return user.userId
 }
+
+function createLayerViews(){
+    returnHistory()
+    view.whenLayerView(TxDotRoaways)
+      .then((featLayerView) => {
+        console.log(featLayerView)
+        if(featLayerView.layer.title === 'TxDOT Roadways'){
+          let query = featLayerView.layer.createQuery()
+          query.where = "OBJECTID < 10"
+
+          featLayerView.queryFeatures(query)
+            .then(x => console.log(x))
+            .catch(err => console.log(err))
+          return
+        }
+        //roadLayerview = featLayerView
+      })
+      .catch(err => console.log(err))
+    return
+}
+
+
+
 

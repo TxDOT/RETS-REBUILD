@@ -1,8 +1,9 @@
-import {view, retsLayer, homeWidget, retsGraphicLayer} from './map-Init'
+import {view, retsLayer, homeWidget, retsGraphicLayer, TxDotRoaways, retsHistory} from './map-Init'
 import Query from "@arcgis/core/rest/support/Query.js";
 import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant.js";
 import {store} from './store.js'
+import {getDFOFromGRID} from './crud.js'
 
 export function clickRetsPoint(){
     try{
@@ -173,7 +174,7 @@ export function getQueryLayer(newQuery, orderFields, count){
     query.returnGeometry = true
     query.num = count ??= 20000
 
-    return retsLayer.queryFeatures(query)
+    return newQuery.queryLayer === 'retsLayer' ? retsLayer.queryFeatures(query) : retsHistory.queryFeatures(query)
 }
 
 
@@ -183,6 +184,7 @@ export function searchCards(cardArr, string, index){
     //     return
     // }
     cardArr.forEach((x) => {
+        console.log(x)
         const a = Object.values(x.attributes).find(t => String(t).includes(string))
         if(a){
             document.getElementById(`${x.attributes[index]}`).classList.add('showCards')
@@ -213,11 +215,6 @@ export function addRelatedRetsToMap(rets){
         return
     }    
     
-    // a.retsid.concat(', ', rets.RETS_ID)
-        // console.log(a)
-
-    
-
     const graphicPt = {
         type: "point",
         longitude: rets.geometry[0],
@@ -288,17 +285,33 @@ export function zoomToRelatedRets(relatedRets){
 }
 
 export const toggleRelatedRets = (retsid) =>  {
-    console.log(retsid)
     const parseRets = JSON.parse(retsid)
+    if(!parseRets.attributes.RELATED_RETS) return
+    console.log(parseRets)
     const newRetsId = typeof retsid === "object" ? parseRets.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID) : parseRets.attributes.RELATED_RETS.split(",")
     turnAllVisibleGraphicsOff()
     newRetsId.forEach((ret) =>{
         let a = retsGraphicLayer.graphics.items.filter(item => item.attributes.retsId === Number(ret))
         a.forEach(x => x.visible = true)
     })
+    return
 }
 
 export function returnDFO(roadName, dfo){
+    
+    view.on("pointer-move", (event)=>{
+        view.hitTest(event, {include: [TxDotRoaways]})
+            .then((x) =>{
+                if(!x.results.length) return
+                console.log(view.toMap(x.screenPoint))
+                console.log(x)
+                getDFOFromGRID(x.results[0].graphic.attributes.GID, .2)
+            })
+    })
+    
+    // new Query({
+    //     returnGeometry: true
+    // })
     //query for road
     //find dfo placement on the road
         //find segment point is on (two points) => before, end
@@ -309,3 +322,25 @@ export function returnDFO(roadName, dfo){
 // export function openDetailsFromGraphic(){
     
 //}
+
+export function returnHistory(){
+    const queryString = {"whereString": `1=1`, "queryLayer": "retsHistory"}
+    getQueryLayer(queryString, "create_dt desc")
+        .then((hist) => {
+            const arrHist = []
+            hist.features.forEach(x => arrHist.push(x.attributes))
+            store.history = JSON.stringify(arrHist)
+        })
+    return
+}
+
+export function getUniqueQueryValues(layer, constantsProp){
+    const query = new Query()
+    query.where = `1=1`
+    query.outFields = ["*"]
+    
+    layer.queryFeatures(query)
+        .then((item) => {
+            item.features.forEach(x => constantsProp.push(x.attributes))
+        })
+}

@@ -196,9 +196,10 @@
                     },
                     async processAddPt(newPointGraphic){
                         try{
-                            console.log(newPointGraphic)
                             const objectid = await addRETSPT(newPointGraphic)
+                            
                             const obj = objectid.addFeatureResults[0].objectId
+                            console.log(`${obj} has been created`)
                             this.addrets2 = obj
                             return
                         }

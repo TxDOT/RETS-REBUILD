@@ -14,6 +14,7 @@
   padding-left: .5rem !important;
   padding-right: .5rem !important;
   height: 1.8rem !important;
+  border-radius: 0% !important;
 }
 
 .main-button-style{
@@ -46,7 +47,7 @@
 }
 
 .main-color{
-    color: #4472C4 !important;
+    color: #8FAADC !important;
 }
 
 .subtitle-text{
@@ -85,12 +86,12 @@
 }
 
 .gem-search{
-  top: 34rem;
+  top: 36rem;
   min-height: 4rem;
   max-height: 9rem;
   position: fixed;
   display: flex;
-  left: 5rem;
+  left: 5.2rem;
   width: 5rem;
   background-color: #404040;
   display: none;
@@ -124,10 +125,51 @@
   top: 0rem;
   width: 100%;
 }
-#retsSubtitle{
+.retsSubtitle{
   position: relative;
-  width: 27% !important;
-  padding: 0%;
-  height: 10px !important;
-  bottom: 1rem !important;
+  width: 30%;
+  max-height: 50px;
+  bottom: 1rem;
+  margin-left: 10px;
+}
+
+.date {
+  display: block !important;
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+  padding-inline-start: 0px !important;
+  padding-inline-end: 0px !important;
+  row-gap: 0px !important;
+  justify-content: left !important;
+  
+}
+
+.date :deep(.v-date-picker-controls){
+  row-gap: 0px !important;
+  justify-content: left !important;
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+}
+
+.date :deep(.v-date-picker-month){
+  padding: 0px 0px 0px !important;
+}
+
+.date :deep(.v-date-picker-month) .v-date-picker-month__days{
+  row-gap: 0px !important;
+}
+
+.history-card{
+  position:relative; 
+  height: 18rem; 
+  bottom: 0.2rem; 
+  border-radius: 0%; 
+  overflow-y: auto;
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.marginSetting{
+  margin-right: 10px;
+  margin-left: 10px;
 }

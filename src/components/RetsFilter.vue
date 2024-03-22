@@ -108,7 +108,7 @@
         methods:{
             cancelFilter(){
                 this.calcFilterDiff()
-                this.$emit('filter-set', this.filterPros)
+                this.$emit('filter-set', 'cancel')
                 return
             },
             setFilterNumber(){
@@ -122,18 +122,17 @@
                 return
             },  
             calcFilterDiff(){
-                console.log(2)
                 const ignoreField = ['CREATE_DT', 'filterTotal', 'loggedInUser']
                 for(const [key,value] of Object.entries(this.filterPros)){
-                    console.log(key)
                     if(ignoreField.includes(key) || !value) continue
                     if(value.length){
-                        console.log(1)
+                        console.log(value)
                         this.addNumFilter()
                     }
                 }
 
                 this.filterPros.filterTotal = this.numFilters
+                this.numFilters = 0
                 return
             },
             restoreDefault(){
@@ -149,6 +148,7 @@
                 this.filterPros.filterTotal = this.defaultFilter.filterTotal
                 
                 filterMapActivityFeed(this.defaultFilter)
+                this.$emit('filter-set', this.filterPros)
                 return
             },
             selectDates(){
@@ -156,9 +156,9 @@
                 if(this.selectDate.length === 2){
                     this.selectDate.sort((a,b) => a - b)
                     this.filterPros.EDIT_DT = `${this.selectDate[0].toLocaleDateString('en-US')} - ${this.selectDate[1].toLocaleDateString('en-US')}`
+                    this.isDate = false
                     return
                 }
-
                 this.filterPros.EDIT_DT = `${this.selectDate[0].toLocaleDateString('en-US')}`
                 return
             },
@@ -201,9 +201,9 @@
         display: flex;
         flex-direction: column;
         border-radius: 0%;
-        position: relative;
-        min-height: 44vh;
-        max-height: 90vh;
+        position: absolute;
+        min-height: 64vh;
+        max-height: 91vh;
         overflow-y: auto;
     }
 
@@ -218,29 +218,5 @@
         color: #4472C4;
         right: 1rem;
     }
-    .date {
-        display: block !important;
-        padding-top: 0px !important;
-        padding-bottom: 0px !important;
-        padding-inline-start: 0px !important;
-        padding-inline-end: 0px !important;
-        row-gap: 0px !important;
-        justify-content: left !important;
-        
-    }
 
-    .date :deep(.v-date-picker-controls){
-        row-gap: 0px !important;
-        justify-content: left !important;
-        padding-top: 0px !important;
-        padding-bottom: 0px !important;
-    }
-
-    .date :deep(.v-date-picker-month){
-        padding: 0px 0px 0px !important;
-    }
-
-   .date :deep(.v-date-picker-month) .v-date-picker-month__days{
-        row-gap: 0px !important;
-    }
 </style>

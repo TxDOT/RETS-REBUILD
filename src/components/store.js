@@ -5,5 +5,7 @@ export const store = reactive({
         isCloseDetail: false,
         taskGem: 0,
         clickedGraphic: 0,
-        currentInfo: ""
+        currentInfo: "",
+        history: "",
+        historyRetsId: 0 
 })

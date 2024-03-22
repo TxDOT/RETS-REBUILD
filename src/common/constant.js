@@ -25,5 +25,6 @@ export const appConstants = {
     jobTypeDomainValues:[],
     defaultStatValues: [{ name: "Not Started", value: 1 },{ name: "In Progress", value: 2 }],
     defaultUserValue:[],
-    activityList: []
+    activityList: [],
+    userRoles: [],
 }

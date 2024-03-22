@@ -1,6 +1,7 @@
 <template>
-    <div style="height: 0rem;">
-        <v-row align="start" no-gutters dense style="position: relative; bottom: .5rem;">
+    <div>
+    <v-container>
+        <v-row align="start" no-gutters dense style="position: relative; bottom: .5rem; height: 50px;">
             <v-col cols="4" offset="0">
                 <v-autocomplete :items="activityList" label="Activity" variant="underlined" density="compact" flat v-model="infoRets.attributes.ACTV"></v-autocomplete>
             </v-col>
@@ -12,7 +13,7 @@
                 </v-text-field>
             </v-col>
         </v-row>
-        <v-row align="center" no-gutters dense style="position: relative; bottom: 1.3rem;">
+        <v-row align="center" no-gutters dense style="position: relative; bottom: 1.3rem; height: 70px; padding-bottom: 0% !important;">
             <v-col cols="3" offset="0" style="position: relative; bottom: 5px !important;">
                 <v-text-field label="Route" variant="underlined" v-model="infoRets.attributes.RTE_NM" :rules="[valueRequired]" id="route"></v-text-field>
             </v-col>
@@ -56,46 +57,61 @@
                 <v-autocomplete auto-select-first label="Status" variant="underlined" density="compact" class="rets-status" :items="detailsStat" item-title="name" item-value="value" v-model="infoRets.attributes.STAT"></v-autocomplete>
             </v-col>
         </v-row>
-        <v-row align="center" no-gutters dense style="position: relative; bottom: 6.1rem;">
+        <v-row align="center" no-gutters dense style="position: relative; bottom: 6.1rem; height: 0px;">
             <v-col cols="12" offset="0">
                 <v-textarea label="Description" no-resize variant="underlined" class="rets-description" rows="3" v-model="infoRets.attributes.DESC_" :rules="[valueRequired]"></v-textarea>
             </v-col>
         </v-row>
-        <v-row align="center" style="position: relative; bottom: 9.1rem; ">
-            <v-col cols="5" offset="0" style="z-index: 999;">
-                <v-btn icon="mdi-plus" variant="plain" @click="displayGemSearch" style="top: 9px;"></v-btn>
-                <div id="chips">
-                    <v-chip 
-                        v-for="i in gemTasks"
-                        closable
-                        color="#4472C4"
-                        density="compact"
-                        variant="elevated" 
-                        rounded="0"
-                        pill
-                        size="default"
-                        class="gem-chip",
-                    >
-                    {{ i }}
-                </v-chip>
+        <v-row align="center" style="position: relative; bottom: 2.1rem; height: 25px;">
+            <div style="width: 100%; height: 5%">
+                <!-- <v-col cols="5" offset="0" style="z-index: 999;"> -->
+                <div style="width: 35%;">
+                    <v-btn icon="mdi-plus" variant="plain" @click="displayGemSearch" style="bottom: 0px;"></v-btn>
+                    <div id="chips">
+                        <v-chip 
+                            v-for="i in gemTasks"
+                            closable
+                            color="#4472C4"
+                            density="compact"
+                            variant="elevated" 
+                            rounded="0"
+                            pill
+                            size="default"
+                            class="gem-chip"
+                        >
+                        {{ i }}
+                        </v-chip>
+                    </div>
                 </div>
-            </v-col>
-            <div class="cardDiv" id="outerDeadlineDiv" >
-                <div class="deadline-div" @click="isDatePicker = !isDatePicker" style="cursor: pointer;">
-                    <v-text-field prepend-icon="mdi-timer-outline" disabled density="compact" variant="plain" class="date-select"> {{ datePicker }}</v-text-field>
-                 </div>
+                
+            <!-- </v-col> -->
+                <div style="position:relative; bottom: 4.3rem; cursor: pointer !important; height: 32px; width: 119px; float: right" @click="isDatePicker = true">
+                    <v-text-field prepend-icon="mdi-timer-outline" disabled density="compact" variant="plain" class="date-select" style="z-index: 9999; " > {{ datePicker }}</v-text-field>
+                    <!-- <v-col offset="0" style="z-index: 999; cursor: pointer; max-width: 6rem; height:2rem; padding: 0px; " @click="isDatePicker = true">
+                        
+                    </v-col> -->
+                </div>
             </div>
 
+         
+
+
+
+            <!-- <v-text-field prepend-icon="mdi-timer-outline" disabled density="compact" variant="plain" class="date-select" style="z-index: 9999; cursor: pointer !important;" @click="isDatePicker = true"> {{ datePicker }}</v-text-field> -->
             <div class="date-picker" v-if="isDatePicker">
-                <v-date-picker v-model="datePicked"></v-date-picker>
+                <v-date-picker v-model="datePicked" class="date" hide-header></v-date-picker>
             </div>
         </v-row>
+        
+    </v-container>
     </div>
+    
 </template>
 
 <script>
 import { appConstants } from '../common/constant'
-import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets, zoomTo} from './utility.js'
+import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets, zoomTo, returnDFO} from './utility.js'
+
 import {store} from './store.js'
     export default{
         name: "DetailsCard",
@@ -156,6 +172,7 @@ import {store} from './store.js'
                 }
             },
             valueRequired(e){
+                if(e === null) return
                 if(!e.length){
                     this.sendDisabledSave(true)
                     return `Wrong :(`
@@ -167,15 +184,16 @@ import {store} from './store.js'
                 this.$emit("disable-save", bool)
             },
             onlyNumbers(i){
-                if(this.infoRets.attributes.NO_RTE === 1){
+                console.log(i)
+                if(this.infoRets.attributes.NO_RTE === 1 || this.infoRets.attributes.NO_RTE === null){
                     let convert = Number(i)
-                if(!convert){
-                    this.sendDisabledSave(true)
-                    return `Whoa! Numbers are more my vibe!`
+                    if(!convert){
+                        this.sendDisabledSave(true)
+                        return `Whoa! Numbers are more my vibe!`
+                    }
                 }
                 this.sendDisabledSave(false)
                 return true
-                }
 
             },
             paperClipFunc(){
@@ -186,7 +204,7 @@ import {store} from './store.js'
                 console.log("paperclip clicked")
             },
             crossHairFunc(){
-                console.log('crosshair clicked')
+                returnDFO()
             },
             setDate(date){
                 return date.toLocaleDateString('en-US')
@@ -195,10 +213,9 @@ import {store} from './store.js'
                 document.querySelectorAll(".gem-search")[0].style.display =  document.querySelectorAll(".gem-search")[0].style.display === "block" ? "none" : "block"
             },
             async gimmeRETS(a, string){
-                console.log(a, string)
                 if(a.length){
-                    const queryString = string ?? `RETS_ID >= ${a}`
-                    const query = {"whereString" : queryString}
+                    const queryString = string ?? `CAST(RETS_ID AS VARCHAR(12)) LIKE '%${a}%'`
+                    const query = {"whereString" : queryString, "queryLayer": "retsLayer"}
                     try{
                         const retsid = await getQueryLayer(query, 'RETS_ID', 5)
                         this.RETSData.length = 0
@@ -228,11 +245,13 @@ import {store} from './store.js'
                 zoomToRelatedRets(this.infoRets.attributes.RELATED_RETS)
             },
             closeRelatedRetsChip(ret){
-                console.log(ret)
                 removeRelatedRetsFromMap(ret.raw?.name)
                 const retsPos = this.infoRets.attributes.RELATED_RETS.findIndex(x => x.name === Number(ret.raw?.name))
                 this.infoRets.attributes.RELATED_RETS.splice(retsPos,1)
             },
+            queryRdFeatureLayer(){
+                
+            }
         },
         watch:{
             datePicked:{
@@ -251,8 +270,6 @@ import {store} from './store.js'
             'infoRets.attributes.RETS_ID':{ //<= neccessary?
                 handler: function(n,o){
                     store.currentInfo = JSON.stringify(this.infoRets)
-                    console.log("new", n)
-                    console.log("old", o)
                     this.splitAndAddRelatedRets(this.infoRets.attributes.RELATED_RETS)
                     // toggleRelatedRets(o, false)
                     // toggleRelatedRets(n, true)
@@ -326,14 +343,14 @@ import {store} from './store.js'
     float: right;
 }
 
-.deadline-div .v-btn{
+#deadline-div .v-btn{
     padding-top: 7px !important;
 }
-.deadline-div{
+#deadline-div{
     position: relative;
     margin-right: 0px;
     padding-top: 0px;
-    bottom: 0rem;
+    top: 0px;
     float: right;
 }
 

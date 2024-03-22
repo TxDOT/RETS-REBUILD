@@ -80,11 +80,35 @@ export const retsLayer = new FeatureLayer({
   editingEnabled: true,
 })
 
+//DFO Producer in GRID
+export const DFOProducer = new FeatureLayer({
+  url: "https://testportal.txdot.gov/createags/rest/services/RETS_PNT_HELPER/FeatureServer/0",
+  outFields:["*"],
+  returnM: true,
+  returnZ: true,
+  hasM: true,
+  hasZ: true,
+  visible: true,
+})
+
 //TxDotRoaways Layer construction
 export const TxDotRoaways = new FeatureLayer ({
   url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Roadways/FeatureServer/0",
   visible: true,
   renderer: roadwaysRenderer,
+  outFields: ["GID"],
+  hasM: true
+})
+
+//RETS History
+export const retsHistory = new FeatureLayer({
+  url: "https://testportal.txdot.gov/createags/rest/services/RETS_CMNT/FeatureServer/0",
+  outFields: ["*"]
+})
+
+//Rets User Roles
+export const retsUserRole = new FeatureLayer({
+  url: "https://testportal.txdot.gov/createags/rest/services/RETS_SUPPORT/FeatureServer/1"
 })
 
 //Creates label class for RETS points
@@ -282,7 +306,7 @@ export const OSMVTBasemap = new Basemap({
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-map.addMany([retsLayer,TxDotRoaways, sketchLayer, graphics, retsGraphicLayer])
+map.addMany([retsLayer, TxDotRoaways, sketchLayer, graphics, retsGraphicLayer])
 
 //remove attribution and zoom information
 view.ui.remove("attribution")

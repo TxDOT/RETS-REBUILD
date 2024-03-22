@@ -13,7 +13,11 @@
                     <div style="width: 100%;">
                         <div class="banner-txt">
                             <p>{{activityBanner}}</p>
-                            <div id="retsSubtitle"><v-text-field v-if="isSubtitle" label="Enter a subtitle" id="retsSubtitle"></v-text-field></div>
+                            <div class="retsSubtitle">
+                                <div id="retSubText">
+                                    <v-text-field variant="plain" v-if="isDetailsPage" :disabled="isSubtitle" placeholder="Enter a subtitle" style="position:relative; top: 1px;" v-model="retsSubtitle"></v-text-field>
+                                </div>
+                            </div>
                             
                             <v-btn v-if="isDetailsPage" icon="mdi-pencil-outline" density="compact" flat id="renameRets" @click="displaySubtitle($event)"></v-btn>
                         </div>
@@ -84,7 +88,7 @@
         <v-card-title>Discard unsaved changes?</v-card-title>
         <v-divider style="margin-left: 15px; margin-right: 15px; color:white;"></v-divider>
         <v-card-text>
-            If you proceed your chagnes will be discarded.
+            If you proceed your changes will be discarded.
         </v-card-text>
         <div style="margin: 15px;">
             <div style="float: right; margin-bottom: 15px;">
@@ -94,7 +98,6 @@
         </div>
         
     </v-card>
-
 </template>
 
 <script>
@@ -106,6 +109,7 @@ import RetsDetailPage from './RetsDetail.vue'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import {store} from './store.js'
 import {view, retsGraphicLayer} from './map-Init.js'
+
 
 export default{
     name: "RetsCards",
@@ -134,18 +138,20 @@ export default{
             activityBanner: "Activity Feed",
             isSubtitle: false,
             isRetsActivated: true,
+            retsSubtitle:"",
             actvFeedSearch: "",
             flagColor: '',
             uploadAttachment: false,
             isfilter: false,
             loggedInUser: '',
-            retsFilters: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, "JOB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
+            retsFilters: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"}, "JOB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
                          "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, "GIS_ANALYST": appConstants.defaultUserValue, 
                          "filterTotal": 2},
             count: 0,
             store,
             stageData: 0,
-            unsavedChanges: false
+            unsavedChanges: false,
+            showChanges: false
         }
     },
     beforeMount(){
@@ -153,6 +159,7 @@ export default{
         clickRetsPoint()
     },
     mounted(){
+        this.showChanges = true
         reactiveUtils.on(() => view.popup, "trigger-action",
             async (event) => {
                 if (event.action.id === "open-details") {
@@ -162,8 +169,6 @@ export default{
                     const returnGraphic = retsGraphicLayer.graphics.items.find(ret => ret.attributes.OBJECTID === graphicOid)
                     this.stageData = {attributes: returnGraphic.attributes, geometry: [returnGraphic.geometry.x, returnGraphic.geometry.y]}
                     this.checkChanges()
-                    
-                    
                 }
         });
     },
@@ -180,13 +185,11 @@ export default{
             //do nothing
         },
         displaySubtitle(e){ 
-            this.isSubtitle = true
-            console.log(e)
+            this.isSubtitle = !this.isSubtitle
         },
         checkChanges(){
             const beforeAtt = JSON.parse(store.currentInfo)
             const afterAtt = JSON.parse(JSON.stringify(this.currRoad))
-            console.log(afterAtt)
             let issue = 0
             for(const [key, value] of Object.entries(beforeAtt.attributes)){
                 if(key==='RELATED_RETS'){
@@ -194,25 +197,36 @@ export default{
                 }
                 if(value !== afterAtt.attributes[key]){
                     this.unsavedChanges = true
-                    console.log(beforeAtt)
-                    console.log(afterAtt)
                     issue++
                     return
                 }
             }
-            console.log("done")
             issue === 0 ? this.double({attributes: this.stageData.attributes, geometry: [this.stageData.geometry.x, this.stageData.geometry.y]}, 1) : null
         },
         processBanner(i){
             console.log(i)
         },
-
+        addNewPoint(){
+            const queryString = {"whereString": `OBJECTID = ${this.addrets}`, "queryLayer": "retsLayer"}
+            getQueryLayer(queryString, "PRIO, CREATE_DT DESC")
+                .then((obj) =>{
+                    if(obj.features.length){
+                        obj.features.forEach((x) => {
+                            this.double({attributes:x.attributes, geometry: [x.geometry.x, x.geometry.y]})
+                        })
+                        return
+                    }
+                    console.log('objectid not found')
+                    return
+                })
+        },
         async enableFeed(e){
-            console.log(e)
             turnAllVisibleGraphicsOff()
-            if(e.isDelete){
-                this.roadObj.splice(e.index, 1)
+            if(e[0].attributes.isDelete){
+                e[0].attributes.index ? this.roadObj.splice(e[0].attributes.index, 1) : this.removeUndefinedIndex(e[0].attributes)
                 this.activityBanner = "Activity Feed"
+                this.isDetailsPage = e[1]
+                await this.setActivityFeed
                 return
             }
             await this.setActivityFeed
@@ -220,8 +234,12 @@ export default{
             this.activityBanner = "Activity Feed"
             return
         },
+        removeUndefinedIndex(delRd){
+            const findRoad = this.roadObj.findIndex(road => road.attributes.OBJECTID === delRd.OBJECTID)
+            this.roadObj.splice(findRoad, 1)
+        },
         double(road, index){
-            console.log(road)
+            store.historyRetsId = road.attributes.RETS_ID
             road.attributes.logInUser = this.loggedInUser 
             road.attributes.index = index
             this.send = this.currRoad = road
@@ -254,7 +272,8 @@ export default{
         },
         assignColorToFlag(clr){
             document.getElementById(`${this.flagClickedId}Icon`).style.color = clr
-            this.roadObj.find(rd => rd.attributes.RETS_ID === this.flagClickedId).flagColor = clr
+            this.roadObj.find(rd => rd.attributes.RETS_ID === this.flagClickedId).attributes.flagColor = clr
+            console.log(this.roadObj.find(rd => rd.attributes.RETS_ID === this.flagClickedId))
             this.isColorPicked = false;
             this.closeFlagDiv()
         },
@@ -274,7 +293,23 @@ export default{
         },
         dropAttachment(event){
             console.log(event)
-        }
+        },
+        changeNumFilter(filter){
+            if(filter === 'cancel'){
+                this.isfilter = false;
+                return
+            }
+            this.retsFilters = filter
+            this.isfilter = false
+            this.setActivityFeed
+        },
+        changeFlagIcon(color){
+            console.log(color)
+            if(color === '#FFFFFF'){
+                return 'mdi-flag-outline'
+            }
+            return 'mdi-flag'
+        },
 
     },
     watch:{
@@ -295,7 +330,20 @@ export default{
         },
         addrets:{
             handler: function(){
-
+                if(this.addrets){
+                    this.addNewPoint()
+                    return
+                }
+                return
+            },
+            immediate: true
+        },
+        retsSubtitle:{
+            handler:function(word){
+                if(word.length<0) return
+                setTimeout(()=>{
+                   // this.filterPros.attributes.RTE_NM = word
+                },1000)
             },
             immediate: true
         }
@@ -307,8 +355,8 @@ export default{
                 const user = await getUserId()
                 this.loggedInUser = user
                 this.retsFilters.loggedInUser = user
-                const queryString = {"whereString": `(GIS_ANALYST = '${user}') AND (STAT = 1 OR STAT = 2)`}
-                const orderField = "PRIO, CREATE_DT DESC"
+                const queryString = {"whereString": `(GIS_ANALYST = '${user}') AND (STAT = 1 OR STAT = 2)`, "queryLayer": "retsLayer"}
+                const orderField = "PRIO, EDIT_DT DESC"
                 getQueryLayer(queryString, orderField)
                 .then(obj => {
                     if(obj.features.length){
@@ -323,11 +371,11 @@ export default{
                 .catch((err)=> console.log(err))
             },
         },
-        setActivityFeed:{
-            async get(){
+        async setActivityFeed(){
                 const filter = await filterMapActivityFeed(this.retsFilters)
                 this.roadObj = []
-                const query = {"whereString": `${filter}`}
+                const query = {"whereString": `${filter}`, "queryLayer": "retsLayer"}
+                console.log(this.retsFilters.CREATE_DT)
                 const orderField = `${this.retsFilters.CREATE_DT.filter} ${this.retsFilters.CREATE_DT.sortType}`
                 getQueryLayer(query, orderField)
                     .then(obj => {
@@ -336,6 +384,7 @@ export default{
                                 this.roadObj.push({attributes:x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                             })
                             this.isNoRets = false
+                            console.log(this.roadObj)
                             return
                         }
                         this.isDetailsPage = false
@@ -345,15 +394,20 @@ export default{
                     .catch((err)=> {
                         console.log(err)
                     })
-            }
-        },
+            },
 
     }
 }
 </script>
 
 <style scoped>
-    #retsSubtitle{}
+    #retSubText{
+        position: relative;
+        right: 15px;
+        padding: 0px;
+        margin-left: 10px;
+        bottom: .4rem;
+    }
     .attachCard{
         position: relative; 
         width: 20%; 
