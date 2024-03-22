@@ -185,7 +185,7 @@ export const searchWidget = new Search({
       layer: retsLayer, 
       placeholder: "City, County, District, Route",
       zoomScale: 5000,
-      searchFields: ["RETS_ID","RTE_NM","CNTY_NM","DIST_NM","GIS_ANALYST","GRID_ANALYST","DIST_ANALYST","MO_NBR","ACTIVITY"],
+      searchFields: ["RETS_ID","RTE_NM","CNTY_NM","DIST_NM","GIS_ANALYST","GRID_ANALYST","DIST_ANALYST","ACTV"]
       displayField: "RETS_ID",
       exactMatch: false,
       outFields: ["RETS_ID"],
