@@ -78,6 +78,7 @@
             </div>
     </v-container>
 
+
 </template>
 
 <script>
@@ -90,7 +91,7 @@
 
     export default{
         name: "RetsDetailPage",
-        components: {editHistoryNotes, DetailsCard, MetadataCard, detailsAlert},
+        components: {editHistoryNotes, DetailsCard, MetadataCard, detailsAlert, },
         props: {
             retsInfo: Object,
             taskGem: Number,
@@ -400,5 +401,5 @@ div .cardDiv{
         margin-left: 2.2rem;
         background-color: black;
     }
-
+   
 </style>

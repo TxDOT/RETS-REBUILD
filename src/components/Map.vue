@@ -13,6 +13,12 @@ import {home, hoverRetsPoint} from './utility.js'
 //import ESRI JS ESM class
 export default{
     name: "Map",
+    data(){
+        return{
+            isActOpen: true,
+            shift: 250,
+        };
+    },
     mounted(){
             //1.Check to see if user is signed in. If not sign them in without using the popup
             //2. If user is signed in, get username and set retLayer definition and load map
@@ -22,7 +28,27 @@ export default{
             hoverRetsPoint();
         },
     methods:{
+        togglemenu(){   
+            
+            var currentCenter = view.center.clone();
+            var screenPoint = view.toScreen(currentCenter);
+            var newCenter;    
+            if (this.isActOpen === true){
 
+                 this.isActOpen =! this.isActOpen
+                screenPoint.x = screenPoint.x + this.shift; // Adjust the x coordinate by the desired amount of pixels
+                var newCenter = view.toMap(screenPoint); // Convert back to map coordinates
+                view.goTo(newCenter)
+                
+            }
+            else{
+                 this.isActOpen =! this.isActOpen
+                screenPoint.x = screenPoint.x - this.shift; // Adjust the x coordinate by the desired amount of pixels
+                var newCenter = view.toMap(screenPoint); // Convert back to map coordinates
+                view.goTo(newCenter)                
+            }
+            
+        }
     }
 }
 </script>
@@ -47,5 +73,7 @@ export default{
     .esri-view {
         --esri-view-outline-color: none !important;
     }
+
+
 
 </style>

@@ -156,6 +156,9 @@ import {store} from './store.js'
                 }
             },
             valueRequired(e){
+                if(e === null){
+                    return
+                }
                 if(!e.length){
                     this.sendDisabledSave(true)
                     return `Wrong :(`
@@ -275,7 +278,7 @@ import {store} from './store.js'
     position: relative;
     height: 400px !important;
     width: 100vh !important;
-    bottom: 1rem;
+    bottom: rem;
     border-radius: 0px;
     
 }
