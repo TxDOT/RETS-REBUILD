@@ -142,6 +142,7 @@
     export default{
         components: {RetsCards, Map},
         name: "RetsFeed",
+        props: {addrets: Number},
         data(){
             return{
                 addrets2: null,
