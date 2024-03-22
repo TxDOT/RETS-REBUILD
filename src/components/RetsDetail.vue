@@ -214,9 +214,9 @@
                 this.editText = false
             },
             saveNote(){
-                this.histNotes[this.noteIndex].notes = this.editNotes
-                this.histNotes[this.noteIndex].author = this.retsInfo.logInUser
-                this.histNotes[this.noteIndex].time = new Date().toLocaleDateString('en-US')
+                // this.histNotes[this.noteIndex].notes = this.editNotes
+                // this.histNotes[this.noteIndex].author = this.retsInfo.logInUser
+                // this.histNotes[this.noteIndex].time = new Date().toLocaleDateString('en-US')
                 this.editText = false
                 this.alertTextInfo = {"text": "Note Saved", "color": "#70ad47", "toggle": true}
                 this.isAlert = true

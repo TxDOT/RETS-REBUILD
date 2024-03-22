@@ -335,7 +335,7 @@ export const OSMVTBasemap = new Basemap({
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-map.addMany([retsLayer, TxDotRoaways, sketchLayer, graphics, retsGraphicLayer])
+map.addMany([retsLayer, TxDotRoaways, graphics, retsGraphicLayer])
 
 //remove attribution and zoom information
 view.ui.remove("attribution")

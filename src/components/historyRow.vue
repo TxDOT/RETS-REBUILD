@@ -19,12 +19,12 @@
                             <v-text-field style="width:100%; position: relative; width: 20rem !important; height: 2rem; margin:0% !important;" density="compact" variant="plain" :disabled="!editContent" v-model="note.CMNT"></v-text-field>                                
                             <span style="font-size: 10px; color: grey; padding-left: 5px;">{{ returnUserName(note.CMNT_NM) }} {{ returnDateFormat(note.CREATE_DT) }}</span>
                         </v-banner-text>
-                        <template v-slot:actions v-if="note.SYS_GEN === 0">
-                            <div style="position: relative; top: 6px;">
-                                <v-btn icon="mdi-pencil-outline" style="font-size: 13px; bottom: 15px;" @click="openNote(note.CMNT, note.OBJECTID)"></v-btn>
-                                <v-btn icon="mdi-reply" style="font-size: 13px; bottom: 15px;" @click="replyNote(note.CMNT, note)"></v-btn>
+                        <div v-if="note.SYS_GEN === 0" style="width: 100%; position: absolute;">
+                            <div style="position: relative; float: right; top: 14px;" v-if="note.SYS_GEN === 0">
+                                <v-btn variant="plain" density="compact" icon="mdi-pencil-outline" style="font-size: 13px; bottom: 15px;" @click="openNote(note.CMNT, note.OBJECTID)"></v-btn>
+                                <v-btn variant="plain" density="compact" icon="mdi-reply" style="font-size: 13px; bottom: 15px;" @click="replyNote(note.CMNT, note)"></v-btn>
                             </div>
-                        </template>
+                        </div>
                     </v-banner>
                     <span v-if="updateOID === note.OBJECTID && note.SYS_GEN === 0" :id="note.OBJECTID">
                         <div style="position: relative; float: right; top: 15px; margin: 0% !important; padding: 0% !important"> 
@@ -134,6 +134,7 @@
                     console.log(this.histNotes)
                     let oid = this.count += 1
                     this.histNotes.push({OBJECTID: oid , RETS_ID: store.historyRetsId, CMNT: this.historyArr, SYS_GEN: 0})
+                    this.isHistNotesEmpty = false
                 },
                 immediate: true
             },
@@ -182,6 +183,7 @@
         margin: 0%;
         padding: 1%;
         padding-bottom: 3rem; */
+        /* width: 100%; */
     }
     #displayHistory{
         display: flex;

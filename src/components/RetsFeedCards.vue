@@ -281,7 +281,7 @@ export default{
             toggleRelatedRets(JSON.stringify(road))
         },
         async addretss(){
-            const querystring = {"whereString":`OBJECTID = ${this.addrets}`}
+            const querystring = {"whereString":`OBJECTID = ${this.addrets}`, "queryLayer": "retsLayer"}
             try{const querypromise = await getQueryLayer(querystring, "PRIO, CREATE_DT DESC")
                 if (querypromise.features.length){
                     querypromise.features.forEach(
