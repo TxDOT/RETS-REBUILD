@@ -263,7 +263,11 @@
                 })
 
                 input.remove()
-            }
+            },
+            removeRetsGraphics(){
+                removeretsgraphic();
+            },
+
         },
         watch:{
             searchHistoryFilter:{

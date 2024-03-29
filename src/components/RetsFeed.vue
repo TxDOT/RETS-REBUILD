@@ -80,44 +80,62 @@
         <v-card-item id= "settingsheader" >
             <v-card-title id="headerfont">Settings</v-card-title>            
         </v-card-item>
-        <hr id = "separator"/>
+            <hr id = "separator"/>
         <v-card-item id = "darkmodeitem" >
-            
-            <v-card-title id="darkmodetogglefont" >
-                <v-icon size = "30" icon="mdi-toggle-switch"></v-icon>
-                Dark Mode
-            </v-card-title>
-            
-            
+            <div id = "darkmodeswitch">
+                <v-switch v-model = "switchValue"  label = "Dark Mode"></v-switch> 
+            </div>
+             
         </v-card-item>
-        <hr id = "separator" />
+            <hr id = "separator" />
         <v-card-item id = "notificationsitems" >
             <v-card-title id="notificationsfont">Notifications</v-card-title>
             <v-card-subtitle id = "notificationssub">
+            <div id="notis">
                 Send notifications for: <br>
-                <v-icon size = "30" icon="mdi-toggle-switch"></v-icon>&nbsp;&nbsp;&nbsp;&nbsp;RETS I Create<br>
-                <v-icon size = "30" icon="mdi-toggle-switch"></v-icon>&nbsp;&nbsp;&nbsp;&nbsp;RETS assigned to me<br>
-                <v-icon size = "30" icon="mdi-toggle-switch"></v-icon>&nbsp;&nbsp;&nbsp;&nbsp;RETS I'm tagged in<br>
-                <v-icon size = "30" icon="mdi-toggle-switch"></v-icon>&nbsp;&nbsp;&nbsp;&nbsp;High Priority RETS<br>
-                <v-icon size = "30" icon="mdi-toggle-switch"></v-icon>&nbsp;&nbsp;&nbsp;&nbsp;RETS assigned to me that have been<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inactive for 30 days<br>
-                <v-icon size = "30" icon="mdi-toggle-switch"></v-icon>&nbsp;&nbsp;&nbsp;&nbsp;New RETS assigned to me<br>
-                <v-icon size = "30" icon="mdi-toggle-switch"></v-icon>&nbsp;&nbsp;&nbsp;&nbsp;Status changed to<br>
-                <v-icon size = "30" icon="mdi-toggle-switch"></v-icon>&nbsp;&nbsp;&nbsp;&nbsp;My RETS are archived
+                <div id="notiswitches">
+                    <v-card-item id = "switch-container">
+                        <v-switch label = "RETS I Create" > </v-switch>
+                    </v-card-item>
+                    <v-card-item id = "switch-container">
+                        <v-switch label = "RETS I'm tagged in"> </v-switch>
+                    </v-card-item>
+                    <v-card-item id = "switch-container">
+                        <v-switch label = "High Priority RETS"> </v-switch>
+                    </v-card-item>
+                    <v-card-item id = "switch-container">
+                        <v-switch label = "RETS assigned to me that have been inactive for 30 days"> </v-switch>
+                    </v-card-item>
+                    <v-card-item id = "switch-container">
+                        <v-switch label = "New RETS assigned to me"> </v-switch>
+                    </v-card-item>
+                    <v-card-item id = "switch-container">
+                        <v-switch label = "Status changed to"> </v-switch>
+                    </v-card-item>
+                    <v-card-item id = "switch-container">
+                        <v-switch label = "My RETS are archived"> </v-switch>
+                    </v-card-item>
+                </div>
+                
+            </div>
             </v-card-subtitle>
             
         </v-card-item>
-        <hr id = "separator" />
-        <v-card-item id=" bottomitems">
-            <v-btn prepend-icon="mdi-power"  >LOGOUT</v-btn>
-            <v-btn text="CANCEL"></v-btn>
-            <v-btn text="SAVE"></v-btn>
+            <hr id = "separator" />
+        <v-card-item id="bottomitems">
+            <v-btn-group>
+                <v-btn id = "logoutbutton" prepend-icon="mdi-power"  >LOGOUT</v-btn>
+            </v-btn-group>
+            <v-btn-group id = "savebutton">
+                <v-btn  text="CANCEL" ></v-btn>
+               
+                    <v-btn  text="SAVE" id = "save"></v-btn>
+            
+                
+            </v-btn-group>
+            
 
         </v-card-item>
-
-
-        
-
 
     </v-card>
 
@@ -128,9 +146,14 @@
 
 <script>
     import RetsCards from '../components/RetsFeedCards.vue';
-    import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect} from '../components/map-Init.js';
+    import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass} from '../components/map-Init.js';
     import {addRETSPT} from '../components/crud.js'
-    import { createtool, selecttool } from '../components/utility.js';
+    import { createtool, selecttool, togglemenu } from '../components/utility.js';
+    import Map from './Map.vue';
+    import { vuetify } from 'C:/Users/ssaldana/Documents/repo/RETS-REBUILD/src/main.js';
+
+    import { useTheme } from 'vuetify'
+
 
     export default{
         components: {RetsCards},
@@ -138,6 +161,9 @@
         props: {addrets: Number},
         data(){
             return{
+                switchValue : false,
+                isActOpen: true,
+                shift: 200,
                 addrets2: null,
                 basemapcard: false,
                 jumptocard:false,
@@ -225,6 +251,18 @@
                 computed:{
 
                 },
+                watch: {
+                    switchValue(newValue) {
+                        if (newValue) {
+                            this.switchTurnedOn();
+                            
+                            
+                        }
+                        else{
+                            this.switchTurnedOff();
+                        }
+                    }
+                },
                 mounted() {
                 
                     
@@ -232,8 +270,20 @@
                 },
                 
                 methods: {
+                    switchTurnedOn() {
+                       
+                        console.log("on")
+                        
+
+                        vuetify.theme.defaultTheme = vuetify.theme.defaultTheme === 'dark' ? 'light' : 'dark'
+                       
+                    },
+                    switchTurnedOff(){
+                        console.log("off")
+                    },
                     resizemap(){
-                        this.$refs.MapRef.togglemenu();
+                        togglemenu(this.isActOpen, this.shift);
+                        this.isActOpen =! this.isActOpen
                     },
                     mouseleavebasemap(){
                         this.basemapcard = false;
@@ -270,12 +320,8 @@
                        
                     },
                     handleSelectTool() { 
-                        //this.handleKeyDown(event);
-
-                        //this.handleKeyUp(event);
-
                         if (this.isSelectEnabled === true ){
-                            selecttool(this.isSelectEnabled, sketchWidgetselect, this.clearSelection, graphics, this.shiftKey);
+                            selecttool(this.isSelectEnabled, sketchWidgetselect, graphics);
                             this.isSelectEnabled =! this.isSelectEnabled
                         }
                         else{
@@ -320,30 +366,37 @@
                     toggledarkgrey(){
                         map.basemap = darkVTBasemap;
                         this.basemapcard = false;
+                        retsLabelclass.symbol.color = "white"
                     },
                     togglelightgrey(){
                         map.basemap = lightVTBasemap
                         this.basemapcard = false;
+                        retsLabelclass.symbol.color = "black"
                     },
                     togglestandard(){
                         map.basemap = standardVTBasemap;
                         this.basemapcard = false;
+                        retsLabelclass.symbol.color = "black"
                     },  
                     toggleimagery(){
                         map.basemap = imageryBasemap;
+                        retsLabelclass.symbol.color = "white"
                         this.basemapcard = false;
                     },
                     togglegoogle(){
                         map.basemap = googleVTBasemap;
+                        retsLabelclass.symbol.color = "black"
                         this.basemapcard = false;
                     },
                     toggleosm(){
                         map.basemap = OSMVTBasemap;
+                        retsLabelclass.symbol.color = "black"
                         this.basemapcard = false;
                     },
 
                     toggledarkmode(){
-                        
+                        vuetify.theme.defaultTheme = 'light';
+
                     }
 
                     
@@ -424,6 +477,8 @@
         bottom: 10rem;
         left: 50%;
         z-index: 9999;
+        
+
     }
     #settingsheader{
         position: relative;
@@ -450,6 +505,7 @@
         bottom: 2px;
         left: 25px;
         font-size: 20px;
+        height: 4rem;
     }
 
     #darkmodetogglefont{
@@ -475,14 +531,63 @@
         position: absolute;
         font-size: 14px;
         top: 40px;
-        left: 40px;
+        left: 18px;
+        height: 500px;
     }
     #viewDiv{
         top: 0px;
         bottom: 0px;
         left: 0px;
         width: 100%;
-        }
+    }
+    #darkmodeswitch{
+        margin-left: 1px; 
+        margin-bottom: -55px;
+        margin-top: 0px;
+        left: 5px;;
+    }    
+    #switch-container{
+        /* position: absolute; */
+        margin-left: 1px; 
+        margin-bottom: -55px;
+        margin-top: 0px;
+        /* flex: 1 1 auto; */
+
+    }
+    #notis{
+        /* display: block; */
+        /* flex-wrap: wrap; */
+        position: relative;
+        width: 400px;
+
+    }
+    #notiswitches{
+        position: relative;
+        left: -15px;
+    }
+    #bottomitems{
+        position: absolute;
+        bottom: 10px;
+        width: 25rem;
+        
+    }
+    #logoutbutton{
+        text-align: start;
+    }
+    #savebutton{
+        float: right;
+    color: green;    }
+    #darkmodeswitch{
+        position: absolute;
+        bottom: 2.3rem;
+    }
+    #save{
+        border: 1px solid ;
+        border-radius: 9%;
+        
+    }
+
+ 
 
 
       

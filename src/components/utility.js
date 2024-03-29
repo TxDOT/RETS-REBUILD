@@ -7,6 +7,7 @@ import {getDFOFromGRID} from './crud.js'
 import { addRETSPT } from './crud.js';
 import esriRequest from "@arcgis/core/request.js";
 
+
 export function clickRetsPoint(){
     try{
         view.on("click", (event)=>{
@@ -18,7 +19,6 @@ export function clickRetsPoint(){
                 outlineFeedCards(evt.results)
                 removeHighlight("a", true)
                 evt.results.forEach(rest => rest.graphic.layer.title ? highlightRETSPoint(rest.graphic.attributes) : highlightGraphicPt(rest.graphic.attributes))
-                // highlightRETSPoint(evt.results)
                 return evt.results[0].graphic.attributes.RETS_ID;
             })
         })
@@ -65,17 +65,22 @@ export async function getHighlightGraphic(){
 }
 
 export function removeHighlight(feature, removeAll){
+    //console.log(feature)
     view.whenLayerView(retsLayer)
         .then((lyrView) => {
             if(removeAll){
                 lyrView._highlightIds.clear()
                 return
             }
-            //highlights Point by giving OBJECTID
-            if(lyrView._highlightIds.has(feature.OBJECTID)){
-                lyrView._highlightIds.delete(feature.OBJECTID)
+
+            if(lyrView._highlightIds.has(feature?.attributes.OBJECTID)){
+                //console.log("before: " + feature?.attributes.OBJECTID )
+                lyrView._highlightIds.delete(feature?.attributes.OBJECTID)
+                //console.log("after: " + feature?.attributes.OBJECTID )
+                
                 return
             }
+            
             return
         })
 }
@@ -84,19 +89,18 @@ function outlineFeedCards(res){
     res.forEach((x) => {
         console.log(x.graphic.attributes)
         //set card outline
-        const retsId = String(x.graphic.attributes.RETS_ID)
-        const oid = String(x.graphic.attributes.OBJECTID)
-        if(!document.getElementById(`${retsId}-${oid}`)) return
-        document.getElementById(`${retsId}-${oid}`).classList.add('highlight-card')
+        var objectcomparison = x.attributes ? String(x.attributes.RETS_ID).concat('-',x.attributes.OBJECTID) : String(x.graphic.attributes.RETS_ID).concat('-',x.graphic.attributes.OBJECTID)
+        if(!document.getElementById(objectcomparison)) return
+        document.getElementById(objectcomparison).classList.add('highlight-card')
         //zoom to card in feed
 
         const zoomToCard = document.createElement('a')
-        zoomToCard.href = `#${retsId}-${oid}`
+        zoomToCard.href = `#${objectcomparison}`
         zoomToCard.click()
         //remove card outline
-        // setTimeout(()=>{
-        //     document.getElementById(`${retsId}-${oid}`).classList.remove('highlight-card')
-        // },5000)
+        setTimeout(()=>{
+            document.getElementById(objectcomparison).classList.remove('highlight-card')
+        },5000)
     })
     return;
 }
@@ -400,34 +404,24 @@ export function createtool(sketchWidgetcreate, createretssym) {
     });
   }
 
-export function deleteRetsGraphic(){
-    graphics.graphics.items.forEach((ret) => {
-        if(ret.geometry.type === 'point'){
-            graphics.remove((ret))
-        }
-    })
-    return
-}
-
-export function selecttool(isSelectEnabled, sketchWidgetselect, clearSelection, graphics){
-    var testshift = false;
+    var pressedkey = false;
     window.addEventListener("keydown", (event)=>{
-        testshift = event.key
+
+        pressedkey = event.key
     });
-    window.addEventListener("keyup", () => {
-      testshift = false
+    window.addEventListener("keyup", (event) => {
+        pressedkey = false
     });
-  
+
+  export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
     if(isSelectEnabled === true){ 
-        var state = clearSelection
         sketchWidgetselect.create("rectangle");
-        state = !state
+        var removeAll = true
         sketchWidgetselect
         .on("create", function (event) 
             {
             if (event.state === "complete")
                 {
-                   
                     // Get the rectangle geometry
                     var rectangleGeometry = event.graphic.geometry;
                     // Query for points within the rectangle
@@ -438,16 +432,17 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, clearSelection, 
                             {
                                 // Access the selected features
                                 var selectedFeatures = result.features;
+                                outlineFeedCards(selectedFeatures);
 
-                                if (state === true && testshift != "Shift"){
-                                    console.log('true')
+                                if (pressedkey === false){
+
                                     for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                      removeHighlight(selectedFeatures[i].attributes,state);  
+                                      removeHighlight(selectedFeatures[i].attributes,removeAll);  
 
-                                      
                                     }
                                     for (let i = 0; i < selectedFeatures.length; i++ ) {
                                         highlightRETSPoint(selectedFeatures[i].attributes);
+                                         //outlineFeedCards(selectedFeatures);
                                         
   
                                   }   
@@ -456,24 +451,37 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, clearSelection, 
                                   graphics.removeAll() 
                                    return 
                                 }
-                                
-                                 if(state === true && testshift === "Shift"){
-                                    console.log('false')
 
+                                
+                                 
+                                
+                                if(pressedkey === "Shift"){
                                     for (let i = 0; i < selectedFeatures.length; i++ ) {
                                         highlightRETSPoint(selectedFeatures[i].attributes);
-                                        
-  
-  
-                                  }    
-                                  graphics.removeAll();
-                                  return
+                                        //outlineFeedCards(selectedFeatures);
+
+                                    } 
+                                    graphics.removeAll();
+                                    return
+                                }
+                                
+                                if(pressedkey === "Control"){
+                                    
+                                    for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                        console.log("this: " + selectedFeatures[i].attributes.OBJECTID)
+    
+                                        removeHighlight(selectedFeatures[i]);  
+
+                                    } 
+
+                                   
+                                    graphics.removeAll();
+                                    return
+        
                                 }
 
-
                                 
-                                
-
+                               
                             });
 
                             
@@ -487,7 +495,6 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, clearSelection, 
     else{
         isSelectEnabled = !isSelectEnabled;
         sketchWidgetselect.cancel()
-        clearSelection = !clearSelection
             
     }
     
