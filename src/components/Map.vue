@@ -15,8 +15,6 @@ export default{
     name: "Map",
     data(){
         return{
-            isActOpen: true,
-            shift: 250,
         };
     },
     mounted(){
@@ -28,27 +26,7 @@ export default{
             hoverRetsPoint();
         },
     methods:{
-        togglemenu(){   
-            
-            var currentCenter = view.center.clone();
-            var screenPoint = view.toScreen(currentCenter);
-            var newCenter;    
-            if (this.isActOpen === true){
-
-                 this.isActOpen =! this.isActOpen
-                screenPoint.x = screenPoint.x + this.shift; // Adjust the x coordinate by the desired amount of pixels
-                var newCenter = view.toMap(screenPoint); // Convert back to map coordinates
-                view.goTo(newCenter)
-                
-            }
-            else{
-                 this.isActOpen =! this.isActOpen
-                screenPoint.x = screenPoint.x - this.shift; // Adjust the x coordinate by the desired amount of pixels
-                var newCenter = view.toMap(screenPoint); // Convert back to map coordinates
-                view.goTo(newCenter)                
-            }
-            
-        }
+        
     }
 }
 </script>

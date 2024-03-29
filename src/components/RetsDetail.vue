@@ -85,7 +85,7 @@
     import editHistoryNotes from './EditHistoryNotes.vue'
     import DetailsCard from './detailsCard.vue'
     import MetadataCard from './metadataCard.vue'
-    import {getGEMTasks, searchCards, removeHighlight, removeRelatedRetsFromMap} from './utility.js'
+    import {getGEMTasks, searchCards, removeHighlight, removeRelatedRetsFromMap, removeretsgraphic} from './utility.js'
     import detailsAlert from './detailsAlert.vue'
     import {updateRETSPT, deleteRETSPT} from './crud.js'
 
@@ -205,7 +205,11 @@
             },
             closeGEMTask(){
                 document.querySelectorAll(".gem-search")[0].style.display = "none"
-            }
+            },
+            removeRetsGraphics(){
+                removeretsgraphic();
+            },
+
         },
         watch:{
             searchHistoryFilter:{

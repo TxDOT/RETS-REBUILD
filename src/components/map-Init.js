@@ -37,6 +37,18 @@ export let retsPointRenderer = new UniqueValueRenderer({
   },
   {
     value: "2",
+    symbol: new SimpleMarkerSymbol({
+      size: 8,
+      color: appConstants.CardColorMap[2],
+      outline: {
+        color: "white",
+        width: 0
+      }
+    }),
+    label: "In Progress"
+  },
+  {
+    value: "3",
       symbol: new SimpleMarkerSymbol({
       size: 8,
       color: appConstants.CardColorMap[3],
@@ -48,16 +60,16 @@ export let retsPointRenderer = new UniqueValueRenderer({
       label: "Complete"
   },
   {
-    value: "3",
+    value: "4",
     symbol: new SimpleMarkerSymbol({
       size: 8,
-      color: appConstants.CardColorMap[2],
+      color: appConstants.CardColorMap[4],
       outline: {
         color: "white",
         width: 0
       }
     }),
-    label: "in Progress"
+    label: "On Hold"
   },
 
   // Add more unique value info objects as needed...
@@ -73,6 +85,18 @@ export let roadwaysRenderer = {
       color: "transparent"
     }
 }
+export let polygonRenderer = {
+  type: "simple",
+    symbol: {
+      type: "simple-fill",  // autocasts as new SimpleFillSymbol()
+      color: "transparent",
+      style: "solid",
+      outline: {  // autocasts as new SimpleLineSymbol()
+        color: "transparent",
+        width: 0
+      }
+    }
+}
 //Rets Layer construction
 export const retsLayer = new FeatureLayer({
   url: "https://testportal.txdot.gov/createags/rest/services/RETS/FeatureServer/0",
@@ -80,6 +104,33 @@ export const retsLayer = new FeatureLayer({
   outFields: ["*"],
   renderer: retsPointRenderer,
   editingEnabled: true,
+})
+
+//County Layer construction
+export const texasCounties = new FeatureLayer({
+  url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/Texas_Counties_Detailed/FeatureServer/0",
+  visible: true,
+  renderer: polygonRenderer
+  
+  
+})
+
+export const txdotDistricts = new FeatureLayer({
+  url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Districts/FeatureServer/0",
+  visible: true,
+  renderer: polygonRenderer
+})
+
+export const texasCities = new FeatureLayer({
+  url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_City_Boundaries/FeatureServer/0",
+  visible: true,
+  renderer: polygonRenderer
+})
+
+export const minuteOrders = new FeatureLayer({
+  url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Highway_Designations/FeatureServer",
+  visble: true, 
+  renderer: roadwaysRenderer
 })
 
 
@@ -93,7 +144,7 @@ export const TxDotRoaways = new FeatureLayer ({
 })
 
 //Creates label class for RETS points
-const retsLabelclass = new LabelClass({
+export const retsLabelclass = new LabelClass({
   labelExpressionInfo : {expression: "$feature.RETS_ID"},
   symbol: {
     type: "text",
@@ -171,27 +222,85 @@ export const view = new MapView({
     lods: TileInfo.create().lods, //property to allow a mapview center to the imagery basemap
     rotationEnabled: false,
   },
+  
 })
+
 
 
 //create search widget
 export const searchWidget = new Search({
+  
   view: view,
   includeDefaultSources: false,
+  allPlaceholder: "City, County, District, Route",
   sources:
   [
     {
       name: "RETS ID",
       layer: retsLayer, 
-      placeholder: "City, County, District, Route",
       zoomScale: 5000,
-      searchFields: ["RETS_ID","RTE_NM","CNTY_NM","DIST_NM","GIS_ANALYST","GRID_ANALYST","DIST_ANALYST","MO_NBR","ACTIVITY"],
-      displayField: "RETS_ID",
+      searchFields: ["RETS_ID","GIS_ANALYST","GRID_ANALYST","DIST_ANALYST","ACTV"],
+      displayField: "RETS_ID", 
       exactMatch: false,
-      outFields: ["RETS_ID"],
-      minSuggestCharacters: 0,
+      outFields: ["*"],
+      minSuggestCharacters: 2,
+      
     },
-  ] 
+    {
+      name: "County",
+      layer: texasCounties, 
+      searchFields: ["CNTY_NM"],
+      displayField: "CNTY_NM", 
+      exactMatch: false,
+      outFields: ["*"],
+      maxSuggestions: 1,
+      minSuggestCharacters: 2,
+      
+    },
+    {
+      name: "District",
+      layer: txdotDistricts, 
+      searchFields: ["TXDOT_DIST_NM"],
+      displayField: "TXDOT_DIST_NM", 
+      exactMatch: false,
+      outFields: ["*"],
+      maxSuggestions: 3,
+      minSuggestCharacters: 2,
+    },
+    {
+      name: "Roadways",
+      layer: TxDotRoaways, 
+      searchFields: ["RTE_NM", "GID"],
+      displayField: "RTE_NM", 
+      exactMatch: false,
+      outFields: ["*"],
+      maxSuggestions: 1,
+      minSuggestCharacters: 2,
+    },
+    {
+      name: "Cities",
+      layer: texasCities, 
+      searchFields: ["CITY_NM"],
+      displayField: "CITY_NM", 
+      exactMatch: false,
+      outFields: ["*"],
+      //maxSuggestions: 1,
+      minSuggestCharacters: 3,
+    },
+    {
+      name: "Minute Orders",
+      layer: minuteOrders, 
+      searchFields: ["mo_nbr"],
+      displayField: "mo_nbr", 
+      exactMatch: false,
+      outFields: ["*"],
+      //maxSuggestions: 1,
+      minSuggestCharacters: 3,
+    },
+    
+    
+  ],
+
 });
 
 export var homeWidget  = new Home({
@@ -255,6 +364,20 @@ view.ui.add(searchWidget, {
   container: "searchcont",
 });
 
+searchWidget.on("select-result", function(event) {
+  const selectedFeature = event.result.feature;
+  
+  if (selectedFeature && selectedFeature.geometry) {
+    // Calculate the extent of the selected feature
+    const extent = selectedFeature.geometry.extent;
+    
+    
+    // Set the map view's extent based on the feature's extent
+    console.log(extent)
+    view.extent = extent;
+  }
+});
+
 
 //adds zoom widget to map 
 view.ui.add(ZoomWidget, {
@@ -314,13 +437,11 @@ export const OSMVTBasemap = new Basemap({
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-map.addMany([retsLayer,TxDotRoaways, graphics, retsGraphicLayer])
+map.addMany([retsLayer,TxDotRoaways, graphics, retsGraphicLayer, texasCounties, texasCities, minuteOrders])
 
 //remove attribution and zoom information
 view.ui.remove("attribution")
 // </></>
-view.on("drag", ["Shift"], (event) => {
-  event.stopPropagation();
-});
+
 
 

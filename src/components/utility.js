@@ -1,9 +1,10 @@
-import {view, retsLayer, homeWidget, retsGraphicLayer} from './map-Init'
+import {view, retsLayer, homeWidget, retsGraphicLayer, graphics, } from './map-Init'
 import Query from "@arcgis/core/rest/support/Query.js";
 import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant.js";
 import {store} from './store.js'
 import { addRETSPT } from './crud.js';
+
 
 export function clickRetsPoint(){
     try{
@@ -16,7 +17,6 @@ export function clickRetsPoint(){
                 outlineFeedCards(evt.results)
                 removeHighlight("a", true)
                 evt.results.forEach(rest => rest.graphic.layer.title ? highlightRETSPoint(rest.graphic.attributes) : highlightGraphicPt(rest.graphic.attributes))
-                // highlightRETSPoint(evt.results)
                 return evt.results[0].graphic.attributes.RETS_ID;
             })
         })
@@ -63,17 +63,22 @@ export async function getHighlightGraphic(){
 }
 
 export function removeHighlight(feature, removeAll){
+    //console.log(feature)
     view.whenLayerView(retsLayer)
         .then((lyrView) => {
             if(removeAll){
                 lyrView._highlightIds.clear()
                 return
             }
-            //highlights Point by giving OBJECTID
-            if(lyrView._highlightIds.has(feature.OBJECTID)){
-                lyrView._highlightIds.delete(feature.OBJECTID)
+
+            if(lyrView._highlightIds.has(feature?.attributes.OBJECTID)){
+                //console.log("before: " + feature?.attributes.OBJECTID )
+                lyrView._highlightIds.delete(feature?.attributes.OBJECTID)
+                //console.log("after: " + feature?.attributes.OBJECTID )
+                
                 return
             }
+            
             return
         })
 }
@@ -81,17 +86,18 @@ export function removeHighlight(feature, removeAll){
 function outlineFeedCards(res){
     res.forEach((x) => {
         //set card outline
-        if(!document.getElementById(`${x?.graphic.attributes.RETS_ID-x?.graphic.attributes.OBJECTID}`)) return
-        document.getElementById(`${x?.graphic.attributes.RETS_ID-x?.graphic.attributes.OBJECTID}`).classList.add('highlight-card')
+        var objectcomparison = x.attributes ? String(x.attributes.RETS_ID).concat('-',x.attributes.OBJECTID) : String(x.graphic.attributes.RETS_ID).concat('-',x.graphic.attributes.OBJECTID)
+        if(!document.getElementById(objectcomparison)) return
+        document.getElementById(objectcomparison).classList.add('highlight-card')
         //zoom to card in feed
 
         const zoomToCard = document.createElement('a')
-        zoomToCard.href = `#${x.graphic.attributes.RETS_ID-x.graphic.attributes.OBJECTID}`
+        zoomToCard.href = `#${objectcomparison}`
         zoomToCard.click()
         //remove card outline
-        // setTimeout(()=>{
-        //     document.getElementById(`${x.graphic.attributes.RETS_ID-x.graphic.attributes.OBJECTID}`).classList.remove('highlight-card')
-        // },5000)
+        setTimeout(()=>{
+            document.getElementById(objectcomparison).classList.remove('highlight-card')
+        },5000)
     })
     return;
 }
@@ -341,24 +347,24 @@ export function createtool(sketchWidgetcreate, createretssym) {
     });
   }
 
-  var testshift = false;
-  window.addEventListener("keydown", (event)=>{
-      testshift = event.key
-  });
-  window.addEventListener("keyup", (event) => {
-    testshift = false
-  });
-  export function selecttool(isSelectEnabled, sketchWidgetselect, clearSelection, graphics){
+    var pressedkey = false;
+    window.addEventListener("keydown", (event)=>{
+
+        pressedkey = event.key
+    });
+    window.addEventListener("keyup", (event) => {
+        pressedkey = false
+    });
+
+  export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
     if(isSelectEnabled === true){ 
-        var state = clearSelection
         sketchWidgetselect.create("rectangle");
-        state = !state
+        var removeAll = true
         sketchWidgetselect
         .on("create", function (event) 
             {
             if (event.state === "complete")
                 {
-                   
                     // Get the rectangle geometry
                     var rectangleGeometry = event.graphic.geometry;
                     // Query for points within the rectangle
@@ -369,42 +375,56 @@ export function createtool(sketchWidgetcreate, createretssym) {
                             {
                                 // Access the selected features
                                 var selectedFeatures = result.features;
+                                outlineFeedCards(selectedFeatures);
 
-                                if (state === true && testshift != "Shift"){
-                                    console.log('true')
+                                if (pressedkey === false){
+
                                     for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                      removeHighlight(selectedFeatures[i].attributes,state);  
+                                      removeHighlight(selectedFeatures[i].attributes,removeAll);  
 
-                                      
                                     }
                                     for (let i = 0; i < selectedFeatures.length; i++ ) {
                                         highlightRETSPoint(selectedFeatures[i].attributes);
+                                         //outlineFeedCards(selectedFeatures);
                                         
-  
-                                  }   
-                                  console.log(selectedFeatures) 
-                                  outlineFeedCards(selectedFeatures);
-                                  graphics.removeAll() 
-                                   return 
+                                        
+                                    }
+                                    
+                                    graphics.removeAll() 
+                                    return
+                                    
                                 }
-                                
-                                 if(state === true && testshift === "Shift"){
-                                    console.log('false')
 
+                                
+                                 
+                                
+                                if(pressedkey === "Shift"){
                                     for (let i = 0; i < selectedFeatures.length; i++ ) {
                                         highlightRETSPoint(selectedFeatures[i].attributes);
-                                        
-  
-  
-                                  }    
-                                  graphics.removeAll();
-                                  return
+                                        //outlineFeedCards(selectedFeatures);
+
+                                    } 
+                                    graphics.removeAll();
+                                    return
+                                }
+                                
+                                if(pressedkey === "Control"){
+                                    
+                                    for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                        console.log("this: " + selectedFeatures[i].attributes.OBJECTID)
+    
+                                        removeHighlight(selectedFeatures[i]);  
+
+                                    } 
+
+                                   
+                                    graphics.removeAll();
+                                    return
+        
                                 }
 
-
                                 
-                                
-
+                               
                             });
 
                             
@@ -418,7 +438,6 @@ export function createtool(sketchWidgetcreate, createretssym) {
     else{
         isSelectEnabled = !isSelectEnabled;
         sketchWidgetselect.cancel()
-        clearSelection = !clearSelection
             
     }
     
@@ -438,3 +457,33 @@ export function createtool(sketchWidgetcreate, createretssym) {
         console.log(err)
     }
   }
+
+
+  export function removeretsgraphic(){
+
+    graphics.removeAll()
+
+  }
+
+  export function togglemenu(isActOpen, shift){   
+            
+    var currentCenter = view.center.clone();
+    var screenPoint = view.toScreen(currentCenter);
+    var newCenter;    
+    if (isActOpen === true){
+
+         isActOpen =! isActOpen
+        screenPoint.x = screenPoint.x + shift; // Adjust the x coordinate by the desired amount of pixels
+        var newCenter = view.toMap(screenPoint); // Convert back to map coordinates
+        view.goTo(newCenter)
+        
+    }
+    else{
+         isActOpen =! isActOpen
+        screenPoint.x = screenPoint.x - shift; // Adjust the x coordinate by the desired amount of pixels
+        var newCenter = view.toMap(screenPoint); // Convert back to map coordinates
+        view.goTo(newCenter)                
+    }
+    
+}
+  
