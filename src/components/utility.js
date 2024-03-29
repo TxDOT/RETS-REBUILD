@@ -1,10 +1,11 @@
-import {view, retsLayer, homeWidget, retsGraphicLayer, TxDotRoaways, retsHistory} from './map-Init'
+import {view, retsLayer, homeWidget, retsGraphicLayer, TxDotRoaways, retsHistory, graphics} from './map-Init'
 import Query from "@arcgis/core/rest/support/Query.js";
 import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant.js";
 import {store} from './store.js'
 import {getDFOFromGRID} from './crud.js'
 import { addRETSPT } from './crud.js';
+import esriRequest from "@arcgis/core/request.js";
 
 export function clickRetsPoint(){
     try{
@@ -81,17 +82,20 @@ export function removeHighlight(feature, removeAll){
 
 function outlineFeedCards(res){
     res.forEach((x) => {
+        console.log(x.graphic.attributes)
         //set card outline
-        if(!document.getElementById(`${x?.graphic.attributes.RETS_ID-x?.graphic.attributes.OBJECTID}`)) return
-        document.getElementById(`${x?.graphic.attributes.RETS_ID-x?.graphic.attributes.OBJECTID}`).classList.add('highlight-card')
+        const retsId = String(x.graphic.attributes.RETS_ID)
+        const oid = String(x.graphic.attributes.OBJECTID)
+        if(!document.getElementById(`${retsId}-${oid}`)) return
+        document.getElementById(`${retsId}-${oid}`).classList.add('highlight-card')
         //zoom to card in feed
 
         const zoomToCard = document.createElement('a')
-        zoomToCard.href = `#${x.graphic.attributes.RETS_ID-x.graphic.attributes.OBJECTID}`
+        zoomToCard.href = `#${retsId}-${oid}`
         zoomToCard.click()
         //remove card outline
         // setTimeout(()=>{
-        //     document.getElementById(`${x.graphic.attributes.RETS_ID-x.graphic.attributes.OBJECTID}`).classList.remove('highlight-card')
+        //     document.getElementById(`${retsId}-${oid}`).classList.remove('highlight-card')
         // },5000)
     })
     return;
@@ -153,13 +157,12 @@ export function getDistinctAttributeValues(field){
 
 export function processDomainArr(domain){
     const holdArr = []
-
     domain.forEach((x) => {
         if(x.name === 'Username' || x.name === 'ACTV'){
             holdArr.push(`'${x.value}'`)
         }
         else{
-            holdArr.push(x.value)
+            holdArr.push(typeof x.value === "string" ? `'${x.value}'` : x.value)
         }
 
     })
@@ -185,7 +188,6 @@ export function searchCards(cardArr, string, index){
     //     return
     // }
     cardArr.forEach((x) => {
-        console.log(x)
         const a = Object.values(x.attributes).find(t => String(t).includes(string))
         if(a){
             document.getElementById(`${x.attributes[index]}`).classList.add('showCards')
@@ -288,7 +290,6 @@ export function zoomToRelatedRets(relatedRets){
 export const toggleRelatedRets = (retsid) =>  {
     const parseRets = JSON.parse(retsid)
     if(!parseRets.attributes.RELATED_RETS) return
-    console.log(parseRets)
     const newRetsId = typeof retsid === "object" ? parseRets.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID) : parseRets.attributes.RELATED_RETS.split(",")
     turnAllVisibleGraphicsOff()
     newRetsId.forEach((ret) =>{
@@ -304,8 +305,6 @@ export function returnDFO(roadName, dfo){
         view.hitTest(event, {include: [TxDotRoaways]})
             .then((x) =>{
                 if(!x.results.length) return
-                console.log(view.toMap(x.screenPoint))
-                console.log(x)
                 getDFOFromGRID(x.results[0].graphic.attributes.GID, .2)
             })
     })
@@ -318,21 +317,43 @@ export function returnDFO(roadName, dfo){
         //find segment point is on (two points) => before, end
         //take beginning measure and find delta between beginning and placed point
         //return new dfo
+    return
 }
 
 // export function openDetailsFromGraphic(){
     
 //}
 
-export function returnHistory(){
-    const queryString = {"whereString": `1=1`, "queryLayer": "retsHistory"}
+export function returnHistory(query){
+    const queryString = {"whereString": `${query ?? '1=1'}`, "queryLayer": "retsHistory"}
     getQueryLayer(queryString, "create_dt desc")
         .then((hist) => {
             const arrHist = []
-            hist.features.forEach(x => arrHist.push(x.attributes))
-            store.history = JSON.stringify(arrHist)
+            hist.features.forEach((x) => {
+                // x.attributes.attachments = []
+                // x.attributes.attachments.push()
+                arrHist.push(x.attributes)
+            })
+            query ? store.historyChat = arrHist : store.history = JSON.stringify(arrHist)
         })
+        .catch(err => console.log(err))
     return
+}
+
+export async function getAttachmentInfo(oid){
+    try{
+        const isAttach = await retsHistory.queryAttachments({
+            objectIds: oid
+        })
+    
+        if(isAttach){
+           return isAttach
+        }
+    }
+
+    catch(err){
+        console.log(err)
+    }
 }
 
 export function getUniqueQueryValues(layer, constantsProp){
@@ -342,20 +363,24 @@ export function getUniqueQueryValues(layer, constantsProp){
     
     layer.queryFeatures(query)
         .then((item) => {
-            item.features.forEach(x => constantsProp.push(x.attributes))
+            item.features.forEach(x => constantsProp.push({
+                "value" : x.attributes.USERNAME,
+                "name": x.attributes.NAME,
+                "email": x.attributes.EMAIL
+            }))
         })
 }
+
 export function highlightpoints(event){
-     // Get the rectangle geometry
-     var rectangleGeometry = event.graphic.geometry;
-     // Query for points within the rectangle
-     var query = retsLayer.createQuery();
-     query.geometry = rectangleGeometry;
-     retsLayer.queryFeatures(query)
+    // Get the rectangle geometry
+    var rectangleGeometry = event.graphic.geometry;
+    // Query for points within the rectangle
+    var query = retsLayer.createQuery();
+    query.geometry = rectangleGeometry;
+    retsLayer.queryFeatures(query)
 
+    return
 }
-
-
 
 export function createtool(sketchWidgetcreate, createretssym) {
     return new Promise((resolve, reject) => {
@@ -375,14 +400,24 @@ export function createtool(sketchWidgetcreate, createretssym) {
     });
   }
 
-  var testshift = false;
-  window.addEventListener("keydown", (event)=>{
-      testshift = event.key
-  });
-  window.addEventListener("keyup", (event) => {
-    testshift = false
-  });
-  export function selecttool(isSelectEnabled, sketchWidgetselect, clearSelection, graphics){
+export function deleteRetsGraphic(){
+    graphics.graphics.items.forEach((ret) => {
+        if(ret.geometry.type === 'point'){
+            graphics.remove((ret))
+        }
+    })
+    return
+}
+
+export function selecttool(isSelectEnabled, sketchWidgetselect, clearSelection, graphics){
+    var testshift = false;
+    window.addEventListener("keydown", (event)=>{
+        testshift = event.key
+    });
+    window.addEventListener("keyup", () => {
+      testshift = false
+    });
+  
     if(isSelectEnabled === true){ 
         var state = clearSelection
         sketchWidgetselect.create("rectangle");
@@ -456,13 +491,18 @@ export function createtool(sketchWidgetcreate, createretssym) {
             
     }
     
-    
+    window.removeEventListener("keydown", (event)=>{
+        testshift = event.key
+    });
+    window.removeEventListener("keyup", () => {
+        testshift = false
+    });
+
     return
   }
 
-  export async function handleaddrets(newPointGraphic, addrets){
+export async function handleaddrets(newPointGraphic, addrets){
     try{
-        console.log(newPointGraphic)
         const obj = await addRETSPT(newPointGraphic)
         const objectid = obj.addFeatureResults[0].objectId
         addrets = objectid
@@ -470,5 +510,60 @@ export function createtool(sketchWidgetcreate, createretssym) {
     }
     catch(err){
         console.log(err)
+        return
     }
-  }
+}
+
+export async function getCmntOID(retId){
+    const queryString = {"whereString": `RETS_ID = ${retId}`, "queryLayer": "retsHistory"}
+    return await getQueryLayer(queryString, "EDIT_DT DESC")
+}
+
+export function addAttachments(oid, files, flag){
+    const arr = Array.from(files)
+    const formData = new FormData()
+    formData.append("attachment", arr[0], arr[0].name)
+    
+    esriRequest(`https://testportal.txdot.gov/createags/rest/services/RETS_CMNT/FeatureServer/0/${oid}/addAttachment`, {
+        body: formData,
+        method: "post",
+        responseType: "html",
+    })
+        .then((x) => {
+            console.log(x)
+            console.log(arr)
+            flag ? null : store.attachToNote(oid, arr)
+        })
+        .then(() => console.log('add attachment'))
+        .catch(err => console.log(err))
+}
+
+export function deleteAttachment(oid, attachName){
+    const attachGraphic = new Graphic({
+        attributes :{
+            OBJECTID : oid,
+        }
+    })
+
+    retsHistory.queryAttachments({
+        objectIds: [oid]
+    })
+    .then((x) => {
+        x[oid].forEach((attach) => {
+            if(attach.name === attachName){
+                retsHistory.deleteAttachments(attachGraphic, [attach.id])
+                    .then((y) => {
+                        const chat = store.historyChat.find(z => z.OBJECTID === attach.parentObjectId)
+                        const index = chat.attachments.findIndex(att => att.name === attach.name)
+                        chat.attachments.splice(index, 1)
+                    })
+                
+                    .catch(err => console.log(err))
+            }
+        })
+        
+    })
+    return 
+}
+
+export const rtrnNumAttachChat = () => store.historyChat.filter(chat => chat.attachments).length

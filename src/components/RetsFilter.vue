@@ -36,7 +36,7 @@
                     <v-autocomplete :items="filterCounty" item-title="name" item-value="value" return-object multiple label="County" chips closable-chips variant="underlined" density="compact" v-model="filterPros.CNTY_NM"></v-autocomplete>
                 </v-row>
                 <v-row no-gutters dense >
-                    <v-autocomplete :items="filterUser" item-title="value" item-value="value" return-object label="Users" multiple chips closable-chips variant="underlined" density="compact" v-model="filterPros.GIS_ANALYST"></v-autocomplete>
+                    <v-autocomplete :items="filterUser" item-title="name" item-value="value" return-object label="Users" multiple chips closable-chips variant="underlined" density="compact" v-model="filterPros.GIS_ANALYST"></v-autocomplete>
                 </v-row>
 
                 <v-expansion-panels flat variant="accordion">
@@ -94,16 +94,20 @@
                 filterStatus: appConstants.statDomainValues,
                 filterDistrict: appConstants.districtDomainValues,
                 filterCounty: appConstants.countyDomainValues,
-                filterUser: appConstants.defaultUserValue,
+                filterUser: appConstants.userRoles,
                 filterActivity: appConstants.activityList,
                 numFilters: 0,
                 defaultFilter: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, "JOB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
-                         "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, "GIS_ANALYST": appConstants.defaultUserValue, 
+                         "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, "GIS_ANALYST": appConstants.userRoles.filter(y => y.value === appConstants.defaultUserValue[0].value), 
                          "filterTotal": 2},
                 isDate: false,
                 selectDate: null,
                 currentYear: null,
             }
+        },
+        mounted(){
+            console.log(this.filterPros.GIS_ANALYST)
+            this.filterPros.GIS_ANALYST = appConstants.userRoles.filter(y => y.value === this.filterPros.GIS_ANALYST[0].value)
         },
         methods:{
             cancelFilter(){
@@ -126,7 +130,6 @@
                 for(const [key,value] of Object.entries(this.filterPros)){
                     if(ignoreField.includes(key) || !value) continue
                     if(value.length){
-                        console.log(value)
                         this.addNumFilter()
                     }
                 }

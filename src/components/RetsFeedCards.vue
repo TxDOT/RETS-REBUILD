@@ -23,11 +23,14 @@
                             <v-btn v-if="isDetailsPage" icon="mdi-pencil-outline" density="compact" flat id="renameRets" @click="displaySubtitle($event)"></v-btn>
                         </div>
 
-                        <div v-if="!isDetailsPage">
-                            <v-btn icon="mdi-filter" class="banner-btn" flat @click="isfilter = !isfilter"></v-btn>
-                            <div class="filter-notification-bubble" v-if="retsFilters.filterTotal > 0">
-                                <p style="font-size: 16.5px; position: relative; left: 21%; bottom: 1px;"><b>{{ retsFilters.filterTotal}}</b></p>
+                        <div v-if="!isDetailsPage" style="position: relative; top: .1rem">
+                            <div>
+                                <v-btn icon="mdi-filter" class="banner-btn" flat @click="isfilter = !isfilter"></v-btn>
+                                <div class="filter-notification-bubble" v-if="retsFilters.filterTotal > 0">
+                                    <p style="font-size: 13.5px; position: relative; left: 25%; bottom: 1.3px;"><b>{{ retsFilters.filterTotal}}</b></p>
+                                </div>
                             </div>
+
                         </div>
                     </div>
                 </v-banner>
@@ -46,7 +49,7 @@
                     <v-col class="color-picker" v-if="flagClickedId === rd.attributes.RETS_ID" v-click-outside="closeFlagDiv">
                         <v-icon size="medium" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" ></v-icon>
                     </v-col>    
-                    <v-card :id="rd.attributes.RETS_ID-rd.attributes.OBJECTID" :style="{borderLeft: `7px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple class="card" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road);">
+                    <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `7px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple class="card" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road);">
                         <v-card-text id="retsCard">
                             RETS {{rd.attributes.RETS_ID }}
                         </v-card-text>
@@ -62,7 +65,7 @@
                         </div>
 
                         <v-card-subtitle class="subtitle-text main-color">
-                            Created by {{ rd.attributes.CREATE_NM ? rd.attributes.CREATE_NM : "If Create Name is empty is it really created" }} {{ rd.attributes.CREATE_DT ? returnDateFormat(rd.attributes.CREATE_DT) : returnDateFormat(rd.attributes.EDIT_DT)}}
+                            Created by {{ rd.attributes.CREATE_NM ? returnUserName(rd.attributes.CREATE_NM) : "If Create Name is empty is it really created" }} {{ rd.attributes.CREATE_DT ? returnDateFormat(rd.attributes.CREATE_DT) : returnDateFormat(rd.attributes.EDIT_DT)}}
                         </v-card-subtitle>
                         <div>
                             <v-icon icon="mdi-exclamation" id="cardPRIO" v-if="rd.attributes.PRIO === 0"></v-icon>
@@ -102,7 +105,7 @@
 </template>
 
 <script>
-import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer, searchCards, highlightRETSPoint, turnAllVisibleGraphicsOff, toggleRelatedRets, getHighlightGraphic, removeHighlight, createtool, handleaddrets} from './utility.js'
+import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer, searchCards, highlightRETSPoint, turnAllVisibleGraphicsOff, toggleRelatedRets, getHighlightGraphic, removeHighlight, createtool, returnHistory} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {getUserId} from './login.js'
 import Filter from './RetsFilter.vue'
@@ -110,7 +113,6 @@ import RetsDetailPage from './RetsDetail.vue'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import {store} from './store.js'
 import {view, retsGraphicLayer} from './map-Init.js'
-import RetsFeed from './RetsFeed.vue'
 import { sketchWidgetcreate, createretssym } from './map-Init.js'
 import {addRETSPT} from '../components/crud.js'
 
@@ -120,7 +122,7 @@ export default{
     components: {Filter, RetsDetailPage},
     props: {
         filterPros: Object,
-        addrets:Number
+        // addrets:Number
     },
     components: {RetsDetailPage, Filter}, 
     data(){
@@ -190,18 +192,17 @@ export default{
     },
     methods:{
         async processAddPt(newPointGraphic){
-                        try{
-                            console.log(newPointGraphic)
-                            const obj = await addRETSPT(newPointGraphic)
-                            const objectid = obj.addFeatureResults[0].objectId
-                            this.addrets = objectid
-                            return
-                        }
-                        catch(err){
-                            console.log(err)
-                        }
-                         //handleaddrets(newPointGraphic, this.addrets);
-                    },
+            try{
+                const obj = await addRETSPT(newPointGraphic, "rets")
+                const objectid = obj.addFeatureResults[0].objectId
+                this.addrets = objectid
+                return
+            }
+            catch(err){
+                console.log(err)
+            }
+            //handleaddrets(newPointGraphic, this.addrets);
+        },
         alert(s){
             window.alert(s)
         },
@@ -269,6 +270,7 @@ export default{
         },
         double(road, index){
             store.historyRetsId = road.attributes.RETS_ID
+            returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
             road.attributes.logInUser = this.loggedInUser 
             road.attributes.index = index
             this.send = this.currRoad = road
@@ -285,7 +287,9 @@ export default{
             try{const querypromise = await getQueryLayer(querystring, "PRIO, CREATE_DT DESC")
                 if (querypromise.features.length){
                     querypromise.features.forEach(
-                        (feat)=> this.double({attributes:feat.attributes,geometry:[feat.geometry.x,feat.geometry.y]})
+                        (feat)=> {
+                            this.double({attributes:feat.attributes,geometry:[feat.geometry.x,feat.geometry.y]})
+                        }
                     )
                 }
 
@@ -369,9 +373,14 @@ export default{
                 this.isCreateEnabled = !this.isCreateEnabled;
                 //console.log("false")
                 }
-
-
-        }
+        },
+        returnUserName(n){
+            if(!n) {
+                return "My name is Null"
+            }
+            const usernameRow = appConstants.userRoles.find(name => name.value === n)
+            return usernameRow?.name ?? 'My name is not in the RESP table :('
+        },
 
     },
     watch:{
@@ -390,16 +399,16 @@ export default{
             },
             immediate: true
         },
-        addrets:{
-            handler: function(){
-                if(this.addrets){
-                    this.addNewPoint()
-                    return
-                }
-                return
-            },
-            immediate: true
-        },
+        // addrets:{
+        //     handler: function(){
+        //         if(this.addrets){
+        //             this.addNewPoint()
+        //             return
+        //         }
+        //         return
+        //     },
+        //     immediate: true
+        // },
         retsSubtitle:{
             handler:function(word){
                 if(word.length<0) return
@@ -423,7 +432,7 @@ export default{
                 const user = await getUserId()
                 this.loggedInUser = user
                 this.retsFilters.loggedInUser = user
-                const queryString = {"whereString": `(GIS_ANALYST = '${user}') AND (STAT = 1 OR STAT = 2)`, "queryLayer": "retsLayer"}
+                const queryString = {"whereString": `(GIS_ANALYST = '${user}') AND (STAT = 1 OR STAT = 2 or STAT = 4)`, "queryLayer": "retsLayer"}
                 const orderField = "PRIO, EDIT_DT DESC"
                 getQueryLayer(queryString, orderField)
                 .then(obj => {
@@ -440,28 +449,26 @@ export default{
             },
         },
         async setActivityFeed(){
-                const filter = await filterMapActivityFeed(this.retsFilters)
-                this.roadObj = []
-                const query = {"whereString": `${filter}`, "queryLayer": "retsLayer"}
-                console.log(this.retsFilters.CREATE_DT)
-                const orderField = `${this.retsFilters.CREATE_DT.filter} ${this.retsFilters.CREATE_DT.sortType}`
-                getQueryLayer(query, orderField)
-                    .then(obj => {
-                        if(obj.features.length){
-                            obj.features.forEach((x) => {
-                                this.roadObj.push({attributes:x.attributes, geometry: [x.geometry.x, x.geometry.y]})
-                            })
-                            this.isNoRets = false
-                            console.log(this.roadObj)
-                            return
-                        }
-                        this.isDetailsPage = false
-                        this.isNoRets = true
+            const filter = await filterMapActivityFeed(this.retsFilters)
+            this.roadObj = []
+            const query = {"whereString": `${filter}`, "queryLayer": "retsLayer"}
+            const orderField = `${this.retsFilters.CREATE_DT.filter} ${this.retsFilters.CREATE_DT.sortType}`
+            getQueryLayer(query, orderField)
+                .then(obj => {
+                    if(obj.features.length){
+                        obj.features.forEach((x) => {
+                            this.roadObj.push({attributes:x.attributes, geometry: [x.geometry.x, x.geometry.y]})
+                        })
+                        this.isNoRets = false
+                        return
+                    }
+                    this.isDetailsPage = false
+                    this.isNoRets = true
                         
-                    })
-                    .catch((err)=> {
-                        console.log(err)
-                    })
+                })
+                .catch((err)=> {
+                    console.log(err)
+                })
             },
 
     }
@@ -494,6 +501,7 @@ export default{
         position: absolute;
         left: 74px;
         padding: 0px;
+        display: block;
     }
     #feed-row{
         position: absolute;
@@ -585,21 +593,24 @@ export default{
     }
 
     .highlight-card{
-        position: relative;
+        position: absolute;
         animation: fade 2500ms ease-out forwards;
         transform: scale(1);
         background-color: rgba(9, 107, 219, 0.7);
         top: 0rem;
+        left: 10rem;
         width: 100%;
     }
-
+    #test{
+        display: none;
+    }
     .route-card{
         position: relative;
         max-width: 50%;
     }
     .route-name{
         position: absolute;
-        right: 3.5vh;
+        right: 3.8vh;
         float: right;
         top: 0.5rem;
         justify-content: end;
@@ -670,9 +681,9 @@ export default{
     }
     .filter-notification-bubble{
         position: relative;
-        width: 1.2rem;
+        width: 1.1rem;
         background-color:#4472C4;
-        height: 1.2rem;
+        height: 1.1rem;
         float: right;
         bottom: 1rem;
         left: 2.5rem;

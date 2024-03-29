@@ -39,25 +39,37 @@ export let retsPointRenderer = new UniqueValueRenderer({
     value: "2",
       symbol: new SimpleMarkerSymbol({
       size: 8,
-      color: appConstants.CardColorMap[3],
+      color: appConstants.CardColorMap[2],
         outline: {
           color: "white",
           width: 0
         }
       }),
-      label: "Complete"
+      label: "In Progress"
   },
   {
     value: "3",
     symbol: new SimpleMarkerSymbol({
       size: 8,
-      color: appConstants.CardColorMap[2],
+      color: appConstants.CardColorMap[3],
       outline: {
         color: "white",
         width: 0
       }
     }),
-    label: "in Progress"
+    label: "Complete"
+  },
+  {
+    value: "4",
+    symbol: new SimpleMarkerSymbol({
+      size: 8,
+      color: appConstants.CardColorMap[4],
+      outline: {
+        color: "white",
+        width: 0
+      }
+    }),
+    label: "On Hold"
   },
 
   // Add more unique value info objects as needed...

@@ -1,7 +1,7 @@
 <template>
     <div id="viewDiv">
       
-        <ShowChanges style="position: absolute; left: 50%; top: 50%;" />
+        <!-- <ShowChanges style="position: absolute; left: 50%; top: 50%;" /> -->
        
     </div>
 
@@ -14,7 +14,7 @@
 //import {queryRetsTable} from './utility.js'
 import {view} from './map-Init.js'
 import {home, hoverRetsPoint} from './utility.js'
-import ShowChanges from './showChanges.vue'
+// import ShowChanges from './showChanges.vue'
 //import ESRI JS ESM class
 export default{
     name: "Map",
@@ -40,14 +40,14 @@ export default{
             var newCenter;    
             if (this.isActOpen === true){
 
-                 this.isActOpen =! this.isActOpen
+                this.isActOpen =! this.isActOpen
                 screenPoint.x = screenPoint.x + this.shift; // Adjust the x coordinate by the desired amount of pixels
                 var newCenter = view.toMap(screenPoint); // Convert back to map coordinates
                 view.goTo(newCenter)
                 
             }
             else{
-                 this.isActOpen =! this.isActOpen
+                this.isActOpen =! this.isActOpen
                 screenPoint.x = screenPoint.x - this.shift; // Adjust the x coordinate by the desired amount of pixels
                 var newCenter = view.toMap(screenPoint); // Convert back to map coordinates
                 view.goTo(newCenter)                

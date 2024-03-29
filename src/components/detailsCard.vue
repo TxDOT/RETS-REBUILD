@@ -184,7 +184,6 @@ import {store} from './store.js'
                 this.$emit("disable-save", bool)
             },
             onlyNumbers(i){
-                console.log(i)
                 if(this.infoRets.attributes.NO_RTE === 1 || this.infoRets.attributes.NO_RTE === null){
                     let convert = Number(i)
                     if(!convert){
@@ -201,7 +200,6 @@ import {store} from './store.js'
                                                             window.open(`https://txdot.sharepoint.com/sites/division-tpp/DM-Admin/Lists/Data%20Request/EditForm.aspx?ID=${1138}`, '_blank')
             
 
-                console.log("paperclip clicked")
             },
             crossHairFunc(){
                 returnDFO()
@@ -268,11 +266,9 @@ import {store} from './store.js'
                 },
             },
             'infoRets.attributes.RETS_ID':{ //<= neccessary?
-                handler: function(n,o){
+                handler: function(){
                     store.currentInfo = JSON.stringify(this.infoRets)
                     this.splitAndAddRelatedRets(this.infoRets.attributes.RELATED_RETS)
-                    // toggleRelatedRets(o, false)
-                    // toggleRelatedRets(n, true)
                 },
                 immediate: true
             }

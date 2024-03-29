@@ -31,7 +31,7 @@ export default{
   watch:{
     auth:{
       handler: function(){
-        this.$router.push('/')
+        this.$router.push('/apps/statewide_mapping/rets_rebuild/login')
       },
       immediate: true,
     }

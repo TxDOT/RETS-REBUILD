@@ -27,7 +27,7 @@
     data () {
       return {
         dialog: true,
-        changes: '<ol><li>Add/update/delete a Rets (Add rets does not open details page yet)</li><br><li>Related Rets workflow</li><br><li>Flags, importance</li><br><li>Styling, etc...</li></ol>'
+        changes: '<ol><li>Add/update/delete a Rets (Add rets does not open details page yet)</li><br><li>Related Rets workflow</li><br><li>Flags, importance</li><br><br><li>History</li><br><li>Styling, etc...</li></ol>'
       }
     },
   }

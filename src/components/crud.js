@@ -1,12 +1,12 @@
-import { retsLayer, DFOProducer } from "./map-Init";
+import { retsLayer, DFOProducer, retsHistory } from "./map-Init";
 import Graphic from "@arcgis/core/Graphic.js";
 import Query from "@arcgis/core/rest/support/Query";
+import {store} from './store'
 
 export async function addRETSPT(retsObj){
     return retsLayer.applyEdits({
         addFeatures: [retsObj]
     })
-    
 }
 
 export async function updateRETSPT(retsObj){
@@ -34,12 +34,13 @@ export function deleteRETSPT(retsObj){
 
 
 function createGraphic(retsObj){
-    delete retsObj.index
-    delete retsObj.logInUser
-    delete retsObj.retsPt
+    delete retsObj?.index
+    delete retsObj?.logInUser
+    delete retsObj?.retsPt
+    delete retsObj?.STATUS
 
     return new Graphic({
-        attributes: retsObj.attributes
+        attributes: retsObj.attributes ?? retsObj
     })
 }
 
@@ -52,7 +53,7 @@ export function getDFOFromGRID(gid, dfo){
         .then((x) => {
             console.log(x)
             const query = new Query()
-            query.where = `OBJECTID = 1`
+            query.where = `1=1`
             query.outFields = ["*"]
             query.returnGeometry = true
             query.returnM = true
@@ -61,4 +62,42 @@ export function getDFOFromGRID(gid, dfo){
                 .then(y => console.log(y))
         })
         .catch(err => console.log(err))
-}   
+}
+
+export async function sendChatHistory(chat, type){
+    //take chat and send it chat history feature layer
+    //create Graphic acceptable to be sent feature layer
+    //if new ; add to feature layer
+    //if update ; update feature in history feature layer
+    //if delete ; delete feature in history feature layer
+
+    let newGraphic;
+    const chatType = {
+        add: () => {
+            newGraphic = createGraphic(chat)
+            return retsHistory.applyEdits({
+                addFeatures: [newGraphic]
+            })
+        },
+        modify:() => {
+            newGraphic = createGraphic(chat)
+            return retsHistory.applyEdits({
+                updateFeatures: [newGraphic]
+            })
+        },
+        delete:() =>{
+            newGraphic = createGraphic(chat)
+            return retsHistory.applyEdits({
+                deleteFeatures: [newGraphic]
+            })
+        }
+    }
+
+    const returnStatus = await chatType[type]()
+    return returnStatus
+    // return addRETSPT(newGraphic, "hist")
+
+
+    
+}
+

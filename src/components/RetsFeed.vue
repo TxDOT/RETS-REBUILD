@@ -1,7 +1,6 @@
 
 
 <template style="overflow-y:hidden;">
-<Map ref="MapRef"></Map>
 
     <v-navigation-drawer width="200" height="100" permanent color="black">
         <v-list height="100%" id="icons-top" >
@@ -122,11 +121,7 @@
 
     </v-card>
 
-   
-
-    
-    <RetsCards :addrets = "addrets2"/>
-
+    <RetsCards/>
     
 
 </template>
@@ -136,11 +131,9 @@
     import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect} from '../components/map-Init.js';
     import {addRETSPT} from '../components/crud.js'
     import { createtool, selecttool } from '../components/utility.js';
-    import Map from './Map.vue';
-    
 
     export default{
-        components: {RetsCards, Map},
+        components: {RetsCards},
         name: "RetsFeed",
         props: {addrets: Number},
         data(){
@@ -156,20 +149,16 @@
                 settingsstatus: false,
                 shiftKey: false,
                 retsToolsTop: [
-                               {title:"Test", icon: 'mdi-menu', color: "white", name: "Menu", action: () =>{
-                                
-                                    this.isActive = !this.tester
-                                    document.getElementById("container").style.display = 
-                                    document.getElementById("container").style.display === "none" ? "block" : "none",
-                                    this.resizemap()
-                                }, isActive: this.tester,
+                               {
+                                title:"Toggle",
+                                icon: 'mdi-menu', 
+                                color: "white", 
+                                name: "Menu", 
+                                action: () =>{
+                                    document.getElementById("container").style.display = document.getElementById("container").style.display === "none" ? "block" : "none"
+                                }, 
+                                isActive: this.tester,
                                },  
-                            //    {title:"Test", icon: 'mdi-plus', color: "#4472C4", name: "Add RETS", action: async () =>{
-                            //     const graphicAdd = await this.handleCreateTool();
-                            //     if (graphicAdd) {
-                            //         this.processAddPt(graphicAdd)
-                            //         }
-                            //    }},
                             ],
  
                 retsToolsBottom: [
@@ -183,7 +172,7 @@
                                     }
                                 },
                                {title:"JumpTo", icon: 'mdi-map-marker', color: "white", name: "Jump To", action: () =>{
-                                console.log("click")
+    
                                },
                                hover:(i) => 
                                     { 
@@ -205,7 +194,7 @@
                                     }
                                 },
                                {title:"Basemap", icon: 'mdi-map-legend', color: "white", name: "Basemaps", action: () => {
-                                console.log("click")
+                            
                                },
                                 hover:(i) => { 
                                     if (i === "Basemap")
@@ -232,60 +221,17 @@
 
             }
         },
-                created(){
-                    window.addEventListener("keydown", this.handleKeyDown);
-                    //window.addEventListener("keyup", this.handleKeyUp);
-                },
-                destroyed() {
-                    // Remove event listeners when the component is destroyed to avoid memory leaks
-                    window.removeEventListener("keydown", this.handleKeyDown);
-                    //window.removeEventListener("keyup", this.handleKeyUp);
-                },
+        
                 computed:{
-                    test:{
-                        get(){
-                            return this.tester
-                        },
-                        set(value){
-                            this.tester = value
-                        }
-                    }
+
                 },
                 mounted() {
-                    //  document.addEventListener("keydown", this.handleKeyDown);
-                    //  document.addEventListener("keyup", this.handleKeyUp);
+                
                     
 
                 },
                 
                 methods: {
-                    handleKeyDown(event) {
-                        // if (event.key === "Shift") {
-                        //     // Set shiftStatus to false when the Shift key is released
-                        //     this.shiftKey = true;
-                             console.log(event.key)
-                        //     return
-                            
-                        // }
-                        //return this.shiftKey
-                        this.shiftKey = true;
-                        //console.log(this.shiftKey);
-                        return this.shiftKey
-
-                    },
-                    handleKeyUp(event) {
-                        // if (event.key === "Shift") {
-                        //     // Set shiftStatus to false when the Shift key is released
-                        //     this.shiftKey = false;
-                        //     console.log("noshift")
-
-                            
-                        // }
-                        // //return this.shiftKey
-                        // return
-                        this.shiftKey = true;
-
-                    },
                     resizemap(){
                         this.$refs.MapRef.togglemenu();
                     },
@@ -298,7 +244,6 @@
                     async processAddPt(newPointGraphic){
                         //handleaddrets(newPointGraphic);
                         try{
-                            console.log(newPointGraphic)
                             const obj = await addRETSPT(newPointGraphic)
                             const objectid = obj.addFeatureResults[0].objectId
                             this.addrets2 = objectid

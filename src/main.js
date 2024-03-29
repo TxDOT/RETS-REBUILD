@@ -22,6 +22,4 @@ const vuetify = createVuetify({
     }
   })
   
-
-router.push('/')
 createApp(App).use(vuetify).use(router).mount('#app')

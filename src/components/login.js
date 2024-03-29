@@ -16,7 +16,6 @@ const authen = new OAuthInfo({
 export function login(){
   try{
     esriId.registerOAuthInfos([authen]);
-    console.log(authen.portalUrl)
     esriId.checkSignInStatus(authen.portalUrl)
       .then((x) => setDefExpRets(x.userId)) //already signed in
       .catch(() => signIn()) //not signed in; proceed to sign in 
@@ -36,7 +35,8 @@ export function login(){
     //.catch(() => signIn()) //not signed in; proceed to sign in 
 }
 
-export async function signIn(){ 
+export async function signIn(){
+  getUniqueQueryValues(retsUserRole, appConstants.userRoles)
   const userId = await getUserId()
   setDefExpRets(userId)
   retsLayer
@@ -49,13 +49,12 @@ export async function signIn(){
       })
 
       getDistinctAttributeValues('ACTV')
-      getUniqueQueryValues(retsUserRole, appConstants.userRoles)
       createLayerViews()
 
       return retsLayer.queryExtent();
     })
     .then((response) => {
-      router.push('/map')
+      router.push('/apps/statewide_mapping/rets_rebuild/map')
       view.goTo(response.extent);
       
     });
@@ -64,7 +63,7 @@ export async function signIn(){
 const setDefExpRets = (userId) => {
   if(appConstants.defaultUserValue.length) return
   appConstants.defaultUserValue.push({"name": "Username", "value": `${userId}`})
-  retsLayer.definitionExpression = `(GIS_ANALYST = '${userId}') AND (STAT = 1 OR STAT = 2)`
+  retsLayer.definitionExpression = `(GIS_ANALYST = '${userId}') AND (STAT = 1 OR STAT = 2 or STAT = 4)`
   return
 }
 
@@ -78,21 +77,21 @@ export async function getUserId(){
 
 function createLayerViews(){
     returnHistory()
-    view.whenLayerView(TxDotRoaways)
-      .then((featLayerView) => {
-        console.log(featLayerView)
-        if(featLayerView.layer.title === 'TxDOT Roadways'){
-          let query = featLayerView.layer.createQuery()
-          query.where = "OBJECTID < 10"
+    // view.whenLayerView(TxDotRoaways)
+    //   .then((featLayerView) => {
+    //     console.log(featLayerView)
+    //     if(featLayerView.layer.title === 'TxDOT Roadways'){
+    //       let query = featLayerView.layer.createQuery()
+    //       query.where = "OBJECTID < 10"
 
-          featLayerView.queryFeatures(query)
-            .then(x => console.log(x))
-            .catch(err => console.log(err))
-          return
-        }
-        //roadLayerview = featLayerView
-      })
-      .catch(err => console.log(err))
+    //       featLayerView.queryFeatures(query)
+    //         .then(x => console.log(x))
+    //         .catch(err => console.log(err))
+    //       return
+    //     }
+    //     //roadLayerview = featLayerView
+    //   })
+    //   .catch(err => console.log(err))
     return
 }
 

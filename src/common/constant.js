@@ -5,7 +5,7 @@ export const appConstants = {
         '1': '#FF00C5',
         '2': '#FFAA00',
         '3': '#55FF00',
-        '4': 'Red',
+        '4': '#686868',
         '5': 'Red'
     },
     
@@ -23,7 +23,7 @@ export const appConstants = {
     countyDomainValues:[],
     userDomainValues:[],
     jobTypeDomainValues:[],
-    defaultStatValues: [{ name: "Not Started", value: 1 },{ name: "In Progress", value: 2 }],
+    defaultStatValues: [{ name: "Not Started", value: 1 },{ name: "In Progress", value: 2 }, { name: "On Hold", value: 4 }],
     defaultUserValue:[],
     activityList: [],
     userRoles: [],

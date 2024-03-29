@@ -41,14 +41,11 @@
             
             <v-card class="history-card">
                 <div style="float: right; font-size: 10px; position: relative; top: .5rem;" >
-                    <v-btn icon="mdi-arrow-expand" variant="plain" density="compact" @click="editText = true"></v-btn>
+                    <v-btn icon="mdi-arrow-expand" variant="plain" density="compact" @click="expandChatHistory"></v-btn>
                 </div>
                 <v-card-title style="padding-bottom: 30px;">History</v-card-title>
-                
-                <historyView :historyArr="sendHistory"/>
+                <historyView/>
             </v-card>
-        </div>
-        <div>
         </div>
     </div>
     <div id="commentDiv" v-if="editText">
@@ -57,14 +54,15 @@
             <div style="float: right; font-size: 10px; position: relative; bottom: 2.4rem;" >
                 <v-btn icon="mdi-close" variant="plain" density="compact" @click="editText = false"></v-btn>
             </div>
-            <historyView :historyArr="sendHistory"/>
+            <historyView/>
             <div class="marginSetting" style="padding-top: 10px; position: absolute; width: 98%; bottom: 2rem;">
                 <v-text-field label="Type a message" density="compact" tile v-model="addHistoryChat"></v-text-field>
                 <div style="float: left; bottom: 1rem; position: relative;">
-                    <v-btn prepend-icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px !important;">Add an Attachment</v-btn>
+                    <v-btn prepend-icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px !important;" @click="displayAttachments()">Add an Attachment</v-btn>
+                    
                 </div>
                 <div style="float:right; bottom: 1rem; position: relative; ">
-                    <v-btn icon="mdi-close" variant="plain" density="compact" style="font-size: 15px !important;"></v-btn>
+                    <v-btn icon="mdi-close" variant="plain" density="compact" style="font-size: 15px !important;" @click="clearMessage"></v-btn>
                     <v-btn icon="mdi-check" variant="plain" density="compact" style="font-size: 15px !important;" @click="addHistoryNote"></v-btn>
                 </div>
             </div>
@@ -78,17 +76,16 @@
         </v-card>
 
     </div>
-    <div style="position: relative; float: bottom">
+    <div style="position: relative; top: 5rem;">
         <div style="position: relative; float: left; margin-left: 10px; font-size: 11px; display: flex; flex-wrap: wrap;">
-                <v-checkbox label="Asset Only Job" density="compact"></v-checkbox>
+            <v-checkbox label="Asset Only Job" density="compact"></v-checkbox>
         </div>
         <v-btn-toggle id="trigger-buttons" density="compact">
-                <v-btn @click="deleteRets" variant="plain" flat size="small">Delete</v-btn>
-                <v-btn @click="cancelDetailsMetadata" class="secondary-button" variant="plain" flat size="small">Cancel</v-btn>
-                <v-btn @click="sendToParent" variant="elevated" class="main-button-style" size="small" :disabled="saveDisable">Save</v-btn>
+            <v-btn @click="deleteRets" variant="plain" flat size="small">Delete</v-btn>
+            <v-btn @click="cancelDetailsMetadata" class="secondary-button" variant="plain" flat size="small">Cancel</v-btn>
+            <v-btn @click="sendToParent" variant="elevated" class="main-button-style" size="small" :disabled="saveDisable">Save</v-btn>
         </v-btn-toggle>
     </div>
-
 
 </template>
 
@@ -97,7 +94,7 @@
     import DetailsCard from './detailsCard.vue'
     import MetadataCard from './metadataCard.vue'
     import { appConstants } from '../common/constant.js'
-    import {getGEMTasks, searchCards, removeHighlight, removeRelatedRetsFromMap} from './utility.js'
+    import {getGEMTasks, searchCards, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic} from './utility.js'
     import detailsAlert from './detailsAlert.vue'
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
@@ -110,7 +107,7 @@
             retsInfo: Object,
             taskGem: Number,
             alertInfo: Object,
-            historyArr: String
+            historyString: String,
         },
         emits:['close-detail'],
         data(){
@@ -139,7 +136,8 @@
                 store,
                 noHistResp: "No History for this RETS",
                 addHistoryChat: "",
-                sendHistory: ""
+                sendHistory: "",
+                hasAttachment: false
             }
         },
         mounted(){
@@ -151,6 +149,7 @@
                 }
             })
             this.getHistoryStore
+            store.getHistoryChatRet()
         },
         methods:{
             returnDateFormat(e){
@@ -194,12 +193,13 @@
                 removeRelatedRetsFromMap(this.retsInfo.attributes.OBJECTID)
                 removeHighlight(this.retsInfo, true)
                 this.$emit('close-detail', [this.retsInfo, false])
+                deleteRetsGraphic()
             },
             async sendToParent(){
                 await updateRETSPT(this.retsInfo)
                 removeHighlight(this.retsInfo, true)
                 this.$emit('close-detail', [this.retsInfo, false])
-                
+                deleteRetsGraphic()
             },
             cancelDetailsMetadata(){
                 this.$emit('close-detail', [this.retsInfo, false])
@@ -218,7 +218,7 @@
                 // this.histNotes[this.noteIndex].author = this.retsInfo.logInUser
                 // this.histNotes[this.noteIndex].time = new Date().toLocaleDateString('en-US')
                 this.editText = false
-                this.alertTextInfo = {"text": "Note Saved", "color": "#70ad47", "toggle": true}
+                this.alertTextInfo = {"text": "Chat Saved", "color": "#70ad47", "toggle": true}
                 this.isAlert = true
             },
             deleteNote(){
@@ -237,9 +237,32 @@
             closeGEMTask(){
                 document.querySelectorAll(".gem-search")[0].style.display = "none"
             },
+            expandChatHistory(){
+                this.editText = true
+                this.sendHistory = ""
+            },
             addHistoryNote(){
-                this.sendHistory = this.addHistoryChat
+                if(!this.addHistoryChat.length) return
+                store.addNote(this.addHistoryChat)
+                this.clearMessage()
+                return
+            },
+            clearMessage(){
                 this.addHistoryChat = ""
+            },
+
+            displayAttachments(){
+                const input = document.createElement('input')
+                input.type = "file"
+                input.name = "attachment"
+                input.click()
+
+                input.addEventListener("change", (event)=>{
+                    let attach = true
+                    store.addNote("", attach, event.target.files)
+                })
+
+                input.remove()
             }
         },
         watch:{
@@ -263,8 +286,7 @@
                         return
                     }
                     const unpackHistory = JSON.parse(store.history)
-                    console.log(unpackHistory)
-                    console.log(this.retsInfo.attributes.RETS_ID)
+ 
                     const getRelatedHist = unpackHistory.filter(hist => hist.RETS_ID === this.retsInfo.attributes.RETS_ID)//4430)
                     if(!getRelatedHist.length){
                         this.isHistNotesEmpty = true
@@ -297,8 +319,8 @@ div .cardDiv{
 }
 
 #commentDiv{
-    position: relative;
-    bottom: 80%; 
+    position: inherit;
+    bottom: 20%; 
     left: 55vh; 
     width: 50rem;
     padding:0%;
@@ -326,9 +348,8 @@ div .cardDiv{
 #container-div{
     position: relative;
     top: 5.2rem;
-    height: 890vh;
     min-height: 0% !important;
-    max-height: 89% !important;
+    max-height: 77% !important;
     overflow-x: hidden;
     scroll-behavior: smooth;
     scrollbar-width: thin;

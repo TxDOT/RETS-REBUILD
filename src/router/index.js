@@ -3,8 +3,8 @@ import Initial from '../views/initial.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
-    { path: '/', name:"Inital", component: Initial},
-    { path: '/map', name:"Map", component: MapContainer}
+    { path: '/apps/statewide_mapping/rets_rebuild/login', name:"Inital", component: Initial},
+    { path: '/apps/statewide_mapping/rets_rebuild/map', name:"Map", component: MapContainer}
 ]
   
   const router = createRouter({
