@@ -87,7 +87,6 @@ export function removeHighlight(feature, removeAll){
 
 function outlineFeedCards(res){
     res.forEach((x) => {
-        console.log(x.graphic.attributes)
         //set card outline
         var objectcomparison = x.attributes ? String(x.attributes.RETS_ID).concat('-',x.attributes.OBJECTID) : String(x.graphic.attributes.RETS_ID).concat('-',x.graphic.attributes.OBJECTID)
         if(!document.getElementById(objectcomparison)) return
@@ -404,6 +403,15 @@ export function createtool(sketchWidgetcreate, createretssym) {
     });
   }
 
+  export function deleteRetsGraphic(){
+    graphics.graphics.items.forEach((ret) => {
+        if(ret.geometry.type === 'point'){
+            graphics.remove((ret))
+        }
+    })
+    return
+}
+
     var pressedkey = false;
     window.addEventListener("keydown", (event)=>{
 
@@ -413,100 +421,94 @@ export function createtool(sketchWidgetcreate, createretssym) {
         pressedkey = false
     });
 
-  export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
-    if(isSelectEnabled === true){ 
-        sketchWidgetselect.create("rectangle");
-        var removeAll = true
-        sketchWidgetselect
-        .on("create", function (event) 
-            {
-            if (event.state === "complete")
+    export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
+        if(isSelectEnabled === true){ 
+            sketchWidgetselect.create("rectangle");
+            var removeAll = true
+            sketchWidgetselect
+            .on("create", function (event) 
                 {
-                    // Get the rectangle geometry
-                    var rectangleGeometry = event.graphic.geometry;
-                    // Query for points within the rectangle
-                    var query = retsLayer.createQuery();
-                    query.geometry = rectangleGeometry;
-                    retsLayer.queryFeatures(query)
-                    .then(function (result) 
-                            {
-                                // Access the selected features
-                                var selectedFeatures = result.features;
-                                outlineFeedCards(selectedFeatures);
-
-                                if (pressedkey === false){
-
-                                    for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                      removeHighlight(selectedFeatures[i].attributes,removeAll);  
-
-                                    }
-                                    for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                        highlightRETSPoint(selectedFeatures[i].attributes);
-                                         //outlineFeedCards(selectedFeatures);
+                if (event.state === "complete")
+                    {
+                        // Get the rectangle geometry
+                        var rectangleGeometry = event.graphic.geometry;
+                        // Query for points within the rectangle
+                        var query = retsLayer.createQuery();
+                        query.geometry = rectangleGeometry;
+                        retsLayer.queryFeatures(query)
+                        .then(function (result) 
+                                {
+                                    // Access the selected features
+                                    var selectedFeatures = result.features;
+                                    outlineFeedCards(selectedFeatures);
+    
+                                    if (pressedkey === false){
+    
+                                        for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                          removeHighlight(selectedFeatures[i].attributes,removeAll);  
+    
+                                        }
+                                        for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                            highlightRETSPoint(selectedFeatures[i].attributes);
+                                             //outlineFeedCards(selectedFeatures);
+                                            
+                                            
+                                        }
                                         
-  
-                                  }   
-                                  console.log(selectedFeatures) 
-                                  //outlineFeedCards(selectedFeatures);
-                                  graphics.removeAll() 
-                                   return 
-                                }
-
-                                
-                                 
-                                
-                                if(pressedkey === "Shift"){
-                                    for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                        highlightRETSPoint(selectedFeatures[i].attributes);
-                                        //outlineFeedCards(selectedFeatures);
-
-                                    } 
-                                    graphics.removeAll();
-                                    return
-                                }
-                                
-                                if(pressedkey === "Control"){
+                                        graphics.removeAll() 
+                                        return
+                                        
+                                    }
+    
                                     
-                                    for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                        console.log("this: " + selectedFeatures[i].attributes.OBJECTID)
+                                     
+                                    
+                                    if(pressedkey === "Shift"){
+                                        for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                            highlightRETSPoint(selectedFeatures[i].attributes);
+                                            //outlineFeedCards(selectedFeatures);
     
-                                        removeHighlight(selectedFeatures[i]);  
-
-                                    } 
-
-                                   
-                                    graphics.removeAll();
-                                    return
+                                        } 
+                                        graphics.removeAll();
+                                        return
+                                    }
+                                    
+                                    if(pressedkey === "Control"){
+                                        
+                                        for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                            console.log("this: " + selectedFeatures[i].attributes.OBJECTID)
         
-                                }
-
-                                
-                               
-                            });
-
-                            
-                            
-                }
-
-        });
-
-        isSelectEnabled = !isSelectEnabled; 
-    }
-    else{
-        isSelectEnabled = !isSelectEnabled;
-        sketchWidgetselect.cancel()
-            
-    }
+                                            removeHighlight(selectedFeatures[i]);  
     
-    window.removeEventListener("keydown", (event)=>{
-        testshift = event.key
-    });
-    window.removeEventListener("keyup", () => {
-        testshift = false
-    });
-
-    return
-  }
+                                        } 
+    
+                                       
+                                        graphics.removeAll();
+                                        return
+            
+                                    }
+    
+                                    
+                                   
+                                });
+    
+                                
+                                
+                    }
+    
+            });
+    
+            isSelectEnabled = !isSelectEnabled; 
+        }
+        else{
+            isSelectEnabled = !isSelectEnabled;
+            sketchWidgetselect.cancel()
+                
+        }
+        
+        
+        return
+      }
 
 export async function handleaddrets(newPointGraphic, addrets){
     try{
@@ -574,3 +576,25 @@ export function deleteAttachment(oid, attachName){
 }
 
 export const rtrnNumAttachChat = () => store.historyChat.filter(chat => chat.attachments).length
+
+export function togglemenu(isActOpen, shift){   
+            
+    var currentCenter = view.center.clone();
+    var screenPoint = view.toScreen(currentCenter);
+    var newCenter;    
+    if (isActOpen === true){
+
+         isActOpen =! isActOpen
+        screenPoint.x = screenPoint.x + shift; // Adjust the x coordinate by the desired amount of pixels
+        var newCenter = view.toMap(screenPoint); // Convert back to map coordinates
+        view.goTo(newCenter)
+        
+    }
+    else{
+         isActOpen =! isActOpen
+        screenPoint.x = screenPoint.x - shift; // Adjust the x coordinate by the desired amount of pixels
+        var newCenter = view.toMap(screenPoint); // Convert back to map coordinates
+        view.goTo(newCenter)                
+    }
+    
+}

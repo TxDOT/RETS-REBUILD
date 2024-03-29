@@ -598,7 +598,6 @@ export default{
         transform: scale(1);
         background-color: rgba(9, 107, 219, 0.7);
         top: 0rem;
-        left: 10rem;
         width: 100%;
     }
     #test{
