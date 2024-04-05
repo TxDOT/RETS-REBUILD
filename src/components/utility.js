@@ -4,6 +4,8 @@ import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant.js";
 import {store} from './store.js'
 import { addRETSPT } from './crud.js';
+import esriId from "@arcgis/core/identity/IdentityManager.js";
+
 
 
 export function clickRetsPoint(){
@@ -11,11 +13,16 @@ export function clickRetsPoint(){
         view.on("click", (event)=>{
             view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt) =>{
                 if(!evt.results.length){
+                    removeOutline()
                     removeHighlight("a", true)
+                   
                     return
-                }
+                }                
+                removeOutline()
                 outlineFeedCards(evt.results)
                 removeHighlight("a", true)
+
+
                 evt.results.forEach(rest => rest.graphic.layer.title ? highlightRETSPoint(rest.graphic.attributes) : highlightGraphicPt(rest.graphic.attributes))
                 return evt.results[0].graphic.attributes.RETS_ID;
             })
@@ -72,7 +79,7 @@ export function removeHighlight(feature, removeAll){
             }
 
             if(lyrView._highlightIds.has(feature?.attributes.OBJECTID)){
-                //console.log("before: " + feature?.attributes.OBJECTID )
+                console.log("before: " + feature?.attributes.OBJECTID )
                 lyrView._highlightIds.delete(feature?.attributes.OBJECTID)
                 //console.log("after: " + feature?.attributes.OBJECTID )
                 
@@ -95,9 +102,9 @@ function outlineFeedCards(res){
         zoomToCard.href = `#${objectcomparison}`
         zoomToCard.click()
         //remove card outline
-        setTimeout(()=>{
-            document.getElementById(objectcomparison).classList.remove('highlight-card')
-        },5000)
+        // setTimeout(()=>{
+        //     document.getElementById(objectcomparison).classList.remove('highlight-card')
+        // },5000)
     })
     return;
 }
@@ -375,16 +382,27 @@ export function createtool(sketchWidgetcreate, createretssym) {
                             {
                                 // Access the selected features
                                 var selectedFeatures = result.features;
-                                outlineFeedCards(selectedFeatures);
+                                
 
                                 if (pressedkey === false){
+                                    if (selectedFeatures.length){
+                                        for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                            removeHighlight(selectedFeatures[i].attributes,removeAll); 
+                                            
 
-                                    for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                      removeHighlight(selectedFeatures[i].attributes,removeAll);  
+                                             
+                                            
+      
+                                          }
+                                          removeOutline();
 
                                     }
+
+                                    
                                     for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                        //removeOutline();
                                         highlightRETSPoint(selectedFeatures[i].attributes);
+                                        outlineFeedCards(selectedFeatures);
                                          //outlineFeedCards(selectedFeatures);
                                         
                                         
@@ -401,7 +419,7 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                 if(pressedkey === "Shift"){
                                     for (let i = 0; i < selectedFeatures.length; i++ ) {
                                         highlightRETSPoint(selectedFeatures[i].attributes);
-                                        //outlineFeedCards(selectedFeatures);
+                                        outlineFeedCards(selectedFeatures);
 
                                     } 
                                     graphics.removeAll();
@@ -414,14 +432,17 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                         console.log("this: " + selectedFeatures[i].attributes.OBJECTID)
     
                                         removeHighlight(selectedFeatures[i]);  
+                                        
 
                                     } 
+                                        
 
                                    
                                     graphics.removeAll();
                                     return
         
                                 }
+                                
 
                                 
                                
@@ -484,6 +505,20 @@ export function createtool(sketchWidgetcreate, createretssym) {
         var newCenter = view.toMap(screenPoint); // Convert back to map coordinates
         view.goTo(newCenter)                
     }
+    
+}
+
+export function logoutUser(){
+    esriId.destroyCredentials({
+    })
+
+}
+
+export function removeOutline(){
+    const classList = document.querySelectorAll('.highlight-card');
+    classList.forEach(element => {
+    element.classList.remove('highlight-card'); // Remove each element individually
+    });
     
 }
   

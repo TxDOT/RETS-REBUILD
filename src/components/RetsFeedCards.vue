@@ -3,9 +3,9 @@
         <v-col class="d-flex flex-wrap ga-2" align-self="start">
             <v-row class="main-color">
                 <header id="container-header">RETS Dashboard</header>
-                <v-btn v-for="(tool, i) in addbutton" :key="i" :value="tool" @click="tool.action()" prepend-icon="mdi-plus" color="#4472C4" rounded="0" id="add-new-btn" class="main-button" >
+                <v-btn v-for="(tool, i) in addbutton" :key="i" :value="tool" @click="tool.action()" :prepend-icon= "buttonIcon" color="#4472C4" rounded="0" id="add-new-btn" class="main-button" v-if="!isDetailsPage">
                     <!-- @click="handlecreate"> -->
-                    <p class="text-btn">New</p>
+                    <p class="text-btn" id = "addbtn">{{addbtntext}}</p>
                 </v-btn>
                 
             </v-row>
@@ -32,7 +32,7 @@
                 <v-text-field density="compact" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" v-model="actvFeedSearch"></v-text-field>
             </v-row>
 
-            <div class="card-feed-div" v-if="!isDetailsPage">
+            <div class="card-feed-div" v-if="isCard">
                 <v-row class="rets-card-row" v-for="(rd, road) in roadObj" :key="rd" :value="road" :id="rd.attributes.OBJECTID">
                     <v-btn elevation="0" @click="changeColor(rd.attributes.RETS_ID);" class="flag-btn" size="small" max-width=".5px" density="compact" variant="plain" slim>
                         <template v-slot:prepend>
@@ -42,7 +42,7 @@
                     <v-col class="color-picker" v-if="flagClickedId === rd.attributes.RETS_ID" v-click-outside="closeFlagDiv">
                         <v-icon size="medium" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" ></v-icon>
                     </v-col>    
-                    <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `7px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple class="card" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road);">
+                    <v-card  :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `7px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple class="card" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road); ">
                         <v-card-text id="retsCard">
                             RETS {{rd.attributes.RETS_ID }}
                         </v-card-text>
@@ -70,6 +70,7 @@
             <div class="card-feed-div" v-if="isNoRets"><p>No RETS for you!</p></div>
         </v-col>
         <RetsDetailPage v-if="isDetailsPage" :retsInfo="send" @close-detail="enableFeed"/>
+
     </v-container>
     <v-card v-if="uploadAttachment" class="card attachCard"> 
         <div class="cardDiv" id="dragndrop" @drop="dropAttachment($event)" @dragover="dragover()" @click="fileAttach()" @dragleave="dragLeave()">
@@ -96,6 +97,12 @@
         
     </v-card>
 
+    
+        <v-container id="Spinner" v-if="isSpinner" >
+            <v-progress-circular color="blue" indeterminate size="60" ></v-progress-circular>
+        </v-container>
+    
+    
 </template>
 
 <script>
@@ -111,16 +118,23 @@ import RetsFeed from './RetsFeed.vue'
 import { sketchWidgetcreate, createretssym } from './map-Init.js'
 import {addRETSPT} from '../components/crud.js'
 
+
 export default{
     name: "RetsCards",
     components: {Filter, RetsDetailPage},
     props: {
         filterPros: Object,
-        addrets:Number
+        addrets:Number,
     },
-    components: {RetsDetailPage, Filter}, 
+    //components: {RetsDetailPage, Filter}, 
     data(){
         return{
+            isCard: true,
+            Spinneractive: false,
+            isSpinner: false,
+            isVisible : true,
+            buttonIcon: 'mdi-plus',
+            addbtntext: "New",
             addrets: null,
             filterOptions: appConstants.RetsStatus,
             colorTable: appConstants.CardColorMap,
@@ -156,7 +170,9 @@ export default{
                 {title:"New", action: async () =>{
                                 const graphicAdd = await this.handlecreate();
                                 if (graphicAdd){
+
                                     this.processAddPt(graphicAdd)
+
                                 }
                                 
                 }}
@@ -186,10 +202,18 @@ export default{
     methods:{
         async processAddPt(newPointGraphic){
                         try{
+                            this.isSpinner = true
+                            this.Spinneractive = false
+                            this.isCard = false
                             console.log(newPointGraphic)
                             const obj = await addRETSPT(newPointGraphic)
                             const objectid = obj.addFeatureResults[0].objectId
                             this.addrets = objectid
+                            this.isSpinner = false
+                            this.Spinneractive = true
+
+
+                            
                             return
                         }
                         catch(err){
@@ -237,6 +261,8 @@ export default{
         },
 
         async enableFeed(e){
+            this.isCard = true
+            this.isDetailsPage = false
             console.log(e)
             turnAllVisibleGraphicsOff()
             if(e.isDelete){
@@ -256,18 +282,21 @@ export default{
             this.send = this.currRoad = road
             clearTimeout(this.timer)
             this.timer=""
+            this.isCard = false
+
             this.isDetailsPage = true
             this.activityBanner = `${road.attributes.RETS_ID}`
             highlightRETSPoint(road.attributes)
             this.zoomToRetsPt(road)
             toggleRelatedRets(JSON.stringify(road))
+
         },
         async addretss(){
             const querystring = {"whereString":`OBJECTID = ${this.addrets}`}
             try{const querypromise = await getQueryLayer(querystring, "PRIO, CREATE_DT DESC")
                 if (querypromise.features.length){
                     querypromise.features.forEach(
-                        (feat)=> this.double({attributes:feat.attributes,geometry:[feat.geometry.x,feat.geometry.y]})
+                        (feat)=> this.double({attributes:feat.attributes,geometry:[feat.geometry.x,feat.geometry.y]}),
                     )
                 }
 
@@ -321,18 +350,24 @@ export default{
         },
         async handlecreate(){
             if (this.isCreateEnabled === true) {
+                this.addbtntext = "Cancel"
+                this.buttonIcon = null
+
                 this.isCreateEnabled = !this.isCreateEnabled;
                 //console.log("true")
                 const newPointGraphic = await createtool(sketchWidgetcreate, createretssym);
                 // Process the newPointGraphic as needed
                 this.isCreateEnabled = !this.isCreateEnabled;
+                this.addbtntext = "New"  
+                this.buttonIcon = "mdi-plus"
                 return newPointGraphic
                             
                 } 
             else {
                 sketchWidgetcreate.cancel();
                 this.isCreateEnabled = !this.isCreateEnabled;
-                //console.log("false")
+                this.addbtntext = "New"  
+                this.buttonIcon = "mdi-plus"
                 }
 
 
@@ -357,7 +392,7 @@ export default{
         },
         addrets:{
             handler: async function(){
-                console.log(this.addrets)
+                //console.log(this.addrets)
                 await this.addretss()
             },
             immediate: true
@@ -416,6 +451,14 @@ export default{
 </script>
 
 <style scoped>
+    #Spinner{
+        position: absolute;
+        top: 50%;
+        left: 16.5%
+
+        
+        
+    }
     #retsSubtitle{
         /*  */
     }
@@ -503,6 +546,7 @@ export default{
         justify-items: end;
     }
     #add-new-btn{
+        
         position: absolute;
         right: 1rem;
         top: .5rem;
@@ -629,6 +673,12 @@ export default{
         color: red;
         top: 1rem;
     }
+    #addbtn{
+        position: relative;
+        left: 1%;
+    }
+
+    
 
 
 </style>

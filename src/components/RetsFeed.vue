@@ -1,14 +1,12 @@
 
 
 <template style="overflow-y:hidden;">
-<Map ref="MapRef"></Map>
-
     <v-navigation-drawer width="200" height="100" permanent color="black">
         <v-list height="100%" id="icons-top" >
             <v-list-item v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" active-class="btn-left-brder" :active="tool.isActive">  
                 <v-tooltip location="bottom" :text=tool.name >
                     <template v-slot:activator="{ props}">
-                        <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props"></v-icon>
+                        <v-icon size="30" :icon="tool.icon" :color= "tool.color" :name="tool.name" v-bind="props"></v-icon>
                 </template>
                 </v-tooltip>
                 
@@ -18,7 +16,7 @@
             <v-list-item v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" active-class="btn-left-brder" >
                 <v-tooltip location="bottom" :text=tool.name >
                     <template v-slot:activator="{ props }">
-                    <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props"></v-icon>
+                    <v-icon   size="30" :icon="tool.icon" :color="tool.color" @click="tool.color='#FFFFFF'" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'":name="tool.name" v-bind="props" ></v-icon>
                 </template>
                 </v-tooltip>
                 
@@ -125,10 +123,10 @@
             <hr id = "separator" />
         <v-card-item id="bottomitems">
             <v-btn-group>
-                <v-btn id = "logoutbutton" prepend-icon="mdi-power"  >LOGOUT</v-btn>
+                <v-btn id = "logoutbutton" prepend-icon="mdi-power" @click="logoutMethod()" >LOGOUT</v-btn>
             </v-btn-group>
             <v-btn-group id = "savebutton">
-                <v-btn  text="CANCEL" ></v-btn>
+                <v-btn  text="CANCEL" @click="handleSettingsTool();handleactiveclass()"></v-btn>
                
                     <v-btn  text="SAVE" id = "save"></v-btn>
             
@@ -137,8 +135,13 @@
             
 
         </v-card-item>
-
     </v-card>
+    
+   
+   
+    
+    
+
 
    
 
@@ -153,19 +156,18 @@
     import RetsCards from '../components/RetsFeedCards.vue';
     import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass} from '../components/map-Init.js';
     import {addRETSPT} from '../components/crud.js'
-    import { createtool, selecttool, togglemenu } from '../components/utility.js';
-    import Map from './Map.vue';
+    import { createtool, selecttool, togglemenu, logoutUser } from '../components/utility.js';
     import { vuetify } from 'C:/Users/ssaldana/Documents/repo/RETS-REBUILD/src/main.js';
 
-    import { useTheme } from 'vuetify'
 
 
     export default{
-        components: {RetsCards, Map},
+        components: {RetsCards}, 
         name: "RetsFeed",
         props: {addrets: Number},
         data(){
             return{
+                buttonColor: "#00FF00",
                 switchValue : false,
                 isActOpen: true,
                 shift: 200,
@@ -180,7 +182,7 @@
                 settingsstatus: false,
                 shiftKey: false,
                 retsToolsTop: [
-                               {title:"Test", icon: 'mdi-menu', color: "white", name: "Menu", action: () =>{
+                               {title:"Test", icon: 'mdi-menu', color: "#D9D9D9", name: "Menu", action: () =>{
                                 
                                     this.isActive = !this.tester
                                     document.getElementById("container").style.display = 
@@ -188,25 +190,21 @@
                                     this.resizemap()
                                 }, isActive: this.tester,
                                },  
-                            //    {title:"Test", icon: 'mdi-plus', color: "#4472C4", name: "Add RETS", action: async () =>{
-                            //     const graphicAdd = await this.handleCreateTool();
-                            //     if (graphicAdd) {
-                            //         this.processAddPt(graphicAdd)
-                            //         }
-                            //    }},
                             ],
  
                 retsToolsBottom: [
-                               {title:"Select", icon: 'mdi-select-multiple', color: "white", name: "Select", action: () =>{
+                               {title:"Select", icon: 'mdi-select-multiple', color: "#D9D9D9", name: "Select", action: () =>{
                                 this.handleSelectTool();
                                },
                                hover:(i) => 
                                     {
                                         this.basemapcard = false;
                                         this.jumptocard= false;
+                                        
+                                        
                                     }
                                 },
-                               {title:"JumpTo", icon: 'mdi-map-marker', color: "white", name: "Jump To", action: () =>{
+                               {title:"JumpTo", icon: 'mdi-map-marker', color: "#D9D9D9", name: "Jump To", action: () =>{
                                 console.log("click")
                                },
                                hover:(i) => 
@@ -218,9 +216,8 @@
                                             }
                                     }
                                 },
-                               {title:"Legend", icon: 'mdi-format-list-bulleted-type', color: "white", name: "Legend", action: () =>{
+                               {title:"Legend", icon: 'mdi-format-list-bulleted-type', color: "#D9D9D9", name: "Legend", action: () =>{
                                 this.handleLegendTool();
-                                //this.addrets2 = 2
                                },
                                hover:(i) => 
                                     {
@@ -228,7 +225,7 @@
                                         this.jumptocard= false;
                                     }
                                 },
-                               {title:"Basemap", icon: 'mdi-map-legend', color: "white", name: "Basemaps", action: () => {
+                               {title:"Basemap", icon: 'mdi-map-legend', color: "#D9D9D9", name: "Basemaps", action: () => {
                                 console.log("click")
                                },
                                 hover:(i) => { 
@@ -239,7 +236,7 @@
                                         }
                                     }
                                 },
-                               {title:"Test", icon: 'mdi-cog', color: "white", name: "Settings", action: () =>{
+                               {title:"Test", icon: 'mdi-cog', color:"#D9D9D9", name: "Settings", action: () =>{
                                 this.handleSettingsTool();
                                 
                                },
@@ -270,7 +267,7 @@
                         set(value){
                             this.tester = value
                         }
-                    }
+                    },
                 },
                 watch: {
                     switchValue(newValue) {
@@ -291,6 +288,25 @@
                 },
                 
                 methods: {
+                    handleactiveclass(){
+                        
+                        // const classList = document.querySelectorAll('.btn-left-brder');
+                        //     classList.forEach(element => {
+                        //     element.classList.toggle('btn-left-brder'); // Remove each element individually
+                        //     });
+                    },
+                    logoutMethod(){
+                        logoutUser();
+                        location.reload()
+                    },
+                    colorchange(){
+                        this.tool.color = "red"
+                        this.buttonColor = "red"
+                        this.buttonColor2 = this.buttonColor
+
+                        
+                        
+                    },
                     switchTurnedOn() {
                        
                         console.log("on")
@@ -311,19 +327,6 @@
                     },
                     mouseleavejumpto(){
                         this.jumptocard = false;
-                    },
-                    async processAddPt(newPointGraphic){
-                        //handleaddrets(newPointGraphic);
-                        try{
-                            console.log(newPointGraphic)
-                            const obj = await addRETSPT(newPointGraphic)
-                            const objectid = obj.addFeatureResults[0].objectId
-                            this.addrets2 = objectid
-                            return
-                        }
-                        catch(err){
-                            console.log(err)
-                        }
                     },
                     async handleCreateTool() {
                         if (this.isCreateEnabled === true) {
@@ -419,7 +422,7 @@
                     toggledarkmode(){
                         vuetify.theme.defaultTheme = 'light';
 
-                    }
+                    },
 
                     
                 },
@@ -436,8 +439,11 @@
     #icons-bottom{
         position: relative;
         bottom: 15.5rem;
+        left: 10%;
     }
-
+    #icons-top{
+        left: 10%;
+    }
     .v-navigation-drawer{
         overflow-y: hidden !important;
         height: 100% !important;
@@ -496,7 +502,7 @@
     #containersettings{
         position: absolute;
         width: 400px;
-        bottom: 10rem;
+        bottom: 10%;
         left: 50%;
         z-index: 9999;
         
@@ -607,6 +613,14 @@
         border: 1px solid ;
         border-radius: 9%;
         
+    }
+    #archivepopup{
+        padding: 20px;
+        border-radius: 5px;
+        left: 50%;
+        width: 26%;
+        top:40%;
+        height:25%; 
     }
 
  

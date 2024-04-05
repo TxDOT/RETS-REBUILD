@@ -1,6 +1,7 @@
 <template>
-    <!-- details section -->
+    <!-- details section --> 
     <div id="detailsHeaderDiv">
+        
         <div id="detailsHeaderIcon">
             <v-btn icon="mdi-paperclip" density="compact" flat @click="uploadAttachment = !uploadAttachment"></v-btn>
             <v-btn density="compact" flat @click="changeColor(retsInfo.RETS_ID);" id="flagBtnDetails">
@@ -14,10 +15,10 @@
             <v-btn-toggle v-model="retsInfo.PRIO" density="compact">
                 <v-btn icon="mdi-exclamation" density="compact" flat style="color:red" ></v-btn>
             </v-btn-toggle>   
+            
         </div>
+        
     </div>
-
-
     <detailsAlert v-if="isAlert" :alertsTextInfo="alertTextInfo"/>
     <div id="container-div">
         <v-card id="details-page">
@@ -38,6 +39,7 @@
                 <span class="gem-task" @click="addGemChip(i)">{{ i }}</span>
             </span>
         </div>
+        
         <!-- history section -->
         <div >
             <v-card class="history-card">
@@ -58,17 +60,22 @@
                 </div>
             </v-card>
         </div>
+        
         <div>
             <div style="position: relative; float: left; margin-left: 10px; font-size: 11px; display: flex; flex-wrap: wrap;">
                 <v-checkbox label="Asset Only Job" density="compact"></v-checkbox>
             </div>
             <v-btn-toggle id="trigger-buttons" density="compact">
-                    <v-btn @click="deleteRets" variant="plain" flat size="small">Delete</v-btn>
+                    <v-btn @click="handlearchive" variant="plain" flat size="small">Delete</v-btn>
                     <v-btn @click="cancelDetailsMetadata" class="secondary-button" variant="plain" flat size="small">Cancel</v-btn>
                     <v-btn @click="sendToParent" variant="elevated" class="main-button-style" size="small" :disabled="saveDisable">Save</v-btn>
             </v-btn-toggle>
+            
         </div>
+        
     </div>
+    
+    
     <v-container v-if="editText" style="" id="commentDiv">
         <v-textarea variant="filled" auto-grow v-model="editNotes" label="Make a Comment"></v-textarea>
             <div style="position: relative; float: right; left: 13px;">
@@ -77,9 +84,30 @@
                 <v-btn variant="outlined" class="main-button-style" @click="saveNote">Save</v-btn>
             </div>
     </v-container>
+    
+    <v-card id = "archivepopup" v-if="isarchiveopen" >
+        <v-card-title id = "archiveheader" >
+            Delete RETS ####
+            <hr id = "separator2" />
+        </v-card-title>
+            <v-card-subtitle id = "archivetext">
+                Deleting this RETS will move it to the archive table.
+            </v-card-subtitle>
+        
 
+        <v-btn-group id = "archivebuttons">
+                <v-btn  text="CANCEL" @click="handlearchive"></v-btn>
+                <v-btn  text="DELETE" @click="deleteRets"></v-btn>
+            </v-btn-group>
+    
+    </v-card>    
+     
+    
+
+    
 
 </template>
+
 
 <script>
     import editHistoryNotes from './EditHistoryNotes.vue'
@@ -88,7 +116,7 @@
     import {getGEMTasks, searchCards, removeHighlight, removeRelatedRetsFromMap, removeretsgraphic} from './utility.js'
     import detailsAlert from './detailsAlert.vue'
     import {updateRETSPT, deleteRETSPT} from './crud.js'
-
+    import { sketchWidgetcreate, graphics } from './map-Init.js'
     export default{
         name: "RetsDetailPage",
         components: {editHistoryNotes, DetailsCard, MetadataCard, detailsAlert, },
@@ -100,6 +128,7 @@
         emits:['close-detail'],
         data(){
             return{
+                isarchiveopen: false,
                 isDetails: true,
                 isMetadata: false,
                 activityList: ['CRI', 'GSC Review', 'HPMS Sample Review', 'Interstate Project', 'Minute Order', 
@@ -133,6 +162,9 @@
             })
         },
         methods:{
+            canceladdrets(){
+                console.log("ok")
+            },
             closeFlagDiv(){
                 this.flagClickedId = ""
             },
@@ -209,6 +241,11 @@
             removeRetsGraphics(){
                 removeretsgraphic();
             },
+            handlearchive(){
+                this.isarchiveopen =! this.isarchiveopen
+                console.log(this.isarchiveopen)
+            }
+            
 
         },
         watch:{
@@ -227,6 +264,40 @@
 </script>
 
 <style scoped>
+#archivepopup{
+    position: absolute;
+        padding: 10px;
+        border-radius: 5px;
+        left: 180%;
+        width: 120%;
+        top:40%;
+        height:25%; 
+    }
+    #archiveheader{
+        position: absolute;
+        top: 2%;
+        left: 2%;
+        font-size: 18px;
+        
+    }
+    #separator2{
+        border: 0;
+        border-bottom: 1px solid ;
+        margin: 0 auto;
+        width: 24rem;
+    }
+    #archivetext{
+        position: absolute;
+        top: 25%;
+        left: 2%;
+    }
+    #archivebuttons{
+        position: absolute;
+        bottom: 10px;
+        width: 25rem;
+        justify-content: end;
+
+    }
 #flagBtnDetails{
     padding: 1px !important;
     margin: 15px !important;
@@ -297,7 +368,7 @@ div .cardDiv{
 
 #trigger-buttons{
     padding-top: .5rem;
-    position: relative;
+    position: absolute;
     float: right;
 }
 
@@ -396,14 +467,15 @@ div .cardDiv{
 }
 
 .details-color-picker{
-        position: fixed; 
-        display: flex; 
-        flex-direction: column; 
-        z-index: 9999; 
-        width:2.3%; 
-        float: right;
-        margin-left: 2.2rem;
-        background-color: black;
-    }
-   
+    position: fixed; 
+    display: flex; 
+    flex-direction: column; 
+    z-index: 9999; 
+    width:2.3%; 
+    float: right;
+    margin-left: 2.2rem;
+    background-color: black;
+}
+
+
 </style>
