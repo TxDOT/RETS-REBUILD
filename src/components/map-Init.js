@@ -19,6 +19,8 @@ import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer.js";
 import TileInfo from "@arcgis/core/layers/support/TileInfo.js";
 import Legend from "@arcgis/core/widgets/Legend";
 import LegendViewModel from "@arcgis/core/widgets/Legend/LegendViewModel";
+import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
+import Graphic from "@arcgis/core/Graphic";
 
 export let retsPointRenderer = new UniqueValueRenderer({
  field: "STAT", // Field based on which the symbology will be categorized
@@ -57,19 +59,7 @@ export let retsPointRenderer = new UniqueValueRenderer({
           width: 0
         }
       }),
-      label: "In Progress"
-  },
-  {
-    value: "4",
-    symbol: new SimpleMarkerSymbol({
-      size: 8,
-      color: appConstants.CardColorMap[3],
-      outline: {
-        color: "white",
-        width: 0
-      }
-    }),
-    label: "Complete"
+      label: "Complete"
   },
   {
     value: "4",
@@ -163,8 +153,8 @@ export const TxDotRoaways = new FeatureLayer ({
   url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Roadways/FeatureServer/0",
   visible: true,
   renderer: roadwaysRenderer,
-  outFields: ["GID"],
-  hasM: true
+  outFields: ["*"],
+  returnM: true,
 })
 
 //RETS History
@@ -176,6 +166,10 @@ export const retsHistory = new FeatureLayer({
 //Rets User Roles
 export const retsUserRole = new FeatureLayer({
   url: "https://testportal.txdot.gov/createags/rest/services/RETS_SUPPORT/FeatureServer/1"
+})
+
+export const flagRetsColor = new FeatureLayer({
+  url: "https://testportal.txdot.gov/createags/rest/services/RETS_SUPPORT/FeatureServer/3"
 })
 
 //Creates label class for RETS points
@@ -198,6 +192,7 @@ retsLayer.labelingInfo = [retsLabelclass];
 export const retsGraphicLayer = new GraphicsLayer({});
 
 export const graphics = new GraphicsLayer({});
+
 ////////////////////////////////////////////BASEMAPS//////////////////////////////////////////////////////////////////////////
         
 //Dark Vector Tile construction
@@ -387,10 +382,7 @@ export const sketchWidgetcreate = new Sketch({
       enabled: true,
       featureSources: [{layer: TxDotRoaways, enabled: true}]
   },
-
-
 });
-
 
 // Adds the search widget below other elements in the top right corner of the view
 view.ui.add(searchWidget, {
@@ -472,11 +464,10 @@ export const OSMVTBasemap = new Basemap({
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-map.addMany([retsLayer,TxDotRoaways, graphics, retsGraphicLayer, texasCounties, texasCities, minuteOrders])
-
+map.addMany([retsLayer, graphics, retsGraphicLayer, texasCounties, texasCities, minuteOrders, TxDotRoaways])
+//TxDotRoaways
 //remove attribution and zoom information
 view.ui.remove("attribution")
 // </></>
 
-
-
+//create RETS FeatureLayerView

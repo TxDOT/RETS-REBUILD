@@ -1,16 +1,16 @@
 <template>
     <div style="font-size: 1px !important;"> 
         <v-row >
-            <v-autocomplete :items="userRole" item-title="name" item-value="username" return-object label="Assigned To" flat variant="underlined" density="compact" rounded="0" v-model="infoRets.attributes.ASSIGNED_TO"></v-autocomplete>
+            <v-autocomplete :items="userRole" item-title="name" item-value="value" label="Assigned To" flat variant="underlined" density="compact" rounded="0" v-model="infoRets.attributes.ASSIGNED_TO"></v-autocomplete>
         </v-row>
         <v-row>
-            <v-autocomplete :items="userRole" item-title="name" item-value="username" label="GIS Editor" flat variant="underlined" density="compact" rounded="0" v-model="infoRets.attributes.GIS_ANALYST"></v-autocomplete>
+            <v-autocomplete :items="userRole" item-title="name" item-value="value" label="GIS Editor" flat variant="underlined" density="compact" rounded="0" v-model="infoRets.attributes.GIS_ANALYST"></v-autocomplete>
         </v-row>
         <v-row>
-            <v-autocomplete :items="userRole" item-title="name" item-value="username" label="Asset Editor" flat variant="underlined" density="compact" rounded="0" v-model="infoRets.attributes.GRID_ANALYST"></v-autocomplete>
+            <v-autocomplete :items="userRole" item-title="name" item-value="value" label="Asset Editor" flat variant="underlined" density="compact" rounded="0" v-model="infoRets.attributes.GRID_ANALYST"></v-autocomplete>
         </v-row>
         <v-row>
-            <v-autocomplete :items="userRole" item-title="name" item-value="username" label="District Editor" flat variant="underlined" density="compact" rounded="0" v-model="infoRets.attributes.DIST_ANALYST"></v-autocomplete>
+            <v-autocomplete :items="userRole" item-title="name" item-value="value" label="District Editor" flat variant="underlined" density="compact" rounded="0" v-model="infoRets.attributes.DIST_ANALYST"></v-autocomplete>
         </v-row>
         <v-row>
             <v-autocomplete :items="districtMetadata" item-title="name" item-value="value" return-object label="District" flat variant="underlined" density="compact" rounded="0" v-model="infoRets.attributes.DIST_NM"></v-autocomplete>
@@ -37,6 +37,9 @@
                 countyMetadata: appConstants.countyDomainValues,
                 userRole: appConstants.userRoles
             }
+        },
+        mounted(){
+
         },
         methods:{
             returnUserName(){

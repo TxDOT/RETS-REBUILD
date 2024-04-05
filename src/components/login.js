@@ -1,9 +1,10 @@
 import OAuthInfo from "@arcgis/core/identity/OAuthInfo.js";
 import esriId from "@arcgis/core/identity/IdentityManager.js";
-import { retsLayer, view, TxDotRoaways, retsUserRole } from './map-Init.js'
-import {getDomainValues, getDistinctAttributeValues, returnHistory, getUniqueQueryValues} from './utility.js'
+import { retsLayer, view, TxDotRoaways, retsUserRole} from './map-Init.js'
+import {getDomainValues, getDistinctAttributeValues, returnHistory, getUniqueQueryValues, queryFlags} from './utility.js'
 import { appConstants } from "../common/constant.js";
 import router from '../router/index.js'
+import {store} from './store.js'
 
 const authen = new OAuthInfo({
   appId: "qzqSMtBVUMsAt2Is",
@@ -38,6 +39,8 @@ export function login(){
 export async function signIn(){
   getUniqueQueryValues(retsUserRole, appConstants.userRoles)
   const userId = await getUserId()
+  await queryFlags(userId)
+  store.getRetsLayer(userId)
   setDefExpRets(userId)
   retsLayer
     .when(() => {
@@ -50,10 +53,10 @@ export async function signIn(){
 
       getDistinctAttributeValues('ACTV')
       createLayerViews()
-
       return retsLayer.queryExtent();
     })
     .then((response) => {
+      
       router.push('/apps/statewide_mapping/rets_rebuild/map')
       view.goTo(response.extent);
       
@@ -63,11 +66,12 @@ export async function signIn(){
 const setDefExpRets = (userId) => {
   if(appConstants.defaultUserValue.length) return
   appConstants.defaultUserValue.push({"name": "Username", "value": `${userId}`})
-  retsLayer.definitionExpression = `(GIS_ANALYST = '${userId}') AND (STAT = 1 OR STAT = 2 or STAT = 4)`
+  retsLayer.definitionExpression = appConstants['defaultQuery'](userId)
   return
 }
 
 export async function getUserId(){
+  console.warn('VERSION: 2.0')
   const user = await esriId.getCredential(authen.portalUrl + "/sharing/rest",{
     oAuthPopupConfirmation: false,
   })

@@ -1,7 +1,7 @@
 <template>
     <div style="margin-right: 10px; margin-left: 10px; width: 100%;">
         <div id="search">
-            <v-text-field class="search-history" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" density="compact" v-model="searchHistoryFilter"></v-text-field>
+            <v-text-field class="search-history" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" density="compact" v-model="searchHistoryFilter" variant="solo-filled"></v-text-field>
         </div>
         <div style="position: relative; bottom: 2rem;">
                 <v-btn variant="plain" density="compact" style="font-size: 10px; float: right; position: relative; bottom:0px; margin:0%; padding: 0%; padding:0px 10px 0px 10px; margin-right: 10px; margin-bottom: 0px" @click="queryAttachments" :disabled="numAttachments === 0" v-model="isAttachedActive" :active="isAttachedActive" active-class="active-button">
@@ -16,12 +16,12 @@
                 </div>
             </div>
         <div id="displayHistory">
-                <div v-for="(note, i) in histNotes" :key="note.OBJECTID" track-by="OBJECTID" v-if="!isHistNotesEmpty" id="chatDiv">
-                    <v-banner v-model="note[i]" :id="note.OBJECTID" class="history-notes" density="compact" style="padding: 0px; padding-left: 5px; border-left: 3px solid #4472C4 !important;">
+                <div v-for="(note, i) in orderList[sortA ?? sortB]()" :key="note.OBJECTID" track-by="OBJECTID" v-if="!isHistNotesEmpty" id="chatDiv">
+                    <v-banner v-model="note[i]" :id="note.OBJECTID" density="compact" style="padding: 0px; padding-left: 5px; border-left: 3px solid #4472C4 !important;">
                         <v-banner-text>
                             <span v-if="note.PARENT_ID" style="margin:0% !important; "> <p id="replyingToCmnt">Replying to "{{histNotes.find(x => x.OBJECTID === note.PARENT_ID)?.CMNT ?? "Referenced Note has been deleted"}}"</p></span>
-                            <v-text-field style="width:100%; position: relative; width: 20rem !important; height: 2rem; margin:0% !important; z-index:9999;" density="compact" variant="plain" :disabled="note.OBJECTID !== updateOID" v-model="note.CMNT"></v-text-field>                                
-                            <span style="font-size: 10px; color: grey; padding-left: 5px;">{{ returnUserName(note.CMNT_NM) }} {{ returnDateFormat(note.CREATE_DT) }}</span>
+                            <v-text-field style="width:100%; position: relative; width: 40rem !important; height: 2rem; margin:0% !important; z-index:9999;" density="compact" variant="plain" :disabled="note.OBJECTID !== updateOID" v-model="note.CMNT"></v-text-field>                                
+                            <span style="font-size: 10px; color: grey; padding-left: 5px;">{{ returnUserName(note.CMNT_NM) }} {{ note.EDIT_DT ? returnDateFormat(note.EDIT_DT) : returnDateFormat(note.CREATE_DT) }}</span>
                             <div style="position: relative; bottom: 0rem;" v-if="note.attachments">
                                 <span v-for="attach in note.attachments" style="padding-right: 3px;">
                                     <v-chip :text="attach.name" color="#4472C4" class="" closable density="compact" rounded="0" variant="flat" @click="openAttachement(attach.url)" @click:close="deleteAttach(note.OBJECTID, attach.name)"></v-chip>
@@ -37,8 +37,7 @@
  
                     </v-banner>
                     <span v-if="updateOID === note.OBJECTID && note.SYS_GEN === 0" :id="note.OBJECTID">
-                        <div style="position: relative; float: right; top: 15px; margin: 0% !important; padding: 0% !important">
-                           
+                        <div style="position: relative; float: right; top: 15px; margin: 0% !important; padding: 0% !important">                           
                             <v-btn icon="mdi-delete" variant="plain" density="compact" style="font-size: 10px; bottom: 15px;" @click="deleteNote(note.CMNT, note.OBJECTID)"></v-btn>
                             <v-btn icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px; bottom: 15px;" @click="attachToNote(note.CMNT, note.OBJECTID)"></v-btn>
                             <v-btn icon="mdi-close" variant="plain" density="compact" style="font-size: 10px; bottom: 15px;" @click="closeNotes(note.CMNT, note)"></v-btn>
@@ -55,13 +54,14 @@
 
 <script>
     import {store} from './store.js'
-    import {addAttachments, deleteAttachment} from './utility.js'
+    import {addAttachments, deleteAttachment, searchCards} from './utility.js'
     import { appConstants } from '../common/constant'
 
     export default{
         name: 'historyView',
         props: {
-            historyString: String,
+            sortA: String,
+            sortB: String
         },
         data(){
             return{
@@ -70,7 +70,7 @@
                 histNotes: [],
                 fullChat: [],
                 noHistResp: "No History for this RETS",
-                searchHistoryFilter: '',
+                searchHistoryFilter: null,
                 editText: false,
                 editContent: false,
                 updateOID: -1,
@@ -82,6 +82,7 @@
                 numAttachments: 0,
                 isAttachedActive: false,
                 isActive: false,
+                testOid: 0
             }
         },
         mounted(){
@@ -113,8 +114,9 @@
                 return
             },
             async replyNote(cmnt, note){
-                this.editContent = true
-                await store.replyNote(note)
+                const returnOid = await store.replyNote(note)
+                this.openNote(cmnt, returnOid)
+                this.testOid = returnOid
                 return
             },
             attachToNote(cmnt, oid){
@@ -135,13 +137,14 @@
             },
             returnDateFormat(e){
                 //10/29/2023 09:11am
-                const date = e ? new Date(e) : new Date()
+                const date = new Date(e)
                 return `${date.toLocaleString('en-US')}`
             },
             returnUserName(n){
-                if(!n) {
-                    return "System Generated"
+                if(n === 'RETSBOT' || !n) {
+                    return n ?? 'SYSTEM GENERATED'
                 }
+                console.log(n)
                 this.loggedInUserName = appConstants.defaultUserValue[0].value
                 const usernameRow = appConstants.userRoles.find(name => name.value === n)
                 return usernameRow.name
@@ -171,19 +174,23 @@
             }   
         },
         watch:{
-            'store.historyChat':{
+            searchHistoryFilter:{
                 handler: function(){
-                    console.log(store.historyChat)
-                    this.histNotes = store.historyChat
-
-                    // const attachNum = store.historyChat.filter(chat => chat.attachments).length
-                    // this.numAttachments = attachNum ?? 0
+                    if(!this.searchHistoryFilter) return
+                    console.log(this.searchHistoryFilter)
+                    searchCards(this.histNotes, this.searchHistoryFilter, "OBJECTID")
+                    return
                 },
-                immediate: true
+                immediate:true
             },
         },
         computed:{
-           
+            orderList: function(){
+                return {
+                    "ASC" : () => {return store.historyChat.slice().sort((a,b) => a.EDIT_DT - b.EDIT_DT) },
+                    "DESC": () => {return store.historyChat.slice().sort((a,b) => b.EDIT_DT - a.EDIT_DT) }
+                }
+            }
         }
     }
 
@@ -203,10 +210,10 @@
         display: flex;
         flex-direction: column;
         min-height: 10vh;
-        max-height: 26vh;
+        max-height: 250px;
         width: 98.7%;
         overflow-y: auto;
-        padding-bottom: 5rem;
+        padding-bottom: 10px;
     }
     #search{
         position: relative;
@@ -244,6 +251,11 @@
         color: #4472C4 !important;
         /* background-color: transparent !important; */
         /* padding: 0px !important; */
+    }
+
+    .history-notes{
+        border-color: red;
+        background-color: #4472C4;
     }
 
 </style>

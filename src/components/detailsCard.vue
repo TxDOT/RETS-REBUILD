@@ -15,12 +15,12 @@
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom: 1.3rem; height: 70px; padding-bottom: 0% !important;">
             <v-col cols="3" offset="0" style="position: relative; bottom: 5px !important;">
-                <v-text-field label="Route" variant="underlined" v-model="infoRets.attributes.RTE_NM" :rules="[valueRequired]" id="route"></v-text-field>
+                <v-text-field label="Route" variant="underlined" v-model="infoRets.attributes.RTE_NM" :rules="!store.isDisableValidations ? [valueRequired] : [] " id="route"></v-text-field>
             </v-col>
             <v-col cols="4" offset="4">
-                <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" v-model="infoRets.attributes.DFO" :rules="[onlyNumbers]">
+                <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" v-model="infoRets.attributes.DFO" :rules="!store.isDisableValidations ? [onlyNumbers]: []">
                     <template v-slot:append-inner >
-                        <v-btn id="dfoCrosshair" variant="plain" density="compact" class="number-field-icon"><v-icon icon="mdi-drag-variant" small  @click="crossHairFunc"></v-icon></v-btn>
+                        <v-btn :disabled="!infoRets.attributes.RTE_NM || !infoRets.attributes.DFO" id="dfoCrosshair" variant="plain" density="compact" class="number-field-icon"><v-icon icon="mdi-drag-variant" small @click="crossHairFunc"></v-icon></v-btn>
                     </template>
                 </v-text-field>
             </v-col>
@@ -59,7 +59,7 @@
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom: 6.1rem; height: 0px;">
             <v-col cols="12" offset="0">
-                <v-textarea label="Description" no-resize variant="underlined" class="rets-description" rows="3" v-model="infoRets.attributes.DESC_" :rules="[valueRequired]"></v-textarea>
+                <v-textarea label="Description" no-resize variant="underlined" class="rets-description" rows="3" v-model="infoRets.attributes.DESC_" :rules="!store.isDisableValidations ? [valueRequired]: []"></v-textarea>
             </v-col>
         </v-row>
         <v-row align="center" style="position: relative; bottom: 2.1rem; height: 25px;">
@@ -110,7 +110,7 @@
 
 <script>
 import { appConstants } from '../common/constant'
-import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets, zoomTo, returnDFO} from './utility.js'
+import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets, zoomTo, getPointRoadInteraction} from './utility.js'
 
 import {store} from './store.js'
     export default{
@@ -133,7 +133,7 @@ import {store} from './store.js'
                 detailsStat: appConstants.statDomainValues,
                 ogValues: {},
                 RETSData: [],
-                store
+                store,
             }
         },
         beforeMount(){
@@ -144,6 +144,11 @@ import {store} from './store.js'
             const milliDate = new Date(this.infoRets.attributes.DEADLINE)
             this.datePicker = this.setDate(milliDate)
             this.initDataCheck()
+
+            if(this.infoRets.attributes.NO_RTE === 1){
+                store.isDisableValidations = true
+            }
+            getPointRoadInteraction(store.retsObj)
             
         },
         methods:{
@@ -167,33 +172,51 @@ import {store} from './store.js'
             initDataCheck(){
                 // if Route, status or description; save button disabled
                 let item = [this.infoRets.attributes.RTE_NM, this.infoRets.attributes.STAT, this.infoRets.attributes.DESC_].filter(x => !x)
-                if(item.length > 0){
-                    this.sendDisabledSave(true)
+                if(!this.infoRets.attributes.NO_RTE){
+                    if(!this.infoRets.attributes.DFO || !this.infoRets.attributes.RTE_NM){
+                        return store.isSaveBtnDisable = true
+                    }
+                    if(!this.infoRets.attributes.RTE_NM.length || !this.infoRets.attributes.DFO.length){
+                        return store.isSaveBtnDisable = true
+                    }
                 }
+                if(item.length > 0){
+
+                    store.isSaveBtnDisable = true
+                    return
+                }
+                store.isSaveBtnDisable = false
             },
             valueRequired(e){
-                if(e === null) return
+                if(e === null) return false
                 if(!e.length){
-                    this.sendDisabledSave(true)
+                    store.isSaveBtnDisable = true
                     return `Wrong :(`
                 }
-                this.sendDisabledSave(false)
+                
+                this.initDataCheck()
                 return true
             },
             sendDisabledSave(bool){
                 this.$emit("disable-save", bool)
             },
             onlyNumbers(i){
-                if(this.infoRets.attributes.NO_RTE === 1 || this.infoRets.attributes.NO_RTE === null){
+                console.log(i)
+                if(!i){
+                    this.initDataCheck()
+                    return `But where am I? Don't leave me blank!`
+                }
+                if(!this.infoRets.attributes.NO_RTE){
                     let convert = Number(i)
                     if(!convert){
-                        this.sendDisabledSave(true)
+                        store.isSaveBtnDisable = true
                         return `Whoa! Numbers are more my vibe!`
                     }
+                    this.initDataCheck()
+                    return true
                 }
-                this.sendDisabledSave(false)
+                this.initDataCheck()
                 return true
-
             },
             paperClipFunc(){
                 this.infoRets.attributes.ACTV === 'Minute Order' ? window.open(`https://publicdocs.txdot.gov/minord/mosearch/Pages/Minute-Order-Search-Results.aspx#k=${this.infoRets.attributes.MO_NBR}`, '_blank') :
@@ -202,7 +225,8 @@ import {store} from './store.js'
 
             },
             crossHairFunc(){
-                returnDFO()
+                getPointRoadInteraction(store.retsObj)
+                store.isMoveRetsPt = true
             },
             setDate(date){
                 return date.toLocaleDateString('en-US')
@@ -269,6 +293,22 @@ import {store} from './store.js'
                 handler: function(){
                     store.currentInfo = JSON.stringify(this.infoRets)
                     this.splitAndAddRelatedRets(this.infoRets.attributes.RELATED_RETS)
+                },
+                immediate: true
+            },
+            'infoRets.attributes.NO_RTE':{
+                handler: function(){
+                    console.log(this.infoRets.attributes.NO_RTE)
+
+                    if(this.infoRets.attributes.NO_RTE){
+                        store.isDisableValidations = true
+                        store.isSaveBtnDisable = false
+                        return
+                    }
+                    store.isDisableValidations = false
+                    this.initDataCheck()
+
+                    return
                 },
                 immediate: true
             }

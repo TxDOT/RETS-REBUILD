@@ -27,4 +27,7 @@ export const appConstants = {
     defaultUserValue:[],
     activityList: [],
     userRoles: [],
+    defaultQuery : (userId) => {
+        return `(GIS_ANALYST = '${userId}' OR ASSIGNED_TO = '${userId}') AND (STAT = 1 OR STAT = 2 or STAT = 4)`
+    }
 }

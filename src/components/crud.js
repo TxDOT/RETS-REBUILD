@@ -1,4 +1,4 @@
-import { retsLayer, DFOProducer, retsHistory } from "./map-Init";
+import { retsLayer, DFOProducer, retsHistory, flagRetsColor } from "./map-Init";
 import Graphic from "@arcgis/core/Graphic.js";
 import Query from "@arcgis/core/rest/support/Query";
 import {store} from './store'
@@ -13,7 +13,10 @@ export async function updateRETSPT(retsObj){
     if(retsObj.attributes.RELATED_RETS){
         retsObj.attributes.RELATED_RETS = retsObj.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID).toString()
     }
+    console.log(retsObj)
+    postFlagColor(retsObj)
     let esriUpdateGraphic = createGraphic(retsObj)
+    console.log(esriUpdateGraphic)
     await retsLayer.applyEdits({
         updateFeatures: [esriUpdateGraphic]
     })
@@ -96,8 +99,26 @@ export async function sendChatHistory(chat, type){
     const returnStatus = await chatType[type]()
     return returnStatus
     // return addRETSPT(newGraphic, "hist")
+}
 
-
-    
+export function postFlagColor(rets){
+    //if OBJECTID is blank, would mean its a new flag insert
+    const flagGraphic = createGraphic(rets.attributes.flagColor)
+    console.log(flagGraphic)
+    if(rets.attributes.flagColor.OBJECTID === ''){
+        flagRetsColor.applyEdits({
+            addFeatures: [flagGraphic]
+        })
+        .then((x) => console.log(x))
+        .catch(err => console.log(err)) 
+        return
+    }
+    //if OBJECTID is filled, would mean its a update flag insert    
+    flagRetsColor.applyEdits({
+        updateFeatures: [flagGraphic]
+    })
+    .then((x) => console.log(x))
+    .catch(err => console.log(err)) 
+    return
 }
 

@@ -200,7 +200,7 @@
     #filterFeed{
         top: 57px;
         width: 47vh;
-        left: calc(74px + 50vh);
+        left: calc(74px + 509px);
         display: flex;
         flex-direction: column;
         border-radius: 0%;

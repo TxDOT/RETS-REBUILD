@@ -370,6 +370,7 @@
                     },
                     togglelightgrey(){
                         map.basemap = lightVTBasemap
+                        lightVTBasemap.visible = true
                         this.basemapcard = false;
                         retsLabelclass.symbol.color = "black"
                     },
