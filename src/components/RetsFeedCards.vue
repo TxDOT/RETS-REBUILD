@@ -135,6 +135,13 @@
         </div>
         
     </v-card>
+
+    
+        <v-container id="Spinner" v-if="isSpinner" >
+            <v-progress-circular color="blue" indeterminate size="60" ></v-progress-circular>
+        </v-container>
+    
+    
 </template>
 
 <script>
@@ -149,6 +156,7 @@ import { sketchWidgetcreate, createretssym, flagRetsColor } from './map-Init.js'
 import {addRETSPT, postFlagColor} from '../components/crud.js'
 
 
+
 export default{
     name: "RetsCards",
     components: {Filter, RetsDetailPage},
@@ -156,9 +164,15 @@ export default{
         filterPros: Object,
         // addrets:Number
     },
-    components: {RetsDetailPage, Filter}, 
+    //components: {RetsDetailPage, Filter}, 
     data(){
         return{
+            isCard: true,
+            Spinneractive: false,
+            isSpinner: false,
+            isVisible : true,
+            buttonIcon: 'mdi-plus',
+            addbtntext: "New",
             addrets: null,
             filterOptions: appConstants.RetsStatus,
             colorTable: appConstants.CardColorMap,
@@ -193,7 +207,9 @@ export default{
                 {title:"New", action: async () =>{
                                 const graphicAdd = await this.handlecreate();
                                 if (graphicAdd){
+
                                     this.processAddPt(graphicAdd)
+
                                 }
                                 
                 }}
@@ -233,18 +249,26 @@ export default{
     },
     methods:{
         async processAddPt(newPointGraphic){
-            try{
-                const obj = await addRETSPT(newPointGraphic, "rets")
-                console.log(obj)
-                const objectid = obj.addFeatureResults[0].objectId
-                this.addrets = objectid
-                return
-            }
-            catch(err){
-                console.log(err)
-            }
-            //handleaddrets(newPointGraphic, this.addrets);
-        },
+                        try{
+                            this.isSpinner = true
+                            this.Spinneractive = false
+                            this.isCard = false
+                            console.log(newPointGraphic)
+                            const obj = await addRETSPT(newPointGraphic)
+                            const objectid = obj.addFeatureResults[0].objectId
+                            this.addrets = objectid
+                            this.isSpinner = false
+                            this.Spinneractive = true
+
+
+                            
+                            return
+                        }
+                        catch(err){
+                            console.log(err)
+                        }
+                         //handleaddrets(newPointGraphic, this.addrets);
+                    },
         alert(s){
             window.alert(s)
         },
@@ -409,18 +433,24 @@ export default{
         },
         async handlecreate(){
             if (this.isCreateEnabled === true) {
+                this.addbtntext = "Cancel"
+                this.buttonIcon = null
+
                 this.isCreateEnabled = !this.isCreateEnabled;
                 //console.log("true")
                 const newPointGraphic = await createtool(sketchWidgetcreate, createretssym);
                 // Process the newPointGraphic as needed
                 this.isCreateEnabled = !this.isCreateEnabled;
+                this.addbtntext = "New"  
+                this.buttonIcon = "mdi-plus"
                 return newPointGraphic
                             
                 } 
             else {
                 sketchWidgetcreate.cancel();
                 this.isCreateEnabled = !this.isCreateEnabled;
-                //console.log("false")
+                this.addbtntext = "New"  
+                this.buttonIcon = "mdi-plus"
                 }
         },
         returnUserName(n){
@@ -480,7 +510,7 @@ export default{
         },
         addrets:{
             handler: async function(){
-                console.log(this.addrets)
+                //console.log(this.addrets)
                 await this.addretss()
             },
             immediate: true
@@ -511,13 +541,6 @@ export default{
 </script>
 
 <style scoped>
-    #retSubText{
-        position: relative;
-        right: 15px;
-        padding: 0px;
-        margin-left: 10px;
-        bottom: .4rem;
-    }
     #retsSubtitle{
         /*  */
     }
@@ -745,6 +768,12 @@ export default{
         float: right;
         font-size: 10px;
     }
+    #addbtn{
+        position: relative;
+        left: 1%;
+    }
+
+    
 
     :deep(.v-switch--inset .v-switch__track){
         height: 20px !important;

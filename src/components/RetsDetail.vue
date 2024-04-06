@@ -1,6 +1,7 @@
 <template>
-    <!-- details section -->
+    <!-- details section --> 
     <div id="detailsHeaderDiv">
+        
         <div id="detailsHeaderIcon">
             <v-btn density="compact" flat @click="changeColor(store.retsObj.attributes.RETS_ID);" id="flagBtnDetails">
                 <template v-slot:prepend>
@@ -13,7 +14,9 @@
             <v-btn-toggle v-model="store.retsObj.attributes.PRIO" density="compact">
                 <v-btn icon="mdi-exclamation" density="compact" flat style="color: #d9d9d9" selected-class="toggle-exclamation" variant="plain"></v-btn>
             </v-btn-toggle>   
+            
         </div>
+        
     </div>
 
 
@@ -35,6 +38,7 @@
                 <span class="gem-task" @click="addGemChip(i)">{{ i }}</span>
             </span>
         </div>
+        
         <!-- history section -->
         <div >
             
@@ -85,8 +89,40 @@
             <v-btn @click="sendToParent" variant="outlined" class="main-button-style" size="small" :disabled="store.isSaveBtnDisable">Save</v-btn>
         </v-btn-toggle>
     </div>
+    
+    
+    <v-container v-if="editText" style="" id="commentDiv">
+        <v-textarea variant="filled" auto-grow v-model="editNotes" label="Make a Comment"></v-textarea>
+            <div style="position: relative; float: right; left: 13px;">
+                <v-btn variant="plain" @click="deleteNote" class="secondary-button">Delete</v-btn>
+                <v-btn variant="plain" @click="closeNote" class="secondary-button">Cancel</v-btn>
+                <v-btn variant="outlined" class="main-button-style" @click="saveNote">Save</v-btn>
+            </div>
+    </v-container>
+    
+    <v-card id = "archivepopup" v-if="isarchiveopen" >
+        <v-card-title id = "archiveheader" >
+            Delete RETS ####
+            <hr id = "separator2" />
+        </v-card-title>
+            <v-card-subtitle id = "archivetext">
+                Deleting this RETS will move it to the archive table.
+            </v-card-subtitle>
+        
+
+        <v-btn-group id = "archivebuttons">
+                <v-btn  text="CANCEL" @click="handlearchive"></v-btn>
+                <v-btn  text="DELETE" @click="deleteRets"></v-btn>
+            </v-btn-group>
+    
+    </v-card>    
+     
+    
+
+    
 
 </template>
+
 
 <script>
     import editHistoryNotes from './EditHistoryNotes.vue'
@@ -110,6 +146,7 @@
         emits:['close-detail'],
         data(){
             return{
+                isarchiveopen: false,
                 isDetails: true,
                 isMetadata: false,
                 activityList: ['CRI', 'GSC Review', 'HPMS Sample Review', 'Interstate Project', 'Minute Order', 
@@ -154,6 +191,9 @@
             store.getHistoryChatRet()
         },
         methods:{
+            canceladdrets(){
+                console.log("ok")
+            },
             returnDateFormat(e){
                 //10/29/2023 09:11am
                 const date = new Date(e)
@@ -283,6 +323,11 @@
             removeRetsGraphics(){
                 removeretsgraphic();
             },
+            handlearchive(){
+                this.isarchiveopen =! this.isarchiveopen
+                console.log(this.isarchiveopen)
+            }
+            
 
         },
         watch:{
@@ -313,6 +358,40 @@
 </script>
 
 <style scoped>
+#archivepopup{
+    position: absolute;
+        padding: 10px;
+        border-radius: 5px;
+        left: 180%;
+        width: 120%;
+        top:40%;
+        height:25%; 
+    }
+    #archiveheader{
+        position: absolute;
+        top: 2%;
+        left: 2%;
+        font-size: 18px;
+        
+    }
+    #separator2{
+        border: 0;
+        border-bottom: 1px solid ;
+        margin: 0 auto;
+        width: 24rem;
+    }
+    #archivetext{
+        position: absolute;
+        top: 25%;
+        left: 2%;
+    }
+    #archivebuttons{
+        position: absolute;
+        bottom: 10px;
+        width: 25rem;
+        justify-content: end;
+
+    }
 #flagBtnDetails{
     padding: 1px !important;
     margin: 15px !important;
@@ -389,7 +468,7 @@ div .cardDiv{
 
 #trigger-buttons{
     padding-top: .5rem;
-    position: relative;
+    position: absolute;
     float: right;
 }
 
@@ -489,24 +568,14 @@ div .cardDiv{
 }
 
 .details-color-picker{
-    position: fixed; 
-    display: flex; 
-    flex-direction: column; 
-    z-index: 9999; 
-    width: 2%; 
-    float: right;
-    margin-left: 2.8rem;
-    background-color: black;
-}
-
-.toggleExclamation{
-    color: red;
-}
-
-#retsDetailMeta{
-    margin-left: 10px;
-}
-.toggle-exclamation{
-    color: red !important;
-}
+        position: fixed; 
+        display: flex; 
+        flex-direction: column; 
+        z-index: 9999; 
+        width:2.3%; 
+        float: right;
+        margin-left: 2.2rem;
+        background-color: black;
+    }
+   
 </style>

@@ -8,7 +8,9 @@ import { addRETSPT } from './crud.js';
 import esriRequest from "@arcgis/core/request.js";
 import * as geodesicUtils from "@arcgis/core/geometry/support/geodesicUtils.js";
 import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils.js";
-import * as geometryEngine from "@arcgis/core/geometry/geometryEngine.js";
+import * as geometryEngine from "@arcgis/core/geometry/geometryEngine.js";import esriId from "@arcgis/core/identity/IdentityManager.js";
+
+
 
 export function clickRetsPoint(){
     try{
@@ -82,7 +84,7 @@ export function removeHighlight(feature, removeAll){
             }
 
             if(lyrView._highlightIds.has(feature?.attributes.OBJECTID)){
-                //console.log("before: " + feature?.attributes.OBJECTID )
+                console.log("before: " + feature?.attributes.OBJECTID )
                 lyrView._highlightIds.delete(feature?.attributes.OBJECTID)
                 //console.log("after: " + feature?.attributes.OBJECTID )
                 
@@ -426,97 +428,108 @@ export function createtool(sketchWidgetcreate, createretssym) {
         pressedkey = false
     });
 
-    export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
-        if(isSelectEnabled === true){ 
-            sketchWidgetselect.create("rectangle");
-            var removeAll = true
-            sketchWidgetselect
-            .on("create", function (event) 
+  export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
+    if(isSelectEnabled === true){ 
+        sketchWidgetselect.create("rectangle");
+        var removeAll = true
+        sketchWidgetselect
+        .on("create", function (event) 
+            {
+            if (event.state === "complete")
                 {
-                if (event.state === "complete")
-                    {
-                        // Get the rectangle geometry
-                        var rectangleGeometry = event.graphic.geometry;
-                        // Query for points within the rectangle
-                        var query = retsLayer.createQuery();
-                        query.geometry = rectangleGeometry;
-                        retsLayer.queryFeatures(query)
-                        .then(function (result) 
-                                {
-                                    // Access the selected features
-                                    var selectedFeatures = result.features;
-                                    outlineFeedCards(selectedFeatures);
-    
-                                    if (pressedkey === false){
-                                        
-                                        removeHighlight("a", removeAll); 
-                                        // for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                           
-    
-                                        // }
+                    // Get the rectangle geometry
+                    var rectangleGeometry = event.graphic.geometry;
+                    // Query for points within the rectangle
+                    var query = retsLayer.createQuery();
+                    query.geometry = rectangleGeometry;
+                    retsLayer.queryFeatures(query)
+                    .then(function (result) 
+                            {
+                                // Access the selected features
+                                var selectedFeatures = result.features;
+                                
+
+                                if (pressedkey === false){
+                                    if (selectedFeatures.length){
                                         for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                            store.roadHighlightObj.add(String(selectedFeatures[i].attributes.RETS_ID).concat('-', selectedFeatures[i].attributes.OBJECTID))
-                                            highlightRETSPoint(selectedFeatures[i].attributes);
-                                             //outlineFeedCards(selectedFeatures);
+                                            removeHighlight(selectedFeatures[i].attributes,removeAll); 
                                             
+
+                                             
                                             
-                                        }
+      
+                                          }
+                                          removeOutline();
+
+                                    }
+
+                                    
+                                    for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                        //removeOutline();
+                                        highlightRETSPoint(selectedFeatures[i].attributes);
+                                        outlineFeedCards(selectedFeatures);
+                                         //outlineFeedCards(selectedFeatures);
                                         
-                                        graphics.removeAll() 
-                                        return
                                         
                                     }
+                                    
+                                    graphics.removeAll() 
+                                    return
+                                    
+                                }
+
+                                
+                                 
+                                
+                                if(pressedkey === "Shift"){
+                                    for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                        highlightRETSPoint(selectedFeatures[i].attributes);
+                                        outlineFeedCards(selectedFeatures);
+
+                                    } 
+                                    graphics.removeAll();
+                                    return
+                                }
+                                
+                                if(pressedkey === "Control"){
+                                    
+                                    for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                        console.log("this: " + selectedFeatures[i].attributes.OBJECTID)
     
-                                    
-                                     
-                                    
-                                    if(pressedkey === "Shift"){
-                                        for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                            store.roadHighlightObj.add(String(selectedFeatures[i].attributes.RETS_ID).concat('-', selectedFeatures[i].attributes.OBJECTID))
-                                            highlightRETSPoint(selectedFeatures[i].attributes);
-                                            //outlineFeedCards(selectedFeatures);
-    
-                                        } 
-                                        graphics.removeAll();
-                                        return
-                                    }
-                                    
-                                    if(pressedkey === "Control"){
+                                        removeHighlight(selectedFeatures[i]);  
                                         
-                                        for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                            console.log("this: " + selectedFeatures[i].attributes.OBJECTID)
-        
-                                            removeHighlight(selectedFeatures[i]);  
-    
-                                        } 
-    
-                                       
-                                        graphics.removeAll();
-                                        return
-            
-                                    }
-    
-                                    
+
+                                    } 
+                                        
+
                                    
-                                });
-    
-                                
-                                
-                    }
-    
-            });
-    
-            isSelectEnabled = !isSelectEnabled; 
-        }
-        else{
-            isSelectEnabled = !isSelectEnabled;
-            sketchWidgetselect.cancel()
-                
-        }
+                                    graphics.removeAll();
+                                    return
         
-        
-        return
-      }
+                                }
+                                
+
+                                
+                               
+                            });
+
+                            
+                            
+                }
+
+        });
+
+        isSelectEnabled = !isSelectEnabled; 
+    }
+    else{
+        isSelectEnabled = !isSelectEnabled;
+        sketchWidgetselect.cancel()
+            
+    }
+    
+    
+    return
+  }
 
 export async function handleaddrets(newPointGraphic, addrets){
     try{
@@ -604,6 +617,20 @@ export function togglemenu(isActOpen, shift){
         var newCenter = view.toMap(screenPoint); // Convert back to map coordinates
         view.goTo(newCenter)                
     }
+    
+}
+
+export function logoutUser(){
+    esriId.destroyCredentials({
+    })
+
+}
+
+export function removeOutline(){
+    const classList = document.querySelectorAll('.highlight-card');
+    classList.forEach(element => {
+    element.classList.remove('highlight-card'); // Remove each element individually
+    });
     
 }
 

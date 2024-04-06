@@ -178,9 +178,12 @@ export const retsLabelclass = new LabelClass({
   symbol: {
     type: "text",
     color: "white",
+    haloSize: .3,
+    haloColor: "black",
     font: {
-      size: 12
-    }
+      size: 13
+    },
+    
   },
   labelPlacement: "above-right",
   minScale: 200000,
@@ -259,7 +262,6 @@ export const view = new MapView({
 
 //create search widget
 export const searchWidget = new Search({
-  
   view: view,
   includeDefaultSources: false,
   allPlaceholder: "City, County, District, Route",
