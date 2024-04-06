@@ -16,9 +16,7 @@
             </v-btn-toggle>   
             
         </div>
-        
     </div>
-
 
     <detailsAlert v-if="store.isAlert"/>
     <div id="container-div">
@@ -84,21 +82,11 @@
             <v-checkbox label="Asset Only Job" density="compact"></v-checkbox>
         </div>
         <v-btn-toggle id="trigger-buttons" density="compact">
-            <v-btn @click="deleteRets" variant="plain" flat size="small">Delete</v-btn>
+            <v-btn @click="archiveBtn" variant="plain" flat size="small">Delete</v-btn>
             <v-btn @click="cancelDetailsMetadata" class="secondary-button" variant="plain" flat size="small">Cancel</v-btn>
             <v-btn @click="sendToParent" variant="outlined" class="main-button-style" size="small" :disabled="store.isSaveBtnDisable">Save</v-btn>
         </v-btn-toggle>
     </div>
-    
-    
-    <v-container v-if="editText" style="" id="commentDiv">
-        <v-textarea variant="filled" auto-grow v-model="editNotes" label="Make a Comment"></v-textarea>
-            <div style="position: relative; float: right; left: 13px;">
-                <v-btn variant="plain" @click="deleteNote" class="secondary-button">Delete</v-btn>
-                <v-btn variant="plain" @click="closeNote" class="secondary-button">Cancel</v-btn>
-                <v-btn variant="outlined" class="main-button-style" @click="saveNote">Save</v-btn>
-            </div>
-    </v-container>
     
     <v-card id = "archivepopup" v-if="isarchiveopen" >
         <v-card-title id = "archiveheader" >
@@ -240,15 +228,22 @@
                 removeRelatedRetsFromMap(store.retsObj.attributes.OBJECTID)
                 store.deleteRetsID()
                 store.isDetailsPage = false
+                store.isCard = true
                 store.activityBanner = "Activity Feed"
                 deleteRetsGraphic()
+                this.isarchiveopen = false
+            },
+            archiveBtn(){
+                this.isarchiveopen = true
             },
             async sendToParent(){
                 // this.retsInfo.ASSIGNED_TO = this.retsInfo.ASSIGNED_TO.value
                 store.retsObj.attributes.PRIO = store.retsObj.attributes.PRIO ?? 1
                 console.log(store.retsObj.attributes.PRIO)
                 await updateRETSPT(store.retsObj)
+                store.userRetsFlag.push(store.retsObj.attributes.FLAG)
                 store.isDetailsPage = false
+                store.isCard = true
                 store.activityBanner = "Activity Feed"
                 deleteRetsGraphic()
                 store.updateRetsID()
@@ -256,6 +251,7 @@
             cancelDetailsMetadata(){
                 store.preserveHighlightCards()
                 store.isDetailsPage = false
+                store.isCard = true
                 store.activityBanner = "Activity Feed"
             },
             openNote(note, index){
@@ -360,38 +356,37 @@
 <style scoped>
 #archivepopup{
     position: absolute;
-        padding: 10px;
-        border-radius: 5px;
-        left: 180%;
-        width: 120%;
-        top:40%;
-        height:25%; 
-    }
-    #archiveheader{
-        position: absolute;
-        top: 2%;
-        left: 2%;
-        font-size: 18px;
-        
-    }
-    #separator2{
-        border: 0;
-        border-bottom: 1px solid ;
-        margin: 0 auto;
-        width: 24rem;
-    }
-    #archivetext{
-        position: absolute;
-        top: 25%;
-        left: 2%;
-    }
-    #archivebuttons{
-        position: absolute;
-        bottom: 10px;
-        width: 25rem;
-        justify-content: end;
+    padding: 10px;
+    border-radius: 5px;
+    left: 45rem;
+    width: 120%;
+    top:40%;
+    height:25%; 
+}
+#archiveheader{
+    position: absolute;
+    top: 2%;
+    left: 2%;
+    font-size: 18px;  
+}
+#separator2{
+    border: 0;
+    border-bottom: 1px solid ;
+    margin: 0 auto;
+    width: 24rem;
+}
+#archivetext{
+    position: absolute;
+    top: 25%;
+    left: 2%;
+}
+#archivebuttons{
+    position: absolute;
+    bottom: 10px;
+    width: 25rem;
+    justify-content: end;
+}
 
-    }
 #flagBtnDetails{
     padding: 1px !important;
     margin: 15px !important;
@@ -468,7 +463,7 @@ div .cardDiv{
 
 #trigger-buttons{
     padding-top: .5rem;
-    position: absolute;
+    position: relative;
     float: right;
 }
 
@@ -568,14 +563,18 @@ div .cardDiv{
 }
 
 .details-color-picker{
-        position: fixed; 
-        display: flex; 
-        flex-direction: column; 
-        z-index: 9999; 
-        width:2.3%; 
-        float: right;
-        margin-left: 2.2rem;
-        background-color: black;
-    }
+    position: fixed; 
+    display: flex; 
+    flex-direction: column; 
+    z-index: 9999; 
+    width:2.3%; 
+    float: right;
+    margin-left: 2.2rem;
+    background-color: black;
+}
+
+.toggle-exclamation{
+    color: red !important;
+}
    
 </style>

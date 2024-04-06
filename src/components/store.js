@@ -9,6 +9,7 @@ export const store = reactive({
         taskGem: 0,
         clickedGraphic: 0,
         isDetailsPage: false,
+        isCard: true,
         activityBanner: "Activity Feed",
         isNoRets: false,
         currentInfo: "",

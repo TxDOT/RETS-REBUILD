@@ -113,9 +113,9 @@
                 this.updateOID = -1
                 return
             },
-            async replyNote(cmnt, note){
+            async replyNote(oid, note){
                 const returnOid = await store.replyNote(note)
-                this.openNote(cmnt, returnOid)
+                this.openNote(oid, returnOid)
                 this.testOid = returnOid
                 return
             },

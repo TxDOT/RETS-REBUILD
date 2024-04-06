@@ -154,9 +154,9 @@
     import RetsCards from '../components/RetsFeedCards.vue';
     import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass} from '../components/map-Init.js';
     import {addRETSPT} from '../components/crud.js'
-    import { createtool, selecttool, togglemenu } from '../components/utility.js';
+    import { createtool, selecttool, togglemenu, logoutUser } from '../components/utility.js';
     import Map from './Map.vue';
-    import { vuetify } from 'C:/Users/ssaldana/Documents/repo/RETS-REBUILD/src/main.js';
+    import { vuetify } from '../main.js';
 
 
 

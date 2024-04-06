@@ -6,9 +6,9 @@
                     <header id="container-header">RETS Dashboard</header>
                     <div class="add-new-btn">
                         <div style="float:right;">
-                            <v-btn v-for="(tool, i) in addbutton" :key="i" :value="tool" @click="tool.action()" prepend-icon="mdi-plus" color="#4472C4" rounded="0"  class="main-button" >
+                            <v-btn v-for="(tool, i) in addbutton" :key="i" :value="tool" @click="tool.action()" :prepend-icon="buttonIcon" color="#4472C4" rounded="0"  class="main-button" >
                             <!-- @click="handlecreate"> -->
-                            <p class="text-btn">New</p>
+                            <p class="text-btn" id="addbtn">{{addbtntext}}</p>
                             </v-btn>
                         </div>
 
@@ -61,7 +61,7 @@
                 <v-text-field density="compact" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" v-model="actvFeedSearch"></v-text-field>
             </v-row>
 
-            <div class="card-feed-div" v-if="!store.isDetailsPage">
+            <div class="card-feed-div" v-if="store.isCard">
                 <v-row v-for="(rd, road) in store.roadObj" :key="rd" :value="road" :id="rd.attributes.OBJECTID" class="rets-card-row"> 
                     <v-btn elevation="0" @click="changeColor(rd.attributes.RETS_ID);" class="flag-btn" size="small" max-width=".5px" density="compact" variant="plain" slim>
                         <template v-slot:prepend>
@@ -167,7 +167,6 @@ export default{
     //components: {RetsDetailPage, Filter}, 
     data(){
         return{
-            isCard: true,
             Spinneractive: false,
             isSpinner: false,
             isVisible : true,
@@ -252,7 +251,7 @@ export default{
                         try{
                             this.isSpinner = true
                             this.Spinneractive = false
-                            this.isCard = false
+                            store.isCard = false
                             console.log(newPointGraphic)
                             const obj = await addRETSPT(newPointGraphic)
                             const objectid = obj.addFeatureResults[0].objectId
@@ -344,6 +343,7 @@ export default{
             clearTimeout(this.timer)
             this.timer=""
             store.isDetailsPage = true
+            store.isCard = false
             store.activityBanner = `${road.attributes.RETS_ID}`
             highlightRETSPoint(road.attributes)
             this.zoomToRetsPt(road)
@@ -543,6 +543,11 @@ export default{
 <style scoped>
     #retsSubtitle{
         /*  */
+    }
+    #Spinner{
+        position: absolute;
+        top: 50%;
+        left: 16.5%
     }
     .attachCard{
         position: relative; 
