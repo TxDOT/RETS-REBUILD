@@ -817,7 +817,7 @@ function findDFOSlider(findRelateLineGraphic){
                     x: event.x,
                     y: event.y
                 })
-                const findNearestVertex = geometryEngine.nearestVertex(findRelateLineGraphic.geometry,mapCoords)
+                const findNearestVertex = geometryEngine.nearestVertex(findRelateLineGraphic.geometry, mapCoords)
                 const dfo = geodesicUtils.geodesicDistance(webMercatorUtils.webMercatorToGeographic(mapCoords), webMercatorUtils.webMercatorToGeographic(findNearestVertex.coordinate), "miles")
                 // console.log(dfo.distance)
                 // console.log(findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2])

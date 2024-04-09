@@ -53,7 +53,7 @@ export let retsPointRenderer = new UniqueValueRenderer({
     value: "3",
       symbol: new SimpleMarkerSymbol({
       size: 8,
-      color: appConstants.CardColorMap[2],
+      color: appConstants.CardColorMap[3],
         outline: {
           color: "white",
           width: 0
