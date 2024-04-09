@@ -254,8 +254,8 @@ import {store} from './store.js'
             'infoRets.attributes.RETS_ID':{ //<= neccessary?
                 handler: function(n,o){
                     store.currentInfo = JSON.stringify(this.infoRets)
-                    console.log("new", n)
-                    console.log("old", o)
+                    //console.log("new", n)
+                    //console.log("old", o)
                     this.splitAndAddRelatedRets(this.infoRets.attributes.RELATED_RETS)
                     // toggleRelatedRets(o, false)
                     // toggleRelatedRets(n, true)

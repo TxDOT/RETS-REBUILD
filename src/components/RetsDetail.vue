@@ -87,7 +87,7 @@
     
     <v-card id = "archivepopup" v-if="isarchiveopen" >
         <v-card-title id = "archiveheader" >
-            Delete RETS ####
+            Delete RETS {{deletedRETSID}}
             <hr id = "separator2" />
         </v-card-title>
             <v-card-subtitle id = "archivetext">
@@ -97,7 +97,7 @@
 
         <v-btn-group id = "archivebuttons">
                 <v-btn  text="CANCEL" @click="handlearchive"></v-btn>
-                <v-btn  text="DELETE" @click="deleteRets"></v-btn>
+                <v-btn id = "deletebutton" text="DELETE" @click="deleteRets"></v-btn>
             </v-btn-group>
     
     </v-card>    
@@ -128,6 +128,7 @@
         emits:['close-detail'],
         data(){
             return{
+                deletedRETSID: null,
                 isarchiveopen: false,
                 isDetails: true,
                 isMetadata: false,
@@ -194,6 +195,7 @@
                 removeRelatedRetsFromMap(this.retsInfo.OBJECTID)
                 removeHighlight(this.retsInfo, true)
                 this.$emit('close-detail', [this.retsInfo, false])
+                
             },
             async sendToParent(){
                 await updateRETSPT(this.retsInfo)
@@ -243,7 +245,8 @@
             },
             handlearchive(){
                 this.isarchiveopen =! this.isarchiveopen
-                console.log(this.isarchiveopen)
+                console.log(this.retsInfo.attributes.OBJECTID)  
+                this.deletedRETSID = this.retsInfo.attributes.OBJECTID          
             }
             
 
@@ -266,12 +269,12 @@
 <style scoped>
 #archivepopup{
     position: absolute;
-        padding: 10px;
         border-radius: 5px;
-        left: 180%;
-        width: 120%;
+        left: 200%;
+        width: 27rem;
         top:40%;
         height:25%; 
+        border-radius: 0;
     }
     #archiveheader{
         position: absolute;
@@ -288,7 +291,7 @@
     }
     #archivetext{
         position: absolute;
-        top: 25%;
+        top: 30%;
         left: 2%;
     }
     #archivebuttons{
@@ -368,8 +371,11 @@ div .cardDiv{
 
 #trigger-buttons{
     padding-top: .5rem;
-    position: absolute;
+    position: relative;
     float: right;
+    /*  */
+    /* bottom: 2rem; */
+    
 }
 
 .v-btn{
@@ -475,6 +481,10 @@ div .cardDiv{
     float: right;
     margin-left: 2.2rem;
     background-color: black;
+}
+#deletebutton{
+    border: 1px solid;
+    border-radius: 9%;
 }
 
 

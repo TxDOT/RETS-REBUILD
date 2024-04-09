@@ -16,7 +16,7 @@
             <v-list-item v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" active-class="btn-left-brder" >
                 <v-tooltip location="bottom" :text=tool.name >
                     <template v-slot:activator="{ props }">
-                    <v-icon   size="30" :icon="tool.icon" :color="tool.color" @click="tool.color='#FFFFFF'" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'":name="tool.name" v-bind="props" ></v-icon>
+                        <v-icon   size="30" :icon="tool.icon" :color="tool.color" @click="tool.color='#FFFFFF'" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'":name="tool.name" v-bind="props" ></v-icon>
                 </template>
                 </v-tooltip>
                 
@@ -126,9 +126,10 @@
                 <v-btn id = "logoutbutton" prepend-icon="mdi-power" @click="logoutMethod()" >LOGOUT</v-btn>
             </v-btn-group>
             <v-btn-group id = "savebutton">
-                <v-btn  text="CANCEL" @click="handleSettingsTool();handleactiveclass()"></v-btn>
+                <v-btn @click="handleSettingsTool();handleactiveclass()">CANCEL</v-btn>
                
-                    <v-btn  text="SAVE" id = "save"></v-btn>
+                    <!-- <v-btn variant="outlined"class="main-button-style" >SAVE</v-btn> -->
+                    <v-btn id = "save" >SAVE</v-btn>
             
                 
             </v-btn-group>
@@ -167,7 +168,7 @@
         props: {addrets: Number},
         data(){
             return{
-                buttonColor: "#00FF00",
+                buttonColor: "#D9D9D9",
                 switchValue : false,
                 isActOpen: true,
                 shift: 200,
@@ -290,10 +291,12 @@
                 methods: {
                     handleactiveclass(){
                         
-                        // const classList = document.querySelectorAll('.btn-left-brder');
-                        //     classList.forEach(element => {
-                        //     element.classList.toggle('btn-left-brder'); // Remove each element individually
-                        //     });
+                        const classList = document.querySelectorAll('.btn-left-brder');
+                            classList.forEach(element => {
+                            element.classList.toggle('btn-left-brder'); // Remove each element individually
+                            });
+                            this.settingsstatus = false;
+
                     },
                     logoutMethod(){
                         logoutUser();
@@ -505,6 +508,7 @@
         bottom: 10%;
         left: 50%;
         z-index: 9999;
+        border-radius: 0px;
         
 
     }
@@ -604,19 +608,18 @@
     }
     #savebutton{
         float: right;
-    color: green;    }
+    }
     #darkmodeswitch{
         position: absolute;
         bottom: 2.3rem;
     }
     #save{
         border: 1px solid ;
-        border-radius: 9%;
         
     }
     #archivepopup{
         padding: 20px;
-        border-radius: 5px;
+        border-radius: 0px;
         left: 50%;
         width: 26%;
         top:40%;

@@ -454,7 +454,7 @@ export default{
     #Spinner{
         position: absolute;
         top: 50%;
-        left: 16.5%
+        left: 12.5%
 
         
         

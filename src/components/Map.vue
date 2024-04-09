@@ -9,7 +9,7 @@
 //import functions
 //import {queryRetsTable} from './utility.js'
 import {view} from './map-Init.js'
-import {home, hoverRetsPoint} from './utility.js'
+import {home, hoverRetsPoint, clickRetsPoint} from './utility.js'
 //import ESRI JS ESM class
 export default{
     name: "Map",
@@ -33,11 +33,13 @@ export default{
 
 <style>
     #viewDiv{
-        position: absolute;
+        position: fixed;
         height: 100%;
-        width: calc(100% - 74px);
+        width: 100%;
+        min-height: 100%;
         top: 0;
-        left: 74px;
+     
+        
         /* overflow-y: hidden; */
     }
 

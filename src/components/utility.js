@@ -382,6 +382,8 @@ export function createtool(sketchWidgetcreate, createretssym) {
                             {
                                 // Access the selected features
                                 var selectedFeatures = result.features;
+
+                                
                                 
 
                                 if (pressedkey === false){
@@ -396,6 +398,10 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                           }
                                           removeOutline();
 
+                                    }
+                                    else{
+                                        removeHighlight(selectedFeatures.attributes,removeAll)
+                                        removeOutline();
                                     }
 
                                     

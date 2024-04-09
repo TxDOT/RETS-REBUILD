@@ -19,6 +19,11 @@ import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer.js";
 import TileInfo from "@arcgis/core/layers/support/TileInfo.js";
 import Legend from "@arcgis/core/widgets/Legend";
 import LegendViewModel from "@arcgis/core/widgets/Legend/LegendViewModel";
+import SimpleLineSymbol from "@arcgis/core/symbols/SimpleLineSymbol.js";
+import SimpleRenderer from "@arcgis/core/renderers/SimpleRenderer.js";
+import Graphic from "@arcgis/core/Graphic";
+
+
 
 export let retsPointRenderer = new UniqueValueRenderer({
  field: "STAT", // Field based on which the symbology will be categorized
@@ -82,21 +87,30 @@ export let roadwaysRenderer = {
       type: "simple-line",
       width: 0,
       opacity: 0,
-      color: "transparent"
+      color: [255,255,255,1]
     }
 }
-export let polygonRenderer = {
-  type: "simple",
-    symbol: {
-      type: "simple-fill",  // autocasts as new SimpleFillSymbol()
-      color: "transparent",
-      style: "solid",
-      outline: {  // autocasts as new SimpleLineSymbol()
-        color: "transparent",
-        width: 0
-      }
-    }
-}
+// export let minuteorderrenderer = {
+//   type: "simple",
+//     symbol: {
+//       type: "simple-line",
+//       width: 1,
+//       color: "transparent",
+//       style: "solid"
+//     }
+// }
+// export let polygonRenderer = {
+//   type: "simple",
+//     symbol: {
+//       type: "simple-fill",  // autocasts as new SimpleFillSymbol()
+//       color: "transparent",
+//       style: "solid",
+//       outline: {  // autocasts as new SimpleLineSymbol()
+//         color: "transparent",
+//         width: 0
+//       }
+//     }
+// }
 //Rets Layer construction
 export const retsLayer = new FeatureLayer({
   url: "https://testportal.txdot.gov/createags/rest/services/RETS/FeatureServer/0",
@@ -109,29 +123,30 @@ export const retsLayer = new FeatureLayer({
 //County Layer construction
 export const texasCounties = new FeatureLayer({
   url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/Texas_Counties_Detailed/FeatureServer/0",
-  visible: true,
-  renderer: polygonRenderer
+  visible: false,
+  //renderer: polygonRenderer
   
   
 })
 
 export const txdotDistricts = new FeatureLayer({
   url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Districts/FeatureServer/0",
-  visible: true,
-  renderer: polygonRenderer
+  visible: false,
+  //renderer: polygonRenderer
 })
 
 export const texasCities = new FeatureLayer({
   url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_City_Boundaries/FeatureServer/0",
-  visible: true,
-  renderer: polygonRenderer
+  visible: false,
+  //renderer: polygonRenderer
 })
 
 export const minuteOrders = new FeatureLayer({
   url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Highway_Designations/FeatureServer",
-  visble: true, 
-  renderer: roadwaysRenderer
+  visble: false, 
+  //renderer: minuteorderrenderer
 })
+
 
 
 
@@ -162,6 +177,9 @@ export const retsLabelclass = new LabelClass({
 
 //Applies label class to rets layer
 retsLayer.labelingInfo = [retsLabelclass];
+
+export const highlightLayer = new GraphicsLayer();
+
 
 export const retsGraphicLayer = new GraphicsLayer({});
 
@@ -230,11 +248,29 @@ export const view = new MapView({
 
 
 
+const highlightSymbol = {
+  type: "simple-fill", // Use a simple fill symbol
+  color: "transparent", // Transparent fill color
+  outline: {
+    color: '#00FFCC', // Red color for the outline
+    width: 2 // Outline width
+  }
+};
+
+highlightLayer.renderer = {
+  type: "simple", // Use a simple renderer
+  symbol: highlightSymbol // Use the defined highlight symbol
+};
+
+
+
 //create search widget
 export const searchWidget = new Search({
   view: view,
   includeDefaultSources: false,
   allPlaceholder: "City, County, District, Route",
+  popupEnabled: false,
+  popupTemplate: false,
   sources:
   [
     {
@@ -255,7 +291,7 @@ export const searchWidget = new Search({
       displayField: "CNTY_NM", 
       exactMatch: false,
       outFields: ["*"],
-      maxSuggestions: 1,
+      maxSuggestions: 2,
       minSuggestCharacters: 2,
       
     },
@@ -276,7 +312,7 @@ export const searchWidget = new Search({
       displayField: "RTE_NM", 
       exactMatch: false,
       outFields: ["*"],
-      maxSuggestions: 1,
+      maxSuggestions: 6,
       minSuggestCharacters: 2,
     },
     {
@@ -366,19 +402,22 @@ view.ui.add(searchWidget, {
   container: "searchcont",
 });
 
-searchWidget.on("select-result", function(event) {
-  const selectedFeature = event.result.feature;
+// searchWidget.on("select-result", function(event) {
+//   const selectedFeature = event.result.feature;
   
-  if (selectedFeature && selectedFeature.geometry) {
-    // Calculate the extent of the selected feature
-    const extent = selectedFeature.geometry.extent;
+//   if (selectedFeature && selectedFeature.geometry) {
+//     // Calculate the extent of the selected feature
+//     const extent = selectedFeature.geometry.extent;
     
     
-    // Set the map view's extent based on the feature's extent
-    console.log(extent)
-    view.extent = extent;
-  }
-});
+//     // Set the map view's extent based on the feature's extent
+//     console.log(extent)
+//     view.extent = extent;
+//   }
+// });
+
+
+
 
 
 //adds zoom widget to map 
@@ -439,11 +478,31 @@ export const OSMVTBasemap = new Basemap({
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-map.addMany([retsLayer,TxDotRoaways, graphics, retsGraphicLayer, texasCounties, texasCities, minuteOrders])
+map.addMany([retsLayer,TxDotRoaways, graphics, retsGraphicLayer, texasCounties, texasCities, highlightLayer])
+highlightLayer.blendMode = "screen"; 
+
+
+searchWidget.on("select-result", function(event) {
+
+
+  const selectedFeature = event.result.feature;
+  highlightLayer.removeAll(); // Clear previous highlights
+  highlightLayer.add(selectedFeature); // Highlight the selected feature
+  highlightLayer.add(new Graphic({
+    geometry: selectedFeature.geometry,
+    symbol: highlightSymbol
+  }))
+});
+searchWidget.on("search-clear", function() {
+  // Clear the highlight when the search is cleared
+  highlightLayer.removeAll();
+});
+
 
 //remove attribution and zoom information
 view.ui.remove("attribution")
 // </></>
+
 
 
 
