@@ -1,5 +1,5 @@
 <template>
-    <div style="margin-right: 10px; margin-left: 10px; width: 100%;">
+    <div style="margin-right: 10px; margin-left: 10px; width: 100%; height: 250px;">
         <div id="search">
             <v-text-field class="search-history" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" density="compact" v-model="searchHistoryFilter" variant="solo-filled"></v-text-field>
         </div>
@@ -19,7 +19,7 @@
                 <div v-for="(note, i) in orderList[sortA ?? sortB]()" :key="note.OBJECTID" track-by="OBJECTID" v-if="!isHistNotesEmpty" id="chatDiv">
                     <v-banner v-model="note[i]" :id="note.OBJECTID" density="compact" style="padding: 0px; padding-left: 5px; border-left: 3px solid #4472C4 !important;">
                         <v-banner-text>
-                            <span v-if="note.PARENT_ID" style="margin:0% !important; "> <p id="replyingToCmnt">Replying to "{{histNotes.find(x => x.OBJECTID === note.PARENT_ID)?.CMNT ?? "Referenced Note has been deleted"}}"</p></span>
+                            <span v-if="note.PARENT_ID" style="margin:0% !important; "> <p id="replyingToCmnt">Replying to "{{store.historyChat.find(x => x.OBJECTID === note.PARENT_ID)?.CMNT ?? "Referenced Note has been deleted"}}"</p></span>
                             <v-text-field style="width:100%; position: relative; width: 40rem !important; height: 2rem; margin:0% !important; z-index:9999;" density="compact" variant="plain" :disabled="note.OBJECTID !== updateOID" v-model="note.CMNT"></v-text-field>                                
                             <span style="font-size: 10px; color: grey; padding-left: 5px;">{{ returnUserName(note.CMNT_NM) }} {{ note.EDIT_DT ? returnDateFormat(note.EDIT_DT) : returnDateFormat(note.CREATE_DT) }}</span>
                             <div style="position: relative; bottom: 0rem;" v-if="note.attachments">
@@ -31,7 +31,7 @@
                         <div v-if="note.SYS_GEN === 0" style="width: 100%; position: absolute;">
                             <div style="position: relative; float: right; top: 14px;" v-if="note.SYS_GEN === 0">
                                 <v-btn variant="plain" density="compact" icon="mdi-pencil-outline" style="font-size: 13px; bottom: 15px;" @click="openNote(note.CMNT, note.OBJECTID)" :disabled="note.CMNT_NM !== loggedInUserName"></v-btn>
-                                <v-btn variant="plain" density="compact" icon="mdi-reply" style="font-size: 13px; bottom: 15px;" @click="replyNote(note.OBJECTID, note)"></v-btn>
+                                <v-btn variant="plain" density="compact" icon="mdi-reply" style="font-size: 13px; bottom: 15px;" @click="replyNote(note)"></v-btn>
                             </div>
                         </div>
  
@@ -113,9 +113,11 @@
                 this.updateOID = -1
                 return
             },
-            async replyNote(oid, note){
+            async replyNote(note){
+                const cmnt = "Enter Text Here"
+                console.log(note)
                 const returnOid = await store.replyNote(note)
-                this.openNote(oid, returnOid)
+                this.openNote(cmnt, returnOid)
                 this.testOid = returnOid
                 return
             },
@@ -152,13 +154,11 @@
             queryAttachments(){
                 this.isAttachedActive = !this.isAttachedActive
                 if(this.isAttachedActive){
-                    this.fullChat = this.histNotes
-                    const getAttachmentComments = this.histNotes.filter(x => x.attachments)
+                    this.fullChat = store.historyChat
+                    const getAttachmentComments = store.historyChat.filter(x => x.attachments)
                     store.historyChat = getAttachmentComments
                     return
                 }
-
-                store.historyChat = this.fullChat
                 return
                 
             },
@@ -178,7 +178,7 @@
                 handler: function(){
                     if(!this.searchHistoryFilter) return
                     console.log(this.searchHistoryFilter)
-                    searchCards(this.histNotes, this.searchHistoryFilter, "OBJECTID")
+                    searchCards(store.historyChat, this.searchHistoryFilter, "OBJECTID")
                     return
                 },
                 immediate:true
@@ -213,7 +213,7 @@
         max-height: 250px;
         width: 98.7%;
         overflow-y: auto;
-        padding-bottom: 10px;
+        padding-bottom: 30px;
     }
     #search{
         position: relative;

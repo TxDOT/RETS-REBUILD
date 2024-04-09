@@ -1,29 +1,26 @@
 <template>
-    <!-- details section --> 
+    <!-- details section -->
     <div id="detailsHeaderDiv">
-        
         <div id="detailsHeaderIcon">
             <v-btn density="compact" flat @click="changeColor(store.retsObj.attributes.RETS_ID);" id="flagBtnDetails">
                 <template v-slot:prepend>
-                    <v-icon size="25px" :id="`${store.retsObj.attributes.RETS_ID}Icon`" :color="store.retsObj.attributes.flagColor.FLAG" :icon="store.retsObj.attributes.flagColor.FLAG ? changeFlagIcon(store.retsObj.attributes.flagColor.FLAG) : 'mdi-flag-outline' " style="position: relative; bottom: 2px"></v-icon>
+                    <v-icon size="25px" :id="`${store.retsObj.attributes.RETS_ID}Icon`" :color="store.retsObj.attributes.flagColor.FLAG" :icon="store.retsObj.attributes.flagColor.FLAG ? changeFlagIcon(store.retsObj.attributes.flagColor.FLAG) : 'mdi-flag-outline' " style="position: relative; bottom: 2px; left: 6px;"></v-icon>
                 </template>
             </v-btn>
             <v-col class="details-color-picker" v-if="flagClickedId === store.retsObj.attributes.RETS_ID" v-click-outside="closeFlagDiv">
                 <v-icon size="20px" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" style="position: relative; right: 6px;"></v-icon>
             </v-col>
             <v-btn-toggle v-model="store.retsObj.attributes.PRIO" density="compact">
-                <v-btn icon="mdi-exclamation" density="compact" flat style="color: #d9d9d9" selected-class="toggle-exclamation" variant="plain"></v-btn>
+                <v-btn icon="mdi-exclamation" density="compact" style="color: #d9d9d9; opacity: 1;" selected-class="toggle-exclamation" variant="plain" active></v-btn>
             </v-btn-toggle>   
-            
         </div>
     </div>
 
-    <detailsAlert v-if="store.isAlert"/>
     <div id="container-div">
-        <div id="details-page">
+        <div id="details-page" >
             <v-btn-toggle selected-class="active-button" variant="plain" mandatory v-model="isBtnSet" id="retsDetailMeta">
-                <v-btn flat class="secondary-button" @click="this.isDetails = true; this.isMetadata = false">Details</v-btn>
-                <v-btn flat class="secondary-button" @click="this.isMetadata = true; this.isDetails = false">Metadata</v-btn>
+                <v-btn flat class="retsMetaBtn" @click="this.isDetails = true; this.isMetadata = false" density="compact">Details</v-btn>
+                <v-btn flat class="retsMetaBtn" @click="this.isMetadata = true; this.isDetails = false" density="compact">Metadata</v-btn>
             </v-btn-toggle>
         
             <DetailsCard v-if="isDetails" :infoRets="store.retsObj" :taskGem="sendGemTaskNum" @disable-save="disableSave"/>
@@ -36,7 +33,6 @@
                 <span class="gem-task" @click="addGemChip(i)">{{ i }}</span>
             </span>
         </div>
-        
         <!-- history section -->
         <div >
             
@@ -79,45 +75,23 @@
     </div>
     <div style="position: relative; top: 93px; padding-bottom: 0px;">
         <div style="position: relative; float: left; margin-left: 10px; font-size: 11px; display: flex; flex-wrap: wrap;">
-            <v-checkbox label="Asset Only Job" density="compact"></v-checkbox>
+            <v-checkbox label="Asset Only Job" density="compact" class="checkbox-size"></v-checkbox>
         </div>
         <v-btn-toggle id="trigger-buttons" density="compact">
-            <v-btn @click="archiveBtn" variant="plain" flat size="small">Delete</v-btn>
+            <v-btn @click="deleteRets" variant="plain" flat size="small" class="secondary-button">Delete</v-btn>
             <v-btn @click="cancelDetailsMetadata" class="secondary-button" variant="plain" flat size="small">Cancel</v-btn>
             <v-btn @click="sendToParent" variant="outlined" class="main-button-style" size="small" :disabled="store.isSaveBtnDisable">Save</v-btn>
         </v-btn-toggle>
     </div>
-    
-    <v-card id = "archivepopup" v-if="isarchiveopen" >
-        <v-card-title id = "archiveheader" >
-            Delete RETS ####
-            <hr id = "separator2" />
-        </v-card-title>
-            <v-card-subtitle id = "archivetext">
-                Deleting this RETS will move it to the archive table.
-            </v-card-subtitle>
-        
-
-        <v-btn-group id = "archivebuttons">
-                <v-btn  text="CANCEL" @click="handlearchive"></v-btn>
-                <v-btn  text="DELETE" @click="deleteRets"></v-btn>
-            </v-btn-group>
-    
-    </v-card>    
-     
-    
-
-    
 
 </template>
-
 
 <script>
     import editHistoryNotes from './EditHistoryNotes.vue'
     import DetailsCard from './detailsCard.vue'
     import MetadataCard from './metadataCard.vue'
     import { appConstants } from '../common/constant.js'
-    import {getGEMTasks, searchCards, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic} from './utility.js'
+    import {getGEMTasks, searchCards, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer} from './utility.js'
     import detailsAlert from './detailsAlert.vue'
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
@@ -134,7 +108,6 @@
         emits:['close-detail'],
         data(){
             return{
-                isarchiveopen: false,
                 isDetails: true,
                 isMetadata: false,
                 activityList: ['CRI', 'GSC Review', 'HPMS Sample Review', 'Interstate Project', 'Minute Order', 
@@ -179,9 +152,6 @@
             store.getHistoryChatRet()
         },
         methods:{
-            canceladdrets(){
-                console.log("ok")
-            },
             returnDateFormat(e){
                 //10/29/2023 09:11am
                 const date = new Date(e)
@@ -223,35 +193,31 @@
                 this.saveDisable = bool
             },
             deleteRets(){
+                clearGraphicsLayer()
                 store.retsObj.attributes.isDelete = true
                 deleteRETSPT(store.retsObj)
                 removeRelatedRetsFromMap(store.retsObj.attributes.OBJECTID)
                 store.deleteRetsID()
                 store.isDetailsPage = false
-                store.isCard = true
                 store.activityBanner = "Activity Feed"
                 deleteRetsGraphic()
-                this.isarchiveopen = false
-            },
-            archiveBtn(){
-                this.isarchiveopen = true
             },
             async sendToParent(){
+                clearGraphicsLayer()
                 // this.retsInfo.ASSIGNED_TO = this.retsInfo.ASSIGNED_TO.value
                 store.retsObj.attributes.PRIO = store.retsObj.attributes.PRIO ?? 1
                 console.log(store.retsObj.attributes.PRIO)
                 await updateRETSPT(store.retsObj)
-                store.userRetsFlag.push(store.retsObj.attributes.FLAG)
                 store.isDetailsPage = false
-                store.isCard = true
                 store.activityBanner = "Activity Feed"
                 deleteRetsGraphic()
                 store.updateRetsID()
             },
             cancelDetailsMetadata(){
+                clearGraphicsLayer()
+                removeHighlight("a", true)
                 store.preserveHighlightCards()
                 store.isDetailsPage = false
-                store.isCard = true
                 store.activityBanner = "Activity Feed"
             },
             openNote(note, index){
@@ -267,7 +233,7 @@
                 // this.histNotes[this.noteIndex].author = this.retsInfo.logInUser
                 // this.histNotes[this.noteIndex].time = new Date().toLocaleDateString('en-US')
                 this.editText = false
-                store.alertTextInfo = {"text": "Chat Saved", "color": "#70ad47", "toggle": true}
+                store.alertTextInfo = {"text": "Chat Saved", "color": "#70ad47", "type":"success", "toggle": true}
                 store.isAlert = true
                 setTimeout(()=>{
                     store.isAlert = false
@@ -319,11 +285,6 @@
             removeRetsGraphics(){
                 removeretsgraphic();
             },
-            handlearchive(){
-                this.isarchiveopen =! this.isarchiveopen
-                console.log(this.isarchiveopen)
-            }
-            
 
         },
         watch:{
@@ -354,39 +315,6 @@
 </script>
 
 <style scoped>
-#archivepopup{
-    position: absolute;
-    padding: 10px;
-    border-radius: 5px;
-    left: 45rem;
-    width: 120%;
-    top:40%;
-    height:25%; 
-}
-#archiveheader{
-    position: absolute;
-    top: 2%;
-    left: 2%;
-    font-size: 18px;  
-}
-#separator2{
-    border: 0;
-    border-bottom: 1px solid ;
-    margin: 0 auto;
-    width: 24rem;
-}
-#archivetext{
-    position: absolute;
-    top: 25%;
-    left: 2%;
-}
-#archivebuttons{
-    position: absolute;
-    bottom: 10px;
-    width: 25rem;
-    justify-content: end;
-}
-
 #flagBtnDetails{
     padding: 1px !important;
     margin: 15px !important;
@@ -465,6 +393,7 @@ div .cardDiv{
     padding-top: .5rem;
     position: relative;
     float: right;
+    margin-right: 10px;
 }
 
 .v-btn{
@@ -563,18 +492,37 @@ div .cardDiv{
 }
 
 .details-color-picker{
-    position: fixed; 
+    position: absolute; 
     display: flex; 
     flex-direction: column; 
     z-index: 9999; 
-    width:2.3%; 
+    width: 30px; 
     float: right;
-    margin-left: 2.2rem;
+    margin-left: .8rem;
     background-color: black;
+    top: 52px;
 }
 
+.toggleExclamation{
+    color: red;
+}
+
+#retsDetailMeta{
+    padding-left: 15px;
+    text-transform: capitalize !important;
+    height: 40px;
+    color: white;
+    opacity: 1 !important
+}
 .toggle-exclamation{
     color: red !important;
 }
-   
+
+.retsMetaBtn{
+    text-transform: capitalize !important;
+    font-size: 1.25rem;
+    font-weight: 500;
+    letter-spacing: 0.0125em;
+    opacity: 1 !important
+}
 </style>

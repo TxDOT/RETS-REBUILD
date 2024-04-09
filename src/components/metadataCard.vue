@@ -1,5 +1,5 @@
 <template>
-    <div style="font-size: 1px !important;"> 
+    <div style="font-size: 0px !important; margin-right: 10px; margin-left: 10px;"> 
         <v-row >
             <v-autocomplete :items="userRole" item-title="name" item-value="value" label="Assigned To" flat variant="underlined" density="compact" rounded="0" v-model="infoRets.attributes.ASSIGNED_TO"></v-autocomplete>
         </v-row>
@@ -57,13 +57,6 @@
     padding: 0px !important;
     margin-right: 5px !important;
     margin-left: 5px !important; 
-}
-
-.checkbox-size{
-    font-size: 10px !important;
-}
-.v-btn{
-    margin-right: 15px;
 }
 
 .v-autocomplete{

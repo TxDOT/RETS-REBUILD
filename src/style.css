@@ -28,20 +28,20 @@
 }
 
 .main-button-style{
-  border-style: 12px solid white !important;
+  border: 1px solid white !important;
   border-radius: 0% !important;
   padding: 50px;
   margin-right: 10px;
   margin-left: 10px;
-  background-color: transparent !important;
+  /* background-color: transparent !important; */
 }
 
 .secondary-button{
   padding: 5px !important;
   margin-right: 5px;
-  text-transform: capitalize !important;
   margin-right: 10px;
   margin-left: 10px;
+  opacity: 1 !important;
 }
 
 .active-button{
@@ -49,6 +49,8 @@
   color: #4472C4 !important;
   background-color: transparent !important;
   padding: 0px !important;
+  margin: 0px !important;
+  margin-left: 0px !important;
 }
 /* .secondary-button{
   color: white
@@ -64,6 +66,7 @@
 
 .main-color{
     color: #4472C4 !important;
+    opacity: 1 !important;
 }
 
 .subtitle-text{
@@ -72,7 +75,6 @@
   bottom: 0px !important;
   padding: 0px !important;
   padding-bottom: 0px !important;
-  color: #8FAADC;
   font-weight: bold !important;
 }
 
@@ -188,4 +190,9 @@
 .marginSetting{
   margin-right: 10px;
   margin-left: 10px;
+}
+
+.checkbox-size{
+  font-size: 10px !important;
+  border-radius: 0px !important;
 }

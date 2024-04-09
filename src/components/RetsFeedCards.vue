@@ -6,9 +6,9 @@
                     <header id="container-header">RETS Dashboard</header>
                     <div class="add-new-btn">
                         <div style="float:right;">
-                            <v-btn v-for="(tool, i) in addbutton" :key="i" :value="tool" @click="tool.action()" :prepend-icon="buttonIcon" color="#4472C4" rounded="0"  class="main-button" >
+                            <v-btn v-for="(tool, i) in addbutton" :key="i" :value="tool" @click="tool.action()" prepend-icon="mdi-plus" color="#4472C4" rounded="0"  class="main-button" >
                             <!-- @click="handlecreate"> -->
-                            <p class="text-btn" id="addbtn">{{addbtntext}}</p>
+                            <p class="text-btn">New</p>
                             </v-btn>
                         </div>
 
@@ -61,7 +61,7 @@
                 <v-text-field density="compact" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" v-model="actvFeedSearch"></v-text-field>
             </v-row>
 
-            <div class="card-feed-div" v-if="store.isCard">
+            <div class="card-feed-div" v-if="!store.isDetailsPage">
                 <v-row v-for="(rd, road) in store.roadObj" :key="rd" :value="road" :id="rd.attributes.OBJECTID" class="rets-card-row"> 
                     <v-btn elevation="0" @click="changeColor(rd.attributes.RETS_ID);" class="flag-btn" size="small" max-width=".5px" density="compact" variant="plain" slim>
                         <template v-slot:prepend>
@@ -135,17 +135,10 @@
         </div>
         
     </v-card>
-
-    
-        <v-container id="Spinner" v-if="isSpinner" >
-            <v-progress-circular color="blue" indeterminate size="60" ></v-progress-circular>
-        </v-container>
-    
-    
 </template>
 
 <script>
-import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer, searchCards, highlightRETSPoint, turnAllVisibleGraphicsOff, toggleRelatedRets, getHighlightGraphic, removeHighlight, createtool, returnHistory} from './utility.js'
+import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer, searchCards, highlightRETSPoint, turnAllVisibleGraphicsOff, toggleRelatedRets, getHighlightGraphic, removeHighlight, createtool, returnHistory, toggleHighlightCards} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import Filter from './RetsFilter.vue'
 import RetsDetailPage from './RetsDetail.vue'
@@ -156,7 +149,6 @@ import { sketchWidgetcreate, createretssym, flagRetsColor } from './map-Init.js'
 import {addRETSPT, postFlagColor} from '../components/crud.js'
 
 
-
 export default{
     name: "RetsCards",
     components: {Filter, RetsDetailPage},
@@ -164,14 +156,9 @@ export default{
         filterPros: Object,
         // addrets:Number
     },
-    //components: {RetsDetailPage, Filter}, 
+    components: {RetsDetailPage, Filter}, 
     data(){
         return{
-            Spinneractive: false,
-            isSpinner: false,
-            isVisible : true,
-            buttonIcon: 'mdi-plus',
-            addbtntext: "New",
             addrets: null,
             filterOptions: appConstants.RetsStatus,
             colorTable: appConstants.CardColorMap,
@@ -206,9 +193,7 @@ export default{
                 {title:"New", action: async () =>{
                                 const graphicAdd = await this.handlecreate();
                                 if (graphicAdd){
-
                                     this.processAddPt(graphicAdd)
-
                                 }
                                 
                 }}
@@ -216,15 +201,15 @@ export default{
             ],
             alertIcons:[
                 {icon: "mdi-account-group", popup: "Assigned to you", color: "white", display: "ASSIGNED_TO", condition: `${store.loggedInUser}`, displaySup: "GIS_ANALYST", supplementCondition: `${store.loggedInUser}`},
-                {icon:" mdi-account-multiple-check", popup: "MO/TxDOT Connect", color: "white", display: "ACTV", condition: "Minute Order || TxDOTConnect"},
-                {icon:"mdi-pencil-box-outline", popup: "District Request", "color": "white", display: null, condition: null},
-                {icon:"mdi-alarm", popup: "Deadline set (with date)", "color": "white", display: null, condition: null},
+                {icon:"mdi-account-multiple-check", popup: "MO/TxDOT Connect", color: "white", display: "ACTV", condition: "(Minute Order || TxDOTConnect)"}, //ACTV === (Minute Order || TxDOTConnect)
+                {icon:"mdi-pencil-box-outline", popup: "District Request", "color": "white", display: null, condition: null}, //keep null
+                {icon:"mdi-alarm", popup: "Deadline set (with date)", "color": "white", display: null, condition: null}, //past the deadline set
                 {icon:"mdi-check-decagram-outline", popup: "Job Complete", color: "green", display: "STAT", condition: 3},
-                {icon: "mdi-timer-sand", popup: "No activity for (# days)", color: "white", display: null, condition: null},
+                {icon: "mdi-timer-sand", popup: "No activity for (# days)", color: "white", display: null, condition: null}, //Only for in progress rets; edit_dt >= 5 weeks
                 {icon: "mdi-exclamation", popup:"Priority Job", color:"red", display: "PRIO", condition: 0}                
             ],
             isShowSelected: false,
-            isSwitchDisabled: true
+            isSwitchDisabled: false
         }
     },
     beforeMount(){
@@ -248,26 +233,18 @@ export default{
     },
     methods:{
         async processAddPt(newPointGraphic){
-                        try{
-                            this.isSpinner = true
-                            this.Spinneractive = false
-                            store.isCard = false
-                            console.log(newPointGraphic)
-                            const obj = await addRETSPT(newPointGraphic)
-                            const objectid = obj.addFeatureResults[0].objectId
-                            this.addrets = objectid
-                            this.isSpinner = false
-                            this.Spinneractive = true
-
-
-                            
-                            return
-                        }
-                        catch(err){
-                            console.log(err)
-                        }
-                         //handleaddrets(newPointGraphic, this.addrets);
-                    },
+            try{
+                const obj = await addRETSPT(newPointGraphic, "rets")
+                console.log(obj)
+                const objectid = obj.addFeatureResults[0].objectId
+                this.addrets = objectid
+                return
+            }
+            catch(err){
+                console.log(err)
+            }
+            //handleaddrets(newPointGraphic, this.addrets);
+        },
         alert(s){
             window.alert(s)
         },
@@ -343,7 +320,6 @@ export default{
             clearTimeout(this.timer)
             this.timer=""
             store.isDetailsPage = true
-            store.isCard = false
             store.activityBanner = `${road.attributes.RETS_ID}`
             highlightRETSPoint(road.attributes)
             this.zoomToRetsPt(road)
@@ -433,24 +409,18 @@ export default{
         },
         async handlecreate(){
             if (this.isCreateEnabled === true) {
-                this.addbtntext = "Cancel"
-                this.buttonIcon = null
-
                 this.isCreateEnabled = !this.isCreateEnabled;
                 //console.log("true")
                 const newPointGraphic = await createtool(sketchWidgetcreate, createretssym);
                 // Process the newPointGraphic as needed
                 this.isCreateEnabled = !this.isCreateEnabled;
-                this.addbtntext = "New"  
-                this.buttonIcon = "mdi-plus"
                 return newPointGraphic
                             
                 } 
             else {
                 sketchWidgetcreate.cancel();
                 this.isCreateEnabled = !this.isCreateEnabled;
-                this.addbtntext = "New"  
-                this.buttonIcon = "mdi-plus"
+                //console.log("false")
                 }
         },
         returnUserName(n){
@@ -461,20 +431,7 @@ export default{
             return usernameRow?.name ?? 'My name is not in the RESP table :('
         },
         updateSelection(e){
-            const getCardRows = document.getElementsByClassName("rets-card-row")
-                let i;
-                for(i=0; i < getCardRows.length; i++){
-                    if(e === true){
-                        getCardRows[i].style.display = getCardRows[i].lastElementChild.classList.contains("highlight-card") ? "flex" : "none"
-                        continue
-                    }
-                    getCardRows[i].style.display = "flex"
-                }
-                if(!e){
-                    store.roadObj = store.archiveRetsData
-                }
-                
-            return
+            toggleHighlightCards(e)
         },
 
         determineVisibility(id){
@@ -510,23 +467,23 @@ export default{
         },
         addrets:{
             handler: async function(){
-                //console.log(this.addrets)
+                console.log(this.addrets)
                 await this.addretss()
             },
             immediate: true
         },
-        'store.roadHighlightObj.size':{
-            handler: function(){
-                console.log(store.roadHighlightObj.size)
-                if(store.roadHighlightObj.size > 0){
-                    this.isSwitchDisabled = false
-                    return
-                }
-                this.isSwitchDisabled = true
-                return
-            },
-            immediate: true
-        }
+        // 'store.roadHighlightObj.size':{
+        //     handler: function(){
+        //         console.log(store.roadHighlightObj.size)
+        //         if(store.roadHighlightObj.size > 0){
+        //             this.isSwitchDisabled = false
+        //             return
+        //         }
+        //         this.isSwitchDisabled = true
+        //         return
+        //     },
+        //     once: true
+        // }
     },
     computed:{
         queryLayer:{
@@ -541,13 +498,15 @@ export default{
 </script>
 
 <style scoped>
+    #retSubText{
+        position: relative;
+        right: 15px;
+        padding: 0px;
+        margin-left: 10px;
+        bottom: .4rem;
+    }
     #retsSubtitle{
         /*  */
-    }
-    #Spinner{
-        position: absolute;
-        top: 50%;
-        left: 16.5%
     }
     .attachCard{
         position: relative; 
@@ -773,12 +732,6 @@ export default{
         float: right;
         font-size: 10px;
     }
-    #addbtn{
-        position: relative;
-        left: 1%;
-    }
-
-    
 
     :deep(.v-switch--inset .v-switch__track){
         height: 20px !important;

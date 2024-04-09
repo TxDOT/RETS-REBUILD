@@ -1,6 +1,6 @@
 <template>
     <div id="viewDiv">
-      
+        <detailsAlert v-if="store.isAlert" id="showAlert"/>
         <!-- <ShowChanges style="position: absolute; left: 50%; top: 50%;" /> -->
     </div>
 
@@ -13,13 +13,16 @@
 //import {queryRetsTable} from './utility.js'
 import {view} from './map-Init.js'
 import {home, hoverRetsPoint} from './utility.js'
+import {store} from './store.js'
+import detailsAlert from './detailsAlert.vue'
 // import ShowChanges from './showChanges.vue'
 //import ESRI JS ESM class
 export default{
     name: "Map",
+    components: {detailsAlert},
     data(){
         return{
-          
+          store
         };
     },
     async mounted(){
@@ -56,6 +59,12 @@ export default{
 
     .esri-view {
         --esri-view-outline-color: none !important;
+    }
+
+    #showAlert{
+        position: absolute;
+        left: 50%;
+        border-radius: 0% !important;
     }
 
 

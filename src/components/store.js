@@ -9,7 +9,6 @@ export const store = reactive({
         taskGem: 0,
         clickedGraphic: 0,
         isDetailsPage: false,
-        isCard: true,
         activityBanner: "Activity Feed",
         isNoRets: false,
         currentInfo: "",
@@ -33,8 +32,9 @@ export const store = reactive({
         isMoveRetsPt: false,
         showPopUp: false,
         dfoIndex: 0,
-        isAlert: false,
-        alertTextInfo: {"text": "Chat Saved", "color": "#70ad47", "toggle": true},
+        isAlert: true,
+        alertTextInfo: {"text": "Chat Saved", "color": "#70ad47", "type":"info","toggle": true},
+        logDfo: 0,
         async getHistoryChatRet(){
                 console.log(JSON.parse(this.history))
                 const getRelatedHistory = JSON.parse(this.history)
@@ -204,8 +204,9 @@ export const store = reactive({
                                         updateItem.attributes.flagColor = this.setFlagColor( obj.features[0].attributes)
                                         const retsIndex = this.roadObj.findIndex(x => x.attributes.RETS_ID === obj.features[0].attributes.RETS_ID)
                                         this.roadObj.splice(retsIndex, 1, {attributes:obj.features[0].attributes, geometry: [obj.features[0].geometry.x, obj.features[0].geometry.y]})
+                                        //sort by no activity setting (no activity sand thingy)
                                         this.roadObj.sort((a,b) => b.attributes.EDIT_DT - a.attributes.EDIT_DT)
-
+                                        
                                         const cloneRets = [...this.roadObj]
                                         this.archiveRetsData = cloneRets
 

@@ -8,16 +8,13 @@ import { addRETSPT } from './crud.js';
 import esriRequest from "@arcgis/core/request.js";
 import * as geodesicUtils from "@arcgis/core/geometry/support/geodesicUtils.js";
 import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils.js";
-import * as geometryEngine from "@arcgis/core/geometry/geometryEngine.js";import esriId from "@arcgis/core/identity/IdentityManager.js";
-
-
+import * as geometryEngine from "@arcgis/core/geometry/geometryEngine.js";
 
 export function clickRetsPoint(){
     try{
         view.on("click", (event)=>{
             view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt) =>{
                 if(!evt.results.length){
-                    store.roadHighlightObj.length = 0
                     removeHighlight("a", true)
                     removeAllCardHighlight()
                     return
@@ -26,7 +23,8 @@ export function clickRetsPoint(){
                 outlineFeedCards(evt.results)
                 removeHighlight("a", true)
                 if(store.isMoveRetsPt){
-                    getPointRoadInteraction(evt.results)
+                    //getPointRoadInteraction(evt.results)
+                    modifyRETSPt(evt.results)
                 }
                 evt.results.forEach(rest => rest.graphic.layer.title ? highlightRETSPoint(rest.graphic.attributes) : highlightGraphicPt(rest.graphic.attributes))
                 return evt.results[0].graphic.attributes.RETS_ID;
@@ -84,7 +82,7 @@ export function removeHighlight(feature, removeAll){
             }
 
             if(lyrView._highlightIds.has(feature?.attributes.OBJECTID)){
-                console.log("before: " + feature?.attributes.OBJECTID )
+                //console.log("before: " + feature?.attributes.OBJECTID )
                 lyrView._highlightIds.delete(feature?.attributes.OBJECTID)
                 //console.log("after: " + feature?.attributes.OBJECTID )
                 
@@ -102,7 +100,7 @@ function outlineFeedCards(res){
         if(!document.getElementById(objectcomparison)) return
         document.getElementById(objectcomparison).classList.add('highlight-card')
         store.roadHighlightObj.add(objectcomparison)
-        console.log(store.roadHighlightObj.size)
+        
         //zoom to card in feed
         document.getElementById(objectcomparison).scrollIntoView({behavior: 'smooth'})
         // const zoomToCard = document.createElement('a')
@@ -113,7 +111,28 @@ function outlineFeedCards(res){
         //     document.getElementById(objectcomparison).classList.remove('highlight-card')
         // },5000)
     })
+    toggleHighlightCards(store.isShowSelected)
     return;
+}
+
+export function toggleHighlightCards(bool){
+    const getCardRows = document.getElementsByClassName("rets-card-row")
+    let i;
+    
+    console.log('updatedSelection')
+    console.log(store.roadHighlightObj)
+    for(i=0; i < getCardRows.length; i++){
+        if(bool === true){
+            getCardRows[i].style.display = getCardRows[i].lastElementChild.classList.contains("highlight-card") ? "flex" : "none"
+            continue
+        }
+        getCardRows[i].style.display = "flex"
+    }
+    if(!bool){
+        store.roadObj = store.archiveRetsData
+    }
+    
+    return
 }
 
 export function removeAllCardHighlight() {
@@ -130,6 +149,8 @@ export function removeAllCardHighlight() {
     }
     return
 }
+
+export const clearGraphicsLayer = () => graphics.removeAll() 
 
 export const clearRoadHighlightObj = () => store.roadHighlightObj.clear()
 
@@ -428,108 +449,102 @@ export function createtool(sketchWidgetcreate, createretssym) {
         pressedkey = false
     });
 
-  export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
-    if(isSelectEnabled === true){ 
-        sketchWidgetselect.create("rectangle");
-        var removeAll = true
-        sketchWidgetselect
-        .on("create", function (event) 
-            {
-            if (event.state === "complete")
+    export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
+        if(isSelectEnabled === true){ 
+            sketchWidgetselect.create("rectangle");
+            var removeAll = true
+            sketchWidgetselect
+            .on("create", function (event) 
                 {
-                    // Get the rectangle geometry
-                    var rectangleGeometry = event.graphic.geometry;
-                    // Query for points within the rectangle
-                    var query = retsLayer.createQuery();
-                    query.geometry = rectangleGeometry;
-                    retsLayer.queryFeatures(query)
-                    .then(function (result) 
-                            {
-                                // Access the selected features
-                                var selectedFeatures = result.features;
-                                
-
-                                if (pressedkey === false){
-                                    if (selectedFeatures.length){
+                if (event.state === "complete")
+                    {
+                        // Get the rectangle geometry
+                        var rectangleGeometry = event.graphic.geometry;
+                        // Query for points within the rectangle
+                        var query = retsLayer.createQuery();
+                        query.geometry = rectangleGeometry;
+                        retsLayer.queryFeatures(query)
+                        .then(function (result) 
+                                {
+                                    // Access the selected features
+                                    var selectedFeatures = result.features;
+                                    console.log(result.features.length)
+                                    
+    
+                                    if (pressedkey === false){
+                                        
+                                        removeHighlight("a", removeAll); 
+                                        // for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                        removeAllCardHighlight()
+                                        
+                                        //clearRoadHighlightObj()
+                                        outlineFeedCards(selectedFeatures);
+                                        
+                                        console.log('hey1')
+                                        // }
                                         for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                            removeHighlight(selectedFeatures[i].attributes,removeAll); 
+                                            store.roadHighlightObj.add(String(selectedFeatures[i].attributes.RETS_ID).concat('-', selectedFeatures[i].attributes.OBJECTID))
+                                            highlightRETSPoint(selectedFeatures[i].attributes);
+                                             //outlineFeedCards(selectedFeatures);
                                             
-
-                                             
                                             
-      
-                                          }
-                                          removeOutline();
-
-                                    }
-
-                                    
-                                    for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                        //removeOutline();
-                                        highlightRETSPoint(selectedFeatures[i].attributes);
-                                        outlineFeedCards(selectedFeatures);
-                                         //outlineFeedCards(selectedFeatures);
+                                        }
                                         
+                                        graphics.removeAll() 
+                                        return
                                         
                                     }
-                                    
-                                    graphics.removeAll() 
-                                    return
-                                    
-                                }
-
-                                
-                                 
-                                
-                                if(pressedkey === "Shift"){
-                                    for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                        highlightRETSPoint(selectedFeatures[i].attributes);
-                                        outlineFeedCards(selectedFeatures);
-
-                                    } 
-                                    graphics.removeAll();
-                                    return
-                                }
-                                
-                                if(pressedkey === "Control"){
-                                    
-                                    for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                        console.log("this: " + selectedFeatures[i].attributes.OBJECTID)
     
-                                        removeHighlight(selectedFeatures[i]);  
+                                    
+                                     
+                                    
+                                    if(pressedkey === "Shift"){
+                                        for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                            store.roadHighlightObj.add(String(selectedFeatures[i].attributes.RETS_ID).concat('-', selectedFeatures[i].attributes.OBJECTID))
+                                            highlightRETSPoint(selectedFeatures[i].attributes);
+                                            //outlineFeedCards(selectedFeatures);
+    
+                                        } 
+                                        graphics.removeAll();
+                                        return
+                                    }
+                                    
+                                    if(pressedkey === "Control"){
                                         
-
-                                    } 
-                                        
-
-                                   
-                                    graphics.removeAll();
-                                    return
+                                        for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                            console.log("this: " + selectedFeatures[i].attributes.OBJECTID)
         
-                                }
-                                
-
-                                
-                               
-                            });
-
-                            
-                            
-                }
-
-        });
-
-        isSelectEnabled = !isSelectEnabled; 
-    }
-    else{
-        isSelectEnabled = !isSelectEnabled;
-        sketchWidgetselect.cancel()
+                                            removeHighlight(selectedFeatures[i]);  
+    
+                                        } 
+    
+                                       
+                                        graphics.removeAll();
+                                        return
             
-    }
+                                    }
     
+                                    
+                                   
+                                });
     
-    return
-  }
+                                
+                                
+                    }
+    
+            });
+    
+            isSelectEnabled = !isSelectEnabled; 
+        }
+        else{
+            isSelectEnabled = !isSelectEnabled;
+            sketchWidgetselect.cancel()
+                
+        }
+        
+        
+        return
+      }
 
 export async function handleaddrets(newPointGraphic, addrets){
     try{
@@ -620,20 +635,6 @@ export function togglemenu(isActOpen, shift){
     
 }
 
-export function logoutUser(){
-    esriId.destroyCredentials({
-    })
-
-}
-
-export function removeOutline(){
-    const classList = document.querySelectorAll('.highlight-card');
-    classList.forEach(element => {
-    element.classList.remove('highlight-card'); // Remove each element individually
-    });
-    
-}
-
 export async function queryFlags(userid){
     console.log(userid)
     const returnRetsFlagUser = await flagRetsColor.queryFeatures({
@@ -645,12 +646,50 @@ export async function queryFlags(userid){
     return
 }
 
+export function modifyRETSPt(graphicArr){
+    console.log(graphicArr)
+    const findGraphic = graphicArr.find(g => (g.graphic.attributes.RETS_ID === store.retsObj.attributes.RETS_ID) && g.layer.title === 'RETS')
+    console.log(findGraphic)
+    graphics.add(findGraphic.graphic)
+    
+    sketchWidgetcreate.update(findGraphic.graphic)
+}
+
+export function createDFORets(findPtRoadBelongs, retsPt){
+    const dfoDistanceDiff = findPtRoadBelongs.geometry.paths[0].at(store.dfoIndex)[2] - Number(retsPt.attributes.DFO)
+    const returnDfoPt = calculateAzimuth(findPtRoadBelongs, store.dfoIndex, dfoDistanceDiff)
+
+    const dfoPt = new Graphic({
+        geometry: returnDfoPt,
+        attributes:{
+            OBJECTID: retsPt.attributes.OBJECTID,
+            RETS_ID: retsPt.attributes.RETS_ID
+        },
+        symbol:{
+            type: "simple-marker",
+            color: "red",
+            size: 8,
+            outline:{
+                width: 0.5,
+                color: "#4472C4"
+            }
+        }
+    })
+    graphics.add(dfoPt)
+    return
+}
+
 export function getPointRoadInteraction(retsPt){
     //create graphic of clicked Pt
-    console.log(retsPt)
+    //
     const findRelatedPtGraphic = graphics.graphics.items.find(x => (x?.attributes?.OBJECTID === retsPt.attributes.OBJECTID) && x.geometry.type === 'point')
     if(findRelatedPtGraphic){
-        moveDFOPt(retsPt)
+        const roadGraphic = graphics.graphics.items.find(x => (x?.attributes?.OBJECTID === retsPt.attributes.OBJECTID) && x.geometry.type === 'polyline')
+        graphics.remove(findRelatedPtGraphic)
+        const roadIndex =  roadGraphic.geometry.paths[0].findIndex(i => i[2] > Number(retsPt.attributes.DFO))
+        store.dfoIndex = roadIndex
+        createDFORets(roadGraphic, retsPt)
+        //moveDFOPt(retsPt)
         return
     }
     //check if route exist, if so plot the point based on dfo
@@ -663,11 +702,11 @@ export function getPointRoadInteraction(retsPt){
     .then((rd) => {
         if(!rd.features.length || !retsPt.attributes.DFO){
             if(!retsPt.attributes.DFO){
-                store.alertTextInfo = {"text": "Route Number or DFO is missing", "color": "red", "toggle": true}
+                store.alertTextInfo = {"text": "Route Number or DFO is missing", "color": "red", "type":"error", "toggle": true}
                 store.isAlert = true
                 return
             }
-            store.alertTextInfo = {"text": "Route Name isn't exact", "color": "red", "toggle": true}
+            store.alertTextInfo = {"text": "Route Name isn't exact", "color": "red", "type":"error", "toggle": true}
             console.log('fail')
             store.isAlert = true
             
@@ -675,12 +714,28 @@ export function getPointRoadInteraction(retsPt){
             
             return 
         }
+
         //start editing pt
         const findPtRoadBelongs = rd.features.find((rd) => {
-            const roadIndex =  rd.geometry.paths[0].findIndex(i => i[2] > Number(retsPt.attributes.DFO))
-            store.dfoIndex = roadIndex === -1 ? "not in range" : roadIndex
-            return roadIndex
+            const firstM = rd.geometry.paths[0].at(0)[2]
+            const lastM = rd.geometry.paths[0].at(-1)[2]
+            if((Number(retsPt.attributes.DFO) > firstM) && Number(retsPt.attributes.DFO) < lastM){
+                const roadIndex =  rd.geometry.paths[0].findIndex(i => i[2] > Number(retsPt.attributes.DFO))
+                store.dfoIndex = roadIndex === -1 ? "not in range" : roadIndex
+                return roadIndex
+            }
+            store.isAlert = true
+            store.alertTextInfo = {"text": "DFO is out of Range", "color": "red", "type":"error", "toggle": true}
+            store.dfoIndex = "not in range"
         })
+
+        if(store.dfoIndex === 'not in range'){
+            console.log('not in range')
+            store.isAlert = false
+            store.isAlert = true
+            store.alertTextInfo = {"text": "DFO is out of Range", "color": "red", "type":"error", "toggle": true}
+            return
+        }
         console.log(findPtRoadBelongs)
         console.log(store.dfoIndex)
         
@@ -698,35 +753,12 @@ export function getPointRoadInteraction(retsPt){
             }
         })
         graphics.add(rdGraphic)
-        if(store.dfoIndex === 'not in range'){
-            console.log('not in range')
-            store.isAlert = false
-            store.isAlert = true
-            store.alertTextInfo = {"text": "DFO is out of Range", "color": "red", "toggle": true}
-            return
-        }
+
         //plot point
         store.isAlert = false
-        const dfoDistanceDiff = findPtRoadBelongs.geometry.paths[0].at(store.dfoIndex)[2] - Number(retsPt.attributes.DFO)
-        const returnDfoPt = calculateAzimuth(findPtRoadBelongs, store.dfoIndex, dfoDistanceDiff)
-        const dfoPt = new Graphic({
-            geometry: returnDfoPt,
-            attributes:{
-                OBJECTID: retsPt.attributes.OBJECTID,
-                RETS_ID: retsPt.attributes.RETS_ID
-            },
-            symbol:{
-                type: "simple-marker",
-                color: "red",
-                size: 8,
-                outline:{
-                    width: 0.5,
-                    color: "#4472C4"
-                }
-            }
-        })
-        graphics.add(dfoPt)
-        moveDFOPt(retsPt)
+        createDFORets(findPtRoadBelongs,retsPt)
+        
+        //moveDFOPt(retsPt)
         console.log(rd)
     })
     .catch(err => console.log(err))
@@ -767,6 +799,7 @@ function calculateAzimuth(rdLine, dfoIndex, dfo){
     webMerConvertPointB.spatialReference.wkid = 4326
 
     const dfoToMeter = dfo*1609.344
+    store.logDfo = dfo 
     let returnAzmuth = geodesicUtils.geodesicDistance(webMerConvertPointA, webMerConvertPointB, "miles")
     const returnPoint = calculatePointWithDistance(webMerConvertPointA, dfoToMeter, returnAzmuth.azimuth)
     return returnPoint
@@ -806,6 +839,8 @@ function moveDFOPt(retsPt){
 }
 
 function findDFOSlider(findRelateLineGraphic){
+    let previousDfo;
+    let previousNextDfo;
     view.on("pointer-move", (event) => {
         view.hitTest(event, {include: [findRelateLineGraphic]})
             .then((evt)=> {
@@ -815,13 +850,68 @@ function findDFOSlider(findRelateLineGraphic){
                 const mapCoords = view.toMap({
                     type: "point",
                     x: event.x,
-                    y: event.y
+                    y: event.y,
+                    spatialReference: findRelateLineGraphic.geometry.spatialReference
                 })
-                const findNearestVertex = geometryEngine.nearestVertex(findRelateLineGraphic.geometry, mapCoords)
+                
+                
+                const findNearestVertex = geometryEngine.nearestVertex(findRelateLineGraphic.geometry,mapCoords)
+                // console.log(findNearestVertex)
+                store.logDfo = findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2]
+                const nextDFOGraphic = {
+                    type: "point",
+                    x: findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex - 1)[0],
+                    y: findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex - 1)[1],
+                    spatialReference: findRelateLineGraphic.geometry.spatialReference 
+                }
+                const nextVertexDFO = findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex + 1)[2] ?? null
                 const dfo = geodesicUtils.geodesicDistance(webMercatorUtils.webMercatorToGeographic(mapCoords), webMercatorUtils.webMercatorToGeographic(findNearestVertex.coordinate), "miles")
+                const dfoNext = geodesicUtils.geodesicDistance(webMercatorUtils.webMercatorToGeographic(mapCoords), webMercatorUtils.webMercatorToGeographic(nextDFOGraphic), "miles")
+                //console.log(store.logDfo, previousDfo, dfo.distance, dfoNext.distance, previousNextDfo)
+                //  moving away                            moving closer
+                if((dfo.distance > previousDfo)){
+                    console.log(`(${previousDfo}, ${dfo.distance}`)
+                    console.log("moving away to nearest DFO / moving closer from next dfo")
+                    store.retsObj.attributes.DFO = findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2] - dfo.distance 
+                }
+                //  moving closer                       moving away
+                if((dfo.distance < previousDfo)){
+                    console.log(`(${previousDfo}, ${dfo.distance}`)
+                    console.log("moving closer to nearest DFO / moving away from next dfo")
+                    store.retsObj.attributes.DFO = findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2] + dfo.distance 
+                }
+                // if((dfo.distance < previousDfo) && (dfoNext.distance < previousNextDfo)){
+                //     console.log(`(${previousDfo}, ${dfo.distance}/ ${previousNextDfo}, ${dfoNext.distance}`)
+                //     console.log("moving closer to nearest DFO / moving closer from next dfo")
+                //     store.retsObj.attributes.DFO = findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2] - dfo.distance 
+                // }
+                // if((dfo.distance > previousDfo) && (dfoNext.distance > previousNextDfo)){
+                //     console.log(`(${previousDfo}, ${dfo.distance}/ ${previousNextDfo}, ${dfoNext.distance}`)
+                //     console.log("moving away to nearest DFO / moving away from next dfo")
+                //     store.retsObj.attributes.DFO = findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2] - dfo.distance 
+                // }
+                previousDfo = dfo.distance
+                previousNextDfo = dfoNext.distance
+                
+                // if(store.logDfo > dfo.distance + store.logDfo){
+                //     console.log(store.logDfo, dfo.distance + store.logDfo)
+                //     store.retsObj.attributes.DFO = findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2] + dfo.distance 
+                // }
+                // else if(store.logDfo < dfo.distance - store.logDfo){
+                //     console.log(store.logDfo, dfo.distance - store.logDfo)
+                //     store.retsObj.attributes.DFO = findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2] - dfo.distance
+                // }
+
+                // else{
+                //     store.retsObj.attributes.DFO = findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2] - dfo.distance
+                // }
+                //console.log(dfo.distance + findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2])
+                // const isIntersect = geometryEngine.intersects(createLineA.geometry, mapCoords)
+                // console.log(isIntersect)
+                // console.log(createLineA)
                 // console.log(dfo.distance)
                 // console.log(findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2])
-                store.retsObj.attributes.DFO = dfo.distance + findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2]
+                //store.retsObj.attributes.DFO = dfo.distance + findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2]
             })
     })
     return

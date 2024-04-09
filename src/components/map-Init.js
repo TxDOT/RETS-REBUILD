@@ -53,7 +53,7 @@ export let retsPointRenderer = new UniqueValueRenderer({
     value: "3",
       symbol: new SimpleMarkerSymbol({
       size: 8,
-      color: appConstants.CardColorMap[3],
+      color: appConstants.CardColorMap[2],
         outline: {
           color: "white",
           width: 0
@@ -178,12 +178,9 @@ export const retsLabelclass = new LabelClass({
   symbol: {
     type: "text",
     color: "white",
-    haloSize: .3,
-    haloColor: "black",
     font: {
-      size: 13
-    },
-    
+      size: 12
+    }
   },
   labelPlacement: "above-right",
   minScale: 200000,
@@ -262,6 +259,7 @@ export const view = new MapView({
 
 //create search widget
 export const searchWidget = new Search({
+  
   view: view,
   includeDefaultSources: false,
   allPlaceholder: "City, County, District, Route",
