@@ -1,6 +1,9 @@
-<template app>
+<template>
     <div id="viewDiv">
+        <detailsAlert v-if="store.isAlert" id="showAlert"/>
+        <!-- <ShowChanges style="position: absolute; left: 50%; top: 50%;" /> -->
     </div>
+
     
 
 </template>
@@ -9,37 +12,41 @@
 //import functions
 //import {queryRetsTable} from './utility.js'
 import {view} from './map-Init.js'
-import {home, hoverRetsPoint, clickRetsPoint} from './utility.js'
+import {home, hoverRetsPoint} from './utility.js'
+import {store} from './store.js'
+import detailsAlert from './detailsAlert.vue'
+// import ShowChanges from './showChanges.vue'
 //import ESRI JS ESM class
 export default{
     name: "Map",
+    components: {detailsAlert},
     data(){
         return{
+          store
         };
     },
-    mounted(){
+    async mounted(){
             //1.Check to see if user is signed in. If not sign them in without using the popup
             //2. If user is signed in, get username and set retLayer definition and load map
-            
             view.container = this.$el
             home();
             hoverRetsPoint();
-        },
+
+
+    },
     methods:{
-        
+
     }
 }
 </script>
 
 <style>
     #viewDiv{
-        position: fixed;
+        position: absolute;
         height: 100%;
-        width: 100%;
-        min-height: 100%;
+        width: calc(100% - 74px);
         top: 0;
-     
-        
+        left: 74px;
         /* overflow-y: hidden; */
     }
 
@@ -52,6 +59,12 @@ export default{
 
     .esri-view {
         --esri-view-outline-color: none !important;
+    }
+
+    #showAlert{
+        position: absolute;
+        left: 50%;
+        border-radius: 0% !important;
     }
 
 

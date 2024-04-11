@@ -1,28 +1,32 @@
-import {view, retsLayer, homeWidget, retsGraphicLayer, graphics, } from './map-Init'
+import {view, retsLayer, homeWidget, retsGraphicLayer, TxDotRoaways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate} from './map-Init'
 import Query from "@arcgis/core/rest/support/Query.js";
 import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant.js";
 import {store} from './store.js'
+import {getDFOFromGRID} from './crud.js'
 import { addRETSPT } from './crud.js';
+import esriRequest from "@arcgis/core/request.js";
+import * as geodesicUtils from "@arcgis/core/geometry/support/geodesicUtils.js";
+import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils.js";
+import * as geometryEngine from "@arcgis/core/geometry/geometryEngine.js";
 import esriId from "@arcgis/core/identity/IdentityManager.js";
-
-
 
 export function clickRetsPoint(){
     try{
         view.on("click", (event)=>{
             view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt) =>{
                 if(!evt.results.length){
-                    removeOutline()
                     removeHighlight("a", true)
-                   
+                    removeAllCardHighlight()
                     return
-                }                
-                removeOutline()
+                }
+                clearRoadHighlightObj()
                 outlineFeedCards(evt.results)
                 removeHighlight("a", true)
-
-
+                if(store.isMoveRetsPt){
+                    //getPointRoadInteraction(evt.results)
+                    modifyRETSPt(evt.results)
+                }
                 evt.results.forEach(rest => rest.graphic.layer.title ? highlightRETSPoint(rest.graphic.attributes) : highlightGraphicPt(rest.graphic.attributes))
                 return evt.results[0].graphic.attributes.RETS_ID;
             })
@@ -36,7 +40,7 @@ export function clickRetsPoint(){
 
 export function hoverRetsPoint(){
     view.on("pointer-move", (event)=>{
-        view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt) =>{
+        view.hitTest(event, {include: [retsLayer, retsGraphicLayer, graphics]}).then((evt) =>{
             if(!evt.results.length){
                 document.getElementById("viewDiv").style.cursor = "default"
                 return
@@ -79,7 +83,7 @@ export function removeHighlight(feature, removeAll){
             }
 
             if(lyrView._highlightIds.has(feature?.attributes.OBJECTID)){
-                console.log("before: " + feature?.attributes.OBJECTID )
+                //console.log("before: " + feature?.attributes.OBJECTID )
                 lyrView._highlightIds.delete(feature?.attributes.OBJECTID)
                 //console.log("after: " + feature?.attributes.OBJECTID )
                 
@@ -90,25 +94,69 @@ export function removeHighlight(feature, removeAll){
         })
 }
 
-function outlineFeedCards(res){
+export function outlineFeedCards(res){
+
     res.forEach((x) => {
+        console.log("OK")
+
         //set card outline
         var objectcomparison = x.attributes ? String(x.attributes.RETS_ID).concat('-',x.attributes.OBJECTID) : String(x.graphic.attributes.RETS_ID).concat('-',x.graphic.attributes.OBJECTID)
         if(!document.getElementById(objectcomparison)) return
         document.getElementById(objectcomparison).classList.add('highlight-card')
+        store.roadHighlightObj.add(objectcomparison)
+        
         //zoom to card in feed
-
-        const zoomToCard = document.createElement('a')
-        zoomToCard.href = `#${objectcomparison}`
-        zoomToCard.click()
+        document.getElementById(objectcomparison).scrollIntoView({behavior: 'smooth'})
+        // const zoomToCard = document.createElement('a')
+        // zoomToCard.href = `#${objectcomparison}`
+        // zoomToCard.click(preventHashUrl())
         //remove card outline
         // setTimeout(()=>{
         //     document.getElementById(objectcomparison).classList.remove('highlight-card')
         // },5000)
     })
+    toggleHighlightCards(store.isShowSelected)
     return;
 }
 
+export function toggleHighlightCards(bool){
+    const getCardRows = document.getElementsByClassName("rets-card-row")
+    let i;
+    
+    console.log('updatedSelection')
+    console.log(store.roadHighlightObj)
+    for(i=0; i < getCardRows.length; i++){
+        if(bool === true){
+            getCardRows[i].style.display = getCardRows[i].lastElementChild.classList.contains("highlight-card") ? "flex" : "none"
+            continue
+        }
+        getCardRows[i].style.display = "flex"
+    }
+    if(!bool){
+        store.roadObj = store.archiveRetsData
+    }
+    
+    return
+}
+
+export function removeAllCardHighlight() {
+    const getHighlightCardRows = document.getElementsByClassName("highlight-card")
+    console.log(getHighlightCardRows)
+    let i;
+    for(i=0; i < getHighlightCardRows.length; i++){
+        console.log(getHighlightCardRows[i])
+        if(store.isShowSelected){
+            getHighlightCardRows[i].parentElement.style.display = "none"
+        }
+        getHighlightCardRows[i].classList.remove('highlight-card')
+        clearRoadHighlightObj()
+    }
+    return
+}
+
+export const clearGraphicsLayer = () => graphics.removeAll() 
+
+export const clearRoadHighlightObj = () => store.roadHighlightObj.clear()
 
 export const zoomTo = (geom) => view.goTo({center: [geom[0], geom[1]], scale: 30000})
 
@@ -165,13 +213,12 @@ export function getDistinctAttributeValues(field){
 
 export function processDomainArr(domain){
     const holdArr = []
-
     domain.forEach((x) => {
         if(x.name === 'Username' || x.name === 'ACTV'){
             holdArr.push(`'${x.value}'`)
         }
         else{
-            holdArr.push(x.value)
+            holdArr.push(typeof x.value === "string" ? `'${x.value}'` : x.value)
         }
 
     })
@@ -187,23 +234,23 @@ export function getQueryLayer(newQuery, orderFields, count){
     query.returnGeometry = true
     query.num = count ??= 20000
 
-    return retsLayer.queryFeatures(query)
+    return newQuery.queryLayer === 'retsLayer' ? retsLayer.queryFeatures(query) : retsHistory.queryFeatures(query)
 }
 
 
 export function searchCards(cardArr, string, index){
-    // if(!string.length){
-    //     cardArr.forEach(x => document.getElementById(`${x[index]}`).classList.add('showCards'))
-    //     return
-    // }
+    if(!string.length){
+        cardArr.forEach(x =>  document.getElementById(`${x.attributes ? x.attributes[index] : x[index]}`).classList.add('showCards'))
+        return
+    }
     cardArr.forEach((x) => {
-        const a = Object.values(x.attributes).find(t => String(t).includes(string))
+        const a = Object.values(x.attributes ?? x).find(t => String(t).includes(string))
         if(a){
-            document.getElementById(`${x.attributes[index]}`).classList.add('showCards')
+            document.getElementById(`${x.attributes ? x.attributes[index] : x[index]}`).classList.add('showCards')
         }
         else{
-            document.getElementById(`${x.attributes[index]}`).classList.remove('showCards')
-            document.getElementById(`${x.attributes[index]}`).classList.add('hideCards')
+            document.getElementById(`${x.attributes ? x.attributes[index] : x[index]}`).classList.remove('showCards')
+            document.getElementById(`${x.attributes ? x.attributes[index] : x[index]}`).classList.add('hideCards')
         }
     })
     return
@@ -227,11 +274,6 @@ export function addRelatedRetsToMap(rets){
         return
     }    
     
-    // a.retsid.concat(', ', rets.RETS_ID)
-        // console.log(a)
-
-    
-
     const graphicPt = {
         type: "point",
         longitude: rets.geometry[0],
@@ -302,39 +344,78 @@ export function zoomToRelatedRets(relatedRets){
 }
 
 export const toggleRelatedRets = (retsid) =>  {
-    console.log(retsid)
     const parseRets = JSON.parse(retsid)
+    if(!parseRets.attributes.RELATED_RETS) return
     const newRetsId = typeof retsid === "object" ? parseRets.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID) : parseRets.attributes.RELATED_RETS.split(",")
     turnAllVisibleGraphicsOff()
     newRetsId.forEach((ret) =>{
         let a = retsGraphicLayer.graphics.items.filter(item => item.attributes.retsId === Number(ret))
         a.forEach(x => x.visible = true)
     })
-}
-
-export function returnDFO(roadName, dfo){
-    //query for road
-    //find dfo placement on the road
-        //find segment point is on (two points) => before, end
-        //take beginning measure and find delta between beginning and placed point
-        //return new dfo
+    return
 }
 
 // export function openDetailsFromGraphic(){
     
 //}
 
-export function highlightpoints(event){
-     // Get the rectangle geometry
-     var rectangleGeometry = event.graphic.geometry;
-     // Query for points within the rectangle
-     var query = retsLayer.createQuery();
-     query.geometry = rectangleGeometry;
-     retsLayer.queryFeatures(query)
-
+export function returnHistory(query){
+    const queryString = {"whereString": `${query ?? '1=1'}`, "queryLayer": "retsHistory"}
+    getQueryLayer(queryString, "create_dt desc")
+        .then((hist) => {
+            const arrHist = []
+            hist.features.forEach((x) => {
+                // x.attributes.attachments = []
+                // x.attributes.attachments.push()
+                arrHist.push(x.attributes)
+            })
+            query ? store.historyChat = arrHist : store.history = JSON.stringify(arrHist)
+        })
+        .catch(err => console.log(err))
+    return
 }
 
+export async function getAttachmentInfo(oid){
+    try{
+        const isAttach = await retsHistory.queryAttachments({
+            objectIds: oid
+        })
+    
+        if(isAttach){
+           return isAttach
+        }
+    }
 
+    catch(err){
+        console.log(err)
+    }
+}
+
+export function getUniqueQueryValues(layer, constantsProp){
+    const query = new Query()
+    query.where = `1=1`
+    query.outFields = ["*"]
+    
+    layer.queryFeatures(query)
+        .then((item) => {
+            item.features.forEach(x => constantsProp.push({
+                "value" : x.attributes.USERNAME,
+                "name": x.attributes.NAME,
+                "email": x.attributes.EMAIL
+            }))
+        })
+}
+
+export function highlightpoints(event){
+    // Get the rectangle geometry
+    var rectangleGeometry = event.graphic.geometry;
+    // Query for points within the rectangle
+    var query = retsLayer.createQuery();
+    query.geometry = rectangleGeometry;
+    retsLayer.queryFeatures(query)
+
+    return
+}
 
 export function createtool(sketchWidgetcreate, createretssym) {
     return new Promise((resolve, reject) => {
@@ -354,6 +435,15 @@ export function createtool(sketchWidgetcreate, createretssym) {
     });
   }
 
+  export function deleteRetsGraphic(){
+    graphics.graphics.items.forEach((ret) => {
+        if(ret.geometry.type === 'point'){
+            graphics.remove((ret))
+        }
+    })
+    return
+}
+
     var pressedkey = false;
     window.addEventListener("keydown", (event)=>{
 
@@ -363,118 +453,120 @@ export function createtool(sketchWidgetcreate, createretssym) {
         pressedkey = false
     });
 
-  export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
-    if(isSelectEnabled === true){ 
-        sketchWidgetselect.create("rectangle");
-        var removeAll = true
-        sketchWidgetselect
-        .on("create", function (event) 
-            {
-            if (event.state === "complete")
+    export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
+        if(isSelectEnabled === true){ 
+            sketchWidgetselect.create("rectangle");
+            var removeAll = true
+            sketchWidgetselect
+            .on("create", function (event) 
                 {
-                    // Get the rectangle geometry
-                    var rectangleGeometry = event.graphic.geometry;
-                    // Query for points within the rectangle
-                    var query = retsLayer.createQuery();
-                    query.geometry = rectangleGeometry;
-                    retsLayer.queryFeatures(query)
-                    .then(function (result) 
-                            {
-                                // Access the selected features
-                                var selectedFeatures = result.features;
-
-                                
-                                
-
-                                if (pressedkey === false){
-                                    if (selectedFeatures.length){
+                if (event.state === "complete")
+                    {
+                        // Get the rectangle geometry
+                        var rectangleGeometry = event.graphic.geometry;
+                        // Query for points within the rectangle
+                        var query = retsLayer.createQuery();
+                        query.geometry = rectangleGeometry;
+                        retsLayer.queryFeatures(query)
+                        .then(function (result) 
+                                {
+                                    // Access the selected features
+                                    var selectedFeatures = result.features;
+                                    //console.log(result.features.length)
+                                    
+    
+                                    if (pressedkey === false){
+                                        
+                                        // removeHighlight("a", removeAll); 
+                                        // // for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                        // removeAllCardHighlight()
+                                        
+                                        // //clearRoadHighlightObj()
+                                        // outlineFeedCards(selectedFeatures);
+                                        
+                                        // console.log('hey1')
+                                        // }
+                                        if (selectedFeatures.length){
+                                            for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                                removeHighlight(selectedFeatures[i].attributes,removeAll); 
+                                                
+    
+                                                 
+                                                
+          
+                                              }
+                                              removeOutline();
+                                        }
+                                        else{
+                                            removeHighlight(selectedFeatures.attributes,removeAll)
+                                            removeOutline();
+                                        }
                                         for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                            removeHighlight(selectedFeatures[i].attributes,removeAll); 
+                                            store.roadHighlightObj.add(String(selectedFeatures[i].attributes.RETS_ID).concat('-', selectedFeatures[i].attributes.OBJECTID))
+                                            highlightRETSPoint(selectedFeatures[i].attributes);
+                                             outlineFeedCards(selectedFeatures);
                                             
-
-                                             
                                             
-      
-                                          }
-                                          removeOutline();
-
-                                    }
-                                    else{
-                                        removeHighlight(selectedFeatures.attributes,removeAll)
-                                        removeOutline();
-                                    }
-
-                                    
-                                    for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                        //removeOutline();
-                                        highlightRETSPoint(selectedFeatures[i].attributes);
-                                        outlineFeedCards(selectedFeatures);
-                                         //outlineFeedCards(selectedFeatures);
+                                        }
                                         
+                                        graphics.removeAll() 
+                                        return
                                         
                                     }
-                                    
-                                    graphics.removeAll() 
-                                    return
-                                    
-                                }
-
-                                
-                                 
-                                
-                                if(pressedkey === "Shift"){
-                                    for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                        highlightRETSPoint(selectedFeatures[i].attributes);
-                                        outlineFeedCards(selectedFeatures);
-
-                                    } 
-                                    graphics.removeAll();
-                                    return
-                                }
-                                
-                                if(pressedkey === "Control"){
-                                    
-                                    for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                        console.log("this: " + selectedFeatures[i].attributes.OBJECTID)
     
-                                        removeHighlight(selectedFeatures[i]);  
+                                    
+                                     
+                                    
+                                    if(pressedkey === "Shift"){
+                                        for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                            store.roadHighlightObj.add(String(selectedFeatures[i].attributes.RETS_ID).concat('-', selectedFeatures[i].attributes.OBJECTID))
+                                            highlightRETSPoint(selectedFeatures[i].attributes);
+                                            outlineFeedCards(selectedFeatures);
+    
+                                        } 
+                                        graphics.removeAll();
+                                        return
+                                    }
+                                    
+                                    if(pressedkey === "Control"){
                                         
-
-                                    } 
-                                        
-
-                                   
-                                    graphics.removeAll();
-                                    return
+                                        for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                            console.log("this: " + selectedFeatures[i].attributes.OBJECTID)
         
-                                }
-                                
-
-                                
-                               
-                            });
-
-                            
-                            
-                }
-
-        });
-
-        isSelectEnabled = !isSelectEnabled; 
-    }
-    else{
-        isSelectEnabled = !isSelectEnabled;
-        sketchWidgetselect.cancel()
+                                            removeHighlight(selectedFeatures[i]);  
+    
+                                        } 
+    
+                                       
+                                        graphics.removeAll();
+                                        return
             
-    }
+                                    }
     
+                                    
+                                   
+                                });
     
-    return
-  }
+                                
+                                
+                    }
+    
+            });
+    
+            isSelectEnabled = !isSelectEnabled; 
+        }
+        else{
+            isSelectEnabled = !isSelectEnabled;
+            sketchWidgetselect.cancel()
+                
+        }
+        
+        
+        return
+      }
 
-  export async function handleaddrets(newPointGraphic, addrets){
+export async function handleaddrets(newPointGraphic, addrets){
     try{
-        console.log(newPointGraphic)
         const obj = await addRETSPT(newPointGraphic)
         const objectid = obj.addFeatureResults[0].objectId
         addrets = objectid
@@ -482,17 +574,65 @@ export function createtool(sketchWidgetcreate, createretssym) {
     }
     catch(err){
         console.log(err)
+        return
     }
-  }
+}
 
+export async function getCmntOID(retId){
+    const queryString = {"whereString": `RETS_ID = ${retId}`, "queryLayer": "retsHistory"}
+    return await getQueryLayer(queryString, "EDIT_DT DESC")
+}
 
-  export function removeretsgraphic(){
+export function addAttachments(oid, files, flag){
+    const arr = Array.from(files)
+    const formData = new FormData()
+    formData.append("attachment", arr[0], arr[0].name)
+    
+    esriRequest(`https://testportal.txdot.gov/createags/rest/services/RETS_CMNT/FeatureServer/0/${oid}/addAttachment`, {
+        body: formData,
+        method: "post",
+        responseType: "html",
+    })
+        .then((x) => {
+            console.log(x)
+            console.log(arr)
+            flag ? null : store.attachToNote(oid, arr)
+        })
+        .then(() => console.log('add attachment'))
+        .catch(err => console.log(err))
+}
 
-    graphics.removeAll()
+export function deleteAttachment(oid, attachName){
+    const attachGraphic = new Graphic({
+        attributes :{
+            OBJECTID : oid,
+        }
+    })
 
-  }
+    retsHistory.queryAttachments({
+        objectIds: [oid]
+    })
+    .then((x) => {
+        x[oid].forEach((attach) => {
+            if(attach.name === attachName){
+                retsHistory.deleteAttachments(attachGraphic, [attach.id])
+                    .then((y) => {
+                        const chat = store.historyChat.find(z => z.OBJECTID === attach.parentObjectId)
+                        const index = chat.attachments.findIndex(att => att.name === attach.name)
+                        chat.attachments.splice(index, 1)
+                    })
+                
+                    .catch(err => console.log(err))
+            }
+        })
+        
+    })
+    return 
+}
 
-  export function togglemenu(isActOpen, shift){   
+export const rtrnNumAttachChat = () => store.historyChat.filter(chat => chat.attachments).length
+
+export function togglemenu(isActOpen, shift){   
             
     var currentCenter = view.center.clone();
     var screenPoint = view.toScreen(currentCenter);
@@ -514,10 +654,286 @@ export function createtool(sketchWidgetcreate, createretssym) {
     
 }
 
-export function logoutUser(){
-    esriId.destroyCredentials({
-    })
+export async function queryFlags(userid){
+    console.log(userid)
+    const returnRetsFlagUser = await flagRetsColor.queryFeatures({
+        where: `USERNAME = '${userid}'`,
+        outFields: ["*"]
+    }) 
+    console.log(returnRetsFlagUser)
+    returnRetsFlagUser.features.forEach(flag => store.userRetsFlag.push({FLAG: flag.attributes.FLAG, OBJECTID: flag.attributes.OBJECTID, RETS_ID: flag.attributes.RETS_ID, USERNAME: flag.attributes.USERNAME}))
+    return
+}
 
+export function modifyRETSPt(graphicArr){
+    console.log(graphicArr)
+    const findGraphic = graphicArr.find(g => (g.graphic.attributes.RETS_ID === store.retsObj.attributes.RETS_ID) && g.layer.title === 'RETS')
+    console.log(findGraphic)
+    graphics.add(findGraphic.graphic)
+    
+    sketchWidgetcreate.update(findGraphic.graphic)
+}
+
+export function createDFORets(findPtRoadBelongs, retsPt){
+    const dfoDistanceDiff = findPtRoadBelongs.geometry.paths[0].at(store.dfoIndex)[2] - Number(retsPt.attributes.DFO)
+    const returnDfoPt = calculateAzimuth(findPtRoadBelongs, store.dfoIndex, dfoDistanceDiff)
+
+    const dfoPt = new Graphic({
+        geometry: returnDfoPt,
+        attributes:{
+            OBJECTID: retsPt.attributes.OBJECTID,
+            RETS_ID: retsPt.attributes.RETS_ID
+        },
+        symbol:{
+            type: "simple-marker",
+            color: "red",
+            size: 8,
+            outline:{
+                width: 0.5,
+                color: "#4472C4"
+            }
+        }
+    })
+    graphics.add(dfoPt)
+    return
+}
+
+export function getPointRoadInteraction(retsPt){
+    //create graphic of clicked Pt
+    //
+    const findRelatedPtGraphic = graphics.graphics.items.find(x => (x?.attributes?.OBJECTID === retsPt.attributes.OBJECTID) && x.geometry.type === 'point')
+    if(findRelatedPtGraphic){
+        const roadGraphic = graphics.graphics.items.find(x => (x?.attributes?.OBJECTID === retsPt.attributes.OBJECTID) && x.geometry.type === 'polyline')
+        graphics.remove(findRelatedPtGraphic)
+        const roadIndex =  roadGraphic.geometry.paths[0].findIndex(i => i[2] > Number(retsPt.attributes.DFO))
+        store.dfoIndex = roadIndex
+        createDFORets(roadGraphic, retsPt)
+        //moveDFOPt(retsPt)
+        return
+    }
+    //check if route exist, if so plot the point based on dfo
+    TxDotRoaways.queryFeatures({
+        where: `RTE_NM = '${retsPt.attributes.RTE_NM}'`,
+        returnM: true,
+        returnGeometry: true,
+        outFields: ["*"]
+    })
+    .then((rd) => {
+        if(!rd.features.length || !retsPt.attributes.DFO){
+            if(!retsPt.attributes.DFO){
+                store.alertTextInfo = {"text": "Route Number or DFO is missing", "color": "red", "type":"error", "toggle": true}
+                store.isAlert = true
+                return
+            }
+            store.alertTextInfo = {"text": "Route Name isn't exact", "color": "red", "type":"error", "toggle": true}
+            console.log('fail')
+            store.isAlert = true
+            
+
+            
+            return 
+        }
+
+        //start editing pt
+        const findPtRoadBelongs = rd.features.find((rd) => {
+            const firstM = rd.geometry.paths[0].at(0)[2]
+            const lastM = rd.geometry.paths[0].at(-1)[2]
+            if((Number(retsPt.attributes.DFO) > firstM) && Number(retsPt.attributes.DFO) < lastM){
+                const roadIndex =  rd.geometry.paths[0].findIndex(i => i[2] > Number(retsPt.attributes.DFO))
+                store.dfoIndex = roadIndex === -1 ? "not in range" : roadIndex
+                return roadIndex
+            }
+            store.isAlert = true
+            store.alertTextInfo = {"text": "DFO is out of Range", "color": "red", "type":"error", "toggle": true}
+            store.dfoIndex = "not in range"
+        })
+
+        if(store.dfoIndex === 'not in range'){
+            console.log('not in range')
+            store.isAlert = false
+            store.isAlert = true
+            store.alertTextInfo = {"text": "DFO is out of Range", "color": "red", "type":"error", "toggle": true}
+            return
+        }
+        console.log(findPtRoadBelongs)
+        console.log(store.dfoIndex)
+        
+        //create graphic of road
+        const rdGraphic = new Graphic({
+            geometry: findPtRoadBelongs.geometry,
+            attributes:{
+                OBJECTID: retsPt.attributes.OBJECTID,
+                RETS_ID: retsPt.attributes.RETS_ID
+            },
+            symbol: {
+                type:"simple-line",
+                color: [226, 119, 40],
+                width: 4
+            }
+        })
+        graphics.add(rdGraphic)
+
+        //plot point
+        store.isAlert = false
+        createDFORets(findPtRoadBelongs,retsPt)
+        
+        //moveDFOPt(retsPt)
+        console.log(rd)
+    })
+    .catch(err => console.log(err))
+    //if dfo doesn't exist, edit the point
+
+
+
+
+    //hide clicked Pt
+    // console.log(view)
+    // const RETSFeatureLayerView = view.allLayerViews._items.find(x => x.layer.title === "RETS")
+    // RETSFeatureLayerView.filter = {
+    //     where: `GIS_ANALYST = 'DPROSACK' and RETS_ID not in (${retsPt.attributes.RETS_ID})`
+    // }
+
+    //find road information as point moves over road
+    //get dfo value
+}
+
+function calculateAzimuth(rdLine, dfoIndex, dfo){
+    const pointB = {
+        type: 'point',
+        x: rdLine.geometry.paths[0].at(dfoIndex)[0],
+        y: rdLine.geometry.paths[0].at(dfoIndex)[1],
+
+    }
+
+    const pointA = {
+        type: 'point',
+        x: rdLine.geometry.paths[0].at(dfoIndex - 1)[0],
+        y: rdLine.geometry.paths[0].at(dfoIndex - 1)[1],
+
+    }
+
+    const webMerConvertPointA = webMercatorUtils.webMercatorToGeographic(pointA)
+    const webMerConvertPointB = webMercatorUtils.webMercatorToGeographic(pointB)
+    webMerConvertPointA.spatialReference.wkid = 4326
+    webMerConvertPointB.spatialReference.wkid = 4326
+
+    const dfoToMeter = dfo*1609.344
+    store.logDfo = dfo 
+    let returnAzmuth = geodesicUtils.geodesicDistance(webMerConvertPointA, webMerConvertPointB, "miles")
+    const returnPoint = calculatePointWithDistance(webMerConvertPointA, dfoToMeter, returnAzmuth.azimuth)
+    return returnPoint
+}
+
+function calculatePointWithDistance(pointA, dis, azmiuth){
+    
+    const dfoPt = geodesicUtils.pointFromDistance(pointA, dis, azmiuth)
+    const converGeoToWebDfoPt = webMercatorUtils.geographicToWebMercator(dfoPt)
+    return converGeoToWebDfoPt
+}
+
+function moveDFOPt(retsPt){
+    console.log(graphics)
+    const findRelatedGraphics = graphics.graphics.items.filter(x => x.attributes.OBJECTID === retsPt.attributes.OBJECTID)
+    const findRelatedPtGraphic = findRelatedGraphics.find(graphic => graphic.geometry.type === 'point')
+    const findRelateLineGraphic = findRelatedGraphics.find(graphic => graphic.geometry.type === 'polyline')
+
+    view.on("click", (event)=>{
+        view.hitTest(event, {include: [graphics]}).then((evt) =>{
+            if(!evt.results.length){
+                return
+            }
+                
+            sketchWidgetcreate.update(findRelatedPtGraphic)
+            findDFOSlider(findRelateLineGraphic)
+
+
+                // sketchWidgetcreate.create("point", (event)=>{
+
+                //     console.log(event)
+                // })
+            console.log(evt.results[0].graphic)
+            return
+        })
+    })
+}
+
+function findDFOSlider(findRelateLineGraphic){
+    let previousDfo;
+    let previousNextDfo;
+    view.on("pointer-move", (event) => {
+        view.hitTest(event, {include: [findRelateLineGraphic]})
+            .then((evt)=> {
+                if(!evt.results.length){
+                    return
+                }
+                const mapCoords = view.toMap({
+                    type: "point",
+                    x: event.x,
+                    y: event.y,
+                    spatialReference: findRelateLineGraphic.geometry.spatialReference
+                })
+                
+                
+                const findNearestVertex = geometryEngine.nearestVertex(findRelateLineGraphic.geometry,mapCoords)
+                // console.log(findNearestVertex)
+                store.logDfo = findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2]
+                const nextDFOGraphic = {
+                    type: "point",
+                    x: findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex - 1)[0],
+                    y: findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex - 1)[1],
+                    spatialReference: findRelateLineGraphic.geometry.spatialReference 
+                }
+                const nextVertexDFO = findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex + 1)[2] ?? null
+                const dfo = geodesicUtils.geodesicDistance(webMercatorUtils.webMercatorToGeographic(mapCoords), webMercatorUtils.webMercatorToGeographic(findNearestVertex.coordinate), "miles")
+                const dfoNext = geodesicUtils.geodesicDistance(webMercatorUtils.webMercatorToGeographic(mapCoords), webMercatorUtils.webMercatorToGeographic(nextDFOGraphic), "miles")
+                //console.log(store.logDfo, previousDfo, dfo.distance, dfoNext.distance, previousNextDfo)
+                //  moving away                            moving closer
+                if((dfo.distance > previousDfo)){
+                    console.log(`(${previousDfo}, ${dfo.distance}`)
+                    console.log("moving away to nearest DFO / moving closer from next dfo")
+                    store.retsObj.attributes.DFO = findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2] - dfo.distance 
+                }
+                //  moving closer                       moving away
+                if((dfo.distance < previousDfo)){
+                    console.log(`(${previousDfo}, ${dfo.distance}`)
+                    console.log("moving closer to nearest DFO / moving away from next dfo")
+                    store.retsObj.attributes.DFO = findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2] + dfo.distance 
+                }
+                // if((dfo.distance < previousDfo) && (dfoNext.distance < previousNextDfo)){
+                //     console.log(`(${previousDfo}, ${dfo.distance}/ ${previousNextDfo}, ${dfoNext.distance}`)
+                //     console.log("moving closer to nearest DFO / moving closer from next dfo")
+                //     store.retsObj.attributes.DFO = findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2] - dfo.distance 
+                // }
+                // if((dfo.distance > previousDfo) && (dfoNext.distance > previousNextDfo)){
+                //     console.log(`(${previousDfo}, ${dfo.distance}/ ${previousNextDfo}, ${dfoNext.distance}`)
+                //     console.log("moving away to nearest DFO / moving away from next dfo")
+                //     store.retsObj.attributes.DFO = findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2] - dfo.distance 
+                // }
+                previousDfo = dfo.distance
+                previousNextDfo = dfoNext.distance
+                
+                // if(store.logDfo > dfo.distance + store.logDfo){
+                //     console.log(store.logDfo, dfo.distance + store.logDfo)
+                //     store.retsObj.attributes.DFO = findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2] + dfo.distance 
+                // }
+                // else if(store.logDfo < dfo.distance - store.logDfo){
+                //     console.log(store.logDfo, dfo.distance - store.logDfo)
+                //     store.retsObj.attributes.DFO = findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2] - dfo.distance
+                // }
+
+                // else{
+                //     store.retsObj.attributes.DFO = findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2] - dfo.distance
+                // }
+                //console.log(dfo.distance + findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2])
+                // const isIntersect = geometryEngine.intersects(createLineA.geometry, mapCoords)
+                // console.log(isIntersect)
+                // console.log(createLineA)
+                // console.log(dfo.distance)
+                // console.log(findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2])
+                //store.retsObj.attributes.DFO = dfo.distance + findRelateLineGraphic.geometry.paths[0].at(findNearestVertex.vertexIndex)[2]
+            })
+    })
+    return
 }
 
 export function removeOutline(){
@@ -527,4 +943,9 @@ export function removeOutline(){
     });
     
 }
-  
+
+export function logoutUser(){
+    esriId.destroyCredentials({
+    })
+
+}

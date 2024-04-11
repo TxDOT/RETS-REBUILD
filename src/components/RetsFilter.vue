@@ -36,7 +36,7 @@
                     <v-autocomplete :items="filterCounty" item-title="name" item-value="value" return-object multiple label="County" chips closable-chips variant="underlined" density="compact" v-model="filterPros.CNTY_NM"></v-autocomplete>
                 </v-row>
                 <v-row no-gutters dense >
-                    <v-autocomplete :items="filterUser" item-title="value" item-value="value" return-object label="Users" multiple chips closable-chips variant="underlined" density="compact" v-model="filterPros.GIS_ANALYST"></v-autocomplete>
+                    <v-autocomplete :items="filterUser" item-title="name" item-value="value" return-object label="Users" multiple chips closable-chips variant="underlined" density="compact" v-model="filterPros.GIS_ANALYST"></v-autocomplete>
                 </v-row>
 
                 <v-expansion-panels flat variant="accordion">
@@ -94,21 +94,25 @@
                 filterStatus: appConstants.statDomainValues,
                 filterDistrict: appConstants.districtDomainValues,
                 filterCounty: appConstants.countyDomainValues,
-                filterUser: appConstants.defaultUserValue,
+                filterUser: appConstants.userRoles,
                 filterActivity: appConstants.activityList,
                 numFilters: 0,
                 defaultFilter: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, "JOB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
-                         "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, "GIS_ANALYST": appConstants.defaultUserValue, 
+                         "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, "GIS_ANALYST": appConstants.userRoles.filter(y => y.value === appConstants.defaultUserValue[0].value), 
                          "filterTotal": 2},
                 isDate: false,
                 selectDate: null,
                 currentYear: null,
             }
         },
+        mounted(){
+            console.log(this.filterPros.GIS_ANALYST)
+            this.filterPros.GIS_ANALYST = appConstants.userRoles.filter(y => y.value === this.filterPros.GIS_ANALYST[0].value)
+        },
         methods:{
             cancelFilter(){
                 this.calcFilterDiff()
-                this.$emit('filter-set', this.filterPros)
+                this.$emit('filter-set', 'cancel')
                 return
             },
             setFilterNumber(){
@@ -122,18 +126,16 @@
                 return
             },  
             calcFilterDiff(){
-                console.log(2)
                 const ignoreField = ['CREATE_DT', 'filterTotal', 'loggedInUser']
                 for(const [key,value] of Object.entries(this.filterPros)){
-                    console.log(key)
                     if(ignoreField.includes(key) || !value) continue
                     if(value.length){
-                        console.log(1)
                         this.addNumFilter()
                     }
                 }
 
                 this.filterPros.filterTotal = this.numFilters
+                this.numFilters = 0
                 return
             },
             restoreDefault(){
@@ -149,6 +151,7 @@
                 this.filterPros.filterTotal = this.defaultFilter.filterTotal
                 
                 filterMapActivityFeed(this.defaultFilter)
+                this.$emit('filter-set', this.filterPros)
                 return
             },
             selectDates(){
@@ -156,9 +159,9 @@
                 if(this.selectDate.length === 2){
                     this.selectDate.sort((a,b) => a - b)
                     this.filterPros.EDIT_DT = `${this.selectDate[0].toLocaleDateString('en-US')} - ${this.selectDate[1].toLocaleDateString('en-US')}`
+                    this.isDate = false
                     return
                 }
-
                 this.filterPros.EDIT_DT = `${this.selectDate[0].toLocaleDateString('en-US')}`
                 return
             },
@@ -197,13 +200,13 @@
     #filterFeed{
         top: 57px;
         width: 47vh;
-        left: calc(74px + 50vh);
+        left: calc(74px + 509px);
         display: flex;
         flex-direction: column;
         border-radius: 0%;
-        position: relative;
-        min-height: 44vh;
-        max-height: 90vh;
+        position: absolute;
+        min-height: 64vh;
+        max-height: 91vh;
         overflow-y: auto;
     }
 
@@ -218,29 +221,5 @@
         color: #4472C4;
         right: 1rem;
     }
-    .date {
-        display: block !important;
-        padding-top: 0px !important;
-        padding-bottom: 0px !important;
-        padding-inline-start: 0px !important;
-        padding-inline-end: 0px !important;
-        row-gap: 0px !important;
-        justify-content: left !important;
-        
-    }
 
-    .date :deep(.v-date-picker-controls){
-        row-gap: 0px !important;
-        justify-content: left !important;
-        padding-top: 0px !important;
-        padding-bottom: 0px !important;
-    }
-
-    .date :deep(.v-date-picker-month){
-        padding: 0px 0px 0px !important;
-    }
-
-   .date :deep(.v-date-picker-month) .v-date-picker-month__days{
-        row-gap: 0px !important;
-    }
 </style>

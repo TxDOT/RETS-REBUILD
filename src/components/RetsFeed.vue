@@ -1,24 +1,35 @@
 
 
 <template style="overflow-y:hidden;">
+
     <v-navigation-drawer width="200" height="100" permanent color="black">
         <v-list height="100%" id="icons-top" >
-            <v-list-item v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" active-class="btn-left-brder" :active="tool.isActive">  
-                <v-tooltip location="bottom" :text=tool.name >
+            <v-list-item v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" :active-class="tool.name !== 'Menu' ? 'btn-left-brder' : ''" >  
+                <v-tooltip location="right bottom" :text=tool.name >
                     <template v-slot:activator="{ props}">
-                        <v-icon size="30" :icon="tool.icon" :color= "tool.color" :name="tool.name" v-bind="props"></v-icon>
+                        <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
                 </template>
                 </v-tooltip>
                 
             </v-list-item>
         </v-list>
         <v-list id="icons-bottom">
-            <v-list-item v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" active-class="btn-left-brder" >
-                <v-tooltip location="bottom" :text=tool.name >
+            <v-list-item v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" :active-class="tool.name !== 'Jump To' && tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
+                <!-- <v-tooltip v-if="tool.name === 'Basemaps'" location="right" :text=tool.name  >
                     <template v-slot:activator="{ props }">
-                        <v-icon   size="30" :icon="tool.icon" :color="tool.color" @click="tool.color='#FFFFFF'" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'":name="tool.name" v-bind="props" ></v-icon>
+                    <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props"></v-icon>
                 </template>
-                </v-tooltip>
+                </v-tooltip> -->
+                <template v-if="tool.name != 'Basemaps' && tool.name != 'Jump To'">
+                    <v-tooltip location="right" :text="tool.name">
+                        <template v-slot:activator="{ props }">
+                            <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
+                        </template>
+                    </v-tooltip>
+                </template>
+                <template v-else>
+                    <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
+                </template>
                 
             </v-list-item>
         </v-list>
@@ -82,7 +93,7 @@
             <hr id = "separator"/>
         <v-card-item id = "darkmodeitem" >
             <div id = "darkmodeswitch">
-                <v-switch v-model = "switchValue"  label = "Dark Mode"></v-switch> 
+                        <v-switch  v-model="switchValue" label="Dark Mode" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn"></v-switch>
             </div>
              
         </v-card-item>
@@ -93,26 +104,8 @@
             <div id="notis">
                 Send notifications for: <br>
                 <div id="notiswitches">
-                    <v-card-item id = "switch-container">
-                        <v-switch label = "RETS I Create" > </v-switch>
-                    </v-card-item>
-                    <v-card-item id = "switch-container">
-                        <v-switch label = "RETS I'm tagged in"> </v-switch>
-                    </v-card-item>
-                    <v-card-item id = "switch-container">
-                        <v-switch label = "High Priority RETS"> </v-switch>
-                    </v-card-item>
-                    <v-card-item id = "switch-container">
-                        <v-switch label = "RETS assigned to me that have been inactive for 30 days"> </v-switch>
-                    </v-card-item>
-                    <v-card-item id = "switch-container">
-                        <v-switch label = "New RETS assigned to me"> </v-switch>
-                    </v-card-item>
-                    <v-card-item id = "switch-container">
-                        <v-switch label = "Status changed to"> </v-switch>
-                    </v-card-item>
-                    <v-card-item id = "switch-container">
-                        <v-switch label = "My RETS are archived"> </v-switch>
+                    <v-card-item v-for="(item, index) in switches" :key="index" :id="'switch-container-' + index" class="switch-item">
+                        <v-switch  v-model="item.value" :label="item.label" color="primary" :style="switchStyle(item.fontColor)" @change="switchTurnedOn(index)"></v-switch>
                     </v-card-item>
                 </div>
                 
@@ -122,33 +115,23 @@
         </v-card-item>
             <hr id = "separator" />
         <v-card-item id="bottomitems">
-            <v-btn-group>
-                <v-btn id = "logoutbutton" prepend-icon="mdi-power" @click="logoutMethod()" >LOGOUT</v-btn>
+            <v-btn-group density="compact">
+                <v-btn class="secondary-button"  prepend-icon="mdi-power" @click="logoutMethod()" >LOGOUT</v-btn>
             </v-btn-group>
-            <v-btn-group id = "savebutton">
-                <v-btn @click="handleSettingsTool();handleactiveclass()">CANCEL</v-btn>
+            <v-btn-group id = "savebutton" density="compact">
+                <v-btn class="secondary-button"  @click="handleSettingsTool();handleactiveclass()">CANCEL</v-btn>
                
-                    <!-- <v-btn variant="outlined"class="main-button-style" >SAVE</v-btn> -->
-                    <v-btn id = "save" >SAVE</v-btn>
+                    <v-btn class="main-button-style">SAVE</v-btn>
             
                 
             </v-btn-group>
             
 
         </v-card-item>
+
     </v-card>
-    
-   
-   
-    
-    
 
-
-   
-
-    
-    <RetsCards :addrets = "addrets2"/>
-
+    <RetsCards/>
     
 
 </template>
@@ -157,18 +140,20 @@
     import RetsCards from '../components/RetsFeedCards.vue';
     import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass} from '../components/map-Init.js';
     import {addRETSPT} from '../components/crud.js'
-    import { createtool, selecttool, togglemenu, logoutUser } from '../components/utility.js';
-    import { vuetify } from 'C:/Users/ssaldana/Documents/repo/RETS-REBUILD/src/main.js';
+    import { createtool, selecttool, togglemenu, logoutUser  } from '../components/utility.js';
+    import Map from './Map.vue';
+    import { vuetify } from '../main.js';
 
+    import { useTheme } from 'vuetify'
 
 
     export default{
-        components: {RetsCards}, 
+        components: {RetsCards},
         name: "RetsFeed",
         props: {addrets: Number},
         data(){
             return{
-                buttonColor: "#D9D9D9",
+                fontColor: '#D9D9D9',
                 switchValue : false,
                 isActOpen: true,
                 shift: 200,
@@ -182,31 +167,45 @@
                 isCreateEnabled: true,
                 settingsstatus: false,
                 shiftKey: false,
+                switches: [
+                            { label: "RETS I Create", value: false, fontColor: "#D9D9D9" },
+                            { label: "RETS I'm tagged in", value: false, fontColor: "#D9D9D9" },
+                            { label: "High Priority RETS", value: false, fontColor: "#D9D9D9" },
+                            { label: "RETS assigned to me that have been inactive for 30 days", value: false, fontColor: "#D9D9D9" },
+                            { label: "New RETS assigned to me", value: false, fontColor: "#D9D9D9" },
+                            { label: "Status changed to", value: false, fontColor: "#D9D9D9" },
+                            { label: "My RETS are archived", value: false, fontColor: "#D9D9D9" },
+                            // Add more switches as needed
+                        ],
+                darkmodeswitch: [
+                            { label: "Dark Mode", value: false, fontColor: "#D9D9D9" },
+                ],
                 retsToolsTop: [
-                               {title:"Test", icon: 'mdi-menu', color: "#D9D9D9", name: "Menu", action: () =>{
-                                
-                                    this.isActive = !this.tester
-                                    document.getElementById("container").style.display = 
-                                    document.getElementById("container").style.display === "none" ? "block" : "none",
+                               {
+                                title:"Toggle",
+                                icon: 'mdi-menu', 
+                                color: "#D9D9D9", 
+                                name: "Menu", 
+                                action: () =>{
+                                    document.getElementById("container").style.display = document.getElementById("container").style.display === "none" ? "block" : "none",
                                     this.resizemap()
-                                }, isActive: this.tester,
+                                }, 
+                                isActive: this.tester,
                                },  
                             ],
  
                 retsToolsBottom: [
-                               {title:"Select", icon: 'mdi-select-multiple', color: "#D9D9D9", name: "Select", action: () =>{
+                               {title:"Select", icon: 'mdi-select-multiple', color: "#D9D9D9", name: "Multi-Select", action: () =>{
                                 this.handleSelectTool();
                                },
                                hover:(i) => 
                                     {
                                         this.basemapcard = false;
                                         this.jumptocard= false;
-                                        
-                                        
                                     }
                                 },
-                               {title:"JumpTo", icon: 'mdi-map-marker', color: "#D9D9D9", name: "Jump To", action: () =>{
-                                console.log("click")
+                               {title:"JumpTo", icon: 'mdi-run', color: "#D9D9D9", name: "Jump To", action: () =>{
+    
                                },
                                hover:(i) => 
                                     { 
@@ -219,6 +218,7 @@
                                 },
                                {title:"Legend", icon: 'mdi-format-list-bulleted-type', color: "#D9D9D9", name: "Legend", action: () =>{
                                 this.handleLegendTool();
+                                //this.addrets2 = 2
                                },
                                hover:(i) => 
                                     {
@@ -227,7 +227,7 @@
                                     }
                                 },
                                {title:"Basemap", icon: 'mdi-map-legend', color: "#D9D9D9", name: "Basemaps", action: () => {
-                                console.log("click")
+                            
                                },
                                 hover:(i) => { 
                                     if (i === "Basemap")
@@ -237,7 +237,7 @@
                                         }
                                     }
                                 },
-                               {title:"Test", icon: 'mdi-cog', color:"#D9D9D9", name: "Settings", action: () =>{
+                               {title:"Test", icon: 'mdi-cog', color: "#D9D9D9", name: "Settings", action: () =>{
                                 this.handleSettingsTool();
                                 
                                },
@@ -254,72 +254,69 @@
 
             }
         },
-                created(){
-
-                },
-                destroyed() {
-
-                },
+        
                 computed:{
-                    test:{
-                        get(){
-                            return this.tester
-                        },
-                        set(value){
-                            this.tester = value
-                        }
-                    },
+
                 },
                 watch: {
-                    switchValue(newValue) {
-                        if (newValue) {
-                            this.switchTurnedOn();
-                            
-                            
-                        }
-                        else{
-                            this.switchTurnedOff();
-                        }
-                    }
+                   
                 },
                 mounted() {
-
+                
                     
 
                 },
                 
                 methods: {
-                    handleactiveclass(){
+                    newSwitchTurnedOn() {
+                        if (this.switchValue) {
+                            // New switch is turned on, do something
+                            this.fontColor = '#FFFFFF';
+                            
+                        } else {
+                            // New switch is turned off, do something else
+                            this.fontColor = "#D9D9D9";
+                        }
+                    },
+                    switchTurnedOn(index) {
+      
+                            if (this.switches[index].value) {
+                                // Switch is turned on, change font color to green
+                                this.switches[index].fontColor = '#FFFFFF';
+                            } 
+                            else {
+                                // Switch is turned off, change font color to red
+                                this.switches[index].fontColor = '#D9D9D9';
+                            }
                         
-                        const classList = document.querySelectorAll('.btn-left-brder');
+                        },
+                    switchStyle(fontColor) {
+                        return { color: fontColor };
+                    },
+                    handleactiveclass(){
+                        if (this.settingsstatus = true){
+                            
+                            const classList = document.querySelectorAll('.btn-left-brder');
                             classList.forEach(element => {
                             element.classList.toggle('btn-left-brder'); // Remove each element individually
                             });
-                            this.settingsstatus = false;
+
+                        const classList2 = document.querySelectorAll('.v-list-item__overlay');
+                            classList2.forEach(element => {
+                            element.classList.remove('v-list-item__overlay'); // Remove each element individually
+                            });
+
+                            this.settingsstatus = false
+                        }
+                       
+                        //this.settingsstatus != this.settingsstatus
+                        
+                       
 
                     },
                     logoutMethod(){
                         logoutUser();
                         location.reload()
-                    },
-                    colorchange(){
-                        this.tool.color = "red"
-                        this.buttonColor = "red"
-                        this.buttonColor2 = this.buttonColor
-
-                        
-                        
-                    },
-                    switchTurnedOn() {
-                       
-                        console.log("on")
-                        
-
-                        vuetify.theme.defaultTheme = vuetify.theme.defaultTheme === 'dark' ? 'light' : 'dark'
-                       
-                    },
-                    switchTurnedOff(){
-                        console.log("off")
                     },
                     resizemap(){
                         togglemenu(this.isActOpen, this.shift);
@@ -330,6 +327,18 @@
                     },
                     mouseleavejumpto(){
                         this.jumptocard = false;
+                    },
+                    async processAddPt(newPointGraphic){
+                        //handleaddrets(newPointGraphic);
+                        try{
+                            const obj = await addRETSPT(newPointGraphic)
+                            const objectid = obj.addFeatureResults[0].objectId
+                            this.addrets2 = objectid
+                            return
+                        }
+                        catch(err){
+                            console.log(err)
+                        }
                     },
                     async handleCreateTool() {
                         if (this.isCreateEnabled === true) {
@@ -390,6 +399,7 @@
 
                      handleSettingsTool(){
                         this.settingsstatus = !this.settingsstatus;
+
                      },
                     toggledarkgrey(){
                         map.basemap = darkVTBasemap;
@@ -398,6 +408,7 @@
                     },
                     togglelightgrey(){
                         map.basemap = lightVTBasemap
+                        lightVTBasemap.visible = true
                         this.basemapcard = false;
                         retsLabelclass.symbol.color = "black"
                     },
@@ -408,7 +419,9 @@
                     },  
                     toggleimagery(){
                         map.basemap = imageryBasemap;
-                        retsLabelclass.symbol.color = "white"
+                        retsLabelclass.symbol.color = "black"
+                        retsLabelclass.symbol.haloColor = "gray"
+                        retsLabelclass.symbol.haloSize = 1
                         this.basemapcard = false;
                     },
                     togglegoogle(){
@@ -425,7 +438,7 @@
                     toggledarkmode(){
                         vuetify.theme.defaultTheme = 'light';
 
-                    },
+                    }
 
                     
                 },
@@ -442,15 +455,15 @@
     #icons-bottom{
         position: relative;
         bottom: 15.5rem;
-        left: 10%;
+        left: 5%;
     }
     #icons-top{
-        left: 10%;
+        left: 5%;
     }
     .v-navigation-drawer{
         overflow-y: hidden !important;
         height: 100% !important;
-        width: 74px !important;
+        width: 63px !important;
         color: black;
     }
 
@@ -479,6 +492,8 @@
         bottom: 5%;
         left: 75px;
         z-index: 9999;
+        border-radius: 0px;
+
     }
     #basemapfont{
         font-size: 13px;
@@ -490,6 +505,7 @@
         bottom: 15.5%;
         left: 75px;
         z-index: 9999;
+        border-radius: 0px;
 
     }
     #jumptofont{
@@ -505,7 +521,7 @@
     #containersettings{
         position: absolute;
         width: 400px;
-        bottom: 10%;
+        bottom: 10rem;
         left: 50%;
         z-index: 9999;
         border-radius: 0px;
@@ -538,6 +554,10 @@
         left: 25px;
         font-size: 20px;
         height: 4rem;
+        
+    }
+    .font-class{
+        color: aqua !important;
     }
 
     #darkmodetogglefont{
@@ -578,7 +598,7 @@
         margin-top: 0px;
         left: 5px;;
     }    
-    #switch-container{
+    .switch-item{
         /* position: absolute; */
         margin-left: 1px; 
         margin-bottom: -55px;
@@ -608,22 +628,15 @@
     }
     #savebutton{
         float: right;
-    }
+    color: green;    }
     #darkmodeswitch{
         position: absolute;
         bottom: 2.3rem;
     }
     #save{
         border: 1px solid ;
+        border-radius: 9%;
         
-    }
-    #archivepopup{
-        padding: 20px;
-        border-radius: 0px;
-        left: 50%;
-        width: 26%;
-        top:40%;
-        height:25%; 
     }
 
  

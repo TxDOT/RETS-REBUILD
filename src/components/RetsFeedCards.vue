@@ -2,47 +2,76 @@
     <v-container id="container">
         <v-col class="d-flex flex-wrap ga-2" align-self="start">
             <v-row class="main-color">
-                <header id="container-header">RETS Dashboard</header>
-                <v-btn v-for="(tool, i) in addbutton" :key="i" :value="tool" @click="tool.action()" :prepend-icon= "buttonIcon" color="#4472C4" rounded="0" id="add-new-btn" class="main-button" v-if="!isDetailsPage">
-                    <!-- @click="handlecreate"> -->
-                    <p class="text-btn" id = "addbtn">{{addbtntext}}</p>
-                </v-btn>
-                
+                <div>
+                    <header id="container-header">RETS Dashboard</header>
+                    <div class="add-new-btn">
+                        <div style="float:right;">
+                            <v-btn v-for="(tool, i) in addbutton" :key="i" :value="tool" @click="tool.action()" :prepend-icon="buttonIcon" color="#4472C4" rounded="0" id="add-new-btn"  class="main-button" v-if="!isDetailsPage" >
+                            <!-- @click="handlecreate"> -->
+                            <p class="text-btn" id = "addbtn">{{addbtntext}}</p>
+                            </v-btn>
+                        </div>
+
+                    </div>
+                </div>
+               
+
             </v-row>
             <v-row id="feed-row">
                 <v-banner id="feed-banner" lines="two" density="default" min-width="0%">
                     <div style="width: 100%;">
                         <div class="banner-txt">
-                            <p>{{activityBanner}}</p>
-                            <div id="retsSubtitle"><v-text-field v-if="isSubtitle" label="Enter a subtitle" id="retsSubtitle"></v-text-field></div>
+                            <p>{{store.activityBanner}}</p>
+                            <div class="retsSubtitle">
+                                <div id="retSubText">
+                                    <v-text-field variant="plain" v-if="store.isDetailsPage" :disabled="isSubtitle" placeholder="Enter a subtitle" style="position:relative; top: 1px;"></v-text-field>
+                                </div>
+                            </div>
                             
-                            <v-btn v-if="isDetailsPage" icon="mdi-pencil-outline" density="compact" flat id="renameRets" @click="displaySubtitle($event)"></v-btn>
+                            <v-btn v-if="store.isDetailsPage" icon="mdi-pencil-outline" density="compact" flat id="renameRets" @click="displaySubtitle($event)"></v-btn>
                         </div>
 
-                        <div v-if="!isDetailsPage">
-                            <v-btn icon="mdi-filter" class="banner-btn" flat @click="isfilter = !isfilter"></v-btn>
-                            <div class="filter-notification-bubble" v-if="retsFilters.filterTotal > 0">
-                                <p style="font-size: 16.5px; position: relative; left: 21%; bottom: 1px;"><b>{{ retsFilters.filterTotal}}</b></p>
+                        <div v-if="!store.isDetailsPage" style="position: relative; top: .1rem">
+
+
+                            <div>
+                               
+     
+                             
+                                <v-btn icon="mdi-filter" class="banner-btn" flat @click="isfilter = !isfilter"></v-btn>
+                                <div class="filter-notification-bubble" v-if="retsFilters.filterTotal > 0">
+                                    <p style="font-size: 13.5px; position: relative; left: 25%; bottom: 1.3px;"><b>{{ retsFilters.filterTotal}}</b></p>
+                                </div>
                             </div>
+      
+                                <div class="switch">
+                                    <v-tooltip text="Show Selected Cards" location="top">
+                                        <template v-slot:activator="{props}">
+                                            <v-switch flat v-model="store.isShowSelected" density="compact" @update:modelValue="updateSelection(store.isShowSelected)" v-bind="props" color="primary" :disabled="isSwitchDisabled"></v-switch>
+                                        </template>
+                                    </v-tooltip>
+                                        
+                                </div>
+            
                         </div>
                     </div>
                 </v-banner>
             </v-row>
-            <v-row id="search-feed" v-if="!isDetailsPage">
+            <v-row id="search-feed" v-if="!store.isDetailsPage">
                 <v-text-field density="compact" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" v-model="actvFeedSearch"></v-text-field>
             </v-row>
 
-            <div class="card-feed-div" v-if="isCard">
-                <v-row class="rets-card-row" v-for="(rd, road) in roadObj" :key="rd" :value="road" :id="rd.attributes.OBJECTID">
+            <div class="card-feed-div" v-if="!store.isDetailsPage">
+                <v-row v-for="(rd, road) in store.roadObj" :key="rd" :value="road" :id="rd.attributes.OBJECTID" class="rets-card-row"> 
                     <v-btn elevation="0" @click="changeColor(rd.attributes.RETS_ID);" class="flag-btn" size="small" max-width=".5px" density="compact" variant="plain" slim>
                         <template v-slot:prepend>
-                            <v-icon size="medium" :id="`${rd.attributes.RETS_ID}Icon`" :color="rd.attributes.flagColor" :icon="rd.attributes.flagColor ? changeFlagIcon(rd.attributes.flagColor) : 'mdi-flag-outline'"></v-icon>
+                            <v-icon size="medium" :id="`${rd.attributes.RETS_ID}Icon`" :color="rd.attributes.flagColor.FLAG" :icon="rd.attributes.flagColor.FLAG ? changeFlagIcon(rd.attributes.flagColor.FLAG) : 'mdi-flag-outline'"></v-icon>
                         </template>
                     </v-btn>
                     <v-col class="color-picker" v-if="flagClickedId === rd.attributes.RETS_ID" v-click-outside="closeFlagDiv">
                         <v-icon size="medium" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" ></v-icon>
-                    </v-col>    
-                    <v-card  :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `7px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple class="card" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road); ">
+                    </v-col>
+                    <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `7px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="store.roadHighlightObj.has(`${String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)}`) ? 'card highlight-card' : 'card'" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road);">
                         <v-card-text id="retsCard">
                             RETS {{rd.attributes.RETS_ID }}
                         </v-card-text>
@@ -51,26 +80,36 @@
                             {{ rd.attributes.RTE_NM ?? "Route name not provided" }}
                         </v-card-text>
 
-                        <div style="position: relative; bottom: 10px; width: 100%;">
+                        <div style="position: relative; bottom: 7px; width: 100%;">
                             <p class="text-concat">
                                 {{ rd.attributes.DESC_ ? rd.attributes.DESC_ : "If description is empty does it need to be worked ?" }}
                             </p>
                         </div>
+                        <div style="position: relative; top: 2%; height: 40px;">
+                            <div>
+                                <div style="position: relative; float: right; padding-top: 0px; top:0px; left: 0px;">
+                                    <v-tooltip v-for="i in alertIcons" :text="i.popup" location="top">
+                                        <template v-slot:activator="{props}" v-if="i.supplementCondition ? rd.attributes[i.display] === i.condition && rd.attributes[i.displaySup] !== i.supplementCondition : rd.attributes[i.display] === i.condition"> 
+                                            <v-icon :icon="i.icon" class="cardPRIO" :color="i.color" v-bind="props"></v-icon>
+                                        </template>
+                                    </v-tooltip>
+                                </div>
+                                <div style="height:17px; position: absolute; bottom: 0px; width:fit-content;">
+                                <v-card-subtitle class="subtitle-text">
+                                    Created by {{ rd.attributes.CREATE_NM ? returnUserName(rd.attributes.CREATE_NM) : "If Create Name is empty is it really created" }} {{ rd.attributes.CREATE_DT ? returnDateFormat(rd.attributes.CREATE_DT) : returnDateFormat(rd.attributes.EDIT_DT)}}
+                                </v-card-subtitle>
+                                </div>
+                            </div>
+                            <!-- v-if="rd.attributes[i.display] === i.condition"  -->
 
-                        <v-card-subtitle class="subtitle-text main-color">
-                            Created by {{ rd.attributes.CREATE_NM ? rd.attributes.CREATE_NM : "If Create Name is empty is it really created" }} {{ rd.attributes.CREATE_DT ? returnDateFormat(rd.attributes.CREATE_DT) : returnDateFormat(rd.attributes.EDIT_DT)}}
-                        </v-card-subtitle>
-                        <div>
-                            <v-icon icon="mdi-exclamation" id="cardPRIO" v-if="rd.attributes.PRIO === 0"></v-icon>
                         </div>
                         
                     </v-card>
                 </v-row>
             </div>
-            <div class="card-feed-div" v-if="isNoRets"><p>No RETS for you!</p></div>
+            <div class="card-feed-div" v-if="store.isNoRets"><p>No RETS for you!</p></div>
         </v-col>
-        <RetsDetailPage v-if="isDetailsPage" :retsInfo="send" @close-detail="enableFeed"/>
-
+        <RetsDetailPage v-if="store.isDetailsPage" @close-detail="enableFeed"/>
     </v-container>
     <v-card v-if="uploadAttachment" class="card attachCard"> 
         <div class="cardDiv" id="dragndrop" @drop="dropAttachment($event)" @dragover="dragover()" @click="fileAttach()" @dragleave="dragLeave()">
@@ -86,7 +125,7 @@
         <v-card-title>Discard unsaved changes?</v-card-title>
         <v-divider style="margin-left: 15px; margin-right: 15px; color:white;"></v-divider>
         <v-card-text>
-            If you proceed your chagnes will be discarded.
+            If you proceed your changes will be discarded.
         </v-card-text>
         <div style="margin: 15px;">
             <div style="float: right; margin-bottom: 15px;">
@@ -96,27 +135,21 @@
         </div>
         
     </v-card>
-
-    
-        <v-container id="Spinner" v-if="isSpinner" >
+    <v-container id="Spinner" v-if="isSpinner" >
             <v-progress-circular color="blue" indeterminate size="60" ></v-progress-circular>
         </v-container>
-    
-    
 </template>
 
 <script>
-import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer, searchCards, highlightRETSPoint, turnAllVisibleGraphicsOff, toggleRelatedRets, getHighlightGraphic, removeHighlight, createtool, handleaddrets} from './utility.js'
+import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer, searchCards, highlightRETSPoint, turnAllVisibleGraphicsOff, toggleRelatedRets, getHighlightGraphic, removeHighlight, createtool, returnHistory, toggleHighlightCards, outlineFeedCards, removeOutline} from './utility.js'
 import {appConstants} from '../common/constant.js'
-import {getUserId} from './login.js'
 import Filter from './RetsFilter.vue'
 import RetsDetailPage from './RetsDetail.vue'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import {store} from './store.js'
 import {view, retsGraphicLayer} from './map-Init.js'
-import RetsFeed from './RetsFeed.vue'
-import { sketchWidgetcreate, createretssym } from './map-Init.js'
-import {addRETSPT} from '../components/crud.js'
+import { sketchWidgetcreate, createretssym, flagRetsColor } from './map-Init.js'
+import {addRETSPT, postFlagColor} from '../components/crud.js'
 
 
 export default{
@@ -124,9 +157,9 @@ export default{
     components: {Filter, RetsDetailPage},
     props: {
         filterPros: Object,
-        addrets:Number,
+        // addrets:Number
     },
-    //components: {RetsDetailPage, Filter}, 
+    components: {RetsDetailPage, Filter}, 
     data(){
         return{
             isCard: true,
@@ -147,37 +180,45 @@ export default{
             flagColor: "",
             timer: "",
             currentValues: "",
-            isDetailsPage: false,
-            isNoRets: false,
             send: null,
             activityBanner: "Activity Feed",
             isSubtitle: false,
             isRetsActivated: true,
+            retsSubtitle:"",
             actvFeedSearch: "",
-            flagColor: '',
             uploadAttachment: false,
             isfilter: false,
             loggedInUser: '',
-            retsFilters: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, "JOB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
+            retsFilters: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"}, "JOB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
                          "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, "GIS_ANALYST": appConstants.defaultUserValue, 
                          "filterTotal": 2},
             count: 0,
             store,
             stageData: 0,
             unsavedChanges: false,
+            showChanges: false,
             isCreateEnabled: true,
             addbutton: [
                 {title:"New", action: async () =>{
                                 const graphicAdd = await this.handlecreate();
                                 if (graphicAdd){
-
                                     this.processAddPt(graphicAdd)
-
                                 }
                                 
                 }}
                           
-],
+            ],
+            alertIcons:[
+                {icon: "mdi-account-group", popup: "Assigned to you", color: "white", display: "ASSIGNED_TO", condition: `${store.loggedInUser}`, displaySup: "GIS_ANALYST", supplementCondition: `${store.loggedInUser}`},
+                {icon:"mdi-account-multiple-check", popup: "MO/TxDOT Connect", color: "white", display: "ACTV", condition: "(Minute Order || TxDOTConnect)"}, //ACTV === (Minute Order || TxDOTConnect)
+                {icon:"mdi-pencil-box-outline", popup: "District Request", "color": "white", display: null, condition: null}, //keep null
+                {icon:"mdi-alarm", popup: "Deadline set (with date)", "color": "white", display: null, condition: null}, //past the deadline set
+                {icon:"mdi-check-decagram-outline", popup: "Job Complete", color: "green", display: "STAT", condition: 3},
+                {icon: "mdi-timer-sand", popup: "No activity for (# days)", color: "white", display: null, condition: null}, //Only for in progress rets; edit_dt >= 5 weeks
+                {icon: "mdi-exclamation", popup:"Priority Job", color:"red", display: "PRIO", condition: 0}                
+            ],
+            isShowSelected: false,
+            isSwitchDisabled: false
         }
     },
     beforeMount(){
@@ -185,6 +226,7 @@ export default{
         clickRetsPoint()
     },
     mounted(){
+        this.showChanges = true
         reactiveUtils.on(() => view.popup, "trigger-action",
             async (event) => {
                 if (event.action.id === "open-details") {
@@ -194,33 +236,29 @@ export default{
                     const returnGraphic = retsGraphicLayer.graphics.items.find(ret => ret.attributes.OBJECTID === graphicOid)
                     this.stageData = {attributes: returnGraphic.attributes, geometry: [returnGraphic.geometry.x, returnGraphic.geometry.y]}
                     this.checkChanges()
-                    
-                    
                 }
         });
+        this.retsFilters.loggedInUser = store.loggedInUser
     },
     methods:{
         async processAddPt(newPointGraphic){
-                        try{
-                            this.isSpinner = true
-                            this.Spinneractive = false
-                            this.isCard = false
-                            console.log(newPointGraphic)
-                            const obj = await addRETSPT(newPointGraphic)
-                            const objectid = obj.addFeatureResults[0].objectId
-                            this.addrets = objectid
-                            this.isSpinner = false
-                            this.Spinneractive = true
-
-
-                            
-                            return
-                        }
-                        catch(err){
-                            console.log(err)
-                        }
-                         //handleaddrets(newPointGraphic, this.addrets);
-                    },
+            try{
+                this.isSpinner = true
+                this.Spinneractive = false
+                this.isCard = false
+                const obj = await addRETSPT(newPointGraphic, "rets")
+                console.log(obj)
+                const objectid = obj.addFeatureResults[0].objectId
+                this.addrets = objectid
+                this.isSpinner = false
+                this.Spinneractive = true
+                return
+            }
+            catch(err){
+                console.log(err)
+            }
+            //handleaddrets(newPointGraphic, this.addrets);
+        },
         alert(s){
             window.alert(s)
         },
@@ -233,13 +271,11 @@ export default{
             //do nothing
         },
         displaySubtitle(e){ 
-            this.isSubtitle = true
-            console.log(e)
+            this.isSubtitle = !this.isSubtitle
         },
         checkChanges(){
             const beforeAtt = JSON.parse(store.currentInfo)
             const afterAtt = JSON.parse(JSON.stringify(this.currRoad))
-            console.log(afterAtt)
             let issue = 0
             for(const [key, value] of Object.entries(beforeAtt.attributes)){
                 if(key==='RELATED_RETS'){
@@ -247,56 +283,78 @@ export default{
                 }
                 if(value !== afterAtt.attributes[key]){
                     this.unsavedChanges = true
-                    console.log(beforeAtt)
-                    console.log(afterAtt)
                     issue++
                     return
                 }
             }
-            console.log("done")
             issue === 0 ? this.double({attributes: this.stageData.attributes, geometry: [this.stageData.geometry.x, this.stageData.geometry.y]}, 1) : null
         },
         processBanner(i){
             console.log(i)
         },
-
-        async enableFeed(e){
-            this.isCard = true
-            this.isDetailsPage = false
-            console.log(e)
-            turnAllVisibleGraphicsOff()
-            if(e.isDelete){
-                this.roadObj.splice(e.index, 1)
-                this.activityBanner = "Activity Feed"
-                return
+        // async enableFeed(e){
+        //     turnAllVisibleGraphicsOff() 
+        //     console.log(store.roadHighlightObj)
+        //     if(e[0].attributes.isDelete){
+        //         e[0].attributes.index ? store.roadObj.splice(e[0].attributes.index, 1) : this.removeUndefinedIndex(e[0].attributes)
+        //         this.activityBanner = "Activity Feed"
+        //         this.isDetailsPage = e[1]
+        //         await this.setActivityFeed
+        //         return
+        //     }
+        //     console.log(store.archiveRetsData)
+        //     this.isDetailsPage = e[1]
+        //     this.activityBanner = "Activity Feed"
+        //     return
+        // },
+        addClass(id){
+            if(store.isShowSelected){
+                const classToAdd = store.roadHighlightObj.includes(id) ? 'highlight-card card' : "card"
+                console.log(classToAdd)
+                this.updateSelection(true)
+                return classToAdd
             }
-            await this.setActivityFeed
-            this.isDetailsPage = e[1]
-            this.activityBanner = "Activity Feed"
+            return "card"
+        },
+        highlightToggleAndProcess(){
+            console.log('not done')
             return
         },
+        removeUndefinedIndex(delRd){
+            const findRoad = store.roadObj.findIndex(road => road.attributes.OBJECTID === delRd.OBJECTID)
+            store.roadObj.splice(findRoad, 1)
+        },
         double(road, index){
-            console.log(road)
+            store.historyRetsId = road.attributes.RETS_ID
+            returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
             road.attributes.logInUser = this.loggedInUser 
             road.attributes.index = index
-            this.send = this.currRoad = road
+            store.retsObj = road
+            console.log(store.retsObj)
             clearTimeout(this.timer)
             this.timer=""
-            this.isCard = false
-
-            this.isDetailsPage = true
-            this.activityBanner = `${road.attributes.RETS_ID}`
+            store.isDetailsPage = true
+            store.activityBanner = `${road.attributes.RETS_ID}`
+            // removeHighlight(true,true)
+            // removeOutline()
             highlightRETSPoint(road.attributes)
+            //outlineFeedCards()
             this.zoomToRetsPt(road)
             toggleRelatedRets(JSON.stringify(road))
-
+            
+            return
         },
         async addretss(){
-            const querystring = {"whereString":`OBJECTID = ${this.addrets}`}
+            const querystring = {"whereString":`OBJECTID = ${this.addrets}`, "queryLayer": "retsLayer"}
             try{const querypromise = await getQueryLayer(querystring, "PRIO, CREATE_DT DESC")
                 if (querypromise.features.length){
                     querypromise.features.forEach(
-                        (feat)=> this.double({attributes:feat.attributes,geometry:[feat.geometry.x,feat.geometry.y]}),
+                        (feat)=> {
+                            feat.attributes.flagColor = {flagColor: '', OBJECTID: ''}
+                            const addNewRetsPt = {attributes:feat.attributes,geometry:[feat.geometry.x,feat.geometry.y]}
+                            store.addRetsID(addNewRetsPt)
+                            this.double(addNewRetsPt)
+                        }
                     )
                 }
 
@@ -311,7 +369,9 @@ export default{
             this.timer = ""
             this.timer = setTimeout(()=>{
                 const zoomToRETS = rets.geometry
+                highlightRETSPoint(rets.attributes)
                 zoomTo(zoomToRETS)
+
             },250)
         },
 
@@ -327,7 +387,9 @@ export default{
         },
         assignColorToFlag(clr){
             document.getElementById(`${this.flagClickedId}Icon`).style.color = clr
-            this.roadObj.find(rd => rd.attributes.RETS_ID === this.flagClickedId).flagColor = clr
+            const rets = store.roadObj.find(rd => rd.attributes.RETS_ID === this.flagClickedId)
+            rets.attributes.flagColor.FLAG = clr
+            postFlagColor(rets)
             this.isColorPicked = false;
             this.closeFlagDiv()
         },
@@ -348,11 +410,25 @@ export default{
         dropAttachment(event){
             console.log(event)
         },
+        changeNumFilter(filter){
+            if(filter === 'cancel'){
+                this.isfilter = false;
+                return
+            }
+            store.retsFilters = filter
+            this.isfilter = false
+            store.setFilterFeed()
+        },
+        changeFlagIcon(color){
+            if(color === '#FFFFFF'){
+                return 'mdi-flag-outline'
+            }
+            return 'mdi-flag'
+        },
         async handlecreate(){
             if (this.isCreateEnabled === true) {
                 this.addbtntext = "Cancel"
                 this.buttonIcon = null
-
                 this.isCreateEnabled = !this.isCreateEnabled;
                 //console.log("true")
                 const newPointGraphic = await createtool(sketchWidgetcreate, createretssym);
@@ -369,8 +445,22 @@ export default{
                 this.addbtntext = "New"  
                 this.buttonIcon = "mdi-plus"
                 }
+        },
+        returnUserName(n){
+            if(!n) {
+                return "My name is Null"
+            }
+            const usernameRow = appConstants.userRoles.find(name => name.value === n)
+            return usernameRow?.name ?? 'My name is not in the RESP table :('
+        },
+        updateSelection(e){
+            toggleHighlightCards(e)
+        },
 
-
+        determineVisibility(id){
+            if(!store.isShowSelected) return
+            const display = store.roadHighlightObj.includes(id) ? "display: flex" : "display: none"
+            return display
         }
 
     },
@@ -378,7 +468,7 @@ export default{
         actvFeedSearch:{
             handler: function(){
                 if(this.actvFeedSearch.length){
-                    searchCards(this.roadObj, this.actvFeedSearch, "OBJECTID")
+                    searchCards(store.roadObj, this.actvFeedSearch, "OBJECTID")
                     return
                 }
                 const getHideLength = document.getElementsByClassName("hideCards")
@@ -390,74 +480,66 @@ export default{
             },
             immediate: true
         },
+        retsSubtitle:{
+            handler:function(word){
+                if(word.length<0) return
+                setTimeout(()=>{
+                   // this.filterPros.attributes.RTE_NM = word
+                },1000)
+            }
+        },
         addrets:{
             handler: async function(){
-                //console.log(this.addrets)
+                console.log(this.addrets)
                 await this.addretss()
             },
             immediate: true
-        }
-        
+        },
+        // 'store.roadHighlightObj.size':{
+        //     handler: function(){
+        //         console.log(store.roadHighlightObj.size)
+        //         if(store.roadHighlightObj.size > 0){
+        //             this.isSwitchDisabled = false
+        //             return
+        //         }
+        //         this.isSwitchDisabled = true
+        //         return
+        //     },
+        //     once: true
+        // }
     },
     computed:{
         queryLayer:{
-            async get(){
-                const user = await getUserId()
-                this.loggedInUser = user
-                this.retsFilters.loggedInUser = user
-                const queryString = {"whereString": `(GIS_ANALYST = '${user}') AND (STAT = 1 OR STAT = 2 OR STAT = 4)`}
-                const orderField = "PRIO, CREATE_DT DESC"
-                getQueryLayer(queryString, orderField)
-                .then(obj => {
-                    if(obj.features.length){
-                        obj.features.forEach((x) => {
-                            this.roadObj.push({attributes:x.attributes, geometry: [x.geometry.x, x.geometry.y]})
-                        })
-                        return
-                    }
-                    this.isDetailsPage = false
-                    this.isNoRets = true
-                    })
-                .catch((err)=> console.log(err))
+            get(){
+
             },
         },
-        setActivityFeed:{
-            async get(){
-                const filter = await filterMapActivityFeed(this.retsFilters)
-                this.roadObj = []
-                const query = {"whereString": `${filter}`}
-                const orderField = `${this.retsFilters.CREATE_DT.filter} ${this.retsFilters.CREATE_DT.sortType}`
-                getQueryLayer(query, orderField)
-                    .then(obj => {
-                        if(obj.features.length){
-                            obj.features.forEach((x) => {
-                                this.roadObj.push({attributes:x.attributes, geometry: [x.geometry.x, x.geometry.y]})
-                            })
-                            this.isNoRets = false
-                            return
-                        }
-                        this.isDetailsPage = false
-                        this.isNoRets = true
-                        
-                    })
-                    .catch((err)=> {
-                        console.log(err)
-                    })
-            }
-        },
+        
 
     }
 }
 </script>
 
 <style scoped>
-    #Spinner{
+#Spinner{
         position: absolute;
         top: 50%;
-        left: 12.5%
+        left:17rem;
 
         
         
+    }
+#addbtn{
+        position: relative;
+        left: 0%;
+        top: 10%;
+    }
+    #retSubText{
+        position: relative;
+        right: 15px;
+        padding: 0px;
+        margin-left: 10px;
+        bottom: .4rem;
     }
     #retsSubtitle{
         /*  */
@@ -471,12 +553,14 @@ export default{
         width: 25% !important;
     }
     #container{
-        width: 50vh;
-        height: 100vh;
+        width: 509px;
+        height: 100%;
         background-color: black;
         position: absolute;
-        left: 74px;
+        left: 63px;
         padding: 0px;
+        display: block;
+        font-size: 10px;
     }
     #feed-row{
         position: absolute;
@@ -507,7 +591,7 @@ export default{
         bottom: 1.5rem;
         width: 104% !important;
         padding: 5px 0px 0px 10px;
-        height: 105px;
+        height: 120px;
     }
     .card-feed-div{
         position: relative;
@@ -523,7 +607,7 @@ export default{
 
     #container-header{
         position: relative;
-        top: 25%;
+        top: 50%;
         font-size: 23px;
         font-weight: bold; 
         padding-left: 20px;
@@ -545,11 +629,10 @@ export default{
         flex-direction: row;
         justify-items: end;
     }
-    #add-new-btn{
-        
+    .add-new-btn{
         position: absolute;
         right: 1rem;
-        top: .5rem;
+        top: 14px;
         text-align: center;
 
     }
@@ -570,20 +653,19 @@ export default{
 
     .highlight-card{
         position: relative;
-        animation: fade 2500ms ease-out forwards;
-        transform: scale(1);
-        background-color: rgba(9, 107, 219, 0.7);
-        top: 0rem;
-        width: 100%;
-    }
 
+        background-color: #404040;
+    }
+    #test{
+        display: none;
+    }
     .route-card{
         position: relative;
         max-width: 50%;
     }
     .route-name{
         position: absolute;
-        right: 3.5vh;
+        right: 3.8vh;
         float: right;
         top: 0.5rem;
         justify-content: end;
@@ -592,6 +674,8 @@ export default{
         flex-direction: row;
         padding: 0px;
         font-size: 14px;
+        color:#D9D9D9;
+        font-weight: bold;
     }
     
     .text-concat {
@@ -601,7 +685,7 @@ export default{
         overflow: hidden;
         font-size: 14px;
         position: relative;
-        top: .5rem;
+        color: #a6a6a6
     }
 
     .flag-btn{
@@ -651,12 +735,14 @@ export default{
         bottom: 7px; 
         width: 80%;
         font-size: 15px;
+        color: #D9D9D9;
+        font-weight: bold;
     }
     .filter-notification-bubble{
         position: relative;
-        width: 1.2rem;
+        width: 1.1rem;
         background-color:#4472C4;
-        height: 1.2rem;
+        height: 1.1rem;
         float: right;
         bottom: 1rem;
         left: 2.5rem;
@@ -668,17 +754,23 @@ export default{
         margin-bottom: 0px;
         flex: none;
     }
-    #cardPRIO{
-        float: right;
-        color: red;
-        top: 1rem;
+    .cardPRIO{
+        padding: 0px;
+        margin-left: 5px;
+        padding-bottom: 0px;
+        font-size: 22px;
     }
-    #addbtn{
+
+    .switch{
         position: relative;
-        left: 1%;
+        bottom: 30px;
+        left: 5px;
+        float: right;
+        font-size: 10px;
     }
 
-    
-
-
+    :deep(.v-switch--inset .v-switch__track){
+        height: 20px !important;
+        width: 45px !important;
+    }
 </style>

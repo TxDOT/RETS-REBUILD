@@ -1,37 +1,31 @@
 <template>
-    <!-- details section --> 
+    <!-- details section -->
     <div id="detailsHeaderDiv">
-        
         <div id="detailsHeaderIcon">
-            <v-btn icon="mdi-paperclip" density="compact" flat @click="uploadAttachment = !uploadAttachment"></v-btn>
-            <v-btn density="compact" flat @click="changeColor(retsInfo.RETS_ID);" id="flagBtnDetails">
+            <v-btn density="compact" flat @click="changeColor(store.retsObj.attributes.RETS_ID);" id="flagBtnDetails">
                 <template v-slot:prepend>
-                    <v-icon size="25px" :id="`${retsInfo.RETS_ID}Icon`" :color="retsInfo.flagColor" :icon="retsInfo.flagColor ? changeFlagIcon(retsInfo.flagColor) : 'mdi-flag-outline' " style="position: relative; left: 7px; bottom: 2px"></v-icon>
+                    <v-icon size="25px" :id="`${store.retsObj.attributes.RETS_ID}Icon`" :color="store.retsObj.attributes.flagColor.FLAG" :icon="store.retsObj.attributes.flagColor.FLAG ? changeFlagIcon(store.retsObj.attributes.flagColor.FLAG) : 'mdi-flag-outline' " style="position: relative; bottom: 2px; left: 6px;"></v-icon>
                 </template>
             </v-btn>
-            <v-col class="details-color-picker" v-if="flagClickedId === retsInfo.RETS_ID" v-click-outside="closeFlagDiv">
-                <v-icon size="20px" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])"></v-icon>
+            <v-col class="details-color-picker" v-if="flagClickedId === store.retsObj.attributes.RETS_ID" v-click-outside="closeFlagDiv">
+                <v-icon size="20px" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" style="position: relative; right: 6px;"></v-icon>
             </v-col>
-            <v-btn-toggle v-model="retsInfo.PRIO" density="compact">
-                <v-btn icon="mdi-exclamation" density="compact" flat style="color:red" ></v-btn>
+            <v-btn-toggle v-model="store.retsObj.attributes.PRIO" density="compact">
+                <v-btn icon="mdi-exclamation" density="compact" style="color: #d9d9d9; opacity: 1;" selected-class="toggle-exclamation" variant="plain" active></v-btn>
             </v-btn-toggle>   
-            
         </div>
-        
     </div>
-    <detailsAlert v-if="isAlert" :alertsTextInfo="alertTextInfo"/>
+
     <div id="container-div">
-        <v-card id="details-page">
-            <div class="cardDiv"> 
-                <v-btn-toggle selected-class="active-button" variant="plain" mandatory v-model="isBtnSet">
-                    <v-btn flat class="secondary-button" @click="this.isDetails = true; this.isMetadata = false">Details</v-btn>
-                    <v-btn flat class="secondary-button" @click="this.isMetadata = true; this.isDetails = false">Metadata</v-btn>
-                </v-btn-toggle>
+        <div id="details-page" >
+            <v-btn-toggle selected-class="active-button" variant="plain" mandatory v-model="isBtnSet" id="retsDetailMeta">
+                <v-btn flat class="retsMetaBtn" @click="this.isDetails = true; this.isMetadata = false" density="compact">Details</v-btn>
+                <v-btn flat class="retsMetaBtn" @click="this.isMetadata = true; this.isDetails = false" density="compact">Metadata</v-btn>
+            </v-btn-toggle>
         
-                <DetailsCard v-if="isDetails" :infoRets="retsInfo" :taskGem="sendGemTaskNum" @disable-save="disableSave"/>
-                <MetadataCard v-if="isMetadata" :infoRets="retsInfo"/>
-            </div>
-        </v-card>
+            <DetailsCard v-if="isDetails" :infoRets="store.retsObj" :taskGem="sendGemTaskNum" @disable-save="disableSave"/>
+            <MetadataCard v-if="isMetadata" :infoRets="store.retsObj"/>
+        </div>
         <div class="gem-search" >
             <v-icon icon="mdi-magnify" id="gem-search-icon"></v-icon>
             <input type="text" id="gem-id">
@@ -39,52 +33,56 @@
                 <span class="gem-task" @click="addGemChip(i)">{{ i }}</span>
             </span>
         </div>
-        
         <!-- history section -->
         <div >
+            
             <v-card class="history-card">
-                <v-card-title >History</v-card-title>
-                <v-text-field class="search-history" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" density="compact" v-model="searchHistoryFilter"></v-text-field>
-                <div class="cardDiv">
-                    <v-row v-for="(note, i) in histNotes" :key="i" style="padding-bottom: 1rem;" :id="note.index">
-                        <v-banner v-model="note[i]" id="history-notes" density="compact" :id="note.index">
-                            <v-banner-text>
-                                {{ note.notes }} <span style="font-size: 10px; color: grey;">{{ note.author }} {{ note.time }}</span>
-                            </v-banner-text>
-
-                            <template v-slot:actions v-if="note.USER_TAG === 0">
-                                <v-btn icon="mdi-pencil" style="bottom: 15px;" @click="openNote(note.notes, i)"></v-btn>
-                            </template>
-                        </v-banner>
-                    </v-row>
+                <div style="float: right; font-size: 10px; position: relative; top: .5rem;" >
+                    <v-btn icon="mdi-arrow-expand" variant="plain" density="compact" @click="expandChatHistory"></v-btn>
                 </div>
+                <v-card-title style="padding-bottom: 30px;">History</v-card-title>
+                <historyView :sortA="toSortBottom"/>
             </v-card>
         </div>
-        
-        <div>
-            <div style="position: relative; float: left; margin-left: 10px; font-size: 11px; display: flex; flex-wrap: wrap;">
-                <v-checkbox label="Asset Only Job" density="compact"></v-checkbox>
-            </div>
-            <v-btn-toggle id="trigger-buttons" density="compact">
-                    <v-btn @click="handlearchive" variant="plain" flat size="small">Delete</v-btn>
-                    <v-btn @click="cancelDetailsMetadata" class="secondary-button" variant="plain" flat size="small">Cancel</v-btn>
-                    <v-btn @click="sendToParent" variant="elevated" class="main-button-style" size="small" :disabled="saveDisable">Save</v-btn>
-            </v-btn-toggle>
-            
-        </div>
-        
     </div>
-    
-    
-    <v-container v-if="editText" style="" id="commentDiv">
-        <v-textarea variant="filled" auto-grow v-model="editNotes" label="Make a Comment"></v-textarea>
-            <div style="position: relative; float: right; left: 13px;">
-                <v-btn variant="plain" @click="deleteNote" class="secondary-button">Delete</v-btn>
-                <v-btn variant="plain" @click="closeNote" class="secondary-button">Cancel</v-btn>
-                <v-btn variant="outlined" class="main-button-style" @click="saveNote">Save</v-btn>
+    <div id="commentDiv" v-if="editText">
+        <v-card style="position: relative; height: 100%; border-radius: 0%; left: 20%; bottom: 5%;" >
+            <v-card-title style="padding-bottom: 30px;">History</v-card-title>
+            <div style="float: right; font-size: 10px; position: relative; bottom: 2.4rem;" >
+                <v-btn icon="mdi-close" variant="plain" density="compact" @click="editText = false"></v-btn>
             </div>
-    </v-container>
-    
+            <historyView :sortB="toSortTop"/>
+            <div class="marginSetting" style="padding-top: 10px; position: absolute; width: 98%; bottom: 2rem;">
+                <v-text-field label="Type a message" density="compact" tile v-model="addHistoryChat" style="margin-left: 0px; margin-right: 5px;"></v-text-field>
+                <div style="float: left; bottom: 1rem; position: relative;">
+                    <v-btn prepend-icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px !important;" @click="displayAttachments()">Add an Attachment</v-btn>
+                    
+                </div>
+                <div style="float:right; bottom: 1rem; position: relative; ">
+                    <v-btn icon="mdi-close" variant="plain" density="compact" style="font-size: 15px !important;" @click="clearMessage"></v-btn>
+                    <v-btn icon="mdi-check" variant="plain" density="compact" style="font-size: 15px !important;" @click="addHistoryNote"></v-btn>
+                </div>
+            </div>
+            <div style="position: absolute; width: 98%; bottom: 1rem;">
+                <div style="position: relative; float: right; padding-top: .5rem; left: 20px;">
+                    <!-- <v-btn variant="plain" @click="deleteNote" class="secondary-button">Delete</v-btn>
+                    <v-btn variant="plain" @click="closeNote" class="secondary-button">Cancel</v-btn> -->
+                    <v-btn variant="outlined" class="main-button" density="compact" @click="saveNote" style="margin-right: 15px;">Save & Close</v-btn>
+                </div>
+            </div>
+        </v-card>
+
+    </div>
+    <div style="position: relative; top: 93px; padding-bottom: 0px;">
+        <div style="position: relative; float: left; margin-left: 10px; font-size: 11px; display: flex; flex-wrap: wrap;">
+            <v-checkbox label="Asset Only Job" density="compact" class="checkbox-size"></v-checkbox>
+        </div>
+        <v-btn-toggle id="trigger-buttons" density="compact">
+            <v-btn @click="handlearchive" variant="plain" flat size="small" class="secondary-button">Delete</v-btn>
+            <v-btn @click="cancelDetailsMetadata" class="secondary-button" variant="plain" flat size="small">Cancel</v-btn>
+            <v-btn @click="sendToParent" variant="outlined" class="main-button-style" size="small" :disabled="store.isSaveBtnDisable">Save</v-btn>
+        </v-btn-toggle>
+    </div>
     <v-card id = "archivepopup" v-if="isarchiveopen" >
         <v-card-title id = "archiveheader" >
             Delete RETS {{deletedRETSID}}
@@ -95,35 +93,33 @@
             </v-card-subtitle>
         
 
-        <v-btn-group id = "archivebuttons">
-                <v-btn  text="CANCEL" @click="handlearchive"></v-btn>
-                <v-btn id = "deletebutton" text="DELETE" @click="deleteRets"></v-btn>
+        <v-btn-group id = "archivebuttons" density="compact">
+                <v-btn class="secondary-button" @click="handlearchive">CANCEL</v-btn>
+                <v-btn class="main-button-style" @click="deleteRets">DELETE</v-btn>
             </v-btn-group>
     
     </v-card>    
-     
-    
-
-    
 
 </template>
-
 
 <script>
     import editHistoryNotes from './EditHistoryNotes.vue'
     import DetailsCard from './detailsCard.vue'
     import MetadataCard from './metadataCard.vue'
-    import {getGEMTasks, searchCards, removeHighlight, removeRelatedRetsFromMap, removeretsgraphic} from './utility.js'
+    import { appConstants } from '../common/constant.js'
+    import {getGEMTasks, searchCards, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, removeOutline} from './utility.js'
     import detailsAlert from './detailsAlert.vue'
     import {updateRETSPT, deleteRETSPT} from './crud.js'
-    import { sketchWidgetcreate, graphics } from './map-Init.js'
+    import {store} from './store.js'
+    import historyView from './historyRow.vue'
+
     export default{
         name: "RetsDetailPage",
-        components: {editHistoryNotes, DetailsCard, MetadataCard, detailsAlert, },
+        components: {editHistoryNotes, DetailsCard, MetadataCard, detailsAlert, historyView},
         props: {
-            retsInfo: Object,
             taskGem: Number,
             alertInfo: Object,
+            historyString: String,
         },
         emits:['close-detail'],
         data(){
@@ -137,20 +133,26 @@
                                'Sprint 2', 'Sprint 3', 'Sprint 4', 'Sprint 5', 'Toll', 'TxDOTConnect', 'Urban Area Interaction'],
                 isBtnSet: 0,
                 relatedRets: ["Not Started", "On Hold", "Completed"],
-                histNotes: [{notes: "please  make sure this gets done before the EOM", author: "cbardash", time: "10/29/2023",  USER_TAG: 0, index: 0}, 
-                            {notes: "Priority field updated", author: "cbardash", time: "10/29/2023", USER_TAG: null, index: 1}],
+                histNotes: [],
                 editText: false,
                 editNotes: '',
                 noteIndex: 0,
                 gemTask: [],
                 sendGemTaskNum: null,
-                isAlert: false,
-                alertTextInfo: {"text": "Note Saved", "color": "#70ad47"},
                 searchHistoryFilter: '',
                 saveDisable: false,
                 flagClickedId: "",
                 flagColor: "",
                 swatchColor: ['', '#FF0000', '#FF7F00', '#FFFF00', '#008000', '#4472C4', '#B75CFF', '#FFFFFF'],
+                isHistNotesEmpty: false,
+                store,
+                noHistResp: "No History for this RETS",
+                addHistoryChat: "",
+                sendHistory: "",
+                hasAttachment: false,
+                toSortTop: "ASC",
+                toSortBottom: "DESC",
+                retsInfo: []
             }
         },
         mounted(){
@@ -161,10 +163,28 @@
                     return
                 }
             })
+            this.getHistoryStore
+            console.log(store.retsObj)
+            store.retsObj = store.retsObj
+            
+            store.getHistoryChatRet()
         },
         methods:{
-            canceladdrets(){
-                console.log("ok")
+            handlearchive(){
+                this.isarchiveopen =! this.isarchiveopen
+                this.deletedRETSID = store.retsObj.attributes.OBJECTID         
+            },
+            returnDateFormat(e){
+                //10/29/2023 09:11am
+                const date = new Date(e)
+                return `${date.toLocaleString('en-US')}`
+            },
+            returnUserName(n){
+                if(!n) {
+                    return "I have no name"
+                }
+                const usernameRow = appConstants.userRoles.find(name => name.USERNAME === n)
+                return usernameRow.name
             },
             closeFlagDiv(){
                 this.flagClickedId = ""
@@ -177,7 +197,8 @@
             },
             assignColorToFlag(clr){
                 document.getElementById(`${this.flagClickedId}Icon`).style.color = clr
-                this.retsInfo.flagColor = clr
+                store.retsObj.attributes.flagColor.FLAG = clr
+                console.log(store.retsObj.attributes)
                 this.isColorPicked = false;
                 this.closeFlagDiv()
             },
@@ -187,26 +208,39 @@
                 this.isColorPicked = true;
             },
             disableSave(bool){
+                if(store.isDisableValidations){
+                    this.saveDisable = false
+                    return
+                }
                 this.saveDisable = bool
             },
             deleteRets(){
-                this.retsInfo.isDelete = true
-                deleteRETSPT(this.retsInfo)
-                removeRelatedRetsFromMap(this.retsInfo.OBJECTID)
-                removeHighlight(this.retsInfo, true)
-                this.$emit('close-detail', [this.retsInfo, false])
-                
+                clearGraphicsLayer()
+                store.retsObj.attributes.isDelete = true
+                deleteRETSPT(store.retsObj)
+                removeRelatedRetsFromMap(store.retsObj.attributes.OBJECTID)
+                store.deleteRetsID()
+                store.isDetailsPage = false
+                store.activityBanner = "Activity Feed"
+                deleteRetsGraphic()
             },
             async sendToParent(){
-                await updateRETSPT(this.retsInfo)
-                removeHighlight(this.retsInfo, true)
-                this.$emit('close-detail', [this.retsInfo, false])
-                
+                clearGraphicsLayer()
+                // this.retsInfo.ASSIGNED_TO = this.retsInfo.ASSIGNED_TO.value
+                store.retsObj.attributes.PRIO = store.retsObj.attributes.PRIO ?? 1
+                console.log(store.retsObj.attributes.PRIO)
+                await updateRETSPT(store.retsObj)
+                store.isDetailsPage = false
+                store.activityBanner = "Activity Feed"
+                deleteRetsGraphic()
+                store.updateRetsID()
             },
             cancelDetailsMetadata(){
-                console.log(this.retsInfo)
-                this.$emit('close-detail', [this.retsInfo, false])
-                removeHighlight(this.retsInfo, true)
+                clearGraphicsLayer()
+                removeHighlight("a", true)
+                store.preserveHighlightCards()
+                store.isDetailsPage = false
+                store.activityBanner = "Activity Feed"
             },
             openNote(note, index){
                 this.editText = true
@@ -217,12 +251,15 @@
                 this.editText = false
             },
             saveNote(){
-                this.histNotes[this.noteIndex].notes = this.editNotes
-                this.histNotes[this.noteIndex].author = this.retsInfo.logInUser
-                this.histNotes[this.noteIndex].time = new Date().toLocaleDateString('en-US')
+                // this.histNotes[this.noteIndex].notes = this.editNotes
+                // this.histNotes[this.noteIndex].author = this.retsInfo.logInUser
+                // this.histNotes[this.noteIndex].time = new Date().toLocaleDateString('en-US')
                 this.editText = false
-                this.alertTextInfo = {"text": "Note Saved", "color": "#70ad47", "toggle": true}
-                this.isAlert = true
+                store.alertTextInfo = {"text": "Chat Saved", "color": "#70ad47", "type":"success", "toggle": true}
+                store.isAlert = true
+                setTimeout(()=>{
+                    store.isAlert = false
+                },2000)
             },
             deleteNote(){
                 this.histNotes.splice(this.noteIndex, 1)
@@ -240,29 +277,62 @@
             closeGEMTask(){
                 document.querySelectorAll(".gem-search")[0].style.display = "none"
             },
+            expandChatHistory(){
+                this.editText = true
+                this.sendHistory = ""
+            },
+            addHistoryNote(){
+                if(!this.addHistoryChat.length) return
+                store.addNote(this.addHistoryChat)
+                this.clearMessage()
+                return
+            },
+            clearMessage(){
+                this.addHistoryChat = ""
+            },
+
+            displayAttachments(){
+                const input = document.createElement('input')
+                input.type = "file"
+                input.name = "attachment"
+                input.click()
+
+                input.addEventListener("change", (event)=>{
+                    let attach = true
+                    store.addNote("", attach, event.target.files)
+                })
+
+                input.remove()
+            },
             removeRetsGraphics(){
                 removeretsgraphic();
             },
-            handlearchive(){
-                this.isarchiveopen =! this.isarchiveopen
-                console.log(this.retsInfo.attributes.OBJECTID)  
-                this.deletedRETSID = this.retsInfo.attributes.OBJECTID          
-            }
-            
 
         },
         watch:{
-            searchHistoryFilter:{
-                handler: function(){
-                    if(this.searchHistoryFilter.length){
-                        searchCards(this.histNotes, this.searchHistoryFilter, "index")
+
+        },
+        computed:{
+            getHistoryStore:{
+                get(){
+                    if(!store.history.length){
+                        this.noHistResp = 'Error Retrieving History'
+                        this.isHistNotesEmpty = true
                         return
                     }
-
-                },
-                immediate:true
+                    const unpackHistory = JSON.parse(store.history)
+ 
+                    const getRelatedHist = unpackHistory.filter(hist => hist.RETS_ID === store.retsObj.attributes.RETS_ID)//4430)
+                    if(!getRelatedHist.length){
+                        this.isHistNotesEmpty = true
+                        return
+                    }
+                    this.histNotes = getRelatedHist
+                    this.isHistNotesEmpty = false
+                    return
+                }
             }
-        },
+        }
     }
 </script>
 
@@ -305,6 +375,7 @@
     padding: 1px !important;
     margin: 15px !important;
     min-width: 15px !important;
+
 }
 .cardDiv .v-btn-toggle{
     position: relative !important;
@@ -317,14 +388,23 @@ div .cardDiv{
 }
 
 #commentDiv{
-    position: absolute; 
-    bottom: 50%; 
-    left: 70vh; 
-    background-color:black
+    position: inherit;
+    bottom: 20%; 
+    left: 55vh; 
+    width: 50rem;
+    padding:0%;
+    margin:0%;
+    height: 31rem;
 }
 
 #details-page{
-    position: relative;
+    display:flex;
+    flex-direction: column;
+    margin-left: 10px;
+    margin-right: 10px; 
+    margin-bottom: 10px; 
+    background-color: #212121;
+    /* position: relative;
     height: 434px !important;
     bottom: .5rem;
     border-radius: 0px;
@@ -332,17 +412,13 @@ div .cardDiv{
     font-size: 1px !important;
     margin-right: 10px;
     margin-left: 10px;
-    overflow-y: auto;
+    overflow-y: auto; */
 }
 #container-div{
     position: relative;
     top: 5.2rem;
-    height: 890vh;
     min-height: 0% !important;
-    max-height: 87% !important;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
+    max-height: calc(100% - 14rem) !important;
     overflow-x: hidden;
     scroll-behavior: smooth;
     scrollbar-width: thin;
@@ -373,9 +449,7 @@ div .cardDiv{
     padding-top: .5rem;
     position: relative;
     float: right;
-    /*  */
-    /* bottom: 2rem; */
-    
+    margin-right: 10px;
 }
 
 .v-btn{
@@ -420,10 +494,9 @@ div .cardDiv{
 }
 .history-card{
     position:relative; 
-    height: 18rem; 
+    height: 100%; 
     bottom: 0.2rem; 
     border-radius: 0%; 
-    overflow-y: auto;
     margin-right: 10px;
     margin-left: 10px;
 }
@@ -469,23 +542,43 @@ div .cardDiv{
     float: right;
 }
 #detailsHeaderIcon{
+    position: relative;
     float: right;
+    bottom: 0.5rem;
 }
 
 .details-color-picker{
-    position: fixed; 
+    position: absolute; 
     display: flex; 
     flex-direction: column; 
     z-index: 9999; 
-    width:2.3%; 
+    width: 30px; 
     float: right;
-    margin-left: 2.2rem;
+    margin-left: .8rem;
     background-color: black;
-}
-#deletebutton{
-    border: 1px solid;
-    border-radius: 9%;
+    top: 52px;
 }
 
+.toggleExclamation{
+    color: red;
+}
 
+#retsDetailMeta{
+    padding-left: 15px;
+    text-transform: capitalize !important;
+    height: 40px;
+    color: white;
+    opacity: 1 !important
+}
+.toggle-exclamation{
+    color: red !important;
+}
+
+.retsMetaBtn{
+    text-transform: capitalize !important;
+    font-size: 1.25rem;
+    font-weight: 500;
+    letter-spacing: 0.0125em;
+    opacity: 1 !important
+}
 </style>

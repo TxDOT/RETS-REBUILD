@@ -1,25 +1,26 @@
 <template>
-    <div style="height: 0rem;">
-        <v-row align="start" no-gutters dense style="position: relative; bottom: .5rem;">
+    <div>
+    <v-container>
+        <v-row align="start" no-gutters dense style="position: relative; bottom: .5rem; height: 50px;">
             <v-col cols="4" offset="0">
                 <v-autocomplete :items="activityList" label="Activity" variant="underlined" density="compact" flat v-model="infoRets.attributes.ACTV"></v-autocomplete>
             </v-col>
             <v-col cols="4" offset="3">
-                <v-text-field label="Number" density="compact" class="number-field" variant="underlined" :disabled="infoRets.attributes.ACTV === 'Minute Order' || infoRets.attributes.ACTV === 'TxDOTConnect' ? false : true" :v-model="infoRets.attributes.ACTV === 'Minute Order' ? infoRets.attributes.MO_NBR : infoRets.attributes.MO_NBR">
+                <v-text-field label="Number" density="compact" class="number-field" variant="underlined" :disabled="infoRets.attributes.ACTV === 'Minute Order' || infoRets.attributes.ACTV === 'TxDOTConnect' ? false : true" v-model="infoRets.attributes.ACTV_NBR">
                     <template v-slot:append-inner >
                         <v-icon icon="mdi-paperclip" small class="number-field-icon" @click="paperClipFunc" ></v-icon>
                     </template>
                 </v-text-field>
             </v-col>
         </v-row>
-        <v-row align="center" no-gutters dense style="position: relative; bottom: 1.3rem;">
+        <v-row align="center" no-gutters dense style="position: relative; bottom: 1.3rem; height: 70px; padding-bottom: 0% !important;" >
             <v-col cols="3" offset="0" style="position: relative; bottom: 5px !important;">
-                <v-text-field label="Route" variant="underlined" v-model="infoRets.attributes.RTE_NM" :rules="[valueRequired]" id="route"></v-text-field>
+                <v-text-field label="Route" variant="underlined" v-model="infoRets.attributes.RTE_NM" :rules="!store.isDisableValidations ? [valueRequired] : [] " id="route"></v-text-field>
             </v-col>
             <v-col cols="4" offset="4">
-                <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" v-model="infoRets.attributes.DFO" :rules="[onlyNumbers]">
+                <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" v-model="infoRets.attributes.DFO" :rules="!store.isDisableValidations ? [onlyNumbers]: []" @update:model-value="onlyNumbers(infoRets.attributes.DFO)">
                     <template v-slot:append-inner >
-                        <v-btn id="dfoCrosshair" variant="plain" density="compact" class="number-field-icon"><v-icon icon="mdi-drag-variant" small  @click="crossHairFunc"></v-icon></v-btn>
+                        <v-btn id="dfoCrosshair" variant="plain" density="compact" class="number-field-icon"><v-icon icon="mdi-drag-variant" small @click="crossHairFunc"></v-icon></v-btn>
                     </template>
                 </v-text-field>
             </v-col>
@@ -37,9 +38,9 @@
         </v-row>       
         <v-row align="center" no-gutters dense style="position: relative; bottom: 5.4rem;">
             <v-col cols="8" offset="0">
-                <v-autocomplete label="Related RETS" chip closable-chips no-filter multiple variant="underlined" class="related-rets" v-model="infoRets.attributes.RELATED_RETS" :items="RETSData" item-title="name" item-value="name" return-object @update:search="gimmeRETS($event)" @update:modelValue="addGraphic($event)">
-                    <template v-slot:chip="{item}">
-                        <v-chip closable @click:close="closeRelatedRetsChip(item)" @click="zoomToRelateRet(item.raw.geometry)">{{item.props.title}}</v-chip>
+                <v-autocomplete label="Related RETS" no-filter multiple variant="underlined" class="related-rets" v-model="infoRets.attributes.RELATED_RETS" :items="RETSData" item-title="name" item-value="name" return-object @update:search="gimmeRETS($event)" @update:modelValue="addGraphic($event)">
+                    <template v-slot:chip="{props, item}">
+                        <v-chip v-bind="props" closable @click:close="closeRelatedRetsChip(item)" @click="zoomToRelateRet(item.raw.geometry, $event)" style="z-index: 9999;">{{item.props.title}}</v-chip>
                     </template>
                 </v-autocomplete>
 
@@ -56,46 +57,61 @@
                 <v-autocomplete auto-select-first label="Status" variant="underlined" density="compact" class="rets-status" :items="detailsStat" item-title="name" item-value="value" v-model="infoRets.attributes.STAT"></v-autocomplete>
             </v-col>
         </v-row>
-        <v-row align="center" no-gutters dense style="position: relative; bottom: 6.1rem;">
+        <v-row align="center" no-gutters dense style="position: relative; bottom: 6.1rem; height: 0px;">
             <v-col cols="12" offset="0">
-                <v-textarea label="Description" no-resize variant="underlined" class="rets-description" rows="3" v-model="infoRets.attributes.DESC_" :rules="[valueRequired]"></v-textarea>
+                <v-textarea label="Description" no-resize variant="underlined" class="rets-description" rows="3" v-model="infoRets.attributes.DESC_" :rules="!store.isDisableValidations ? [valueRequired]: []"></v-textarea>
             </v-col>
         </v-row>
-        <v-row align="center" style="position: relative; bottom: 9.1rem; ">
-            <v-col cols="5" offset="0" style="z-index: 999;">
-                <v-btn icon="mdi-plus" variant="plain" @click="displayGemSearch" style="top: 9px;"></v-btn>
-                <div id="chips">
-                    <v-chip 
-                        v-for="i in gemTasks"
-                        closable
-                        color="#4472C4"
-                        density="compact"
-                        variant="elevated" 
-                        rounded="0"
-                        pill
-                        size="default"
-                        class="gem-chip",
-                    >
-                    {{ i }}
-                </v-chip>
+        <v-row align="center" style="position: relative; bottom: 2.1rem; height: 25px;">
+            <div style="width: 100%; height: 5%">
+                <!-- <v-col cols="5" offset="0" style="z-index: 999;"> -->
+                <div style="width: 35%;">
+                    <v-btn icon="mdi-plus" variant="plain" @click="displayGemSearch" style="bottom: 0px;"></v-btn>
+                    <div id="chips">
+                        <v-chip 
+                            v-for="i in gemTasks"
+                            closable
+                            color="#4472C4"
+                            density="compact"
+                            variant="elevated" 
+                            rounded="0"
+                            pill
+                            size="default"
+                            class="gem-chip"
+                        >
+                        {{ i }}
+                        </v-chip>
+                    </div>
                 </div>
-            </v-col>
-            <div class="cardDiv" id="outerDeadlineDiv" >
-                <div class="deadline-div" @click="isDatePicker = !isDatePicker" style="cursor: pointer;">
-                    <v-text-field prepend-icon="mdi-timer-outline" disabled density="compact" variant="plain" class="date-select"> {{ datePicker }}</v-text-field>
-                 </div>
+                
+            <!-- </v-col> -->
+                <div style="position:relative; bottom: 4.3rem; cursor: pointer !important; height: 32px; width: 119px; float: right" @click="isDatePicker = true">
+                    <v-text-field prepend-icon="mdi-timer-outline" disabled density="compact" variant="plain" class="date-select" style="z-index: 9999; " > {{ datePicker }}</v-text-field>
+                    <!-- <v-col offset="0" style="z-index: 999; cursor: pointer; max-width: 6rem; height:2rem; padding: 0px; " @click="isDatePicker = true">
+                        
+                    </v-col> -->
+                </div>
             </div>
 
+         
+
+
+
+            <!-- <v-text-field prepend-icon="mdi-timer-outline" disabled density="compact" variant="plain" class="date-select" style="z-index: 9999; cursor: pointer !important;" @click="isDatePicker = true"> {{ datePicker }}</v-text-field> -->
             <div class="date-picker" v-if="isDatePicker">
-                <v-date-picker v-model="datePicked"></v-date-picker>
+                <v-date-picker v-model="datePicked" class="date" hide-header></v-date-picker>
             </div>
         </v-row>
+        
+    </v-container>
     </div>
+    
 </template>
 
 <script>
 import { appConstants } from '../common/constant'
-import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets, zoomTo} from './utility.js'
+import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets, zoomTo, getPointRoadInteraction, modifyRETSPt} from './utility.js'
+
 import {store} from './store.js'
     export default{
         name: "DetailsCard",
@@ -117,7 +133,9 @@ import {store} from './store.js'
                 detailsStat: appConstants.statDomainValues,
                 ogValues: {},
                 RETSData: [],
-                store
+                store,
+                isFocused: false,
+                typeTimeout: null,
             }
         },
         beforeMount(){
@@ -127,12 +145,21 @@ import {store} from './store.js'
             this.ogValues = this.infoRets
             const milliDate = new Date(this.infoRets.attributes.DEADLINE)
             this.datePicker = this.setDate(milliDate)
+            console.log(this.infoRets.attributes.NO_RTE)
+
+            if(this.infoRets.attributes.NO_RTE === 1){
+                store.isAlert = false
+                store.isDisableValidations = true
+                return
+            }
             this.initDataCheck()
+            getPointRoadInteraction(store.retsObj)
             
         },
         methods:{
-            zoomToRelateRet(geom){
+            zoomToRelateRet(geom, event){
                 zoomTo(geom)
+                
             },
             splitAndAddRelatedRets(relatedRets){
                 if(typeof relatedRets === "object" || !relatedRets.length){
@@ -151,45 +178,71 @@ import {store} from './store.js'
             initDataCheck(){
                 // if Route, status or description; save button disabled
                 let item = [this.infoRets.attributes.RTE_NM, this.infoRets.attributes.STAT, this.infoRets.attributes.DESC_].filter(x => !x)
-                if(item.length > 0){
-                    this.sendDisabledSave(true)
+                if(!this.infoRets.attributes.NO_RTE){
+                    if(!this.infoRets.attributes.DFO || !this.infoRets.attributes.RTE_NM){
+                        console.log(this.infoRets.attributes.NO_RTE)
+                        store.isAlert = true
+                        store.alertTextInfo = {"text": "Route Number or DFO is missing", "color": "red", "toggle": true}
+                        return store.isSaveBtnDisable = true
+                    }
+                    if(!this.infoRets.attributes.RTE_NM.length || !this.infoRets.attributes.DFO.length){
+                        store.isAlert = true
+                        store.alertTextInfo = {"text": "Route Number or DFO is missing", "color": "red", "toggle": true}
+                        return store.isSaveBtnDisable = true
+                    }
                 }
+                if(item.length > 0){
+                    store.isAlert = false
+                    store.isSaveBtnDisable = true
+                    return true
+                }
+                store.isSaveBtnDisable = false
             },
             valueRequired(e){
-                if(e === null){
-                    return
-                }
+                if(e === null) return false
                 if(!e.length){
-                    this.sendDisabledSave(true)
-                    return `Wrong :(`
+                    store.isSaveBtnDisable = true
+                    return `RTE Number is required`
                 }
-                this.sendDisabledSave(false)
+                
+                this.initDataCheck()
                 return true
             },
             sendDisabledSave(bool){
                 this.$emit("disable-save", bool)
             },
-            onlyNumbers(i){
-                if(this.infoRets.attributes.NO_RTE === 1){
-                    let convert = Number(i)
-                if(!convert){
-                    this.sendDisabledSave(true)
-                    return `Whoa! Numbers are more my vibe!`
-                }
-                this.sendDisabledSave(false)
-                return true
-                }
+           onlyNumbers(i){
+                console.log(i)
 
+                if(!i){
+                    this.initDataCheck()
+                    return `But where am I? Don't leave me blank!`
+                }
+                if(!this.infoRets.attributes.NO_RTE){
+                    let convert = Number(i)
+                    if(!convert){
+                        store.isSaveBtnDisable = true
+                        return `Whoa! Numbers are more my vibe!`
+                    }
+                    return this.initDataCheck()
+                }
+                clearTimeout(this.typeTimeout)
+                this.typeTimeout = setTimeout(()=>{
+                    getPointRoadInteraction(store.retsObj)
+                },900)
+                return this.initDataCheck()
+                
             },
             paperClipFunc(){
-                this.infoRets.attributes.ACTV === 'Minute Order' ? window.open(`https://publicdocs.txdot.gov/minord/mosearch/Pages/Minute-Order-Search-Results.aspx#k=${this.infoRets.attributes.MO_NBR}`, '_blank') :
-                                                            window.open(`https://txdot.sharepoint.com/sites/division-tpp/DM-Admin/Lists/Data%20Request/EditForm.aspx?ID=${1138}`, '_blank')
+                this.infoRets.attributes.ACTV === 'Minute Order' ? window.open(`https://publicdocs.txdot.gov/minord/mosearch/Pages/Minute-Order-Search-Results.aspx#k=${this.infoRets.attributes.ACTV_NBR}`, '_blank') :
+                                                            window.open(`https://txdot.sharepoint.com/sites/division-tpp/DM-Admin/Lists/Data%20Request/EditForm.aspx?ID=${this.infoRets.attributes.ACTV_NBR}`, '_blank')
             
 
-                console.log("paperclip clicked")
             },
             crossHairFunc(){
-                console.log('crosshair clicked')
+                //modifyRETSPt()
+                //getPointRoadInteraction(store.retsObj)
+                store.isMoveRetsPt = true
             },
             setDate(date){
                 return date.toLocaleDateString('en-US')
@@ -198,10 +251,9 @@ import {store} from './store.js'
                 document.querySelectorAll(".gem-search")[0].style.display =  document.querySelectorAll(".gem-search")[0].style.display === "block" ? "none" : "block"
             },
             async gimmeRETS(a, string){
-                console.log(a, string)
                 if(a.length){
-                    const queryString = string ?? `RETS_ID >= ${a}`
-                    const query = {"whereString" : queryString}
+                    const queryString = string ?? `CAST(RETS_ID AS VARCHAR(12)) LIKE '%${a}%'`
+                    const query = {"whereString" : queryString, "queryLayer": "retsLayer"}
                     try{
                         const retsid = await getQueryLayer(query, 'RETS_ID', 5)
                         this.RETSData.length = 0
@@ -231,11 +283,15 @@ import {store} from './store.js'
                 zoomToRelatedRets(this.infoRets.attributes.RELATED_RETS)
             },
             closeRelatedRetsChip(ret){
-                console.log(ret)
                 removeRelatedRetsFromMap(ret.raw?.name)
-                const retsPos = this.infoRets.attributes.RELATED_RETS.findIndex(x => x.name === Number(ret.raw?.name))
-                this.infoRets.attributes.RELATED_RETS.splice(retsPos,1)
+                // const retsPos = this.infoRets.attributes.RELATED_RETS.findIndex(x => x.name === Number(ret.raw?.name))
+                // console.log(retsPos)
+                //this.infoRets.attributes.RELATED_RETS.splice(retsPos,1)
+                console.log(this.infoRets.attributes.RELATED_RETS)
             },
+            queryRdFeatureLayer(){
+                
+            }
         },
         watch:{
             datePicked:{
@@ -252,13 +308,26 @@ import {store} from './store.js'
                 },
             },
             'infoRets.attributes.RETS_ID':{ //<= neccessary?
-                handler: function(n,o){
+                handler: function(){
                     store.currentInfo = JSON.stringify(this.infoRets)
-                    //console.log("new", n)
-                    //console.log("old", o)
                     this.splitAndAddRelatedRets(this.infoRets.attributes.RELATED_RETS)
-                    // toggleRelatedRets(o, false)
-                    // toggleRelatedRets(n, true)
+                },
+                immediate: true
+            },
+            'infoRets.attributes.NO_RTE':{
+                handler: function(){
+                    console.log(this.infoRets.attributes.NO_RTE)
+
+                    if(this.infoRets.attributes.NO_RTE){
+                        store.isDisableValidations = true
+                        store.isSaveBtnDisable = false
+                        store.isAlert = false
+                        return
+                    }
+                    store.isDisableValidations = false
+                    this.initDataCheck()
+
+                    return
                 },
                 immediate: true
             }
@@ -273,6 +342,9 @@ import {store} from './store.js'
     width: 55px !important;
     left: 120px !important;
     bottom: 1.5rem
+}
+#route{
+    width: 50px;
 }
 #details-page{
     position: relative;
@@ -316,11 +388,10 @@ import {store} from './store.js'
     font-size: 10px !important;
     position: relative;
     bottom: 58px;
+    right: 7.2px;
 }
 
-.checkbox-size{
-    font-size: 10px !important;
-}
+
 .v-btn{
     margin-right: 15px;
 }
@@ -329,14 +400,14 @@ import {store} from './store.js'
     float: right;
 }
 
-.deadline-div .v-btn{
+#deadline-div .v-btn{
     padding-top: 7px !important;
 }
-.deadline-div{
+#deadline-div{
     position: relative;
     margin-right: 0px;
     padding-top: 0px;
-    bottom: 0rem;
+    top: 0px;
     float: right;
 }
 
