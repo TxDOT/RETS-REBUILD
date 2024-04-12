@@ -675,8 +675,8 @@
         width: 50px;
     }
     .esri-view-surface {
-    width: calc(100% - 500px) !important;
-    transform: translate(500px);
+    width: calc(100% - 400px) !important;
+    transform: translate(400px);
     transition: transform 0.1s ease;
     left: 0px;
 }
