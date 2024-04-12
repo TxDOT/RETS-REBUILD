@@ -185,8 +185,6 @@ export const minuteOrders = new FeatureLayer({
 })
 
 
-
-
 //TxDotRoaways Layer construction
 export const TxDotRoaways = new FeatureLayer ({
   url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Roadways/FeatureServer/0",

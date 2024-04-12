@@ -38,9 +38,9 @@
                                
      
                              
-                                <v-btn icon="mdi-filter" class="banner-btn" flat @click="isfilter = !isfilter"></v-btn>
-                                <div class="filter-notification-bubble" v-if="retsFilters.filterTotal > 0">
-                                    <p style="font-size: 13.5px; position: relative; left: 25%; bottom: 1.3px;"><b>{{ retsFilters.filterTotal}}</b></p>
+                                <v-btn icon="mdi-filter" class="banner-btn" flat @click="store.isfilter = !store.isfilter"></v-btn>
+                                <div class="filter-notification-bubble" v-if="store.filterTotal > 0">
+                                    <p style="font-size: 13.5px; position: relative; left: 25%; bottom: 1.3px;"><b>{{ store.filterTotal}}</b></p>
                                 </div>
                             </div>
       
@@ -61,7 +61,7 @@
                 <v-text-field density="compact" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" v-model="actvFeedSearch"></v-text-field>
             </v-row>
 
-            <div class="card-feed-div" v-if="!store.isDetailsPage">
+            <div class="card-feed-div" v-if="store.isCard">
                 <v-row v-for="(rd, road) in store.roadObj" :key="rd" :value="road" :id="rd.attributes.OBJECTID" class="rets-card-row"> 
                     <v-btn elevation="0" @click="changeColor(rd.attributes.RETS_ID);" class="flag-btn" size="small" max-width=".5px" density="compact" variant="plain" slim>
                         <template v-slot:prepend>
@@ -100,13 +100,12 @@
                                 </v-card-subtitle>
                                 </div>
                             </div>
-                            <!-- v-if="rd.attributes[i.display] === i.condition"  -->
-
                         </div>
                         
                     </v-card>
                 </v-row>
             </div>
+            
             <div class="card-feed-div" v-if="store.isNoRets"><p>No RETS for you!</p></div>
         </v-col>
         <RetsDetailPage v-if="store.isDetailsPage" @close-detail="enableFeed"/>
@@ -119,7 +118,7 @@
             </div>
         </div>
     </v-card>
-    <Filter v-if="isfilter" @filter-set="changeNumFilter" :filterPros="retsFilters"/>
+    <Filter v-if="store.isfilter"/>
 
     <v-card style="position: relative; float: center; width: 25%; left: 40%; top: 30%; margin: 15px;" color="black" v-if="unsavedChanges">
         <v-card-title>Discard unsaved changes?</v-card-title>
@@ -133,15 +132,14 @@
                 <v-btn variant="outlined" style="border-radius: 0%;" @click="proceed">Proceeed</v-btn>
             </div>
         </div>
-        
     </v-card>
     <v-container id="Spinner" v-if="isSpinner" >
-            <v-progress-circular color="blue" indeterminate size="60" ></v-progress-circular>
-        </v-container>
+        <v-progress-circular color="blue" indeterminate size="60" ></v-progress-circular>
+    </v-container>
 </template>
 
 <script>
-import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer, searchCards, highlightRETSPoint, turnAllVisibleGraphicsOff, toggleRelatedRets, getHighlightGraphic, removeHighlight, createtool, returnHistory, toggleHighlightCards, outlineFeedCards, removeOutline} from './utility.js'
+import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer, searchCards, highlightRETSPoint, turnAllVisibleGraphicsOff, toggleRelatedRets, getHighlightGraphic, removeHighlight, createtool,  returnHistory, toggleHighlightCards} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import Filter from './RetsFilter.vue'
 import RetsDetailPage from './RetsDetail.vue'
@@ -158,14 +156,14 @@ export default{
     props: {
         filterPros: Object,
         // addrets:Number
+        // addrets:Number
     },
+    components: {RetsDetailPage, Filter}, 
     components: {RetsDetailPage, Filter}, 
     data(){
         return{
-            isCard: true,
             Spinneractive: false,
             isSpinner: false,
-            isVisible : true,
             buttonIcon: 'mdi-plus',
             addbtntext: "New",
             addrets: null,
@@ -185,17 +183,19 @@ export default{
             isSubtitle: false,
             isRetsActivated: true,
             retsSubtitle:"",
+            retsSubtitle:"",
             actvFeedSearch: "",
             uploadAttachment: false,
             isfilter: false,
             loggedInUser: '',
             retsFilters: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"}, "JOB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
-                         "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, "GIS_ANALYST": appConstants.defaultUserValue, 
+                         "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, 
                          "filterTotal": 2},
             count: 0,
             store,
             stageData: 0,
             unsavedChanges: false,
+            showChanges: false,
             showChanges: false,
             isCreateEnabled: true,
             addbutton: [
@@ -210,7 +210,8 @@ export default{
             ],
             alertIcons:[
                 {icon: "mdi-account-group", popup: "Assigned to you", color: "white", display: "ASSIGNED_TO", condition: `${store.loggedInUser}`, displaySup: "GIS_ANALYST", supplementCondition: `${store.loggedInUser}`},
-                {icon:"mdi-account-multiple-check", popup: "MO/TxDOT Connect", color: "white", display: "ACTV", condition: "(Minute Order || TxDOTConnect)"}, //ACTV === (Minute Order || TxDOTConnect)
+                {icon:"mdi-account-multiple-check", popup: "MO/TxDOT Connect", color: "white", display: "ACTV", condition: "TxDOTConnect"}, //ACTV === (Minute Order || TxDOTConnect)
+                {icon:"mdi-account-multiple-check", popup: "MO/TxDOT Connect", color: "white", display: "ACTV", condition: "Minute Order"},
                 {icon:"mdi-pencil-box-outline", popup: "District Request", "color": "white", display: null, condition: null}, //keep null
                 {icon:"mdi-alarm", popup: "Deadline set (with date)", "color": "white", display: null, condition: null}, //past the deadline set
                 {icon:"mdi-check-decagram-outline", popup: "Job Complete", color: "green", display: "STAT", condition: 3},
@@ -227,6 +228,7 @@ export default{
     },
     mounted(){
         this.showChanges = true
+        this.showChanges = true
         reactiveUtils.on(() => view.popup, "trigger-action",
             async (event) => {
                 if (event.action.id === "open-details") {
@@ -238,14 +240,17 @@ export default{
                     this.checkChanges()
                 }
         });
+        console.log(appConstants.defaultUserValue)
         this.retsFilters.loggedInUser = store.loggedInUser
+        this.retsFilters[appConstants.queryField[appConstants.userRoles.find(x => x.value === store.loggedInUser).type]] = appConstants.defaultUserValue
+        console.log(this.retsFilters)
     },
     methods:{
         async processAddPt(newPointGraphic){
             try{
                 this.isSpinner = true
                 this.Spinneractive = false
-                this.isCard = false
+                store.isCard = false
                 const obj = await addRETSPT(newPointGraphic, "rets")
                 console.log(obj)
                 const objectid = obj.addFeatureResults[0].objectId
@@ -271,6 +276,7 @@ export default{
             //do nothing
         },
         displaySubtitle(e){ 
+            this.isSubtitle = !this.isSubtitle
             this.isSubtitle = !this.isSubtitle
         },
         checkChanges(){
@@ -307,15 +313,7 @@ export default{
         //     this.activityBanner = "Activity Feed"
         //     return
         // },
-        addClass(id){
-            if(store.isShowSelected){
-                const classToAdd = store.roadHighlightObj.includes(id) ? 'highlight-card card' : "card"
-                console.log(classToAdd)
-                this.updateSelection(true)
-                return classToAdd
-            }
-            return "card"
-        },
+
         highlightToggleAndProcess(){
             console.log('not done')
             return
@@ -324,24 +322,30 @@ export default{
             const findRoad = store.roadObj.findIndex(road => road.attributes.OBJECTID === delRd.OBJECTID)
             store.roadObj.splice(findRoad, 1)
         },
+        removeUndefinedIndex(delRd){
+            const findRoad = store.roadObj.findIndex(road => road.attributes.OBJECTID === delRd.OBJECTID)
+            store.roadObj.splice(findRoad, 1)
+        },
         double(road, index){
+            store.historyRetsId = road.attributes.RETS_ID
+            returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
             store.historyRetsId = road.attributes.RETS_ID
             returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
             road.attributes.logInUser = this.loggedInUser 
             road.attributes.index = index
             store.retsObj = road
             console.log(store.retsObj)
+            store.retsObj = road
+            console.log(store.retsObj)
             clearTimeout(this.timer)
             this.timer=""
+            store.isCard = false
             store.isDetailsPage = true
             store.activityBanner = `${road.attributes.RETS_ID}`
-            // removeHighlight(true,true)
-            // removeOutline()
             highlightRETSPoint(road.attributes)
             //outlineFeedCards()
             this.zoomToRetsPt(road)
             toggleRelatedRets(JSON.stringify(road))
-            
             return
         },
         async addretss(){
@@ -370,7 +374,9 @@ export default{
             this.timer = setTimeout(()=>{
                 const zoomToRETS = rets.geometry
                 highlightRETSPoint(rets.attributes)
+                highlightRETSPoint(rets.attributes)
                 zoomTo(zoomToRETS)
+
 
             },250)
         },
@@ -425,6 +431,21 @@ export default{
             }
             return 'mdi-flag'
         },
+        changeNumFilter(filter){
+            if(filter === 'cancel'){
+                this.isfilter = false;
+                return
+            }
+            store.retsFilters = filter
+            this.isfilter = false
+            store.setFilterFeed()
+        },
+        changeFlagIcon(color){
+            if(color === '#FFFFFF'){
+                return 'mdi-flag-outline'
+            }
+            return 'mdi-flag'
+        },
         async handlecreate(){
             if (this.isCreateEnabled === true) {
                 this.addbtntext = "Cancel"
@@ -442,8 +463,9 @@ export default{
             else {
                 sketchWidgetcreate.cancel();
                 this.isCreateEnabled = !this.isCreateEnabled;
-                this.addbtntext = "New"  
+                this.addbtntext = "New"
                 this.buttonIcon = "mdi-plus"
+                //console.log("false")
                 }
         },
         returnUserName(n){
@@ -469,6 +491,7 @@ export default{
             handler: function(){
                 if(this.actvFeedSearch.length){
                     searchCards(store.roadObj, this.actvFeedSearch, "OBJECTID")
+                    searchCards(store.roadObj, this.actvFeedSearch, "OBJECTID")
                     return
                 }
                 const getHideLength = document.getElementsByClassName("hideCards")
@@ -488,9 +511,17 @@ export default{
                 },1000)
             }
         },
+        retsSubtitle:{
+            handler:function(word){
+                if(word.length<0) return
+                setTimeout(()=>{
+                   // this.filterPros.attributes.RTE_NM = word
+                },1000)
+            }
+        },
         addrets:{
             handler: async function(){
-                //console.log(this.addrets)
+                console.log(this.addrets)
                 await this.addretss()
             },
             immediate: true
@@ -507,16 +538,25 @@ export default{
         //     },
         //     once: true
         // }
+        //},
+        // 'store.roadHighlightObj.size':{
+        //     handler: function(){
+        //         console.log(store.roadHighlightObj.size)
+        //         if(store.roadHighlightObj.size > 0){
+        //             this.isSwitchDisabled = false
+        //             return
+        //         }
+        //         this.isSwitchDisabled = true
+        //         return
+        //     },
+        //     once: true
+        // }
     },
     computed:{
-        queryLayer:{
-            get(){
-
-            },
+ 
         },
         
 
-    }
 }
 </script>
 
@@ -524,12 +564,16 @@ export default{
 #Spinner{
         position: absolute;
         top: 50%;
-        left:17rem;
-
-        
-        
+        left: 12.5%
     }
-#addbtn{
+    #retSubText{
+        position: relative;
+        right: 15px;
+        padding: 0px;
+        margin-left: 10px;
+        bottom: .4rem;
+    }
+    #addbtn{
         position: relative;
         left: 0%;
         top: 10%;
@@ -592,6 +636,7 @@ export default{
         width: 104% !important;
         padding: 5px 0px 0px 10px;
         height: 120px;
+        height: 120px;
     }
     .card-feed-div{
         position: relative;
@@ -607,6 +652,7 @@ export default{
 
     #container-header{
         position: relative;
+        top: 50%;
         top: 50%;
         font-size: 23px;
         font-weight: bold; 
@@ -633,8 +679,8 @@ export default{
         position: absolute;
         right: 1rem;
         top: 14px;
+        top: 14px;
         text-align: center;
-
     }
     .text-btn{
         position: relative;
@@ -658,6 +704,11 @@ export default{
     }
     #test{
         display: none;
+
+        background-color: #404040;
+    }
+    #test{
+        display: none;
     }
     .route-card{
         position: relative;
@@ -665,6 +716,7 @@ export default{
     }
     .route-name{
         position: absolute;
+        right: 3.8vh;
         right: 3.8vh;
         float: right;
         top: 0.5rem;
@@ -676,6 +728,8 @@ export default{
         font-size: 14px;
         color:#D9D9D9;
         font-weight: bold;
+        color:#D9D9D9;
+        font-weight: bold;
     }
     
     .text-concat {
@@ -685,7 +739,7 @@ export default{
         overflow: hidden;
         font-size: 14px;
         position: relative;
-        color: #a6a6a6
+        color: #a6a6a6;
     }
 
     .flag-btn{
@@ -737,11 +791,15 @@ export default{
         font-size: 15px;
         color: #D9D9D9;
         font-weight: bold;
+        color: #D9D9D9;
+        font-weight: bold;
     }
     .filter-notification-bubble{
         position: relative;
         width: 1.1rem;
+        width: 1.1rem;
         background-color:#4472C4;
+        height: 1.1rem;
         height: 1.1rem;
         float: right;
         bottom: 1rem;
@@ -773,4 +831,5 @@ export default{
         height: 20px !important;
         width: 45px !important;
     }
+
 </style>

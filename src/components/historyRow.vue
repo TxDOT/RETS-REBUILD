@@ -1,10 +1,11 @@
 <template>
+    <hr class="popup-title-border" v-if="sortB"></hr>
     <div style="margin-right: 10px; margin-left: 10px; width: 100%; height: 250px;">
         <div id="search">
-            <v-text-field class="search-history" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" density="compact" v-model="searchHistoryFilter" variant="solo-filled"></v-text-field>
+            <v-text-field class="search-history" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" density="compact" v-model="searchHistoryFilter" variant="filled" v-if="sortA || sortB" elevation="0"></v-text-field>
         </div>
         <div style="position: relative; bottom: 2rem;">
-                <v-btn variant="plain" density="compact" style="font-size: 10px; float: right; position: relative; bottom:0px; margin:0%; padding: 0%; padding:0px 10px 0px 10px; margin-right: 10px; margin-bottom: 0px" @click="queryAttachments" :disabled="numAttachments === 0" v-model="isAttachedActive" :active="isAttachedActive" active-class="active-button">
+                <v-btn variant="plain" density="compact" style="font-size: 10px; float: right; position: relative; top:7px; margin:0%; padding: 0%; padding:0px 10px 0px 10px; margin-right: 10px; margin-bottom: 0px" @click="queryAttachments" :disabled="numAttachments === 0" v-model="isAttachedActive" :active="isAttachedActive" active-class="active-button">
                     <template v-slot:prepend>
                         
                         <v-icon icon="mdi-filter"></v-icon>
@@ -24,7 +25,7 @@
                             <span style="font-size: 10px; color: grey; padding-left: 5px;">{{ returnUserName(note.CMNT_NM) }} {{ note.EDIT_DT ? returnDateFormat(note.EDIT_DT) : returnDateFormat(note.CREATE_DT) }}</span>
                             <div style="position: relative; bottom: 0rem;" v-if="note.attachments">
                                 <span v-for="attach in note.attachments" style="padding-right: 3px;">
-                                    <v-chip :text="attach.name" color="#4472C4" class="" closable density="compact" rounded="0" variant="flat" @click="openAttachement(attach.url)" @click:close="deleteAttach(note.OBJECTID, attach.name)"></v-chip>
+                                    <v-chip :text="attach.name" color="#4472C4" class="" :closable="editContent ? true: false" density="compact" rounded="0" variant="flat" @click="openAttachement(attach.url)" @click:close="deleteAttach(note.OBJECTID, attach.name)"></v-chip>
                                 </span>
                             </div>
                         </v-banner-text>
@@ -45,8 +46,16 @@
                         </div>
                     </span>
                 </div>
+        </div>
+        <div style="position: absolute; bottom: 0px; width:100%;">
+            <div>
+                <div style="position: relative">
+                    <v-btn prepend-icon="mdi-message-plus" id="addCommentBtnSmall" variant="plain" size="small" v-if="sortA" @click="store.addNote('Enter Text', false)">Add</v-btn>
+                </div>
+            </div>
 
         </div>
+        
         <v-text-field v-if="isHistNotesEmpty" disabled variant="plain">{{noHistResp}}</v-text-field>
     </div>
     
@@ -175,11 +184,19 @@
         },
         watch:{
             searchHistoryFilter:{
-                handler: function(){
-                    if(!this.searchHistoryFilter) return
-                    console.log(this.searchHistoryFilter)
-                    searchCards(store.historyChat, this.searchHistoryFilter, "OBJECTID")
-                    return
+                handler: function(a="",b=""){
+                    try{
+                        if(b && !a.length){
+                            searchCards(store.historyChat, "", "OBJECTID")
+                            return
+                        }
+                        searchCards(store.historyChat, this.searchHistoryFilter, "OBJECTID")
+                        return
+                    }
+                    catch(a){
+                        console.log(a)
+                    }
+                    
                 },
                 immediate:true
             },
@@ -199,7 +216,6 @@
 <style scoped>
     .search-history{
         height: 10px;
-        bottom: 0px; 
         margin-left: 10px; 
         margin-right: 10px;
         max-width: 550px;
@@ -217,8 +233,8 @@
     }
     #search{
         position: relative;
-        bottom: 2rem;
-        right: 10px;
+        bottom: 1.5rem;
+        right: 6px;
         width: 69%;
     }
     #replyingToCmnt{
@@ -256,6 +272,14 @@
     .history-notes{
         border-color: red;
         background-color: #4472C4;
+    }
+    #addCommentBtnSmall{
+        position: relative;
+        float: right;
+        margin-right: 15px;
+        padding-left: 10px;
+        padding-right: 10px;
+        bottom: 10px;
     }
 
 </style>

@@ -17,7 +17,11 @@ export const appConstants = {
              width: 1
         }
     },
-
+    queryField:{
+        1: "GIS_ANALYST",
+        2: "GRID_ANALYST",
+        3: "DIST_ANALYST"
+    },
     statDomainValues: [],
     districtDomainValues: [],
     countyDomainValues:[],
@@ -28,6 +32,7 @@ export const appConstants = {
     activityList: [],
     userRoles: [],
     defaultQuery : (userId) => {
-        return `(GIS_ANALYST = '${userId}' OR ASSIGNED_TO = '${userId}') AND (STAT = 1 OR STAT = 2 or STAT = 4)`
-    }
+        return `(${appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]} = '${userId}' OR ASSIGNED_TO = '${userId}') AND (STAT = 1 OR STAT = 2 or STAT = 4)`
+    },
+    userQueryField: []
 }

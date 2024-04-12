@@ -1,7 +1,7 @@
 import OAuthInfo from "@arcgis/core/identity/OAuthInfo.js";
 import esriId from "@arcgis/core/identity/IdentityManager.js";
-import { retsLayer, view, TxDotRoaways, retsUserRole} from './map-Init.js'
-import {getDomainValues, getDistinctAttributeValues, returnHistory, getUniqueQueryValues, queryFlags, home} from './utility.js'
+import { retsLayer, view, retsUserRole} from './map-Init.js'
+import {getDomainValues, getDistinctAttributeValues, returnHistory, getUniqueQueryValues, queryFlags} from './utility.js'
 import { appConstants } from "../common/constant.js";
 import router from '../router/index.js'
 import {store} from './store.js'
@@ -36,12 +36,14 @@ export function login(){
     //.catch(() => signIn()) //not signed in; proceed to sign in 
 }
 
-export async function signIn(){
-  getUniqueQueryValues(retsUserRole, appConstants.userRoles)
+async function signIn(){ 
+  await getUniqueQueryValues(retsUserRole, appConstants.userRoles)
   const userId = await getUserId()
   await queryFlags(userId)
   store.getRetsLayer(userId)
   setDefExpRets(userId)
+  appConstants.userQueryField = appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]
+  store.USER = [appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value)]
   retsLayer
     .when(() => {
 
@@ -52,20 +54,11 @@ export async function signIn(){
       })
 
       getDistinctAttributeValues('ACTV')
-      createLayerViews()
       return retsLayer.queryExtent();
     })
     .then((response) => {
-      
       router.push('/apps/statewide_mapping/rets_rebuild/map')
-
-      view.when(function(){
-        view.goTo(response.extent);
-
-      })
-
-      
-      
+      view.goTo(response.extent);
     });
 }
 
@@ -77,7 +70,7 @@ const setDefExpRets = (userId) => {
 }
 
 export async function getUserId(){
-  console.warn('VERSION: 2.0')
+  console.warn('VERSION: 2.1.3')
   const user = await esriId.getCredential(authen.portalUrl + "/sharing/rest",{
     oAuthPopupConfirmation: false,
   })
@@ -85,25 +78,6 @@ export async function getUserId(){
   return user.userId
 }
 
-function createLayerViews(){
-    returnHistory()
-    // view.whenLayerView(TxDotRoaways)
-    //   .then((featLayerView) => {
-    //     console.log(featLayerView)
-    //     if(featLayerView.layer.title === 'TxDOT Roadways'){
-    //       let query = featLayerView.layer.createQuery()
-    //       query.where = "OBJECTID < 10"
-
-    //       featLayerView.queryFeatures(query)
-    //         .then(x => console.log(x))
-    //         .catch(err => console.log(err))
-    //       return
-    //     }
-    //     //roadLayerview = featLayerView
-    //   })
-    //   .catch(err => console.log(err))
-    return
-}
 
 
 

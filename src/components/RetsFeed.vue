@@ -218,7 +218,7 @@
                                             }
                                     }
                                 },
-                               {title:"Legend", icon: 'mdi-format-list-bulleted-type', color: "#D9D9D9", name: "Legend", action: () =>{
+                               {title:"Legend", icon: 'mdi-format-list-bulleted-type', color: "white", name: "Legend", action: () =>{
                                 this.handleLegendTool();
                                 //this.addrets2 = 2
                                },
@@ -472,7 +472,6 @@
     .v-list-item:hover{
         cursor: pointer;
         background-color: rgba(128,128,128,.3);
-
     }
 
     #icons-bottom{

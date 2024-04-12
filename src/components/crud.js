@@ -13,7 +13,7 @@ export async function updateRETSPT(retsObj){
     if(retsObj.attributes.RELATED_RETS){
         retsObj.attributes.RELATED_RETS = retsObj.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID).toString()
     }
-    console.log(retsObj)
+    retsObj.attributes.NO_RTE === true ? 1 : 0
     postFlagColor(retsObj)
     let esriUpdateGraphic = createGraphic(retsObj)
     console.log(esriUpdateGraphic)
@@ -24,6 +24,7 @@ export async function updateRETSPT(retsObj){
 }
 
 export function deleteRETSPT(retsObj){
+    console.log(retsObj)
     if(retsObj.attributes.RELATED_RETS){
         retsObj.attributes.RELATED_RETS = retsObj.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID).toString()
     }
@@ -31,7 +32,7 @@ export function deleteRETSPT(retsObj){
     retsLayer.applyEdits({
         deleteFeatures: [esriDelGraphic]
     })
-    .then(x => console.log(`${retsObj.attributes.OBJECTID} deleted`))
+    .then(() => console.log(`${retsObj.attributes.OBJECTID} deleted`))
     .catch(err => console.log(err))
 }
 
@@ -42,9 +43,18 @@ function createGraphic(retsObj){
     delete retsObj?.retsPt
     delete retsObj?.STATUS
 
-    return new Graphic({
+    const creatGraph = new Graphic({
         attributes: retsObj.attributes ?? retsObj
     })
+    
+    retsObj.geometry ? creatGraph.geometry = {
+                            type: "point",
+                            x: retsObj?.geometry[0],
+                            y: retsObj?.geometry[1]
+                        } : null
+    
+    
+    return creatGraph
 }
 
 export function getDFOFromGRID(gid, dfo){

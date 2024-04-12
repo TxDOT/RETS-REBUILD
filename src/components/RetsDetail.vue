@@ -22,7 +22,6 @@
                 <v-btn flat class="retsMetaBtn" @click="this.isDetails = true; this.isMetadata = false" density="compact">Details</v-btn>
                 <v-btn flat class="retsMetaBtn" @click="this.isMetadata = true; this.isDetails = false" density="compact">Metadata</v-btn>
             </v-btn-toggle>
-        
             <DetailsCard v-if="isDetails" :infoRets="store.retsObj" :taskGem="sendGemTaskNum" @disable-save="disableSave"/>
             <MetadataCard v-if="isMetadata" :infoRets="store.retsObj"/>
         </div>
@@ -38,7 +37,7 @@
             
             <v-card class="history-card">
                 <div style="float: right; font-size: 10px; position: relative; top: .5rem;" >
-                    <v-btn icon="mdi-arrow-expand" variant="plain" density="compact" @click="expandChatHistory"></v-btn>
+                    <v-btn icon="mdi-arrow-expand" variant="plain" density="compact" @click="expandChatHistory" style="font-size: .8rem;"></v-btn>
                 </div>
                 <v-card-title style="padding-bottom: 30px;">History</v-card-title>
                 <historyView :sortA="toSortBottom"/>
@@ -48,8 +47,8 @@
     <div id="commentDiv" v-if="editText">
         <v-card style="position: relative; height: 100%; border-radius: 0%; left: 20%; bottom: 5%;" >
             <v-card-title style="padding-bottom: 30px;">History</v-card-title>
-            <div style="float: right; font-size: 10px; position: relative; bottom: 2.4rem;" >
-                <v-btn icon="mdi-close" variant="plain" density="compact" @click="editText = false"></v-btn>
+            <div style="float: right; position: relative; bottom: 3.7rem;" >
+                <v-btn icon="mdi-close" variant="plain" density="compact" @click="editText = false" style="font-size: .9rem;"></v-btn>
             </div>
             <historyView :sortB="toSortTop"/>
             <div class="marginSetting" style="padding-top: 10px; position: absolute; width: 98%; bottom: 2rem;">
@@ -75,7 +74,7 @@
     </div>
     <div style="position: relative; top: 93px; padding-bottom: 0px;">
         <div style="position: relative; float: left; margin-left: 10px; font-size: 11px; display: flex; flex-wrap: wrap;">
-            <v-checkbox label="Asset Only Job" density="compact" class="checkbox-size"></v-checkbox>
+            <v-checkbox label="Asset Only Job" density="compact" class="checkbox-size" v-model="isAsset"></v-checkbox>
         </div>
         <v-btn-toggle id="trigger-buttons" density="compact">
             <v-btn @click="handlearchive" variant="plain" flat size="small" class="secondary-button">Delete</v-btn>
@@ -83,22 +82,21 @@
             <v-btn @click="sendToParent" variant="outlined" class="main-button-style" size="small" :disabled="store.isSaveBtnDisable">Save</v-btn>
         </v-btn-toggle>
     </div>
-    <v-card id = "archivepopup" v-if="isarchiveopen" >
-        <v-card-title id = "archiveheader" >
-            Delete RETS {{deletedRETSID}}
-            <hr id = "separator2" />
-        </v-card-title>
-            <v-card-subtitle id = "archivetext">
-                Deleting this RETS will move it to the archive table.
-            </v-card-subtitle>
-        
 
-        <v-btn-group id = "archivebuttons" density="compact">
-                <v-btn class="secondary-button" @click="handlearchive">CANCEL</v-btn>
-                <v-btn class="main-button-style" @click="deleteRets">DELETE</v-btn>
-            </v-btn-group>
-    
-    </v-card>    
+    <v-card id="archivepopup" v-if="isarchiveopen" >
+        <v-card-title id="archiveheader" >
+            Delete RETS {{deletedRETSID}}
+            <hr id="separator2" />
+        </v-card-title>
+        <v-card-subtitle id="archivetext">
+            Deleting this RETS will move it to the archive table.
+        </v-card-subtitle>
+            
+        <v-btn-group id="archivebuttons">
+            <v-btn  text="CANCEL" @click="handlearchive"></v-btn>
+            <v-btn id="deletebutton" text="DELETE" @click="deleteRets"></v-btn>
+        </v-btn-group>
+    </v-card>   
 
 </template>
 
@@ -107,7 +105,7 @@
     import DetailsCard from './detailsCard.vue'
     import MetadataCard from './metadataCard.vue'
     import { appConstants } from '../common/constant.js'
-    import {getGEMTasks, searchCards, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, removeOutline} from './utility.js'
+    import {getGEMTasks, searchCards, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer} from './utility.js'
     import detailsAlert from './detailsAlert.vue'
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
@@ -152,7 +150,8 @@
                 hasAttachment: false,
                 toSortTop: "ASC",
                 toSortBottom: "DESC",
-                retsInfo: []
+                retsInfo: [],
+                isAsset: false,
             }
         },
         mounted(){
@@ -165,15 +164,12 @@
             })
             this.getHistoryStore
             console.log(store.retsObj)
-            store.retsObj = store.retsObj
-            
+            this.isAsset = store.retsObj.attributes.JOB_TYPE === 2 ?  true : false
             store.getHistoryChatRet()
+
+            
         },
         methods:{
-            handlearchive(){
-                this.isarchiveopen =! this.isarchiveopen
-                this.deletedRETSID = store.retsObj.attributes.OBJECTID         
-            },
             returnDateFormat(e){
                 //10/29/2023 09:11am
                 const date = new Date(e)
@@ -215,6 +211,7 @@
                 this.saveDisable = bool
             },
             deleteRets(){
+                store.isAlert = false
                 clearGraphicsLayer()
                 store.retsObj.attributes.isDelete = true
                 deleteRETSPT(store.retsObj)
@@ -223,25 +220,30 @@
                 store.isDetailsPage = false
                 store.activityBanner = "Activity Feed"
                 deleteRetsGraphic()
-
-                
+                store.isCard = true
             },
             async sendToParent(){
+                store.isAlert = false
                 clearGraphicsLayer()
                 // this.retsInfo.ASSIGNED_TO = this.retsInfo.ASSIGNED_TO.value
                 store.retsObj.attributes.PRIO = store.retsObj.attributes.PRIO ?? 1
+                store.retsObj.attributes.JOB_TYPE = this.isAsset === true ? 2 : 1
                 console.log(store.retsObj.attributes.PRIO)
                 await updateRETSPT(store.retsObj)
                 store.isDetailsPage = false
                 store.activityBanner = "Activity Feed"
                 deleteRetsGraphic()
+                store.isCard = true
                 store.updateRetsID()
+                
             },
             cancelDetailsMetadata(){
+                store.isAlert = false
                 clearGraphicsLayer()
                 removeHighlight("a", true)
                 store.preserveHighlightCards()
                 store.isDetailsPage = false
+                store.isCard = true
                 store.activityBanner = "Activity Feed"
             },
             openNote(note, index){
@@ -309,6 +311,10 @@
             removeRetsGraphics(){
                 removeretsgraphic();
             },
+            handlearchive(){
+                this.isarchiveopen = !this.isarchiveopen
+                this.deletedRETSID = store.retsObj.attributes.OBJECTID       
+            }
 
         },
         watch:{
@@ -341,40 +347,41 @@
 <style scoped>
 #archivepopup{
     position: absolute;
-        border-radius: 5px;
-        left: 200%;
-        width: 25rem;
-        top:40%;
-        height:25%; 
-        border-radius: 0;
-    }
-    #archiveheader{
-        position: absolute;
-        top: 2%;
-        left: 2%;
-        font-size: 18px;
-        
-    }
-    #separator2{
-        border: 0;
-        border-bottom: 1px solid ;
-        margin: 0 auto;
-        width: 22.5rem;
-    }
-    #archivetext{
-        position: absolute;
-        top: 30%;
-        left: 2%;
-    }
-    #archivebuttons{
-        position: absolute;
-        bottom: 10px;
-        width: 25rem;
-        justify-content: end;
-        padding-right: 5px;
-        padding-bottom: 5px;
+    border-radius: 5px;
+    left: 200%;
+    width: 27rem;
+    top:40%;
+    height:25%; 
+    border-radius: 0;
+}
 
-    }
+#archiveheader{
+    position: absolute;
+    top: 2%;
+    left: 2%;
+    font-size: 18px;  
+}
+
+#separator2{
+    border: 0;
+    border-bottom: 1px solid ;
+    margin: 0 auto;
+    width: 24rem;
+}
+
+#archivetext{
+    position: absolute;
+    top: 30%;
+    left: 2%;
+}
+
+#archivebuttons{
+    position: absolute;
+    bottom: 10px;
+    width: 25rem;
+    justify-content: end;
+}
+
 #flagBtnDetails{
     padding: 1px !important;
     margin: 15px !important;
@@ -583,6 +590,8 @@ div .cardDiv{
     font-size: 1.25rem;
     font-weight: 500;
     letter-spacing: 0.0125em;
-    opacity: 1 !important
+    opacity: 1 !important;
+    padding: 0px;
+    margin-right: 19px;
 }
 </style>
