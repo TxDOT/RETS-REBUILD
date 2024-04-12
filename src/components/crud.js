@@ -16,6 +16,7 @@ export async function updateRETSPT(retsObj){
     retsObj.attributes.NO_RTE === true ? 1 : 0
     postFlagColor(retsObj)
     let esriUpdateGraphic = createGraphic(retsObj)
+    console.log(esriUpdateGraphic)
     await retsLayer.applyEdits({
         updateFeatures: [esriUpdateGraphic]
     })

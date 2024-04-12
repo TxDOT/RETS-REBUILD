@@ -156,7 +156,7 @@ import {store} from './store.js'
             createRoadGraphic(store.retsObj)
         },
         methods:{
-            zoomToRelateRet(geom){
+            zoomToRelateRet(geom, event){
                 zoomTo(geom)
                 
             },

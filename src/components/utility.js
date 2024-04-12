@@ -20,6 +20,7 @@ export function clickRetsPoint(){
                     return
                 }
                 clearRoadHighlightObj()
+
                 outlineFeedCards(evt.results)
                 removeHighlight("a", true)
                 if(store.isMoveRetsPt){
@@ -73,7 +74,6 @@ export async function getHighlightGraphic(){
 }
 
 export function removeHighlight(feature, removeAll){
-    //console.log(feature)
     view.whenLayerView(retsLayer)
         .then((lyrView) => {
             if(removeAll){
@@ -86,7 +86,7 @@ export function removeHighlight(feature, removeAll){
                 lyrView._highlightIds.delete(feature?.attributes.OBJECTID)
                 //console.log("after: " + feature?.attributes.OBJECTID )
                 
-                return
+                //return
             }
             
             return

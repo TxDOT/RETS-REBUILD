@@ -23,6 +23,7 @@ export default{
 
   mounted(){
     this.auth = login()
+
     
     //import Layer from "@arcgis/core/layers/Layer.js"
     //used to register ESRI Application so users can access map
