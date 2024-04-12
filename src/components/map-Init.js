@@ -157,7 +157,7 @@ export const DFOProducer = new FeatureLayer({
 })
 //County Layer construction
 export const texasCounties = new FeatureLayer({
-  url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/Texas_Counties_Detailed/FeatureServer/0",
+  url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/Texas_County_Boundaries/FeatureServer/0",
   visible: false,
   renderer: polygonRenderer
   
@@ -273,6 +273,7 @@ export const imageryBasemap = new Basemap({
 //add  basemap to the map
 export const map = new Map({
   basemap: darkVTBasemap,
+  
 })
 
 //add  map to the mapview, set zoom and center of screen when the application loads
@@ -309,20 +310,21 @@ export const searchWidget = new Search({
     {
       name: "RETS ID",
       layer: retsLayer, 
-      placeholder: "Rets ID...",
+      placeholder: "RETS ID",
       zoomScale: 5000,
-      searchFields: ["RETS_ID","RTE_NM","CNTY_NM","DIST_NM","GIS_ANALYST","GRID_ANALYST","DIST_ANALYST","ACTV", "ACTV_NBR"],
+      searchFields: ["RETS_ID","RTE_NM","CNTY_NM","DIST_NM","GIS_ANALYST","GRID_ANALYST","DIST_ANALYST","ACTV"],
       displayField: "RETS_ID",
       exactMatch: false,
       outFields: ["*"],
-      minSuggestCharacters: 2,
       maxSuggestions: 3,
       
     },
+    
     {
       name: "County",
       layer: texasCounties, 
-      placeholder: "County Name...",
+      placeholder: "County",
+      zoomScale: 500,
       searchFields: ["CNTY_NM"],
       displayField: "CNTY_NM", 
       exactMatch: false,
@@ -334,7 +336,7 @@ export const searchWidget = new Search({
     {
       name: "District",
       layer: txdotDistricts, 
-      placeholder: "District Name...",
+      placeholder: "District",
       searchFields: ["TXDOT_DIST_NM"],
       displayField: "TXDOT_DIST_NM", 
       exactMatch: false,
@@ -345,7 +347,7 @@ export const searchWidget = new Search({
     {
       name: "Roadways",
       layer: TxDotRoaways, 
-      placeholder: "Roadway...",
+      placeholder: "Roadways",
       searchFields: ["RTE_NM", "GID"],
       displayField: "RTE_NM", 
       exactMatch: false,
@@ -355,7 +357,7 @@ export const searchWidget = new Search({
     {
       name: "Cities",
       layer: texasCities, 
-      placeholder: "City Name...",
+      placeholder: "City",
       searchFields: ["CITY_NM"],
       displayField: "CITY_NM", 
       exactMatch: false,
@@ -363,17 +365,19 @@ export const searchWidget = new Search({
       //maxSuggestions: 1,
       minSuggestCharacters: 3,
     },
-    // {
-    //   name: "Minute Orders",
-    //   layer: minuteOrders, 
-    //   placeholder: "MO Number...",
-    //   searchFields: ["mo_nbr"],
-    //   displayField: "mo_nbr", 
-    //   exactMatch: false,
-    //   outFields: ["*"],
-    //   //maxSuggestions: 1,
-    //   minSuggestCharacters: 3,
-    // },
+    {
+      name: "Minute Order",
+      layer: retsLayer, 
+      placeholder: "Minute Order",
+      zoomScale: 5000,
+      searchFields: [ "ACTV_NBR"],
+      displayField: "ACTV_NBR",
+      exactMatch: false,
+      outFields: ["*"],
+      minSuggestCharacters: 2,
+      maxSuggestions: 3,
+      
+    },
     
     
   ],
@@ -527,6 +531,7 @@ searchWidget.on("select-result", function(event) {
       geometry: selectedFeature.geometry,
       symbol: highlightSymbol
     }));
+    
   } else if (selectedFeature.geometry.type === "polyline") {
     // Highlight the selected polyline feature with highlightSymbolRoadways
     highlightLayer.add(new Graphic({
@@ -541,10 +546,7 @@ searchWidget.on("select-result", function(event) {
     outlineFeedCards(tempArray);
   }
   
-  const searchInput = document.querySelector(".esri-search__input");
-  searchInput.value = null;
-  searchWidget.activeMenu = "none";
-  //removeOutline();
+
 
 });
 searchWidget.on("search-clear", function(event) {
@@ -564,18 +566,15 @@ searchWidget.on("search-complete", function(event){
 
 const searchBox = document.getElementsByClassName('esri-input esri-search__input');
 const menuList = document.querySelector('.esri-menu__list');
-//const menuList = document.getElementsByClassName('esri-menu__list');
-//const searchresult = document.getElementById('18ec9637c65-widget-0-source-item-2');
+
 
 document.addEventListener('click', function(event) {
   const targetElement = event.target.className;
-  //console.log(targetElement)
-  // Check if the clicked element is outside the menu
-  //if (!menuList) {
-      // Menu is closed, focus on the search box
-      //console.log("yo")
       if (targetElement === 'esri-search__source esri-menu__list-item' )
       {
+           const searchInput = document.querySelector(".esri-search__input");
+           searchInput.value = null;
+           searchWidget.activeMenu = "none";
         searchWidget.focus()
 
       }
@@ -583,9 +582,9 @@ document.addEventListener('click', function(event) {
       
       
      
-  //}
-  //document.getElementsByClassName('esri-input esri-search__input')[0].click()
+
 });
+
 
 
 
@@ -594,7 +593,6 @@ document.addEventListener('click', function(event) {
 
 homeWidget.on("go", function() {
   // Run your function here
-  console.log("widget clicked")
   home();
 });
 

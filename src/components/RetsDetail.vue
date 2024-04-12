@@ -223,6 +223,8 @@
                 store.isDetailsPage = false
                 store.activityBanner = "Activity Feed"
                 deleteRetsGraphic()
+
+                
             },
             async sendToParent(){
                 clearGraphicsLayer()
@@ -341,7 +343,7 @@
     position: absolute;
         border-radius: 5px;
         left: 200%;
-        width: 27rem;
+        width: 25rem;
         top:40%;
         height:25%; 
         border-radius: 0;
@@ -357,7 +359,7 @@
         border: 0;
         border-bottom: 1px solid ;
         margin: 0 auto;
-        width: 24rem;
+        width: 22.5rem;
     }
     #archivetext{
         position: absolute;
@@ -369,6 +371,8 @@
         bottom: 10px;
         width: 25rem;
         justify-content: end;
+        padding-right: 5px;
+        padding-bottom: 5px;
 
     }
 #flagBtnDetails{

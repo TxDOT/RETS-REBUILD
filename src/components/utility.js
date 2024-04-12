@@ -74,7 +74,6 @@ export async function getHighlightGraphic(){
 }
 
 export function removeHighlight(feature, removeAll){
-    //console.log(feature)
     view.whenLayerView(retsLayer)
         .then((lyrView) => {
             if(removeAll){
@@ -83,11 +82,11 @@ export function removeHighlight(feature, removeAll){
             }
 
             if(lyrView._highlightIds.has(feature?.attributes.OBJECTID)){
-                //console.log("before: " + feature?.attributes.OBJECTID )
+                console.log("before: " + feature?.attributes.OBJECTID )
                 lyrView._highlightIds.delete(feature?.attributes.OBJECTID)
                 //console.log("after: " + feature?.attributes.OBJECTID )
                 
-                return
+                //return
             }
             
             return
@@ -97,7 +96,7 @@ export function removeHighlight(feature, removeAll){
 export function outlineFeedCards(res){
 
     res.forEach((x) => {
-        console.log("OK")
+        //console.log("OK")
 
         //set card outline
         var objectcomparison = x.attributes ? String(x.attributes.RETS_ID).concat('-',x.attributes.OBJECTID) : String(x.graphic.attributes.RETS_ID).concat('-',x.graphic.attributes.OBJECTID)
@@ -123,8 +122,8 @@ export function toggleHighlightCards(bool){
     const getCardRows = document.getElementsByClassName("rets-card-row")
     let i;
     
-    console.log('updatedSelection')
-    console.log(store.roadHighlightObj)
+    //console.log('updatedSelection')
+    //console.log(store.roadHighlightObj)
     for(i=0; i < getCardRows.length; i++){
         if(bool === true){
             getCardRows[i].style.display = getCardRows[i].lastElementChild.classList.contains("highlight-card") ? "flex" : "none"
@@ -462,6 +461,7 @@ export function createtool(sketchWidgetcreate, createretssym) {
                 {
                 if (event.state === "complete")
                     {
+                        
                         // Get the rectangle geometry
                         var rectangleGeometry = event.graphic.geometry;
                         // Query for points within the rectangle
@@ -470,22 +470,13 @@ export function createtool(sketchWidgetcreate, createretssym) {
                         retsLayer.queryFeatures(query)
                         .then(function (result) 
                                 {
+                                    graphics.removeAll() 
                                     // Access the selected features
                                     var selectedFeatures = result.features;
                                     //console.log(result.features.length)
                                     
     
                                     if (pressedkey === false){
-                                        
-                                        // removeHighlight("a", removeAll); 
-                                        // // for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                        // removeAllCardHighlight()
-                                        
-                                        // //clearRoadHighlightObj()
-                                        // outlineFeedCards(selectedFeatures);
-                                        
-                                        // console.log('hey1')
-                                        // }
                                         if (selectedFeatures.length){
                                             for (let i = 0; i < selectedFeatures.length; i++ ) {
                                                 removeHighlight(selectedFeatures[i].attributes,removeAll); 
@@ -509,7 +500,6 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                             
                                         }
                                         
-                                        graphics.removeAll() 
                                         return
                                         
                                     }
@@ -524,27 +514,17 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                             outlineFeedCards(selectedFeatures);
     
                                         } 
-                                        graphics.removeAll();
                                         return
                                     }
                                     
                                     if(pressedkey === "Control"){
-                                        
-                                        for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                            console.log("this: " + selectedFeatures[i].attributes.OBJECTID)
-        
-                                            removeHighlight(selectedFeatures[i]);  
-    
-                                        } 
-    
-                                       
-                                        graphics.removeAll();
-                                        return
-            
-                                    }
-    
                                     
-                                   
+                                        for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                            removeHighlight(selectedFeatures[i]);
+                                        } 
+                                    }
+
+ 
                                 });
     
                                 
@@ -564,6 +544,15 @@ export function createtool(sketchWidgetcreate, createretssym) {
         
         return
       }
+      async function removeIndividualSelection(selectedFeatures) {
+        try {
+            for (const feature of selectedFeatures) {
+                await removeHighlight(feature);
+            }
+        } catch (error) {
+            console.error("Error removing individual selection:", error);
+        }
+    }
 
 export async function handleaddrets(newPointGraphic, addrets){
     try{
@@ -655,12 +644,12 @@ export function togglemenu(isActOpen, shift){
 }
 
 export async function queryFlags(userid){
-    console.log(userid)
+    //console.log(userid)
     const returnRetsFlagUser = await flagRetsColor.queryFeatures({
         where: `USERNAME = '${userid}'`,
         outFields: ["*"]
     }) 
-    console.log(returnRetsFlagUser)
+    //console.log(returnRetsFlagUser)
     returnRetsFlagUser.features.forEach(flag => store.userRetsFlag.push({FLAG: flag.attributes.FLAG, OBJECTID: flag.attributes.OBJECTID, RETS_ID: flag.attributes.RETS_ID, USERNAME: flag.attributes.USERNAME}))
     return
 }

@@ -4,7 +4,7 @@
 
     <v-navigation-drawer width="200" height="100" permanent color="black">
         <v-list height="100%" id="icons-top" >
-            <v-list-item v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" :active-class="tool.name !== 'Menu' ? 'btn-left-brder' : ''" >  
+            <v-list-item v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" :active-class="tool.name !== 'Menu' ? 'btn-left-brder' : ''" >    
                 <v-tooltip location="right bottom" :text=tool.name >
                     <template v-slot:activator="{ props}">
                         <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
@@ -121,7 +121,7 @@
             <v-btn-group id = "savebutton" density="compact">
                 <v-btn class="secondary-button"  @click="handleSettingsTool();handleactiveclass()">CANCEL</v-btn>
                
-                    <v-btn class="main-button-style">SAVE</v-btn>
+                    <v-btn class="main-button-style" @click="handleSettingsTool();handleactiveclass()">SAVE</v-btn>
             
                 
             </v-btn-group>
@@ -153,6 +153,7 @@
         props: {addrets: Number},
         data(){
             return{
+                shiftmap: false,
                 fontColor: '#D9D9D9',
                 switchValue : false,
                 isActOpen: true,
@@ -188,7 +189,8 @@
                                 name: "Menu", 
                                 action: () =>{
                                     document.getElementById("container").style.display = document.getElementById("container").style.display === "none" ? "block" : "none",
-                                    this.resizemap()
+                                    //this.resizemap();
+                                    this.shiftDiv();
                                 }, 
                                 isActive: this.tester,
                                },  
@@ -268,6 +270,18 @@
                 },
                 
                 methods: {
+                    shiftDiv(){
+                        // console.log(this.isActOpen)
+                        // this.shiftmap = this.isActOpen
+                        //const elements = document.getElementsByClassName('esri-view-root');
+                        
+
+
+                        //elements[0].classList.toggle('esri-view-surface');
+                        const viewSurface = document.querySelector('.esri-view-surface');
+                        viewSurface.classList.toggle('translateX-500px');
+
+                    },
                     newSwitchTurnedOn() {
                         if (this.switchValue) {
                             // New switch is turned on, do something
@@ -405,17 +419,22 @@
                         map.basemap = darkVTBasemap;
                         this.basemapcard = false;
                         retsLabelclass.symbol.color = "white"
+                        retsLabelclass.symbol.haloSize = 0
                     },
                     togglelightgrey(){
                         map.basemap = lightVTBasemap
                         lightVTBasemap.visible = true
                         this.basemapcard = false;
-                        retsLabelclass.symbol.color = "black"
+                        retsLabelclass.symbol.color = "black"                        
+                        retsLabelclass.symbol.haloSize = 0
+
                     },
                     togglestandard(){
                         map.basemap = standardVTBasemap;
                         this.basemapcard = false;
                         retsLabelclass.symbol.color = "black"
+                        retsLabelclass.symbol.haloSize = 0
+
                     },  
                     toggleimagery(){
                         map.basemap = imageryBasemap;
@@ -427,11 +446,15 @@
                     togglegoogle(){
                         map.basemap = googleVTBasemap;
                         retsLabelclass.symbol.color = "black"
+                        retsLabelclass.symbol.haloSize = 0
+
                         this.basemapcard = false;
                     },
                     toggleosm(){
                         map.basemap = OSMVTBasemap;
                         retsLabelclass.symbol.color = "black"
+                        retsLabelclass.symbol.haloSize = 0
+
                         this.basemapcard = false;
                     },
 
@@ -455,15 +478,15 @@
     #icons-bottom{
         position: relative;
         bottom: 15.5rem;
-        left: 5%;
+        left: 0%;
     }
     #icons-top{
-        left: 5%;
+        left: 0%;
     }
     .v-navigation-drawer{
         overflow-y: hidden !important;
         height: 100% !important;
-        width: 63px !important;
+        width: 52px !important;
         color: black;
     }
 
@@ -476,7 +499,8 @@
     }
 
     .btn-left-brder{
-        border-left: 5px solid #4472C4 !important;
+        border-left: 10px solid #4472C4 !important;
+        
     }
     .nav-bar-btn{
         height: 2rem;
@@ -490,7 +514,7 @@
         width: 165px;
         height: 330px;
         bottom: 5%;
-        left: 75px;
+        left: 51px;
         z-index: 9999;
         border-radius: 0px;
 
@@ -503,7 +527,7 @@
         width: 165px;
         height: 120px;
         bottom: 15.5%;
-        left: 75px;
+        left: 51px;
         z-index: 9999;
         border-radius: 0px;
 
@@ -638,6 +662,32 @@
         border-radius: 9%;
         
     }
+    .v-list{
+        position: relative;
+        width: 64px;
+    }
+    .v-list-item{
+        position: relative;
+        left: -10%;
+        padding-right: 0%;
+    }
+    .v-list-item__content{
+        width: 50px;
+    }
+    .esri-view-surface {
+    width: calc(100% - 500px) !important;
+    transform: translate(500px);
+    transition: transform 0.1s ease;
+    left: 0px;
+}
+
+.translateX-500px {
+    left: 0px !important;
+
+    width: 100% !important;
+    transform: translate(0px) /* Transformed position */
+}
+
 
  
 

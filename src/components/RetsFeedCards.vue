@@ -6,7 +6,7 @@
                     <header id="container-header">RETS Dashboard</header>
                     <div class="add-new-btn">
                         <div style="float:right;">
-                            <v-btn v-for="(tool, i) in addbutton" :key="i" :value="tool" @click="tool.action()" :prepend-icon="buttonIcon" color="#4472C4" rounded="0" id="add-new-btn"  class="main-button" v-if="!isDetailsPage" >
+                            <v-btn v-for="(tool, i) in addbutton" :key="i" :value="tool" @click="tool.action()" :prepend-icon="buttonIcon" color="#4472C4" rounded="0" id="add-new-btn"  class="main-button" v-if="!store.isDetailsPage" >
                             <!-- @click="handlecreate"> -->
                             <p class="text-btn" id = "addbtn">{{addbtntext}}</p>
                             </v-btn>
@@ -490,7 +490,7 @@ export default{
         },
         addrets:{
             handler: async function(){
-                console.log(this.addrets)
+                //console.log(this.addrets)
                 await this.addretss()
             },
             immediate: true
@@ -557,7 +557,7 @@ export default{
         height: 100%;
         background-color: black;
         position: absolute;
-        left: 63px;
+        left: 52px;
         padding: 0px;
         display: block;
         font-size: 10px;
