@@ -145,7 +145,7 @@ import {store} from './store.js'
             this.datePicker = this.setDate(milliDate)
             console.log(store.retsObj.attributes.NO_RTE)
 
-            if(store.retsObj.attributes.NO_RTE === 1){
+            if(store.retsObj.attributes.NO_RTE === true){
                 store.isAlert = false
                 store.isDisableValidations = true
                 store.retsObj.attributes.NO_RTE = true
@@ -178,27 +178,27 @@ import {store} from './store.js'
                 // if Route, status or description; save button disabled
                 let item = [store.retsObj.attributes.RTE_NM, store.retsObj.attributes.STAT, store.retsObj.attributes.DESC_].filter(x => !x)
                 console.log(item)
-                // if(!store.retsObj.attributes.NO_RTE){
-                //     if(!store.retsObj.attributes.DFO || !store.retsObj.attributes.RTE_NM){
-                //         console.log(store.retsObj.attributes.NO_RTE)
-                //         store.isAlert = true
-                //         store.alertTextInfo = {"text": "Route Number or DFO is missing", "color": "red", "toggle": true}
-                //         return store.isSaveBtnDisable = true
-                //     }
-                //     if(!store.retsObj.attributes.RTE_NM.length || !store.retsObj.attributes.DFO.length){
-                //         console.log(store.retsObj.attributes.DFO)
-                //         store.isAlert = true
-                //         store.alertTextInfo = {"text": "Route Number or DFO is missing", "color": "red", "toggle": true}
-                //         return store.isSaveBtnDisable = true
-                //     }
-                // }
-                // if(item.length > 0){
-                //     store.isAlert = false
-                //     store.isSaveBtnDisable = true
-                //     return true
-                // }
-                // store.isAlert = false
-                // store.isSaveBtnDisable = false
+                if(!store.retsObj.attributes.NO_RTE){
+                    if(!store.retsObj.attributes.DFO || !store.retsObj.attributes.RTE_NM){
+                        console.log(store.retsObj.attributes.NO_RTE)
+                        store.isAlert = true
+                        store.alertTextInfo = {"text": "Route Number or DFO is missing", "color": "red", "toggle": true}
+                        return store.isSaveBtnDisable = true
+                    }
+                    if(!store.retsObj.attributes.RTE_NM.length || !store.retsObj.attributes.DFO.length){
+                        console.log(store.retsObj.attributes.DFO)
+                        store.isAlert = true
+                        store.alertTextInfo = {"text": "Route Number or DFO is missing", "color": "red", "toggle": true}
+                        return store.isSaveBtnDisable = true
+                    }
+                }
+                if(item.length > 0){
+                    store.isAlert = false
+                    store.isSaveBtnDisable = true
+                    return true
+                }
+                store.isAlert = false
+                store.isSaveBtnDisable = false
             },
             valueRequired(e){
                 if(e === null) return false
@@ -219,7 +219,7 @@ import {store} from './store.js'
                     store.isSaveBtnDisable = true
                     return `But where am I? Don't leave me blank!`
                 }
-                if(store.retsObj.attributes.NO_RTE === 0){
+                if(!store.retsObj.attributes.NO_RTE){
                     console.log(store.retsObj.attributes.NO_RTE)
                     let convert = Number(i)
                     if(!convert){
@@ -322,7 +322,7 @@ import {store} from './store.js'
                 },
                 immediate: true
             },
-            'store.attributes.NO_RTE':{
+            'infoRets.attributes.NO_RTE':{
                 handler: function(){
                     console.log(store.retsObj.attributes.NO_RTE)
 

@@ -68,23 +68,28 @@ export const store = reactive({
                 return
         },
         async getHistoryChatRet(){
-                console.log(JSON.parse(this.history))
-                const getRelatedHistory = JSON.parse(this.history)
-                const retsHistory = getRelatedHistory.filter(hist => hist.RETS_ID === this.historyRetsId)
-                const attachment = await getAttachmentInfo(retsHistory.map(id => id.OBJECTID))
+                try{
+                        const getRelatedHistory = JSON.parse(this.history)
+                        const retsHistory = getRelatedHistory.filter(hist => hist.RETS_ID === this.historyRetsId)
+                        const attachment = await getAttachmentInfo(retsHistory.map(id => id.OBJECTID))
+        
+                        retsHistory.forEach((hist) => {
+                                if(Object.hasOwn(attachment, hist.OBJECTID)){
+                                        hist.attachments = attachment[hist.OBJECTID].map((a) => {
+                                                if(a.parentObjectId === hist.OBJECTID){
+                                                        return {name: a.name, url: a.url}
+                                                }
+                                                
+                                        })
+                                }
+                        })
+                        // this.historyChat = retsHistory
+                        return
+                }
+                catch(err){
+                        //
+                }
 
-                retsHistory.forEach((hist) => {
-                        if(Object.hasOwn(attachment, hist.OBJECTID)){
-                                hist.attachments = attachment[hist.OBJECTID].map((a) => {
-                                        if(a.parentObjectId === hist.OBJECTID){
-                                                return {name: a.name, url: a.url}
-                                        }
-                                        
-                                })
-                        }
-                })
-                // this.historyChat = retsHistory
-                return
         },
         addNote(cmnt, isAttach, event){
                 const date = new Date()
@@ -228,7 +233,7 @@ export const store = reactive({
                 const resp = `RETS_ID = ${this.retsObj.attributes.RETS_ID}`
                 const query = {"whereString": `${resp}`, "queryLayer": "retsLayer"}
                 console.log(query)
-                const orderField = `${this.filter.createDt[0].filter} ${this.filter.createDt[0].sortType}`
+                const orderField = `${this.CREATE_DT[0].filter} ${this.CREATE_DT[0].sortType}`
                 getQueryLayer(query, orderField)
                         .then(obj => {
                                 if(obj.features.length){

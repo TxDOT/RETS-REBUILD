@@ -1,8 +1,7 @@
 import OAuthInfo from "@arcgis/core/identity/OAuthInfo.js";
 import esriId from "@arcgis/core/identity/IdentityManager.js";
-import { retsLayer} from './map-Init.js'
-import { view } from "./map-Init.js";
-import {getDomainValues, getDistinctAttributeValues} from './utility.js'
+import { retsLayer, view, retsUserRole} from './map-Init.js'
+import {getDomainValues, getDistinctAttributeValues, returnHistory, getUniqueQueryValues, queryFlags} from './utility.js'
 import { appConstants } from "../common/constant.js";
 import router from '../router/index.js'
 import {store} from './store.js'
@@ -38,6 +37,7 @@ export function login(){
 }
 
 async function signIn(){ 
+  await getUniqueQueryValues(retsUserRole, appConstants.userRoles)
   const userId = await getUserId()
   await queryFlags(userId)
   store.getRetsLayer(userId)
@@ -57,6 +57,7 @@ async function signIn(){
       return retsLayer.queryExtent();
     })
     .then((response) => {
+      router.push('/apps/statewide_mapping/rets_rebuild/map')
       view.goTo(response.extent);
     });
 }
@@ -69,6 +70,7 @@ const setDefExpRets = (userId) => {
 }
 
 export async function getUserId(){
+  console.warn('VERSION: 2.1.3')
   const user = await esriId.getCredential(authen.portalUrl + "/sharing/rest",{
     oAuthPopupConfirmation: false,
   })
@@ -76,25 +78,6 @@ export async function getUserId(){
   return user.userId
 }
 
-function createLayerViews(){
-    returnHistory()
-    // view.whenLayerView(TxDotRoaways)
-    //   .then((featLayerView) => {
-    //     console.log(featLayerView)
-    //     if(featLayerView.layer.title === 'TxDOT Roadways'){
-    //       let query = featLayerView.layer.createQuery()
-    //       query.where = "OBJECTID < 10"
-
-    //       featLayerView.queryFeatures(query)
-    //         .then(x => console.log(x))
-    //         .catch(err => console.log(err))
-    //       return
-    //     }
-    //     //roadLayerview = featLayerView
-    //   })
-    //   .catch(err => console.log(err))
-    return
-}
 
 
 

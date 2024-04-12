@@ -27,14 +27,7 @@
                                     <v-text-field variant="plain" v-if="store.isDetailsPage" :disabled="isSubtitle" placeholder="Enter a subtitle" style="position:relative; top: 1px;"></v-text-field>
                                 </div>
                             </div>
-                            <p>{{store.activityBanner}}</p>
-                            <div class="retsSubtitle">
-                                <div id="retSubText">
-                                    <v-text-field variant="plain" v-if="store.isDetailsPage" :disabled="isSubtitle" placeholder="Enter a subtitle" style="position:relative; top: 1px;"></v-text-field>
-                                </div>
-                            </div>
                             
-                            <v-btn v-if="store.isDetailsPage" icon="mdi-pencil-outline" density="compact" flat id="renameRets" @click="displaySubtitle($event)"></v-btn>
                             <v-btn v-if="store.isDetailsPage" icon="mdi-pencil-outline" density="compact" flat id="renameRets" @click="displaySubtitle($event)"></v-btn>
                         </div>
 
@@ -45,7 +38,7 @@
                                
      
                              
-                                <v-btn icon="mdi-filter" class="banner-btn" flat @click="store.isfilter = !store.isfilter" variant="compact"></v-btn>
+                                <v-btn icon="mdi-filter" class="banner-btn" flat @click="store.isfilter = !store.isfilter"></v-btn>
                                 <div class="filter-notification-bubble" v-if="store.filterTotal > 0">
                                     <p style="font-size: 13.5px; position: relative; left: 25%; bottom: 1.3px;"><b>{{ store.filterTotal}}</b></p>
                                 </div>
@@ -65,7 +58,6 @@
                 </v-banner>
             </v-row>
             <v-row id="search-feed" v-if="!store.isDetailsPage">
-            <v-row id="search-feed" v-if="!store.isDetailsPage">
                 <v-text-field density="compact" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" v-model="actvFeedSearch"></v-text-field>
             </v-row>
 
@@ -74,13 +66,10 @@
                     <v-btn elevation="0" @click="changeColor(rd.attributes.RETS_ID);" class="flag-btn" size="small" max-width=".5px" density="compact" variant="plain" slim>
                         <template v-slot:prepend>
                             <v-icon size="medium" :id="`${rd.attributes.RETS_ID}Icon`" :color="rd.attributes.flagColor.FLAG" :icon="rd.attributes.flagColor.FLAG ? changeFlagIcon(rd.attributes.flagColor.FLAG) : 'mdi-flag-outline'"></v-icon>
-                            <v-icon size="medium" :id="`${rd.attributes.RETS_ID}Icon`" :color="rd.attributes.flagColor.FLAG" :icon="rd.attributes.flagColor.FLAG ? changeFlagIcon(rd.attributes.flagColor.FLAG) : 'mdi-flag-outline'"></v-icon>
                         </template>
                     </v-btn>
                     <v-col class="color-picker" v-if="flagClickedId === rd.attributes.RETS_ID" v-click-outside="closeFlagDiv">
                         <v-icon size="medium" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" ></v-icon>
-                    </v-col>
-                    <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `7px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="store.roadHighlightObj.has(`${String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)}`) ? 'card highlight-card' : 'card'" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road);">
                     </v-col>
                     <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `7px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="store.roadHighlightObj.has(`${String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)}`) ? 'card highlight-card' : 'card'" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road);">
                         <v-card-text id="retsCard">
@@ -91,7 +80,6 @@
                             {{ rd.attributes.RTE_NM ?? "Route name not provided" }}
                         </v-card-text>
 
-                        <div style="position: relative; bottom: 7px; width: 100%;">
                         <div style="position: relative; bottom: 7px; width: 100%;">
                             <p class="text-concat">
                                 {{ rd.attributes.DESC_ ? rd.attributes.DESC_ : "If description is empty does it need to be worked ?" }}
@@ -112,34 +100,14 @@
                                 </v-card-subtitle>
                                 </div>
                             </div>
-                            <!-- v-if="rd.attributes[i.display] === i.condition"  -->
-
-                        <div style="position: relative; top: 2%; height: 40px;">
-                            <div>
-                                <div style="position: relative; float: right; padding-top: 0px; top:0px; left: 0px;">
-                                    <v-tooltip v-for="i in alertIcons" :text="i.popup" location="top">
-                                        <template v-slot:activator="{props}" v-if="i.supplementCondition ? rd.attributes[i.display] === i.condition && rd.attributes[i.displaySup] !== i.supplementCondition : rd.attributes[i.display] === i.condition"> 
-                                            <v-icon :icon="i.icon" class="cardPRIO" :color="i.color" v-bind="props"></v-icon>
-                                        </template>
-                                    </v-tooltip>
-                                </div>
-                                <div style="height:17px; position: absolute; bottom: 0px; width:fit-content;">
-                                <v-card-subtitle class="subtitle-text">
-                                    Created by {{ rd.attributes.CREATE_NM ? returnUserName(rd.attributes.CREATE_NM) : "If Create Name is empty is it really created" }} {{ rd.attributes.CREATE_DT ? returnDateFormat(rd.attributes.CREATE_DT) : returnDateFormat(rd.attributes.EDIT_DT)}}
-                                </v-card-subtitle>
-                                </div>
-                            </div>
-                            <!-- v-if="rd.attributes[i.display] === i.condition"  -->
-
                         </div>
                         
                     </v-card>
                 </v-row>
             </div>
-            <div class="card-feed-div" v-if="store.isNoRets"><p>No RETS for you!</p></div>
+            
             <div class="card-feed-div" v-if="store.isNoRets"><p>No RETS for you!</p></div>
         </v-col>
-        <RetsDetailPage v-if="store.isDetailsPage" @close-detail="enableFeed"/>
         <RetsDetailPage v-if="store.isDetailsPage" @close-detail="enableFeed"/>
     </v-container>
     <v-card v-if="uploadAttachment" class="card attachCard"> 
@@ -157,7 +125,6 @@
         <v-divider style="margin-left: 15px; margin-right: 15px; color:white;"></v-divider>
         <v-card-text>
             If you proceed your changes will be discarded.
-            If you proceed your changes will be discarded.
         </v-card-text>
         <div style="margin: 15px;">
             <div style="float: right; margin-bottom: 15px;">
@@ -172,15 +139,13 @@
 </template>
 
 <script>
-import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer, searchCards, highlightRETSPoint, turnAllVisibleGraphicsOff, toggleRelatedRets, getHighlightGraphic, removeHighlight, createtool, handleaddrets} from './utility.js'
+import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer, searchCards, highlightRETSPoint, turnAllVisibleGraphicsOff, toggleRelatedRets, getHighlightGraphic, removeHighlight, createtool,  returnHistory, toggleHighlightCards} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import Filter from './RetsFilter.vue'
 import RetsDetailPage from './RetsDetail.vue'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import {store} from './store.js'
 import {view, retsGraphicLayer} from './map-Init.js'
-import { sketchWidgetcreate, createretssym, flagRetsColor } from './map-Init.js'
-import {addRETSPT, postFlagColor} from '../components/crud.js'
 import { sketchWidgetcreate, createretssym, flagRetsColor } from './map-Init.js'
 import {addRETSPT, postFlagColor} from '../components/crud.js'
 
@@ -385,16 +350,9 @@ export default{
         },
         async addretss(){
             const querystring = {"whereString":`OBJECTID = ${this.addrets}`, "queryLayer": "retsLayer"}
-            const querystring = {"whereString":`OBJECTID = ${this.addrets}`, "queryLayer": "retsLayer"}
             try{const querypromise = await getQueryLayer(querystring, "PRIO, CREATE_DT DESC")
                 if (querypromise.features.length){
                     querypromise.features.forEach(
-                        (feat)=> {
-                            feat.attributes.flagColor = {flagColor: '', OBJECTID: ''}
-                            const addNewRetsPt = {attributes:feat.attributes,geometry:[feat.geometry.x,feat.geometry.y]}
-                            store.addRetsID(addNewRetsPt)
-                            this.double(addNewRetsPt)
-                        }
                         (feat)=> {
                             feat.attributes.flagColor = {flagColor: '', OBJECTID: ''}
                             const addNewRetsPt = {attributes:feat.attributes,geometry:[feat.geometry.x,feat.geometry.y]}
@@ -435,9 +393,6 @@ export default{
         },
         assignColorToFlag(clr){
             document.getElementById(`${this.flagClickedId}Icon`).style.color = clr
-            const rets = store.roadObj.find(rd => rd.attributes.RETS_ID === this.flagClickedId)
-            rets.attributes.flagColor.FLAG = clr
-            postFlagColor(rets)
             const rets = store.roadObj.find(rd => rd.attributes.RETS_ID === this.flagClickedId)
             rets.attributes.flagColor.FLAG = clr
             postFlagColor(rets)
@@ -583,7 +538,7 @@ export default{
         //     },
         //     once: true
         // }
-        },
+        //},
         // 'store.roadHighlightObj.size':{
         //     handler: function(){
         //         console.log(store.roadHighlightObj.size)
@@ -598,19 +553,10 @@ export default{
         // }
     },
     computed:{
-        queryLayer:{
-            get(){
-
-            },
-        },
-        
-            get(){
-
-            },
+ 
         },
         
 
-    }
 }
 </script>
 
@@ -730,13 +676,11 @@ export default{
         justify-items: end;
     }
     .add-new-btn{
-    .add-new-btn{
         position: absolute;
         right: 1rem;
         top: 14px;
         top: 14px;
         text-align: center;
-
     }
     .text-btn{
         position: relative;
@@ -795,8 +739,7 @@ export default{
         overflow: hidden;
         font-size: 14px;
         position: relative;
-        color: #a6a6a6
-        color: #a6a6a6
+        color: #a6a6a6;
     }
 
     .flag-btn{
@@ -887,14 +830,6 @@ export default{
     :deep(.v-switch--inset .v-switch__track){
         height: 20px !important;
         width: 45px !important;
-    }
-
-    #addbtn{
-        position: relative;
-        bottom: 30px;
-        left: 5px;
-        float: right;
-        font-size: 10px;
     }
 
 </style>

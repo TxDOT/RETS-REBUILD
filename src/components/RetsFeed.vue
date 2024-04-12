@@ -472,7 +472,6 @@
     .v-list-item:hover{
         cursor: pointer;
         background-color: rgba(128,128,128,.3);
-
     }
 
     #icons-bottom{
@@ -662,7 +661,7 @@
         border-radius: 9%;
         
     }
-    .v-list{
+    /* .{
         position: relative;
         width: 64px;
     }
@@ -673,7 +672,7 @@
     }
     .v-list-item__content{
         width: 50px;
-    }
+    } */
     .esri-view-surface {
     width: calc(100% - 400px) !important;
     transform: translate(400px);

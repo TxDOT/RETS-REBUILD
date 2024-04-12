@@ -115,10 +115,6 @@
             // console.log(this.filterPros)
             // this.filterPros[appConstants.queryField[appConstants.userRoles.find(x => x.value === store.loggedInUser).type]] = appConstants.userRoles.filter(y => y.value === this.filterPros[appConstants.queryField[appConstants.userRoles.find(x => x.value === store.loggedInUser).type]][0].value)
         },
-        mounted(){
-            console.log(this.filterPros.GIS_ANALYST)
-            this.filterPros.GIS_ANALYST = appConstants.userRoles.filter(y => y.value === this.filterPros.GIS_ANALYST[0].value)
-        },
         methods:{
             cancelFilter(){
                 this.calcFilterDiff()

@@ -3,7 +3,8 @@ import Query from "@arcgis/core/rest/support/Query.js";
 import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant.js";
 import {store} from './store.js'
-import {getDFOFromGRID} from './crud.js'
+//import {getDFOFromGRID} from './crud.js'
+import esriId from "@arcgis/core/identity/IdentityManager.js";
 import { addRETSPT, updateRETSPT } from './crud.js';
 import esriRequest from "@arcgis/core/request.js";
 import * as geodesicUtils from "@arcgis/core/geometry/support/geodesicUtils.js";
@@ -93,7 +94,7 @@ export function removeHighlight(feature, removeAll){
         })
 }
 
-function outlineFeedCards(cards){
+export function outlineFeedCards(cards){
     return new Promise((res, rej)=>{
         cards.forEach((x) => {
             //set card outline
@@ -374,7 +375,7 @@ export function searchCards(cardArr, string, index){
         return
     }
     catch(a){
-        console.warm("search is not workin")
+        console.warn("search is not workin")
     }
 
 }
@@ -945,7 +946,7 @@ export function getRoadInformation(){
     view.on(["drag", "pointer-up"], (event)=>{
         view.hitTest(event, {include: [roadsLayerView.layer]})
             .then((rd) => {
-                if(!rd.results.length){
+                if(!rd.results.length && event.type === "pointer-up"){
                     store.isAlert = true
                     store.alertTextInfo = {"text": `No Route has been detected`, "color": "yellow", "type":"info", "toggle": true}
                     store.retsObj.attributes.NO_RTE = true
@@ -957,7 +958,7 @@ export function getRoadInformation(){
                     })
                     .then(()=>{
                         view.goTo(createGraphic)
-                        store.updateRetsID()
+                        //store.updateRetsID()
                         store.isAlert = false
                         store.getHistoryChatRet()
                         return
@@ -967,7 +968,7 @@ export function getRoadInformation(){
                 if(event.type === "drag"){
                     store.retsObj.attributes.RTE_NM = rd.results[0].graphic.attributes.RTE_NM
                 }
-                else if(event.type === "pointer-up"){
+                else if(event.type === "pointer-up" && rd.results.length){
                     roadsLayerView.layer.queryFeatures({
                         where: `RTE_NM = '${rd.results[0].graphic.attributes.RTE_NM}'`,
                         returnM: true,
@@ -983,6 +984,7 @@ export function getRoadInformation(){
                             const newDFO = road.features[0].geometry.paths[0].at(vertexIndex)[2] + distance
                             road.features[0].attributes.DFO = newDFO
                             createRoadGraphic(road.features[0])
+                            return
                         })
                    
                 }
@@ -990,4 +992,19 @@ export function getRoadInformation(){
             })
             .catch(() => console.log('I dont care'))
     })
-} 
+    return
+}
+
+export function removeOutline(){
+    const classList = document.querySelectorAll('.highlight-card');
+    classList.forEach(element => {
+    element.classList.remove('highlight-card'); // Remove each element individually
+    });
+    
+}
+
+export function logoutUser(){
+    esriId.destroyCredentials({
+    })
+
+}
