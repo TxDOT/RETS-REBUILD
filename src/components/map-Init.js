@@ -53,7 +53,7 @@ export let retsPointRenderer = new UniqueValueRenderer({
     value: "3",
       symbol: new SimpleMarkerSymbol({
       size: 8,
-      color: appConstants.CardColorMap[2],
+      color: appConstants.CardColorMap[3],
         outline: {
           color: "white",
           width: 0
@@ -120,7 +120,7 @@ export const DFOProducer = new FeatureLayer({
 })
 //County Layer construction
 export const texasCounties = new FeatureLayer({
-  url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/Texas_Counties_Detailed/FeatureServer/0",
+  url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/Texas_County_Boundaries/FeatureServer/0",
   visible: true,
   renderer: polygonRenderer
   
@@ -144,8 +144,6 @@ export const minuteOrders = new FeatureLayer({
   visble: true, 
   renderer: roadwaysRenderer
 })
-
-
 
 
 //TxDotRoaways Layer construction

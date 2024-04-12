@@ -37,11 +37,13 @@ export function login(){
 }
 
 export async function signIn(){
-  getUniqueQueryValues(retsUserRole, appConstants.userRoles)
+  await getUniqueQueryValues(retsUserRole, appConstants.userRoles)
   const userId = await getUserId()
   await queryFlags(userId)
   store.getRetsLayer(userId)
   setDefExpRets(userId)
+  appConstants.userQueryField = appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]
+  store.USER = [appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value)]
   retsLayer
     .when(() => {
 
@@ -53,6 +55,7 @@ export async function signIn(){
 
       getDistinctAttributeValues('ACTV')
       createLayerViews()
+      store.defaultFilterSetup()
       return retsLayer.queryExtent();
     })
     .then((response) => {
@@ -71,7 +74,7 @@ const setDefExpRets = (userId) => {
 }
 
 export async function getUserId(){
-  console.warn('VERSION: 2.0')
+  console.warn('VERSION: 2.1.2')
   const user = await esriId.getCredential(authen.portalUrl + "/sharing/rest",{
     oAuthPopupConfirmation: false,
   })

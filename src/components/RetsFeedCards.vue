@@ -6,9 +6,9 @@
                     <header id="container-header">RETS Dashboard</header>
                     <div class="add-new-btn">
                         <div style="float:right;">
-                            <v-btn v-for="(tool, i) in addbutton" :key="i" :value="tool" @click="tool.action()" prepend-icon="mdi-plus" color="#4472C4" rounded="0"  class="main-button" >
+                            <v-btn v-for="(tool, i) in addbutton" :key="i" :value="tool" @click="tool.action()" :prepend-icon="buttonIcon" color="#4472C4" rounded="0"  class="main-button" >
                             <!-- @click="handlecreate"> -->
-                            <p class="text-btn">New</p>
+                            <p class="text-btn" id="addbtn">{{addbtntext}}</p>
                             </v-btn>
                         </div>
 
@@ -38,9 +38,9 @@
                                
      
                              
-                                <v-btn icon="mdi-filter" class="banner-btn" flat @click="isfilter = !isfilter"></v-btn>
-                                <div class="filter-notification-bubble" v-if="retsFilters.filterTotal > 0">
-                                    <p style="font-size: 13.5px; position: relative; left: 25%; bottom: 1.3px;"><b>{{ retsFilters.filterTotal}}</b></p>
+                                <v-btn icon="mdi-filter" class="banner-btn" flat @click="store.isfilter = !store.isfilter" variant="compact"></v-btn>
+                                <div class="filter-notification-bubble" v-if="store.filterTotal > 0">
+                                    <p style="font-size: 13.5px; position: relative; left: 25%; bottom: 1.3px;"><b>{{ store.filterTotal}}</b></p>
                                 </div>
                             </div>
       
@@ -61,7 +61,7 @@
                 <v-text-field density="compact" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" v-model="actvFeedSearch"></v-text-field>
             </v-row>
 
-            <div class="card-feed-div" v-if="!store.isDetailsPage">
+            <div class="card-feed-div" v-if="store.isCard">
                 <v-row v-for="(rd, road) in store.roadObj" :key="rd" :value="road" :id="rd.attributes.OBJECTID" class="rets-card-row"> 
                     <v-btn elevation="0" @click="changeColor(rd.attributes.RETS_ID);" class="flag-btn" size="small" max-width=".5px" density="compact" variant="plain" slim>
                         <template v-slot:prepend>
@@ -119,7 +119,7 @@
             </div>
         </div>
     </v-card>
-    <Filter v-if="isfilter" @filter-set="changeNumFilter" :filterPros="retsFilters"/>
+    <Filter v-if="store.isfilter"/>
 
     <v-card style="position: relative; float: center; width: 25%; left: 40%; top: 30%; margin: 15px;" color="black" v-if="unsavedChanges">
         <v-card-title>Discard unsaved changes?</v-card-title>
@@ -133,8 +133,10 @@
                 <v-btn variant="outlined" style="border-radius: 0%;" @click="proceed">Proceeed</v-btn>
             </div>
         </div>
-        
     </v-card>
+    <v-container id="Spinner" v-if="isSpinner" >
+        <v-progress-circular color="blue" indeterminate size="60" ></v-progress-circular>
+    </v-container>
 </template>
 
 <script>
@@ -159,6 +161,10 @@ export default{
     components: {RetsDetailPage, Filter}, 
     data(){
         return{
+            Spinneractive: false,
+            isSpinner: false,
+            buttonIcon: 'mdi-plus',
+            addbtntext: "New",
             addrets: null,
             filterOptions: appConstants.RetsStatus,
             colorTable: appConstants.CardColorMap,
@@ -181,7 +187,7 @@ export default{
             isfilter: false,
             loggedInUser: '',
             retsFilters: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"}, "JOB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
-                         "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, "GIS_ANALYST": appConstants.defaultUserValue, 
+                         "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, 
                          "filterTotal": 2},
             count: 0,
             store,
@@ -201,7 +207,8 @@ export default{
             ],
             alertIcons:[
                 {icon: "mdi-account-group", popup: "Assigned to you", color: "white", display: "ASSIGNED_TO", condition: `${store.loggedInUser}`, displaySup: "GIS_ANALYST", supplementCondition: `${store.loggedInUser}`},
-                {icon:"mdi-account-multiple-check", popup: "MO/TxDOT Connect", color: "white", display: "ACTV", condition: "(Minute Order || TxDOTConnect)"}, //ACTV === (Minute Order || TxDOTConnect)
+                {icon:"mdi-account-multiple-check", popup: "MO/TxDOT Connect", color: "white", display: "ACTV", condition: "TxDOTConnect"}, //ACTV === (Minute Order || TxDOTConnect)
+                {icon:"mdi-account-multiple-check", popup: "MO/TxDOT Connect", color: "white", display: "ACTV", condition: "Minute Order"},
                 {icon:"mdi-pencil-box-outline", popup: "District Request", "color": "white", display: null, condition: null}, //keep null
                 {icon:"mdi-alarm", popup: "Deadline set (with date)", "color": "white", display: null, condition: null}, //past the deadline set
                 {icon:"mdi-check-decagram-outline", popup: "Job Complete", color: "green", display: "STAT", condition: 3},
@@ -229,15 +236,23 @@ export default{
                     this.checkChanges()
                 }
         });
+        console.log(appConstants.defaultUserValue)
         this.retsFilters.loggedInUser = store.loggedInUser
+        this.retsFilters[appConstants.queryField[appConstants.userRoles.find(x => x.value === store.loggedInUser).type]] = appConstants.defaultUserValue
+        console.log(this.retsFilters)
     },
     methods:{
         async processAddPt(newPointGraphic){
             try{
+                this.isSpinner = true
+                this.Spinneractive = false
+                store.isCard = false
                 const obj = await addRETSPT(newPointGraphic, "rets")
                 console.log(obj)
                 const objectid = obj.addFeatureResults[0].objectId
                 this.addrets = objectid
+                this.isSpinner = false
+                this.Spinneractive = true
                 return
             }
             catch(err){
@@ -293,15 +308,7 @@ export default{
         //     this.activityBanner = "Activity Feed"
         //     return
         // },
-        addClass(id){
-            if(store.isShowSelected){
-                const classToAdd = store.roadHighlightObj.includes(id) ? 'highlight-card card' : "card"
-                console.log(classToAdd)
-                this.updateSelection(true)
-                return classToAdd
-            }
-            return "card"
-        },
+
         highlightToggleAndProcess(){
             console.log('not done')
             return
@@ -319,6 +326,7 @@ export default{
             console.log(store.retsObj)
             clearTimeout(this.timer)
             this.timer=""
+            store.isCard = false
             store.isDetailsPage = true
             store.activityBanner = `${road.attributes.RETS_ID}`
             highlightRETSPoint(road.attributes)
@@ -409,17 +417,23 @@ export default{
         },
         async handlecreate(){
             if (this.isCreateEnabled === true) {
+                this.addbtntext = "Cancel"
+                this.buttonIcon = null
                 this.isCreateEnabled = !this.isCreateEnabled;
                 //console.log("true")
                 const newPointGraphic = await createtool(sketchWidgetcreate, createretssym);
                 // Process the newPointGraphic as needed
                 this.isCreateEnabled = !this.isCreateEnabled;
+                this.addbtntext = "New"  
+                this.buttonIcon = "mdi-plus"
                 return newPointGraphic
                             
                 } 
             else {
                 sketchWidgetcreate.cancel();
                 this.isCreateEnabled = !this.isCreateEnabled;
+                this.addbtntext = "New"
+                this.buttonIcon = "mdi-plus"
                 //console.log("false")
                 }
         },
@@ -498,6 +512,11 @@ export default{
 </script>
 
 <style scoped>
+    #Spinner{
+        position: absolute;
+        top: 50%;
+        left: 12.5%
+    }
     #retSubText{
         position: relative;
         right: 15px;
@@ -737,4 +756,10 @@ export default{
         height: 20px !important;
         width: 45px !important;
     }
+
+    #addbtn{
+        position: relative;
+        left: 1%;
+    }
+
 </style>

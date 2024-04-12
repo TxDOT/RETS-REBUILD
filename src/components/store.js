@@ -11,6 +11,7 @@ export const store = reactive({
         isDetailsPage: false,
         activityBanner: "Activity Feed",
         isNoRets: false,
+        isCard: true,
         currentInfo: "",
         history: "",
         updateChatHistory: {},
@@ -19,22 +20,53 @@ export const store = reactive({
         chatAttachments: [],
         roadHighlightObj: new Set(),
         isShowSelected: false,
+        showSelected:[],
         userRetsFlag: [],
         archiveRetsData: [],
         roadObj: [],
         retsObj: [],
+        updatedRetsPtName: "",
         loggedInUser:"",
-        retsFilters: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"}, "JOB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
-                         "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, "GIS_ANALYST": appConstants.defaultUserValue, 
-                         "filterTotal": 2},
+        //retsFilters: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"}, "JOB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
+                         //"ACTV": null, "DIST_NM" : null, "CNTY_NM": null, "GIS_ANALYST": appConstants.defaultUserValue, 
+                         //"filterTotal": 2},
         isDisableValidations: false,
         isSaveBtnDisable: false,
         isMoveRetsPt: false,
         showPopUp: false,
         dfoIndex: 0,
-        isAlert: true,
+        isAlert: false,
         alertTextInfo: {"text": "Chat Saved", "color": "#70ad47", "type":"info","toggle": true},
         logDfo: 0,
+        CREATE_DT: [{title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"}],
+        JOB_TYPE:[],
+        EDIT_DT: null,
+        STAT:appConstants.defaultStatValues,
+        ACTV:[],
+        DIST_NM:[],
+        CNTY_NM:[],
+        USER:[],
+        filterTotal: 2,
+        isfilter: false,
+        filterQuery: "",
+        filter: {},
+        editText: false,
+        defaultFilterSetup(){
+                // this.CREATE_DT.push({title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"})
+                // this.STAT = appConstants.defaultStatValues
+                // this.USER.push(appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value))
+                store.filterTotal = 2
+
+                this.filter.createDt = this.CREATE_DT
+                this.filter.jobType = this.JOB_TYPE
+                this.filter.editDt = this.EDIT_DT
+                this.filter.stat = this.STAT
+                this.filter.actv = this.ACTV
+                this.filter.distNM = this.DIST_NM
+                this.filter.cntyNM = this.CNTY_NM
+                this.filter.user = this.USER
+                return
+        },
         async getHistoryChatRet(){
                 console.log(JSON.parse(this.history))
                 const getRelatedHistory = JSON.parse(this.history)
@@ -152,12 +184,12 @@ export const store = reactive({
                 .catch((err)=> console.log(err)) 
         },
         setFilterFeed(){
-                filterMapActivityFeed(this.retsFilters)
+                filterMapActivityFeed(this.filter)
                         .then((resp) => {
-                                console.log(this.retsFilters)
+                                console.log(this.filter)
                                 this.roadObj = []
                                 const query = {"whereString": `${resp}`, "queryLayer": "retsLayer"}
-                                const orderField = `${this.retsFilters.CREATE_DT.filter} ${this.retsFilters.CREATE_DT.sortType}`
+                                const orderField = `${this.filter.createDt[0].filter} ${this.filter.createDt[0].sortType}`
                                 getQueryLayer(query, orderField)
                                     .then(obj => {
                                         if(obj.features.length){
@@ -196,14 +228,14 @@ export const store = reactive({
                 const resp = `RETS_ID = ${this.retsObj.attributes.RETS_ID}`
                 const query = {"whereString": `${resp}`, "queryLayer": "retsLayer"}
                 console.log(query)
-                const orderField = `${this.retsFilters.CREATE_DT.filter} ${this.retsFilters.CREATE_DT.sortType}`
+                const orderField = `${this.filter.createDt[0].filter} ${this.filter.createDt[0].sortType}`
                 getQueryLayer(query, orderField)
                         .then(obj => {
                                 if(obj.features.length){
                                         const updateItem = {attributes: obj.features[0].attributes, geometry: [obj.features[0].geometry.x, obj.features[0].geometry.y]}
                                         updateItem.attributes.flagColor = this.setFlagColor( obj.features[0].attributes)
                                         const retsIndex = this.roadObj.findIndex(x => x.attributes.RETS_ID === obj.features[0].attributes.RETS_ID)
-                                        this.roadObj.splice(retsIndex, 1, {attributes:obj.features[0].attributes, geometry: [obj.features[0].geometry.x, obj.features[0].geometry.y]})
+                                        this.roadObj.splice(retsIndex, 1, updateItem)
                                         //sort by no activity setting (no activity sand thingy)
                                         this.roadObj.sort((a,b) => b.attributes.EDIT_DT - a.attributes.EDIT_DT)
                                         

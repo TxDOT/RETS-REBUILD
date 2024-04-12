@@ -4,16 +4,16 @@
             <div class="cardDiv regain">
                 <v-card-title style="position: relative; bottom:.5rem;">Filter Activity Feed</v-card-title>
                 <v-row no-gutters >
-                    <v-select :items="filterSort" item-title="title" item-value="sortType" return-object style="position: relative;" density="compact" label="Sort" variant="underlined" v-model="filterPros.CREATE_DT"></v-select>
+                    <v-select :items="filterSort" item-title="title" item-value="sortType" return-object style="position: relative;" density="compact" label="Sort" variant="underlined" v-model="store.CREATE_DT"></v-select>
                 </v-row>
               
                 <v-row no-gutters dense >
-                    <v-select :items="filterJobType" item-title="name" item-value="value" return-object multiple chips closable-chips density="compact" label="Job Type" variant="underlined" v-model="filterPros.JOB_TYPE">
+                    <v-select :items="filterJobType" item-title="name" item-value="value" return-object multiple chips closable-chips density="compact" label="Job Type" variant="underlined" v-model="store.JOB_TYPE">
                     </v-select>
                 </v-row>
             
                 <v-row no-gutters dense id="date">
-                    <v-select label="Date" chips closable-chips variant="underlined" density="compact" v-model="filterPros.EDIT_DT" hide-no-data @click="isDate = !isDate">
+                    <v-select label="Date" chips closable-chips variant="underlined" density="compact" v-model="store.EDIT_DT" hide-no-data @click="isDate = !isDate">
                         <template v-slot:chip="{item}">
                             <v-chip closable @click:close="closeDateChip()">{{ item.props.title}}</v-chip>
                         </template>
@@ -21,22 +21,22 @@
                 </v-row>
                 
                 <v-row no-gutters dense>
-                        <v-select :items="filterStatus" item-title="name" item-value="value" label="Status" return-object chips closable-chips multiple variant="underlined" density="compact" v-model="filterPros.STAT">
+                        <v-select :items="filterStatus" item-title="name" item-value="value" label="Status" return-object chips closable-chips multiple variant="underlined" density="compact" v-model="store.STAT">
                         </v-select>
                 </v-row>
        
                 <v-row no-gutters dense >
-                    <v-autocomplete :items="filterActivity" item-title="value" item-value="value" return-object multiple label="Activity" chips closable-chips variant="underlined" density="compact" v-model="filterPros.ACTV"></v-autocomplete>
+                    <v-autocomplete :items="filterActivity" item-title="value" item-value="value" return-object multiple label="Activity" chips closable-chips variant="underlined" density="compact" v-model="store.ACTV"></v-autocomplete>
                 </v-row>
 
                 <v-row no-gutters dense > 
-                    <v-autocomplete :items="filterDistrict" item-title="name" item-value="value" return-object multiple label="District" chips closable-chips variant="underlined" density="compact" v-model="filterPros.DIST_NM"></v-autocomplete>
+                    <v-autocomplete :items="filterDistrict" item-title="name" item-value="value" return-object multiple label="District" chips closable-chips variant="underlined" density="compact" v-model="store.DIST_NM"></v-autocomplete>
                 </v-row>
                 <v-row no-gutters dense >
-                    <v-autocomplete :items="filterCounty" item-title="name" item-value="value" return-object multiple label="County" chips closable-chips variant="underlined" density="compact" v-model="filterPros.CNTY_NM"></v-autocomplete>
+                    <v-autocomplete :items="filterCounty" item-title="name" item-value="value" return-object multiple label="County" chips closable-chips variant="underlined" density="compact" v-model="store.CNTY_NM"></v-autocomplete>
                 </v-row>
                 <v-row no-gutters dense >
-                    <v-autocomplete :items="filterUser" item-title="name" item-value="value" return-object label="Users" multiple chips closable-chips variant="underlined" density="compact" v-model="filterPros.GIS_ANALYST"></v-autocomplete>
+                    <v-autocomplete :items="filterUser" item-title="name" item-value="value" return-object label="Users" multiple chips closable-chips variant="underlined" density="compact" v-model="store.USER"></v-autocomplete>
                 </v-row>
 
                 <v-expansion-panels flat variant="accordion">
@@ -77,10 +77,11 @@
 <script>
     import {filterMapActivityFeed} from './utility.js'
     import {appConstants} from '../common/constant.js'
+    import { store } from './store'
 
     export default{
         name: "Filter",
-        props:{filterPros: Object},
+        props:{filterPros: String},
         emits: ['filter-set'],
         data(){
             return{
@@ -98,27 +99,52 @@
                 filterActivity: appConstants.activityList,
                 numFilters: 0,
                 defaultFilter: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, "JOB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
-                         "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, "GIS_ANALYST": appConstants.userRoles.filter(y => y.value === appConstants.defaultUserValue[0].value), 
+                         "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, 
                          "filterTotal": 2},
                 isDate: false,
                 selectDate: null,
                 currentYear: null,
+                store,
+
             }
         },
         mounted(){
-            console.log(this.filterPros.GIS_ANALYST)
-            this.filterPros.GIS_ANALYST = appConstants.userRoles.filter(y => y.value === this.filterPros.GIS_ANALYST[0].value)
+            //console.log(appConstants.userRoles.find(y => y.value === console.log(y.value)))
+            // this.filter = JSON.parse(this.filterPros)
+            // console.log(this.filterPros[appConstants.userQueryField])
+            // console.log(this.filterPros)
+            // this.filterPros[appConstants.queryField[appConstants.userRoles.find(x => x.value === store.loggedInUser).type]] = appConstants.userRoles.filter(y => y.value === this.filterPros[appConstants.queryField[appConstants.userRoles.find(x => x.value === store.loggedInUser).type]][0].value)
         },
         methods:{
             cancelFilter(){
                 this.calcFilterDiff()
-                this.$emit('filter-set', 'cancel')
+                store.isfilter = false
                 return
             },
             setFilterNumber(){
+                store.filter = {
+                    createDt: store.CREATE_DT,
+                    jobType: store.JOB_TYPE,
+                    editDt: store.EDIT_DT,
+                    stat: store.STAT,
+                    actv: store.ACTV,
+                    distNM: store.DIST_NM,
+                    cntyNM: store.CNTY_NM,
+                    user: store.USER
+                }
+                // console.log(this.userQuery)
+                // const filterField = appConstants.queryField[appConstants.userRoles.find(x => x.value === this.userQuery[0].value).type]
+                // console.log(filterField)
+                // console.log(this.userQuery)
+                // this.filterPros[filterField] = this.userQuery[0].value
+                //const filters = this.calcFilterDiff()
+                //console.log(filters)
+                //this.$emit('filter-set', this.filter)
                 this.calcFilterDiff()
-                this.$emit('filter-set', this.filterPros)
-                filterMapActivityFeed(this.filterPros)
+                store.setFilterFeed()
+                // filterMapActivityFeed(store.filter)
+                
+                store.isfilter = false
                 return
             },
             addNumFilter(){
@@ -126,48 +152,63 @@
                 return
             },  
             calcFilterDiff(){
-                const ignoreField = ['CREATE_DT', 'filterTotal', 'loggedInUser']
-                for(const [key,value] of Object.entries(this.filterPros)){
-                    if(ignoreField.includes(key) || !value) continue
-                    if(value.length){
-                        this.addNumFilter()
-                    }
-                }
+                const typeField = [store.JOB_TYPE, store.STAT, store.ACTV, store.DIST_NM, store.CNTY_NM, store.USER]
+                console.log(store.JOB_TYPE, store.STAT, store.ACTV, store.DIST_NM, store.CNTY_NM, store.USER)
+                store.filterTotal = typeField.filter(x => x.length).length
+                console.log(typeField.filter(x => x.length).length)
+                // for(const [key, value] of Object.entries(this.filterPros)){
+                //     if(ignoreField.includes(key) || !value) continue
+                //     if(value.length){
+                //         this.addNumFilter()
+                //     }
+                //}
 
-                this.filterPros.filterTotal = this.numFilters
-                this.numFilters = 0
+                // this.filterPros.filterTotal = this.numFilters
+                // this.numFilters = 0
+                // return keyFields
                 return
             },
             restoreDefault(){
-                this.defaultFilter.loggedInUser = appConstants.defaultUserValue[0].value
-                this.filterPros.CREATE_DT = this.defaultFilter.CREATE_DT
-                this.filterPros.JOB_TYPE = this.defaultFilter.JOB_TYPE
-                this.filterPros.EDIT_DT = this.defaultFilter.EDIT_DT
-                this.filterPros.STAT = this.defaultFilter.STAT
-                this.filterPros.ACTV = this.defaultFilter.ACTV
-                this.filterPros.DIST_NM = this.defaultFilter.DIST_NM
-                this.filterPros.CNTY_NM = this.defaultFilter.CNTY_NM
-                this.filterPros.GIS_ANALYST = this.defaultFilter.GIS_ANALYST
-                this.filterPros.filterTotal = this.defaultFilter.filterTotal
+                store.CREATE_DT = [{title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"}]
+                store.JOB_TYPE.length = 0
+                store.EDIT_DT = null
+                store.STAT = appConstants.defaultStatValues
+                store.ACTV.length = 0
+                store.DIST_NM.length = 0
+                store.CNTY_NM.length = 0
+                store.USER = [appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value)]
+
+            
+                store.defaultFilterSetup()
+                // this.defaultFilter.loggedInUser = appConstants.defaultUserValue[0].value
+                // this.filter.CREATE_DT = this.defaultFilter.CREATE_DT
+                // this.filter.JOB_TYPE = this.defaultFilter.JOB_TYPE
+                // this.filter.EDIT_DT = this.defaultFilter.EDIT_DT
+                // this.filter.STAT = this.defaultFilter.STAT
+                // this.filter.ACTV = this.defaultFilter.ACTV
+                // this.filter.DIST_NM = this.defaultFilter.DIST_NM
+                // this.filter.CNTY_NM = this.defaultFilter.CNTY_NM
+                // this.filter[appConstants.userQueryField] = appConstants.defaultUserValue
+                // this.filter.filterTotal = this.defaultFilter.filterTotal
                 
-                filterMapActivityFeed(this.defaultFilter)
-                this.$emit('filter-set', this.filterPros)
+                filterMapActivityFeed(store.filter)
+                //this.$emit('filter-set', this.filterPros)
                 return
             },
             selectDates(){
                 if(this.selectDate.length > 2 ) return
                 if(this.selectDate.length === 2){
                     this.selectDate.sort((a,b) => a - b)
-                    this.filterPros.EDIT_DT = `${this.selectDate[0].toLocaleDateString('en-US')} - ${this.selectDate[1].toLocaleDateString('en-US')}`
+                    store.EDIT_DT = `${this.selectDate[0].toLocaleDateString('en-US')} - ${this.selectDate[1].toLocaleDateString('en-US')}`
                     this.isDate = false
                     return
                 }
-                this.filterPros.EDIT_DT = `${this.selectDate[0].toLocaleDateString('en-US')}`
+                store.EDIT_DT = `${this.selectDate[0].toLocaleDateString('en-US')}`
                 return
             },
             closeDateChip(){
                 this.selectDate = null
-                this.filterPros.EDIT_DT = null
+                store.EDIT_DT = null
                 return
             }
 
@@ -177,7 +218,7 @@
                 handler: function(){
                     if(this.currentYear){
                         this.selectDate = []
-                        this.filterPros.EDIT_DT = null
+                        this.EDIT_DT = null
                         const year = new Date().getFullYear()
                         const constrctBegDate = new Date(`January 01, ${year}`)
                         const constrctEndDate = new Date(`December 31, ${year}`)

@@ -20,7 +20,7 @@
             <v-col cols="4" offset="4">
                 <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" v-model="infoRets.attributes.DFO" :rules="!store.isDisableValidations ? [onlyNumbers]: []" @update:model-value="onlyNumbers(infoRets.attributes.DFO)">
                     <template v-slot:append-inner >
-                        <v-btn id="dfoCrosshair" variant="plain" density="compact" class="number-field-icon"><v-icon icon="mdi-drag-variant" small @click="crossHairFunc"></v-icon></v-btn>
+                        <v-btn id="dfoCrosshair" variant="plain" density="compact" class="number-field-icon" v-model="isCrossHair" @click="crossHairFunc"><v-icon icon="mdi-drag-variant" small></v-icon></v-btn>
                     </template>
                 </v-text-field>
             </v-col>
@@ -40,7 +40,7 @@
             <v-col cols="8" offset="0">
                 <v-autocomplete label="Related RETS" no-filter multiple variant="underlined" class="related-rets" v-model="infoRets.attributes.RELATED_RETS" :items="RETSData" item-title="name" item-value="name" return-object @update:search="gimmeRETS($event)" @update:modelValue="addGraphic($event)">
                     <template v-slot:chip="{props, item}">
-                        <v-chip v-bind="props" closable @click:close="closeRelatedRetsChip(item)" @click="zoomToRelateRet(item.raw.geometry, $event)" style="z-index: 9999;">{{item.props.title}}</v-chip>
+                        <v-chip v-bind="props" closable @click:close="closeRelatedRetsChip(item)" @click="zoomToRelateRet(item.raw.geometry)" style="z-index: 9999;">{{item.props.title}}</v-chip>
                     </template>
                 </v-autocomplete>
 
@@ -92,11 +92,7 @@
                     </v-col> -->
                 </div>
             </div>
-
-         
-
-
-
+            
             <!-- <v-text-field prepend-icon="mdi-timer-outline" disabled density="compact" variant="plain" class="date-select" style="z-index: 9999; cursor: pointer !important;" @click="isDatePicker = true"> {{ datePicker }}</v-text-field> -->
             <div class="date-picker" v-if="isDatePicker">
                 <v-date-picker v-model="datePicked" class="date" hide-header></v-date-picker>
@@ -110,7 +106,7 @@
 
 <script>
 import { appConstants } from '../common/constant'
-import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets, zoomTo, getPointRoadInteraction, modifyRETSPt} from './utility.js'
+import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets, zoomTo, createRoadGraphic, getRoadInformation} from './utility.js'
 
 import {store} from './store.js'
     export default{
@@ -136,28 +132,31 @@ import {store} from './store.js'
                 store,
                 isFocused: false,
                 typeTimeout: null,
+                isCrossHair: false,
+                retsRouteArchive: "" 
             }
         },
         beforeMount(){
-            this.splitAndAddRelatedRets(this.infoRets.attributes.RELATED_RETS)
+            this.splitAndAddRelatedRets(store.retsObj.attributes.RELATED_RETS)
         },
         mounted(){
-            this.ogValues = this.infoRets
-            const milliDate = new Date(this.infoRets.attributes.DEADLINE)
+            this.ogValues = store.retsObj
+            const milliDate = new Date(store.retsObj.attributes.DEADLINE)
             this.datePicker = this.setDate(milliDate)
-            console.log(this.infoRets.attributes.NO_RTE)
+            console.log(store.retsObj.attributes.NO_RTE)
 
-            if(this.infoRets.attributes.NO_RTE === 1){
+            if(store.retsObj.attributes.NO_RTE === 1){
                 store.isAlert = false
                 store.isDisableValidations = true
+                store.retsObj.attributes.NO_RTE = true
                 return
             }
             this.initDataCheck()
-            getPointRoadInteraction(store.retsObj)
-            
+            this.retsRouteArchive = JSON.stringify(store.retsObj)
+            createRoadGraphic(store.retsObj)
         },
         methods:{
-            zoomToRelateRet(geom, event){
+            zoomToRelateRet(geom){
                 zoomTo(geom)
                 
             },
@@ -169,7 +168,7 @@ import {store} from './store.js'
                     return
                 }
                 const splitString = relatedRets.split(",")
-                this.infoRets.attributes.RELATED_RETS = []
+                store.retsObj.attributes.RELATED_RETS = []
                 splitString.map((ret)=>{
                     this.gimmeRETS(ret, `RETS_ID = ${ret}`)
                 })
@@ -177,35 +176,38 @@ import {store} from './store.js'
             },
             initDataCheck(){
                 // if Route, status or description; save button disabled
-                let item = [this.infoRets.attributes.RTE_NM, this.infoRets.attributes.STAT, this.infoRets.attributes.DESC_].filter(x => !x)
-                if(!this.infoRets.attributes.NO_RTE){
-                    if(!this.infoRets.attributes.DFO || !this.infoRets.attributes.RTE_NM){
-                        console.log(this.infoRets.attributes.NO_RTE)
-                        store.isAlert = true
-                        store.alertTextInfo = {"text": "Route Number or DFO is missing", "color": "red", "toggle": true}
-                        return store.isSaveBtnDisable = true
-                    }
-                    if(!this.infoRets.attributes.RTE_NM.length || !this.infoRets.attributes.DFO.length){
-                        store.isAlert = true
-                        store.alertTextInfo = {"text": "Route Number or DFO is missing", "color": "red", "toggle": true}
-                        return store.isSaveBtnDisable = true
-                    }
-                }
-                if(item.length > 0){
-                    store.isAlert = false
-                    store.isSaveBtnDisable = true
-                    return true
-                }
-                store.isSaveBtnDisable = false
+                let item = [store.retsObj.attributes.RTE_NM, store.retsObj.attributes.STAT, store.retsObj.attributes.DESC_].filter(x => !x)
+                console.log(item)
+                // if(!store.retsObj.attributes.NO_RTE){
+                //     if(!store.retsObj.attributes.DFO || !store.retsObj.attributes.RTE_NM){
+                //         console.log(store.retsObj.attributes.NO_RTE)
+                //         store.isAlert = true
+                //         store.alertTextInfo = {"text": "Route Number or DFO is missing", "color": "red", "toggle": true}
+                //         return store.isSaveBtnDisable = true
+                //     }
+                //     if(!store.retsObj.attributes.RTE_NM.length || !store.retsObj.attributes.DFO.length){
+                //         console.log(store.retsObj.attributes.DFO)
+                //         store.isAlert = true
+                //         store.alertTextInfo = {"text": "Route Number or DFO is missing", "color": "red", "toggle": true}
+                //         return store.isSaveBtnDisable = true
+                //     }
+                // }
+                // if(item.length > 0){
+                //     store.isAlert = false
+                //     store.isSaveBtnDisable = true
+                //     return true
+                // }
+                // store.isAlert = false
+                // store.isSaveBtnDisable = false
             },
             valueRequired(e){
                 if(e === null) return false
                 if(!e.length){
                     store.isSaveBtnDisable = true
-                    return `RTE Number is required`
+                    return `Field is required`
                 }
+                store.isSaveBtnDisable = false
                 
-                this.initDataCheck()
                 return true
             },
             sendDisabledSave(bool){
@@ -213,39 +215,45 @@ import {store} from './store.js'
             },
            onlyNumbers(i){
                 console.log(i)
-
                 if(!i){
-                    this.initDataCheck()
+                    store.isSaveBtnDisable = true
                     return `But where am I? Don't leave me blank!`
                 }
-                if(!this.infoRets.attributes.NO_RTE){
+                if(store.retsObj.attributes.NO_RTE === 0){
+                    console.log(store.retsObj.attributes.NO_RTE)
                     let convert = Number(i)
                     if(!convert){
                         store.isSaveBtnDisable = true
                         return `Whoa! Numbers are more my vibe!`
                     }
-                    return this.initDataCheck()
+                    return store.isSaveBtnDisable = false
                 }
-                clearTimeout(this.typeTimeout)
-                this.typeTimeout = setTimeout(()=>{
-                    getPointRoadInteraction(store.retsObj)
-                },900)
-                return this.initDataCheck()
+                
+                return store.isSaveBtnDisable = false
                 
             },
             paperClipFunc(){
-                this.infoRets.attributes.ACTV === 'Minute Order' ? window.open(`https://publicdocs.txdot.gov/minord/mosearch/Pages/Minute-Order-Search-Results.aspx#k=${this.infoRets.attributes.ACTV_NBR}`, '_blank') :
-                                                            window.open(`https://txdot.sharepoint.com/sites/division-tpp/DM-Admin/Lists/Data%20Request/EditForm.aspx?ID=${this.infoRets.attributes.ACTV_NBR}`, '_blank')
+                store.retsObj.attributes.ACTV === 'Minute Order' ? window.open(`https://publicdocs.txdot.gov/minord/mosearch/Pages/Minute-Order-Search-Results.aspx#k=${store.retsObj.attributes.ACTV_NBR}`, '_blank') :
+                                                            window.open(`https://txdot.sharepoint.com/sites/division-tpp/DM-Admin/Lists/Data%20Request/EditForm.aspx?ID=${store.retsObj.attributes.ACTV_NBR}`, '_blank')
             
 
             },
             crossHairFunc(){
-                //modifyRETSPt()
-                //getPointRoadInteraction(store.retsObj)
-                store.isMoveRetsPt = true
+                // if(store.isMoveRetsPt){
+                getRoadInformation()
+                    //getPointRoadInteraction(store.retsObj)
+                    //store.isMoveRetsPt = true
+                    return
+                //}
+                // const parseOG = JSON.parse(this.retsRouteArchive)
+                // store.retsObj.attributes.DFO = parseOG.attributes.DFO
+                // store.retsObj.attributes.RTE_NM = parseOG.attributes.RTE_NM
+                // getPointRoadInteraction(parseOG)
+                //return
             },
             setDate(date){
-                return date.toLocaleDateString('en-US')
+                return date.toLocaleDateString('en-US') === '12/31/1969' ? 'Pick a date' : date.toLocaleDateString('en-US')
+                
             },
             displayGemSearch(){
                 document.querySelectorAll(".gem-search")[0].style.display =  document.querySelectorAll(".gem-search")[0].style.display === "block" ? "none" : "block"
@@ -258,11 +266,11 @@ import {store} from './store.js'
                         const retsid = await getQueryLayer(query, 'RETS_ID', 5)
                         this.RETSData.length = 0
                         retsid.features.forEach((x) => {
-                            this.RETSData.push({name: x.attributes.RETS_ID, oid: x.attributes.OBJECTID, retsid: this.infoRets.attributes.RETS_ID, jobType: x.attributes.JOB_TYPE, fullData: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
+                            this.RETSData.push({name: x.attributes.RETS_ID, oid: x.attributes.OBJECTID, retsid: store.retsObj.attributes.RETS_ID, jobType: x.attributes.JOB_TYPE, fullData: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                         })
                         if(string){
                             this.addGraphic(this.RETSData)
-                            this.infoRets.attributes.RELATED_RETS.push(this.RETSData[0])
+                            store.retsObj.attributes.RELATED_RETS.push(this.RETSData[0])
                             return
                         }
                         return
@@ -276,18 +284,18 @@ import {store} from './store.js'
                 }
             },
             addGraphic(e){
-                e = typeof e === "object" ? e : this.splitAndAddRelatedRets(this.infoRets.attributes.RELATED_RETS)
+                e = typeof e === "object" ? e : this.splitAndAddRelatedRets(store.retsObj.attributes.RELATED_RETS)
                 addRelatedRetsToMap(e.at(-1))
             },
             zoomToRETS(){
-                zoomToRelatedRets(this.infoRets.attributes.RELATED_RETS)
+                zoomToRelatedRets(store.retsObj.attributes.RELATED_RETS)
             },
             closeRelatedRetsChip(ret){
                 removeRelatedRetsFromMap(ret.raw?.name)
-                // const retsPos = this.infoRets.attributes.RELATED_RETS.findIndex(x => x.name === Number(ret.raw?.name))
+                // const retsPos = store.retsObj.attributes.RELATED_RETS.findIndex(x => x.name === Number(ret.raw?.name))
                 // console.log(retsPos)
-                //this.infoRets.attributes.RELATED_RETS.splice(retsPos,1)
-                console.log(this.infoRets.attributes.RELATED_RETS)
+                //store.retsObj.attributes.RELATED_RETS.splice(retsPos,1)
+                console.log(store.retsObj.attributes.RELATED_RETS)
             },
             queryRdFeatureLayer(){
                 
@@ -297,7 +305,7 @@ import {store} from './store.js'
             datePicked:{
                 handler: function(){
                     this.datePicker = this.setDate(this.datePicked)
-                    this.infoRets.attributes.DEADLINE = this.datePicker 
+                    store.retsObj.attributes.DEADLINE = this.datePicker 
                     this.isDatePicker = false
                 },
             },
@@ -307,18 +315,18 @@ import {store} from './store.js'
                     this.gemTasks.push(this.taskGem)
                 },
             },
-            'infoRets.attributes.RETS_ID':{ //<= neccessary?
+            'store.attributes.RETS_ID':{ //<= neccessary?
                 handler: function(){
-                    store.currentInfo = JSON.stringify(this.infoRets)
-                    this.splitAndAddRelatedRets(this.infoRets.attributes.RELATED_RETS)
+                    store.currentInfo = JSON.stringify(store.retsObj)
+                    this.splitAndAddRelatedRets(store.retsObj.attributes.RELATED_RETS)
                 },
                 immediate: true
             },
-            'infoRets.attributes.NO_RTE':{
+            'store.attributes.NO_RTE':{
                 handler: function(){
-                    console.log(this.infoRets.attributes.NO_RTE)
+                    console.log(store.retsObj.attributes.NO_RTE)
 
-                    if(this.infoRets.attributes.NO_RTE){
+                    if(store.retsObj.attributes.NO_RTE){
                         store.isDisableValidations = true
                         store.isSaveBtnDisable = false
                         store.isAlert = false
@@ -330,6 +338,16 @@ import {store} from './store.js'
                     return
                 },
                 immediate: true
+            },
+            'store.retsObj.attributes.DFO':{
+                handler: function(a,b){
+                    if(Number(a) === b) return
+                    clearTimeout(this.typeTimeout)
+                    this.typeTimeout = setTimeout(()=>{
+                        //createRoadGraphic(store.retsObj)
+                    },900)
+
+                }
             }
         },
 
