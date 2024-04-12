@@ -3,8 +3,8 @@
 <template style="overflow-y:hidden;">
 
     <v-navigation-drawer width="200" height="100" permanent color="black">
-        <v-list height="100%" id="icons-top" >
-            <v-list-item v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" :active-class="tool.name !== 'Menu' ? 'btn-left-brder' : ''" >    
+        <v-list height="100%" id="icons-top" class = "iconList">
+            <v-list-item class = "iconList-item" v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" :active-class="tool.name !== 'Menu' ? 'btn-left-brder' : ''" >    
                 <v-tooltip location="right bottom" :text=tool.name >
                     <template v-slot:activator="{ props}">
                         <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
@@ -13,8 +13,8 @@
                 
             </v-list-item>
         </v-list>
-        <v-list id="icons-bottom">
-            <v-list-item v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" :active-class="tool.name !== 'Jump To' && tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
+        <v-list id="icons-bottom" class="iconList">
+            <v-list-item class = "iconList-item" v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" :active-class="tool.name !== 'Jump To' && tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
                 <!-- <v-tooltip v-if="tool.name === 'Basemaps'" location="right" :text=tool.name  >
                     <template v-slot:activator="{ props }">
                     <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props"></v-icon>
@@ -23,7 +23,7 @@
                 <template v-if="tool.name != 'Basemaps' && tool.name != 'Jump To'">
                     <v-tooltip location="right" :text="tool.name">
                         <template v-slot:activator="{ props }">
-                            <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
+                            <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
                         </template>
                     </v-tooltip>
                 </template>
@@ -479,10 +479,14 @@
         position: relative;
         bottom: 15.5rem;
         left: 0%;
+        
     }
     #icons-top{
+        position: relative;
         left: 0%;
+        width: 69px;
     }
+    
     .v-navigation-drawer{
         overflow-y: hidden !important;
         height: 100% !important;
@@ -662,21 +666,18 @@
         border-radius: 9%;
         
     }
-    .v-list{
+    .iconList{
         position: relative;
-        width: 64px;
+        width: 69px;
     }
-    .v-list-item{
+    .iconList-item{
         position: relative;
         left: -10%;
-        padding-right: 0%;
     }
-    .v-list-item__content{
-        width: 50px;
-    }
+
     .esri-view-surface {
-    width: calc(100% - 500px) !important;
-    transform: translate(500px);
+    width: calc(100% - 400px) !important;
+    transform: translate(400px);
     transition: transform 0.1s ease;
     left: 0px;
 }
