@@ -58,7 +58,10 @@ async function signIn(){
     })
     .then((response) => {
       router.push('/apps/statewide_mapping/rets_rebuild/map')
-      view.goTo(response.extent);
+      view.when(function(){
+        view.goTo(response.extent);
+
+    })
     });
 }
 

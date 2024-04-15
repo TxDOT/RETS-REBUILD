@@ -586,6 +586,7 @@ export function createtool(sketchWidgetcreate, createretssym) {
                 {
                 if (event.state === "complete")
                     {
+                        
                         // Get the rectangle geometry
                         var rectangleGeometry = event.graphic.geometry;
                         // Query for points within the rectangle
@@ -600,6 +601,8 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                     
     
                                     if (pressedkey === false){
+                                        graphics.removeAll();
+
                                         
                                         removeHighlight("a", removeAll); 
                                         removeAllCardHighlight()
@@ -610,8 +613,6 @@ export function createtool(sketchWidgetcreate, createretssym) {
                     
                                         
                                         
-                                        console.log('hey1')
-                                                // }
                                         for (let i = 0; i < selectedFeatures.length; i++ ) {
                                             store.roadHighlightObj.add(String(selectedFeatures[i].attributes.RETS_ID).concat('-', selectedFeatures[i].attributes.OBJECTID))
                                             highlightRETSPoint(selectedFeatures[i].attributes);
@@ -620,7 +621,7 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                                     
                                         }
                                         outlineFeedCards(selectedFeatures);        
-                                                graphics.removeAll() 
+                                        graphics.removeAll() 
                                         //clearRoadHighlightObj()
                        
                                         return
@@ -646,9 +647,10 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                         for (let i = 0; i < selectedFeatures.length; i++ ) {
                                             console.log("this: " + selectedFeatures[i].attributes.OBJECTID)
         
-                                            removeHighlight(selectedFeatures[i]);  
+                                            //removeHighlight(selectedFeatures[i]);  
     
                                         } 
+                                        
     
                                        
                                         graphics.removeAll();
@@ -660,8 +662,6 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                    
                                 });
     
-                                
-                                
                     }
     
             });
@@ -677,6 +677,7 @@ export function createtool(sketchWidgetcreate, createretssym) {
         
         return
       }
+
 
 export async function handleaddrets(newPointGraphic, addrets){
     try{

@@ -79,7 +79,7 @@
         <v-btn-toggle id="trigger-buttons" density="compact">
             <v-btn @click="handlearchive" variant="plain" flat size="small" class="secondary-button">Delete</v-btn>
             <v-btn @click="cancelDetailsMetadata" class="secondary-button" variant="plain" flat size="small">Cancel</v-btn>
-            <v-btn @click="sendToParent" variant="outlined" class="main-button-style" size="small" :disabled="store.isSaveBtnDisable">Save</v-btn>
+            <v-btn @click="sendToParent" variant="outlined" class="main-button-style" size="small" >Save</v-btn>
         </v-btn-toggle>
     </div>
 
@@ -92,9 +92,9 @@
             Deleting this RETS will move it to the archive table.
         </v-card-subtitle>
             
-        <v-btn-group id="archivebuttons">
-            <v-btn  text="CANCEL" @click="handlearchive"></v-btn>
-            <v-btn id="deletebutton" text="DELETE" @click="deleteRets"></v-btn>
+        <v-btn-group id="archivebuttons" density="compact">
+            <v-btn class="secondary-button"  @click="handlearchive">CANCEL</v-btn>
+            <v-btn class="main-button-style" @click="deleteRets">DELETE</v-btn>
         </v-btn-group>
     </v-card>   
 
@@ -349,7 +349,7 @@
     position: absolute;
     border-radius: 5px;
     left: 200%;
-    width: 27rem;
+    width: 25rem;
     top:40%;
     height:25%; 
     border-radius: 0;
@@ -366,7 +366,7 @@
     border: 0;
     border-bottom: 1px solid ;
     margin: 0 auto;
-    width: 24rem;
+    width: 22.5rem;
 }
 
 #archivetext{
@@ -377,9 +377,10 @@
 
 #archivebuttons{
     position: absolute;
-    bottom: 10px;
-    width: 25rem;
+    bottom: 14px;
+    width: 20rem;
     justify-content: end;
+    right: 8px;;
 }
 
 #flagBtnDetails{

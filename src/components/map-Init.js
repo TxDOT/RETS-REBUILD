@@ -21,7 +21,10 @@ import Legend from "@arcgis/core/widgets/Legend";
 import LegendViewModel from "@arcgis/core/widgets/Legend/LegendViewModel";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import Graphic from "@arcgis/core/Graphic";
-import { outlineFeedCards, removeOutline, removeHighlight, home} from "./utility.js";
+import { outlineFeedCards, removeOutline, removeHighlight, home, togglemenu} from "./utility.js";
+import SearchVM from "@arcgis/core/widgets/Search/SearchViewModel.js";
+import SearchViewModel from "@arcgis/core/widgets/Search/SearchViewModel.js";
+
 
 
 
@@ -68,7 +71,7 @@ export let retsPointRenderer = new UniqueValueRenderer({
     value: "4",
     symbol: new SimpleMarkerSymbol({
       size: 8,
-      color: appConstants.CardColorMap[5],
+      color: appConstants.CardColorMap[4],
       outline: {
         color: "white",
         width: 0
@@ -81,6 +84,118 @@ export let retsPointRenderer = new UniqueValueRenderer({
   ]
 });
 
+export let retsPointRendererout = new UniqueValueRenderer({
+  field: "STAT", // Field based on which the symbology will be categorized
+  uniqueValueInfos: [
+   {
+     value: "1",
+     symbol: new SimpleMarkerSymbol({
+       size: 5,
+       color: appConstants.CardColorMap[1],
+       outline: {
+         color: "white",
+         width: 0
+       }
+      }),
+      label: "Not Started"
+   },
+   {
+     value: "2",
+     symbol: new SimpleMarkerSymbol({
+       size: 5,
+       color: appConstants.CardColorMap[2],
+       outline: {
+         color: "white",
+         width: 0
+       }
+     }),
+     label: "In Progress"
+   },
+   {
+     value: "3",
+       symbol: new SimpleMarkerSymbol({
+       size: 5,
+       color: appConstants.CardColorMap[3],
+         outline: {
+           color: "white",
+           width: 0
+         }
+       }),
+       label: "Complete"
+   },
+   {
+     value: "4",
+     symbol: new SimpleMarkerSymbol({
+       size: 5,
+       color: appConstants.CardColorMap[4],
+       outline: {
+         color: "white",
+         width: 0
+       }
+     }),
+     label: "On Hold"
+   },
+ 
+   // Add more unique value info objects as needed...
+   ]
+ });
+
+ export let retsPointRendererout2 = new UniqueValueRenderer({
+  field: "STAT", // Field based on which the symbology will be categorized
+  uniqueValueInfos: [
+   {
+     value: "1",
+     symbol: new SimpleMarkerSymbol({
+       size: 6,
+       color: appConstants.CardColorMap[1],
+       outline: {
+         color: "white",
+         width: 0
+       }
+      }),
+      label: "Not Started"
+   },
+   {
+     value: "2",
+     symbol: new SimpleMarkerSymbol({
+       size: 6,
+       color: appConstants.CardColorMap[2],
+       outline: {
+         color: "white",
+         width: 0
+       }
+     }),
+     label: "In Progress"
+   },
+   {
+     value: "3",
+       symbol: new SimpleMarkerSymbol({
+       size: 6,
+       color: appConstants.CardColorMap[3],
+         outline: {
+           color: "white",
+           width: 0
+         }
+       }),
+       label: "Complete"
+   },
+   {
+     value: "4",
+     symbol: new SimpleMarkerSymbol({
+       size: 6,
+       color: appConstants.CardColorMap[4],
+       outline: {
+         color: "white",
+         width: 0
+       }
+     }),
+     label: "On Hold"
+   },
+ 
+   // Add more unique value info objects as needed...
+   ]
+ });
+
 export let roadwaysRenderer = {
   type: "simple",
     symbol: {
@@ -90,22 +205,21 @@ export let roadwaysRenderer = {
       color: "transparent"
     }
 }
-export let polygonRenderer = {
-  type: "simple",
-    symbol: {
-      type: "simple-fill",  // autocasts as new SimpleFillSymbol()
-      color: "transparent",
-      style: "solid",
-      outline: {  // autocasts as new SimpleLineSymbol()
-        color: "transparent",
-        width: 0
-      }
-    }
+/////////////////////////
+export const polygonsymbol = {
+  type: "simple-fill",  // autocasts as new SimpleFillSymbol()
+  color: [224,224,224,.4],
+  outline: {  // autocasts as new SimpleLineSymbol()
+    color: "#636363",
+    width: 2
+  }
+ 
+ 
 }
+
 
 //Highlight graphics layer construction
 export const highlightLayer = new GraphicsLayer();
-export const highlightLayerroadways = new GraphicsLayer();
 
 const highlightSymbolroadways = {
   type: "simple-fill", // Use a simple fill symbol
@@ -116,24 +230,7 @@ const highlightSymbolroadways = {
   }
 };
 
-const highlightSymbol = {
-  type: "simple-fill", // Use a simple fill symbol
-  color: "gray", // Transparent fill color
-  outline: {
-    color: 'gray', // Red color for the outline
-    width: 2 // Outline width
-  }
-};
 
-highlightLayer.renderer = {
-  type: "simple", // Use a simple renderer
-  symbol: highlightSymbol // Use the defined highlight symbol
-};
-
-highlightLayerroadways.renderer = {
-  type: "simple", // Use a simple renderer
-  symbol: highlightSymbolroadways // Use the defined highlight symbol
-};
 
 
 //Rets Layer construction
@@ -141,7 +238,7 @@ export const retsLayer = new FeatureLayer({
   url: "https://testportal.txdot.gov/createags/rest/services/RETS/FeatureServer/0",
   visible: true,
   outFields: ["*"],
-  renderer: retsPointRenderer,
+  renderer: retsPointRendererout,
   editingEnabled: true,
 })
 
@@ -159,7 +256,6 @@ export const DFOProducer = new FeatureLayer({
 export const texasCounties = new FeatureLayer({
   url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/Texas_County_Boundaries/FeatureServer/0",
   visible: false,
-  renderer: polygonRenderer
   
   
 })
@@ -169,20 +265,20 @@ export const txdotDistricts = new FeatureLayer({
   visible: false,
   popupEnabled: false,
   popupTemplate: null,
-  renderer: polygonRenderer
 })
 
 export const texasCities = new FeatureLayer({
   url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_City_Boundaries/FeatureServer/0",
   visible: false,
-  renderer: polygonRenderer
 })
 
-export const minuteOrders = new FeatureLayer({
-  url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Highway_Designations/FeatureServer",
-  visble: false, 
-  renderer: roadwaysRenderer
-})
+// export const minuteOrders = new FeatureLayer({
+//   url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Highway_Designations/FeatureServer",
+//   visble: false, 
+//   renderer: roadwaysRenderer
+// })
+
+
 
 
 //TxDotRoaways Layer construction
@@ -295,6 +391,7 @@ export const view = new MapView({
 
 
 
+
 //create search widget
 export const searchWidget = new Search({
   
@@ -303,6 +400,7 @@ export const searchWidget = new Search({
   allPlaceholder: "City, County, District, Route",
   popupEnabled: false,
   popupTemplate: false,
+  ///autoSelect: false,
   sources:
   [
     {
@@ -322,14 +420,12 @@ export const searchWidget = new Search({
       name: "County",
       layer: texasCounties, 
       placeholder: "County",
-      zoomScale: 500,
       searchFields: ["CNTY_NM"],
       displayField: "CNTY_NM", 
       exactMatch: false,
       outFields: ["*"],
       maxSuggestions: 1,
-      minSuggestCharacters: 2,
-      
+      minSuggestCharacters: 2, 
     },
     {
       name: "District",
@@ -355,7 +451,7 @@ export const searchWidget = new Search({
     {
       name: "Cities",
       layer: texasCities, 
-      placeholder: "City",
+      placeholder: "Cities",
       searchFields: ["CITY_NM"],
       displayField: "CITY_NM", 
       exactMatch: false,
@@ -437,24 +533,7 @@ export const sketchWidgetcreate = new Sketch({
 view.ui.add(searchWidget, {
   position: "top-right",
   index: 2,
-  container: "searchcont",
 });
-
-searchWidget.on("select-result", function(event) {
-  const selectedFeature = event.result.feature;
-  
-  if (selectedFeature && selectedFeature.geometry) {
-    // Calculate the extent of the selected feature
-    const extent = selectedFeature.geometry.extent;
-    
-    
-    // Set the map view's extent based on the feature's extent
-    console.log(extent)
-    view.extent = extent;
-  }
-});
-
-
 //adds zoom widget to map 
 view.ui.add(ZoomWidget, {
   position: "top-right",
@@ -513,58 +592,40 @@ export const OSMVTBasemap = new Basemap({
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-map.addMany([retsLayer, graphics, retsGraphicLayer, texasCounties, texasCities, minuteOrders, TxDotRoaways, highlightLayer, highlightLayerroadways])
-highlightLayer.blendMode = "screen"; 
-highlightLayerroadways.blendMode = "screen"; 
-
+map.addMany([retsLayer, graphics, retsGraphicLayer, texasCounties, texasCities, TxDotRoaways, highlightLayer, txdotDistricts])
 
 searchWidget.on("select-result", function(event) {
   const selectedFeature = event.result.feature;
   highlightLayer.removeAll(); // Clear previous highlights
-
     if (selectedFeature.geometry.type === "polygon") {
-      
-    // Highlight the selected polygon feature with highlightSymbol
-    highlightLayer.add(new Graphic({
-      geometry: selectedFeature.geometry,
-      symbol: highlightSymbol
-    }));
-    
-  } else if (selectedFeature.geometry.type === "polyline") {
-    // Highlight the selected polyline feature with highlightSymbolRoadways
-    highlightLayer.add(new Graphic({
-      geometry: selectedFeature.geometry,
-      symbol: highlightSymbolroadways
-    }));
-  } else if (selectedFeature.geometry.type === "point") {
-    const tempArray = [selectedFeature];
-    // Run the highlightRestPoints function on the selected point feature
-    removeOutline();
-    //removeHighlight(selectedFeature, true)
-    outlineFeedCards(tempArray);
-  }
-  
+      highlightLayer.add(new Graphic({
+        geometry: selectedFeature.geometry,
+        symbol: polygonsymbol,
+      }));
+    } 
+    else if (selectedFeature.geometry.type === "polyline") {
+      highlightLayer.add(new Graphic({
+        geometry: selectedFeature.geometry,
+        symbol: highlightSymbolroadways
+      }));
+    }
+    else if (selectedFeature.geometry.type === "point") {
+      const tempArray = [selectedFeature];
+      removeOutline();
+      outlineFeedCards(tempArray);
+    }
+  });
 
-
-});
 searchWidget.on("search-clear", function(event) {
   // Clear the highlight when the search is cleared
     highlightLayer.removeAll();
-  
-  
    removeOutline();
-
-
 });
 
 searchWidget.on("search-complete", function(event){
   // The results are stored in the event Object[]
   highlightLayer.removeAll();
 });
-
-const searchBox = document.getElementsByClassName('esri-input esri-search__input');
-const menuList = document.querySelector('.esri-menu__list');
-
 
 document.addEventListener('click', function(event) {
   const targetElement = event.target.className;
@@ -574,27 +635,25 @@ document.addEventListener('click', function(event) {
            searchInput.value = null;
            searchWidget.activeMenu = "none";
         searchWidget.focus()
-
       }
-
-      
-      
-     
-
 });
-
-
-
-
-
-
 
 homeWidget.on("go", function() {
   // Run your function here
   home();
 });
 
-
+view.watch("scale", function(newValue) {
+  if (newValue < 1000000 ) { // Adjust this scale threshold as needed
+    retsLayer.renderer = retsPointRenderer;
+  } 
+  else if(newValue > 1000000 && newValue < 2000000){
+    retsLayer.renderer = retsPointRendererout2
+  }
+  else {
+    retsLayer.renderer = retsPointRendererout;
+  }
+});
 
 //TxDotRoaways
 //remove attribution and zoom information
