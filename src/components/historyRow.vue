@@ -2,30 +2,30 @@
     <hr class="popup-title-border" v-if="sortB"></hr>
     <div style="margin-right: 10px; margin-left: 10px; width: 100%; height: 250px;">
         <div id="search">
-            <v-text-field class="search-history" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" density="compact" v-model="searchHistoryFilter" variant="filled" v-if="sortA || sortB" elevation="0"></v-text-field>
+            <v-text-field class="search-history" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" density="compact" v-model="searchHistoryFilter" variant="plain" v-if="sortA || sortB" elevation="0"></v-text-field>
         </div>
         <div style="position: relative; bottom: 2rem;">
-                <v-btn variant="plain" density="compact" style="font-size: 10px; float: right; position: relative; top:7px; margin:0%; padding: 0%; padding:0px 10px 0px 10px; margin-right: 10px; margin-bottom: 0px" @click="queryAttachments" :disabled="numAttachments === 0" v-model="isAttachedActive" :active="isAttachedActive" active-class="active-button">
+                <v-btn variant="plain" density="compact" style="font-size: 10px; float: right; position: relative; top:7px; margin:0%; padding: 0%; padding:0px 10px 0px 10px; margin-right: 10px; margin-bottom: 0px" @click="queryAttachments" :disabled="store.numAttachments === 0" v-model="isAttachedActive" :active="isAttachedActive" active-class="active-button">
                     <template v-slot:prepend>
-                        
                         <v-icon icon="mdi-filter"></v-icon>
                     </template>
                     Has attachments
                 </v-btn>
-                <div class="filter-notification-bubble" v-if="numAttachments > 0">
-                    <p style="font-size: 13.5px; position: relative; left: 27%; bottom: 2px;"><b> {{ numAttachments }}</b></p>
+                <div class="filter-notification-bubble" v-if="store.numAttachments > 0">
+                    <p style="font-size: 11px; position: relative; left: 27%; bottom: 2px;"><b> {{ store.numAttachments }}</b></p>
                 </div>
             </div>
         <div id="displayHistory">
-                <div v-for="(note, i) in orderList[sortA ?? sortB]()" :key="note.OBJECTID" track-by="OBJECTID" v-if="!isHistNotesEmpty" id="chatDiv">
-                    <v-banner v-model="note[i]" :id="note.OBJECTID" density="compact" style="padding: 0px; padding-left: 5px; border-left: 3px solid #4472C4 !important;">
+            <v-progress-circular indeterminate v-if="isHistNotesEmpty"></v-progress-circular>
+                <div v-for="(note, i) in orderList[sortA ?? sortB]()" :key="note.OBJECTID" track-by="OBJECTID" v-if="!isHistNotesEmpty" :id="sortA ? 'chatDiv': `chatDivExpand`">
+                    <v-banner v-model="note[i]" :id="sortA ? note.OBJECTID : `${note.OBJECTID}Expand`" density="compact" style="padding: 0px; padding-left: 5px; border-left: 3px solid #4472C4 !important;">
                         <v-banner-text>
                             <span v-if="note.PARENT_ID" style="margin:0% !important; "> <p id="replyingToCmnt">Replying to "{{store.historyChat.find(x => x.OBJECTID === note.PARENT_ID)?.CMNT ?? "Referenced Note has been deleted"}}"</p></span>
-                            <v-text-field style="width:100%; position: relative; width: 40rem !important; height: 2rem; margin:0% !important; z-index:9999;" density="compact" variant="plain" :disabled="note.OBJECTID !== updateOID" v-model="note.CMNT"></v-text-field>                                
-                            <span style="font-size: 10px; color: grey; padding-left: 5px;">{{ returnUserName(note.CMNT_NM) }} {{ note.EDIT_DT ? returnDateFormat(note.EDIT_DT) : returnDateFormat(note.CREATE_DT) }}</span>
+                            <v-text-field style="width:100%; position: relative; width: 40rem !important; height: 2rem; margin:0% !important; z-index:9999;" density="compact" variant="plain" :disabled="note.OBJECTID !== updateOID" v-model="note.CMNT"  placeholder="Enter Comment"></v-text-field>                                
+                            <span style="font-size: 10px; color: grey; padding-left: 5px;">{{ returnUserName(note.CMNT_NM) }} {{ returnDateFormat(note.CREATE_DT) }} <b v-if="note.CREATE_DT !== note.EDIT_DT && note.SYS_GEN === 0" class="main-color">{{ `Edited ${returnDateFormat(note.EDIT_DT)}` }}</b></span>
                             <div style="position: relative; bottom: 0rem;" v-if="note.attachments">
                                 <span v-for="attach in note.attachments" style="padding-right: 3px;">
-                                    <v-chip :text="attach.name" color="#4472C4" class="" :closable="editContent ? true: false" density="compact" rounded="0" variant="flat" @click="openAttachement(attach.url)" @click:close="deleteAttach(note.OBJECTID, attach.name)"></v-chip>
+                                    <v-chip :text="attach.name" color="#4472C4" class="" :closable="editContent && updateOID === note.OBJECTID ? true: false" density="compact" rounded="0" variant="flat" @click="openAttachement(attach.url)" @click:close="deleteAttach(note.OBJECTID, attach.name)"></v-chip>
                                 </span>
                             </div>
                         </v-banner-text>
@@ -47,18 +47,18 @@
                     </span>
                 </div>
         </div>
-        <div style="position: absolute; bottom: 0px; width:100%;">
+
+        
+        <v-text-field v-if="isHistNotesEmpty" disabled variant="plain">{{noHistResp}}</v-text-field>
+    </div>
+    <div style="position: absolute; bottom: 0px; width:100%;">
             <div>
                 <div style="position: relative">
-                    <v-btn prepend-icon="mdi-message-plus" id="addCommentBtnSmall" variant="plain" size="small" v-if="sortA" @click="store.addNote('Enter Text', false)">Add</v-btn>
+                    <v-btn prepend-icon="mdi-message-plus" id="addCommentBtnSmall" variant="plain" size="small" v-if="sortA" @click="addNote()">Add</v-btn>
                 </div>
             </div>
 
         </div>
-        
-        <v-text-field v-if="isHistNotesEmpty" disabled variant="plain">{{noHistResp}}</v-text-field>
-    </div>
-    
 </template>
 
 <script>
@@ -77,7 +77,6 @@
                 store,
                 isHistNotesEmpty: false,
                 histNotes: [],
-                fullChat: [],
                 noHistResp: "No History for this RETS",
                 searchHistoryFilter: null,
                 editText: false,
@@ -91,13 +90,20 @@
                 numAttachments: 0,
                 isAttachedActive: false,
                 isActive: false,
-                testOid: 0
+                testOid: 0,
+                searchAttach: false
             }
         },
         mounted(){
 
         }, 
         methods:{
+            addNote(){
+                store.addNote(null, false)
+                    .then(() =>{
+                        this.openNote(null, Number(document.getElementById("chatDiv").firstElementChild.id))
+                    })
+            },
             openNote(n, oid){
                 this.editContent = true
                 this.isClose = true;
@@ -123,9 +129,9 @@
                 return
             },
             async replyNote(note){
-                const cmnt = "Enter Text Here"
-                console.log(note)
-                const returnOid = await store.replyNote(note)
+                const cmnt = null
+                const sortType = this.sortA ? "start" : "end"
+                const returnOid = await store.replyNote(note, sortType)
                 this.openNote(cmnt, returnOid)
                 this.testOid = returnOid
                 return
@@ -155,19 +161,20 @@
                 if(n === 'RETSBOT' || !n) {
                     return n ?? 'SYSTEM GENERATED'
                 }
-                console.log(n)
                 this.loggedInUserName = appConstants.defaultUserValue[0].value
                 const usernameRow = appConstants.userRoles.find(name => name.value === n)
                 return usernameRow.name
             },
             queryAttachments(){
+                const searchType = this.sortA ? "sortA" : "sortB"
                 this.isAttachedActive = !this.isAttachedActive
                 if(this.isAttachedActive){
-                    this.fullChat = store.historyChat
-                    const getAttachmentComments = store.historyChat.filter(x => x.attachments)
-                    store.historyChat = getAttachmentComments
+                    this.searchAttach = true
+                    searchCards(store.historyChat, "", {param: "OBJECTID", type: searchType, isFilters: this.searchAttach})
                     return
                 }
+                this.searchAttach = false
+                searchCards(store.historyChat, "", {param: "OBJECTID", type: searchType, isFilters: this.searchAttach})
                 return
                 
             },
@@ -185,12 +192,13 @@
         watch:{
             searchHistoryFilter:{
                 handler: function(a="",b=""){
+                    const searchType = this.sortA ? "sortA" : "sortB"
                     try{
                         if(b && !a.length){
                             searchCards(store.historyChat, "", "OBJECTID")
                             return
                         }
-                        searchCards(store.historyChat, this.searchHistoryFilter, "OBJECTID")
+                        searchCards(store.historyChat, this.searchHistoryFilter, {param: "OBJECTID", type: searchType, isFilters: this.searchAttach})
                         return
                     }
                     catch(a){
@@ -204,8 +212,8 @@
         computed:{
             orderList: function(){
                 return {
-                    "ASC" : () => {return store.historyChat.slice().sort((a,b) => a.EDIT_DT - b.EDIT_DT) },
-                    "DESC": () => {return store.historyChat.slice().sort((a,b) => b.EDIT_DT - a.EDIT_DT) }
+                    "ASC" : () => {return store.historyChat.slice().sort((a,b) => a.CREATE_DT - b.CREATE_DT) },
+                    "DESC": () => {return store.historyChat.slice().sort((a,b) => b.CREATE_DT - a.CREATE_DT) }
                 }
             }
         }
@@ -225,8 +233,8 @@
     #displayHistory{
         display: flex;
         flex-direction: column;
-        min-height: 10vh;
-        max-height: 250px;
+        min-height: 185px;
+        max-height: 263px;
         width: 98.7%;
         overflow-y: auto;
         padding-bottom: 30px;
@@ -244,11 +252,11 @@
     }
     .filter-notification-bubble{
         position: relative;
-        width: 1.1rem;
+        width: .9rem;
         background-color:#4472C4;
-        height: 1.1rem;
+        height: .9rem;
         float: right;
-        top: .8rem;
+        top: 1.3rem;
         left: 1.6rem;
         border-radius: 50%;
         z-index: 9999
@@ -279,7 +287,7 @@
         margin-right: 15px;
         padding-left: 10px;
         padding-right: 10px;
-        bottom: 10px;
+        bottom: 2px;
     }
 
 </style>

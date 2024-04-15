@@ -3,18 +3,18 @@
 <template style="overflow-y:hidden;">
 
     <v-navigation-drawer width="200" height="100" permanent color="black">
-        <v-list height="100%" id="icons-top" class = "iconList">
-            <v-list-item class = 'iconList-item' v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" :active-class="tool.name !== 'Menu' ? 'btn-left-brder' : ''" >    
+        <v-list height="100%" id="icons-top" class="iconList">
+            <v-list-item class="iconList-item" v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" :active-class="tool.name !== 'Menu' ? 'btn-left-brder' : ''" >    
                 <v-tooltip location="right bottom" :text=tool.name >
                     <template v-slot:activator="{ props}">
-                        <v-icon id="disable-overlay" size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
-                </template>
+                        <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
+                    </template>
                 </v-tooltip>
                 
             </v-list-item>
         </v-list>
         <v-list id="icons-bottom" class="iconList">
-            <v-list-item class = "iconList-item" v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" :active-class="tool.name !== 'Jump To' && tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
+            <v-list-item class="iconList-item" v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" :active-class="tool.name !== 'Jump To' && tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
                 <!-- <v-tooltip v-if="tool.name === 'Basemaps'" location="right" :text=tool.name  >
                     <template v-slot:activator="{ props }">
                     <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props"></v-icon>
@@ -23,7 +23,7 @@
                 <template v-if="tool.name != 'Basemaps' && tool.name != 'Jump To'">
                     <v-tooltip location="right" :text="tool.name">
                         <template v-slot:activator="{ props }">
-                            <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
+                            <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
                         </template>
                     </v-tooltip>
                 </template>
@@ -141,11 +141,7 @@
     import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass} from '../components/map-Init.js';
     import {addRETSPT} from '../components/crud.js'
     import { createtool, selecttool, togglemenu, logoutUser  } from '../components/utility.js';
-    import Map from './Map.vue';
     import { vuetify } from '../main.js';
-
-    import { useTheme } from 'vuetify'
-
 
     export default{
         components: {RetsCards},

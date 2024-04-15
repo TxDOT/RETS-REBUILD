@@ -33,7 +33,7 @@
             </span>
         </div>
         <!-- history section -->
-        <div >
+        <div>
             
             <v-card class="history-card">
                 <div style="float: right; font-size: 10px; position: relative; top: .5rem;" >
@@ -41,7 +41,16 @@
                 </div>
                 <v-card-title style="padding-bottom: 30px;">History</v-card-title>
                 <historyView :sortA="toSortBottom"/>
+
             </v-card>
+            <div style="position: relative; bottom: 0px; width:100%;">
+            <div>
+                <div style="position: relative">
+                    <v-btn prepend-icon="mdi-message-plus" id="addCommentBtnSmall" variant="plain" size="small" v-if="sortA" @click="store.addNote('Enter Text', false)">Add</v-btn>
+                </div>
+            </div>
+
+        </div>
         </div>
     </div>
     <div id="commentDiv" v-if="editText">
@@ -79,7 +88,7 @@
         <v-btn-toggle id="trigger-buttons" density="compact">
             <v-btn @click="handlearchive" variant="plain" flat size="small" class="secondary-button">Delete</v-btn>
             <v-btn @click="cancelDetailsMetadata" class="secondary-button" variant="plain" flat size="small">Cancel</v-btn>
-            <v-btn @click="sendToParent" variant="outlined" class="main-button-style" size="small" >Save</v-btn>
+            <v-btn @click="sendToParent" variant="outlined" class="main-button-style" size="small" :disabled="store.isSaveBtnDisable">Save</v-btn>
         </v-btn-toggle>
     </div>
 
@@ -105,7 +114,7 @@
     import DetailsCard from './detailsCard.vue'
     import MetadataCard from './metadataCard.vue'
     import { appConstants } from '../common/constant.js'
-    import {getGEMTasks, searchCards, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer} from './utility.js'
+    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer} from './utility.js'
     import detailsAlert from './detailsAlert.vue'
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
@@ -136,6 +145,7 @@
                 editNotes: '',
                 noteIndex: 0,
                 gemTask: [],
+                archiveRets: [],
                 sendGemTaskNum: null,
                 searchHistoryFilter: '',
                 saveDisable: false,
@@ -162,12 +172,8 @@
                     return
                 }
             })
-            this.getHistoryStore
-            console.log(store.retsObj)
+            //this.getHistoryStore
             this.isAsset = store.retsObj.attributes.JOB_TYPE === 2 ?  true : false
-            store.getHistoryChatRet()
-
-            
         },
         methods:{
             returnDateFormat(e){
@@ -194,7 +200,6 @@
             assignColorToFlag(clr){
                 document.getElementById(`${this.flagClickedId}Icon`).style.color = clr
                 store.retsObj.attributes.flagColor.FLAG = clr
-                console.log(store.retsObj.attributes)
                 this.isColorPicked = false;
                 this.closeFlagDiv()
             },
@@ -219,6 +224,7 @@
                 store.deleteRetsID()
                 store.isDetailsPage = false
                 store.activityBanner = "Activity Feed"
+                store.historyChat.length = 0
                 deleteRetsGraphic()
                 store.isCard = true
             },
@@ -228,23 +234,33 @@
                 // this.retsInfo.ASSIGNED_TO = this.retsInfo.ASSIGNED_TO.value
                 store.retsObj.attributes.PRIO = store.retsObj.attributes.PRIO ?? 1
                 store.retsObj.attributes.JOB_TYPE = this.isAsset === true ? 2 : 1
-                console.log(store.retsObj.attributes.PRIO)
                 await updateRETSPT(store.retsObj)
                 store.isDetailsPage = false
                 store.activityBanner = "Activity Feed"
+                store.historyChat.length = 0
                 deleteRetsGraphic()
                 store.isCard = true
                 store.updateRetsID()
-                
+                return
             },
             cancelDetailsMetadata(){
+                const archiveRets = JSON.parse(store.archiveRetsDataString)
+                this.replaceArchiveContent(archiveRets)
                 store.isAlert = false
                 clearGraphicsLayer()
                 removeHighlight("a", true)
-                store.preserveHighlightCards()
+                store.historyChat.length = 0
+                //store.preserveHighlightCards()
                 store.isDetailsPage = false
                 store.isCard = true
                 store.activityBanner = "Activity Feed"
+                return
+            },
+            replaceArchiveContent(old){
+                const filter = !store.isShowSelected ? store.roadObj : [...store.roadHighlightObj]
+                const rd = filter.findIndex(x => x.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
+                filter.splice(rd, 1, old)
+                return
             },
             openNote(note, index){
                 this.editText = true
@@ -255,9 +271,7 @@
                 this.editText = false
             },
             saveNote(){
-                // this.histNotes[this.noteIndex].notes = this.editNotes
-                // this.histNotes[this.noteIndex].author = this.retsInfo.logInUser
-                // this.histNotes[this.noteIndex].time = new Date().toLocaleDateString('en-US')
+                this.addHistoryNote()
                 this.editText = false
                 store.alertTextInfo = {"text": "Chat Saved", "color": "#70ad47", "type":"success", "toggle": true}
                 store.isAlert = true
@@ -287,7 +301,9 @@
             },
             addHistoryNote(){
                 if(!this.addHistoryChat.length) return
-                store.addNote(this.addHistoryChat)
+                console.log(store.attachment)
+                const attach = store.attachment.length ? true : false 
+                store.addNote(this.addHistoryChat, attach, store.attachment)
                 this.clearMessage()
                 return
             },
@@ -295,7 +311,7 @@
                 this.addHistoryChat = ""
             },
 
-            displayAttachments(){
+            displayAttachments(oid){
                 const input = document.createElement('input')
                 input.type = "file"
                 input.name = "attachment"
@@ -303,7 +319,8 @@
 
                 input.addEventListener("change", (event)=>{
                     let attach = true
-                    store.addNote("", attach, event.target.files)
+                    store.attachment = event.target.files
+                    //addAttaevent.target.fileschments(oid, attach, event.target.files)
                 })
 
                 input.remove()
@@ -318,26 +335,35 @@
 
         },
         watch:{
-
+            // 'store.history':{
+            //     handler: function(){
+            //      if(!store.history.length) return
+            //      store.getHistoryChatRet()
+            //     },
+            //     once: true
+            // }
         },
         computed:{
             getHistoryStore:{
-                get(){
-                    if(!store.history.length){
-                        this.noHistResp = 'Error Retrieving History'
-                        this.isHistNotesEmpty = true
-                        return
-                    }
-                    const unpackHistory = JSON.parse(store.history)
+                get (){
+                    //store.getHistoryChatRet()
+                    //    .then((x) =>console.log(x))
+                    // if(!store.history.length){
+                    //     this.noHistResp = 'Error Retrieving History'
+                    //     this.isHistNotesEmpty = true
+                    //     return
+                    // }
+                    // const unpackHistory = JSON.parse(store.history)
  
-                    const getRelatedHist = unpackHistory.filter(hist => hist.RETS_ID === store.retsObj.attributes.RETS_ID)//4430)
-                    if(!getRelatedHist.length){
-                        this.isHistNotesEmpty = true
-                        return
-                    }
-                    this.histNotes = getRelatedHist
-                    this.isHistNotesEmpty = false
-                    return
+                    // const getRelatedHist = unpackHistory.filter(hist => hist.RETS_ID === store.retsObj.attributes.RETS_ID)//4430)
+                    // if(!getRelatedHist.length){
+                    //     this.isHistNotesEmpty = true
+                    //     return
+                    // }
+
+                    // this.histNotes = getRelatedHist
+                    // this.isHistNotesEmpty = false
+                    // return
                 }
             }
         }
@@ -506,7 +532,7 @@ div .cardDiv{
 }
 .history-card{
     position:relative; 
-    height: 100%; 
+    height: 27rem; 
     bottom: 0.2rem; 
     border-radius: 0%; 
     margin-right: 10px;

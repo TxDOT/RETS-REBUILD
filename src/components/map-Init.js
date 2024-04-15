@@ -235,99 +235,16 @@ const highlightSymbolroadways = {
 
 //Rets Layer construction
 export const retsLayer = new FeatureLayer({
-  url: "https://testportal.txdot.gov/createags/rest/services/RETS/FeatureServer/0",
-  visible: true,
-  outFields: ["*"],
-  renderer: retsPointRendererout,
-  editingEnabled: true,
-})
-
-//DFO Producer in GRID
-export const DFOProducer = new FeatureLayer({
-  url: "https://testportal.txdot.gov/createags/rest/services/RETS_PNT_HELPER/FeatureServer/0",
-  outFields:["*"],
-  returnM: true,
-  returnZ: true,
-  hasM: true,
-  hasZ: true,
-  visible: true,
-})
-//County Layer construction
-export const texasCounties = new FeatureLayer({
-  url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/Texas_County_Boundaries/FeatureServer/0",
-  visible: false,
-  
-  
-})
-
-export const txdotDistricts = new FeatureLayer({
-  url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Districts/FeatureServer/0",
-  visible: false,
-  popupEnabled: false,
-  popupTemplate: null,
-})
-
-export const texasCities = new FeatureLayer({
-  url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_City_Boundaries/FeatureServer/0",
-  visible: false,
-})
-
-// export const minuteOrders = new FeatureLayer({
-//   url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Highway_Designations/FeatureServer",
-//   visble: false, 
-//   renderer: roadwaysRenderer
-// })
-
-
-
-
-//TxDotRoaways Layer construction
-export const TxDotRoaways = new FeatureLayer ({
-  url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Roadways/FeatureServer/0",
-  visible: true,
-  renderer: roadwaysRenderer,
-  outFields: ["*"],
-  returnM: true,
-})
-
-//RETS History
-export const retsHistory = new FeatureLayer({
-  url: "https://testportal.txdot.gov/createags/rest/services/RETS_CMNT/FeatureServer/0",
-  outFields: ["*"]
-})
-
-//Rets User Roles
-export const retsUserRole = new FeatureLayer({
-  url: "https://testportal.txdot.gov/createags/rest/services/RETS_SUPPORT/FeatureServer/1"
-})
-
-export const flagRetsColor = new FeatureLayer({
-  url: "https://testportal.txdot.gov/createags/rest/services/RETS_SUPPORT/FeatureServer/3"
-})
-
-//Creates label class for RETS points
-export const retsLabelclass = new LabelClass({
-  labelExpressionInfo : {expression: "$feature.RETS_ID"},
-  symbol: {
-    type: "text",
-    color: "white",
-    font: {
-      size: 12
+    url: "https://testportal.txdot.gov/createags/rest/services/RETS_REF/FeatureServer/0",//"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadway_Edits_Tracking/FeatureServer/0",
+    visible: true,
+    outFields: ["*"],
+    popupEnabled: true,
+    portalItem:{
+        url: "f37dfee631244e80b12c4c6271066317"
     }
-  },
-  labelPlacement: "above-right",
-  minScale: 200000,
+
 })
 
-//Applies label class to rets layer
-retsLayer.labelingInfo = [retsLabelclass];
-
-export const retsGraphicLayer = new GraphicsLayer({});
-
-export const graphics = new GraphicsLayer({});
-
-////////////////////////////////////////////BASEMAPS//////////////////////////////////////////////////////////////////////////
-        
 //Dark Vector Tile construction
 export const darkVectorTile = new VectorTileLayer({
   url: "https://www.arcgis.com/sharing/rest/content/items/4bd376c56f314bc5a36446630db604a6/resources/styles/root.json"
@@ -335,6 +252,7 @@ export const darkVectorTile = new VectorTileLayer({
 
 //Add Vector Tile as a basemap
 export const darkVTBasemap = new Basemap({
+  baseLayers: darkVectorTile
   baseLayers: darkVectorTile
 })
  

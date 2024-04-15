@@ -4,6 +4,8 @@ import Query from "@arcgis/core/rest/support/Query";
 import {store} from './store'
 
 export async function addRETSPT(retsObj){
+    console.log(retsObj)
+    //retsObj.attributes.ACTV = retsObj.attributes.ACTV.value
     return retsLayer.applyEdits({
         addFeatures: [retsObj]
     })
@@ -13,10 +15,19 @@ export async function updateRETSPT(retsObj){
     if(retsObj.attributes.RELATED_RETS){
         retsObj.attributes.RELATED_RETS = retsObj.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID).toString()
     }
+
+    const createGeo = {
+        type: "point",
+        x: retsObj.geometry.x ? retsObj.geometry.x : retsObj.geometry[0],
+        y: retsObj.geometry.y ? retsObj.geometry.y : retsObj.geometry[1]
+    }
+
     retsObj.attributes.NO_RTE === true ? 1 : 0
+    retsObj.attributes.ACTV = retsObj.attributes.ACTV?.value
     postFlagColor(retsObj)
     let esriUpdateGraphic = createGraphic(retsObj)
-    console.log(esriUpdateGraphic)
+    esriUpdateGraphic.geometry = createGeo
+
     await retsLayer.applyEdits({
         updateFeatures: [esriUpdateGraphic]
     })
@@ -24,7 +35,6 @@ export async function updateRETSPT(retsObj){
 }
 
 export function deleteRETSPT(retsObj){
-    console.log(retsObj)
     if(retsObj.attributes.RELATED_RETS){
         retsObj.attributes.RELATED_RETS = retsObj.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID).toString()
     }
@@ -47,11 +57,11 @@ function createGraphic(retsObj){
         attributes: retsObj.attributes ?? retsObj
     })
     
-    retsObj.geometry ? creatGraph.geometry = {
-                            type: "point",
-                            x: retsObj?.geometry[0],
-                            y: retsObj?.geometry[1]
-                        } : null
+    // retsObj.geometry ? creatGraph.geometry = {
+    //                         type: "point",
+    //                         x: retsObj?.geometry[0],
+    //                         y: retsObj?.geometry[1]
+    //                     } : null
     
     
     return creatGraph
@@ -59,12 +69,10 @@ function createGraphic(retsObj){
 
 export function getDFOFromGRID(gid, dfo){
     let returnGraphic =  createGraphic({attributes: {OBJECTID: 1, GID: gid, DFO: dfo}})
-    console.log(returnGraphic)
     DFOProducer.applyEdits({
         updateFeatures: [returnGraphic]
     })
         .then((x) => {
-            console.log(x)
             const query = new Query()
             query.where = `1=1`
             query.outFields = ["*"]
@@ -114,7 +122,6 @@ export async function sendChatHistory(chat, type){
 export function postFlagColor(rets){
     //if OBJECTID is blank, would mean its a new flag insert
     const flagGraphic = createGraphic(rets.attributes.flagColor)
-    console.log(flagGraphic)
     if(rets.attributes.flagColor.OBJECTID === ''){
         flagRetsColor.applyEdits({
             addFeatures: [flagGraphic]

@@ -47,7 +47,7 @@
                                 <div class="switch">
                                     <v-tooltip text="Show Selected Cards" location="top">
                                         <template v-slot:activator="{props}">
-                                            <v-switch flat v-model="store.isShowSelected" density="compact" @update:modelValue="updateSelection(store.isShowSelected)" v-bind="props" color="primary" :disabled="isSwitchDisabled"></v-switch>
+                                            <v-switch flat v-model="store.isShowSelected" density="compact" @update:modelValue="updateSelection(store.isShowSelected)" v-bind="props" color="primary" :disabled="!store.roadHighlightObj.size"></v-switch>
                                         </template>
                                     </v-tooltip>
                                         
@@ -58,11 +58,11 @@
                 </v-banner>
             </v-row>
             <v-row id="search-feed" v-if="!store.isDetailsPage">
-                <v-text-field density="compact" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" v-model="actvFeedSearch"></v-text-field>
+                <v-text-field density="compact" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" v-model="actvFeedSearch" variant="plain"></v-text-field>
             </v-row>
 
             <div class="card-feed-div" v-if="store.isCard">
-                <v-row v-for="(rd, road) in store.roadObj" :key="rd" :value="road" :id="rd.attributes.OBJECTID" class="rets-card-row"> 
+                <v-row v-for="(rd, road) in !store.isShowSelected ? store.roadObj : store.roadHighlightObj" :key="rd.attributes.OBJECTID" :value="road" :id="rd.attributes.OBJECTID" class="rets-card-row"> 
                     <v-btn elevation="0" @click="changeColor(rd.attributes.RETS_ID);" class="flag-btn" size="small" max-width=".5px" density="compact" variant="plain" slim>
                         <template v-slot:prepend>
                             <v-icon size="medium" :id="`${rd.attributes.RETS_ID}Icon`" :color="rd.attributes.flagColor.FLAG" :icon="rd.attributes.flagColor.FLAG ? changeFlagIcon(rd.attributes.flagColor.FLAG) : 'mdi-flag-outline'"></v-icon>
@@ -71,7 +71,7 @@
                     <v-col class="color-picker" v-if="flagClickedId === rd.attributes.RETS_ID" v-click-outside="closeFlagDiv">
                         <v-icon size="medium" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" ></v-icon>
                     </v-col>
-                    <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `7px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="store.roadHighlightObj.has(`${String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)}`) ? 'card highlight-card' : 'card'" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road);">
+                    <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `7px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="!store.isShowSelected ? 'card' : 'card highlight-card'" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road);">
                         <v-card-text id="retsCard">
                             RETS {{rd.attributes.RETS_ID }}
                         </v-card-text>
@@ -89,8 +89,8 @@
                             <div>
                                 <div style="position: relative; float: right; padding-top: 0px; top:0px; left: 0px;">
                                     <v-tooltip v-for="i in alertIcons" :text="i.popup" location="top">
-                                        <template v-slot:activator="{props}" v-if="i.supplementCondition ? rd.attributes[i.display] === i.condition && rd.attributes[i.displaySup] !== i.supplementCondition : rd.attributes[i.display] === i.condition"> 
-                                            <v-icon :icon="i.icon" class="cardPRIO" :color="i.color" v-bind="props"></v-icon>
+                                        <template v-slot:activator="{props}" v-if="returnSand(i.icon, rd.attributes)"> 
+                                            <v-icon :icon="i.icon" class="cardPRIO" :color="checkColor(i.icon, rd.attributes)" v-bind="props"></v-icon>
                                         </template>
                                     </v-tooltip>
                                 </div>
@@ -108,7 +108,7 @@
             
             <div class="card-feed-div" v-if="store.isNoRets"><p>No RETS for you!</p></div>
         </v-col>
-        <RetsDetailPage v-if="store.isDetailsPage" @close-detail="enableFeed"/>
+        <RetsDetailPage v-if="store.isDetailsPage"/>
     </v-container>
     <v-card v-if="uploadAttachment" class="card attachCard"> 
         <div class="cardDiv" id="dragndrop" @drop="dropAttachment($event)" @dragover="dragover()" @click="fileAttach()" @dragleave="dragLeave()">
@@ -139,14 +139,14 @@
 </template>
 
 <script>
-import {clickRetsPoint, zoomTo, filterMapActivityFeed, getQueryLayer, searchCards, highlightRETSPoint, turnAllVisibleGraphicsOff, toggleRelatedRets, getHighlightGraphic, removeHighlight, createtool,  returnHistory, toggleHighlightCards} from './utility.js'
+import {clickRetsPoint, zoomTo, getQueryLayer, searchCards, highlightRETSPoint, toggleRelatedRets, getHighlightGraphic, removeHighlight, removeAllCardHighlight, createtool, returnHistory, toggleHighlightCards} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import Filter from './RetsFilter.vue'
 import RetsDetailPage from './RetsDetail.vue'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import {store} from './store.js'
 import {view, retsGraphicLayer} from './map-Init.js'
-import { sketchWidgetcreate, createretssym, flagRetsColor } from './map-Init.js'
+import { sketchWidgetcreate, createretssym } from './map-Init.js'
 import {addRETSPT, postFlagColor} from '../components/crud.js'
 
 
@@ -158,7 +158,6 @@ export default{
         // addrets:Number
         // addrets:Number
     },
-    components: {RetsDetailPage, Filter}, 
     components: {RetsDetailPage, Filter}, 
     data(){
         return{
@@ -209,13 +208,13 @@ export default{
                           
             ],
             alertIcons:[
-                {icon: "mdi-account-group", popup: "Assigned to you", color: "white", display: "ASSIGNED_TO", condition: `${store.loggedInUser}`, displaySup: "GIS_ANALYST", supplementCondition: `${store.loggedInUser}`},
-                {icon:"mdi-account-multiple-check", popup: "MO/TxDOT Connect", color: "white", display: "ACTV", condition: "TxDOTConnect"}, //ACTV === (Minute Order || TxDOTConnect)
-                {icon:"mdi-account-multiple-check", popup: "MO/TxDOT Connect", color: "white", display: "ACTV", condition: "Minute Order"},
-                {icon:"mdi-pencil-box-outline", popup: "District Request", "color": "white", display: null, condition: null}, //keep null
-                {icon:"mdi-alarm", popup: "Deadline set (with date)", "color": "white", display: null, condition: null}, //past the deadline set
+                {icon: "mdi-account-multiple-check", popup: "Assigned to you", color: "white", display: "ASSIGNED_TO", condition: `${store.loggedInUser}`, displaySup: "GIS_ANALYST", supplementCondition: `${store.loggedInUser}`},
+                {icon:"mdi-account-group", popup: "MO/TxDOT Connect", color: "white", display: "ACTV", condition: "TxDOTConnect"}, //ACTV === (Minute Order || TxDOTConnect)
+                // {icon:"mdi-account-group", popup: "MO/TxDOT Connect", color: "white", display: "ACTV", condition: "Minute Order"},
+                {icon:"mdi-pencil-box-outline", popup: "District Request", color: "white", display: "ACTV", condition: "Request"}, //keep null
+                {icon:"mdi-alarm", popup: "Deadline set (with date)", color: "white", display: "DEADLINE", condition: null}, //past the deadline set
                 {icon:"mdi-check-decagram-outline", popup: "Job Complete", color: "green", display: "STAT", condition: 3},
-                {icon: "mdi-timer-sand", popup: "No activity for (# days)", color: "white", display: null, condition: null}, //Only for in progress rets; edit_dt >= 5 weeks
+                {icon: "mdi-timer-sand", popup: "No activity for (# days)", color: "white", display: "STAT", condition: 2, determineDate: (x)=>{returnSand(x)}}, //Only for in progress rets; edit_dt >= 5 weeks
                 {icon: "mdi-exclamation", popup:"Priority Job", color:"red", display: "PRIO", condition: 0}                
             ],
             isShowSelected: false,
@@ -228,7 +227,6 @@ export default{
     },
     mounted(){
         this.showChanges = true
-        this.showChanges = true
         reactiveUtils.on(() => view.popup, "trigger-action",
             async (event) => {
                 if (event.action.id === "open-details") {
@@ -240,19 +238,87 @@ export default{
                     this.checkChanges()
                 }
         });
-        console.log(appConstants.defaultUserValue)
         this.retsFilters.loggedInUser = store.loggedInUser
         this.retsFilters[appConstants.queryField[appConstants.userRoles.find(x => x.value === store.loggedInUser).type]] = appConstants.defaultUserValue
-        console.log(this.retsFilters)
     },
     methods:{
+        checkColor(icon, atts){
+            if(icon === 'mdi-alarm' || icon === 'mdi-exclamation'){
+                const deadlineDate = new Date(atts.DEADLINE)
+                const todaysDate = new Date()
+                const oneDay = 24*60*60*1000;
+                const calcTime = deadlineDate.getTime() - todaysDate.getTime()
+                const pastDeadline = Math.round(calcTime/oneDay)
+                if(atts.DEADLINE && pastDeadline < 0 || icon === 'mdi-exclamation'){
+                    return "red"
+                }
+                return "white"
+            }
+            return "white"
+        },
+        returnSand(icon, atts){
+            
+            const notiIcons = {
+                'mdi-account-multiple-check' : () => {
+                    if(atts.ASSIGNED_TO && atts.GIS_ANALYST !== store.loggedInUser){
+                        return true
+                    }
+                    return false
+                },
+                'mdi-account-group': () => {
+                    if(atts.ACTV === "TxDOTConnect" || atts.ACTV === 'Minute Order'){
+                        return true
+                    }
+                    return false
+                },
+                'mdi-pencil-box-outline': () =>{
+                    if(atts.ACTV === "Request"){
+                        return true
+                    }
+                    return false
+                },
+                'mdi-alarm' :()=>{
+                    
+                    
+                    if(atts.DEADLINE){
+                        return true
+                    }
+                    return false
+                },
+                'mdi-check-decagram-outline' : ()=>{
+                    if(atts.STAT === 3){
+                        return true
+                    }
+                    return false
+                },
+                'mdi-timer-sand': ()=>{
+                    const editDt = new Date(atts.EDIT_DT)
+                    const todayDate = new Date()
+                    const oneDay = 24*60*60*1000;
+                    const calcTime = todayDate.getTime() - editDt.getTime()
+                    const calcDate = Math.round(calcTime/oneDay)
+                    //console.log(calcDate)
+                    if(atts.STAT === 2 && calcDate > 25){
+                        return true
+                    }
+                    return false
+                },
+                'mdi-exclamation': () =>{
+                    if(atts.PRIO === 0){
+                        return true
+                    }
+                    return false
+                }
+            }
+            return notiIcons[icon]()
+            //return true
+        },
         async processAddPt(newPointGraphic){
             try{
                 this.isSpinner = true
                 this.Spinneractive = false
                 store.isCard = false
                 const obj = await addRETSPT(newPointGraphic, "rets")
-                console.log(obj)
                 const objectid = obj.addFeatureResults[0].objectId
                 this.addrets = objectid
                 this.isSpinner = false
@@ -276,7 +342,6 @@ export default{
             //do nothing
         },
         displaySubtitle(e){ 
-            this.isSubtitle = !this.isSubtitle
             this.isSubtitle = !this.isSubtitle
         },
         checkChanges(){
@@ -322,21 +387,15 @@ export default{
             const findRoad = store.roadObj.findIndex(road => road.attributes.OBJECTID === delRd.OBJECTID)
             store.roadObj.splice(findRoad, 1)
         },
-        removeUndefinedIndex(delRd){
-            const findRoad = store.roadObj.findIndex(road => road.attributes.OBJECTID === delRd.OBJECTID)
-            store.roadObj.splice(findRoad, 1)
-        },
         double(road, index){
-            store.historyRetsId = road.attributes.RETS_ID
-            returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
+            console.log(store.roadHighlightObj)
+            store.archiveRetsDataString = JSON.stringify(road)
             store.historyRetsId = road.attributes.RETS_ID
             returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
             road.attributes.logInUser = this.loggedInUser 
             road.attributes.index = index
+            console.log(road)
             store.retsObj = road
-            console.log(store.retsObj)
-            store.retsObj = road
-            console.log(store.retsObj)
             clearTimeout(this.timer)
             this.timer=""
             store.isCard = false
@@ -345,6 +404,7 @@ export default{
             highlightRETSPoint(road.attributes)
             //outlineFeedCards()
             this.zoomToRetsPt(road)
+            
             toggleRelatedRets(JSON.stringify(road))
             return
         },
@@ -369,15 +429,13 @@ export default{
         }
         ,
         zoomToRetsPt(rets){
+            //removeAllCardHighlight()
             clearTimeout(this.timer)
             this.timer = ""
             this.timer = setTimeout(()=>{
                 const zoomToRETS = rets.geometry
                 highlightRETSPoint(rets.attributes)
-                highlightRETSPoint(rets.attributes)
                 zoomTo(zoomToRETS)
-
-
             },250)
         },
 
@@ -490,8 +548,7 @@ export default{
         actvFeedSearch:{
             handler: function(){
                 if(this.actvFeedSearch.length){
-                    searchCards(store.roadObj, this.actvFeedSearch, "OBJECTID")
-                    searchCards(store.roadObj, this.actvFeedSearch, "OBJECTID")
+                    searchCards(store.roadObj, this.actvFeedSearch, {param: "OBJECTID", type: "sortA", isFilters: false})
                     return
                 }
                 const getHideLength = document.getElementsByClassName("hideCards")
@@ -521,7 +578,6 @@ export default{
         },
         addrets:{
             handler: async function(){
-                console.log(this.addrets)
                 await this.addretss()
             },
             immediate: true
@@ -749,6 +805,7 @@ export default{
         z-index: 999;
         width: 1px !important;
         padding: 0px !important;
+        opacity: 1 !important;
     }
     .color-picker{
         position: absolute;
@@ -821,7 +878,7 @@ export default{
 
     .switch{
         position: relative;
-        bottom: 30px;
+        bottom: 34px;
         left: 5px;
         float: right;
         font-size: 10px;

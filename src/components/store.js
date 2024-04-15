@@ -18,15 +18,20 @@ export const store = reactive({
         historyRetsId: 0,
         historyChat: [],
         chatAttachments: [],
+        attachment: [],
+        sort: "ASC",
         roadHighlightObj: new Set(),
         isShowSelected: false,
         showSelected:[],
         userRetsFlag: [],
         archiveRetsData: [],
+        archiveRetsDataString: "",
         roadObj: [],
         retsObj: [],
         updatedRetsPtName: "",
         loggedInUser:"",
+        isAttachedActive: false,
+        numAttachments: 0,
         //retsFilters: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"}, "JOB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
                          //"ACTV": null, "DIST_NM" : null, "CNTY_NM": null, "GIS_ANALYST": appConstants.defaultUserValue, 
                          //"filterTotal": 2},
@@ -68,11 +73,11 @@ export const store = reactive({
                 return
         },
         async getHistoryChatRet(){
-                try{
+                try{    
+                        if(!this.history.length) return
                         const getRelatedHistory = JSON.parse(this.history)
                         const retsHistory = getRelatedHistory.filter(hist => hist.RETS_ID === this.historyRetsId)
                         const attachment = await getAttachmentInfo(retsHistory.map(id => id.OBJECTID))
-        
                         retsHistory.forEach((hist) => {
                                 if(Object.hasOwn(attachment, hist.OBJECTID)){
                                         hist.attachments = attachment[hist.OBJECTID].map((a) => {
@@ -84,14 +89,13 @@ export const store = reactive({
                                 }
                         })
                         // this.historyChat = retsHistory
-                        return
                 }
                 catch(err){
-                        //
+                        console.log(err)
                 }
 
         },
-        addNote(cmnt, isAttach, event){
+        addNote(cmnt, isAttach){
                 const date = new Date()
                 const newHistory = {RETS_ID: this.historyRetsId, CMNT: cmnt, CMNT_NM: `${appConstants.defaultUserValue[0].value}`, SYS_GEN: 0, CREATE_DT: date, EDIT_DT: date }
 
@@ -99,17 +103,22 @@ export const store = reactive({
                         .then((res) => {
                                 getCmntOID(newHistory.RETS_ID)
                                         .then((hist) => {
+                                                console.log(isAttach)
                                                 newHistory.OBJECTID = hist.features[0].attributes.OBJECTID
                                                 if(isAttach){
                                                         const oid = hist.features[0].attributes.OBJECTID
-                                                        addAttachments(oid, event, true)
+                                                        addAttachments(oid, store.attachment, true)
                                                         newHistory.attachments = []
-                                                        Array.from(event).forEach(x => newHistory.attachments.push({name: x.name}))
+                                                        Array.from(store.attachment).forEach(x => newHistory.attachments.push({name: x.name}))
                                                 }
                                                 this.historyChat.push(newHistory)
+                                                let divA = document.getElementById("chatDiv") 
+                                                let divB = document.getElementById("chatDivExpand")?.parentElement?.lastElementChild
+                                                divA.scrollIntoView({ behavior: 'smooth', block: 'start'})
+                                                divB?.scrollIntoView({ behavior: 'smooth', block: 'end'})
                                                 
                                         })
-                                
+                                return
                         })
                         .catch(err => console.log(err))
                 
@@ -128,12 +137,14 @@ export const store = reactive({
                 await sendChatHistory({"OBJECTID": oid}, "delete")
                 return
         },
-        async replyNote(note){
+        async replyNote(note, sortType){
                 const updateDate = new Date()
-                const chatObj = {RETS_ID: this.historyRetsId, CMNT: "Enter Text Here", CMNT_NM: `${appConstants.defaultUserValue[0].value}`, PARENT_ID: note.OBJECTID, SYS_GEN: 0, CREATE_DT: note.CREATE_DT, EDIT_DT: updateDate}
+                const chatObj = {RETS_ID: this.historyRetsId, CMNT: null, CMNT_NM: `${appConstants.defaultUserValue[0].value}`, PARENT_ID: note.OBJECTID, SYS_GEN: 0, CREATE_DT: updateDate, EDIT_DT: updateDate}
                 const oidReturn = await this.sendHistoryToFeatLayer(chatObj)
-                let div = document.getElementById("displayHistory").lastElementChild
-                div.scrollIntoView({ behavior: 'smooth', block: 'end' })
+                let divA = document.getElementById("chatDiv") 
+                let divB = document.getElementById("chatDivExpand")?.parentElement?.lastElementChild
+                divA.scrollIntoView({ behavior: 'smooth', block: 'start'})
+                divB.scrollIntoView({ behavior: 'smooth', block: 'end'})
                 return oidReturn
         },
         async sendHistoryToFeatLayer(chatObj){
@@ -152,6 +163,7 @@ export const store = reactive({
                 }
                 // addAttachments(oid)
                 fileList.forEach(x => chat.attachments.push({name: x.name}))
+                return
         },
         setFlagColor(att){
                 const defaultValue = {FLAG: '', OBJECTID: '', RETS_ID: att.RETS_ID, USERNAME: this.loggedInUser}
@@ -162,14 +174,12 @@ export const store = reactive({
         preserveHighlightCards(){
                 if(this.isShowSelected){
                         this.roadObj = this.roadObj.filter(rd => this.roadHighlightObj.has(String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)))
-                        console.log(this.roadObj)
                         return
                 }
                 return
         },
         async getRetsLayer(userid){
                 this.loggedInUser = userid
-                console.log(userid)
                 const queryString = {"whereString": appConstants['defaultQuery'](userid), "queryLayer": "retsLayer"}
                 const orderField = "EDIT_DT DESC, PRIO"
                 getQueryLayer(queryString, orderField)
@@ -191,7 +201,7 @@ export const store = reactive({
         setFilterFeed(){
                 filterMapActivityFeed(this.filter)
                         .then((resp) => {
-                                console.log(this.filter)
+                                console.log(resp)
                                 this.roadObj = []
                                 const query = {"whereString": `${resp}`, "queryLayer": "retsLayer"}
                                 const orderField = `${this.filter.createDt[0].filter} ${this.filter.createDt[0].sortType}`
@@ -232,12 +242,12 @@ export const store = reactive({
                 
                 const resp = `RETS_ID = ${this.retsObj.attributes.RETS_ID}`
                 const query = {"whereString": `${resp}`, "queryLayer": "retsLayer"}
-                console.log(query)
                 const orderField = `${this.CREATE_DT[0].filter} ${this.CREATE_DT[0].sortType}`
                 getQueryLayer(query, orderField)
                         .then(obj => {
                                 if(obj.features.length){
                                         const updateItem = {attributes: obj.features[0].attributes, geometry: [obj.features[0].geometry.x, obj.features[0].geometry.y]}
+                                        store.retsObj = updateItem
                                         updateItem.attributes.flagColor = this.setFlagColor( obj.features[0].attributes)
                                         const retsIndex = this.roadObj.findIndex(x => x.attributes.RETS_ID === obj.features[0].attributes.RETS_ID)
                                         this.roadObj.splice(retsIndex, 1, updateItem)

@@ -59,9 +59,10 @@ async function signIn(){
     .then((response) => {
       router.push('/apps/statewide_mapping/rets_rebuild/map')
       view.when(function(){
-        view.goTo(response.extent);
+        view.goTo(response.extent)
+      })
+      
 
-    })
     });
 }
 
@@ -73,7 +74,7 @@ const setDefExpRets = (userId) => {
 }
 
 export async function getUserId(){
-  console.warn('VERSION: 2.1.3')
+  console.warn('VERSION: 2.1.4')
   const user = await esriId.getCredential(authen.portalUrl + "/sharing/rest",{
     oAuthPopupConfirmation: false,
   })

@@ -153,9 +153,7 @@
             },  
             calcFilterDiff(){
                 const typeField = [store.JOB_TYPE, store.STAT, store.ACTV, store.DIST_NM, store.CNTY_NM, store.USER]
-                console.log(store.JOB_TYPE, store.STAT, store.ACTV, store.DIST_NM, store.CNTY_NM, store.USER)
                 store.filterTotal = typeField.filter(x => x.length).length
-                console.log(typeField.filter(x => x.length).length)
                 // for(const [key, value] of Object.entries(this.filterPros)){
                 //     if(ignoreField.includes(key) || !value) continue
                 //     if(value.length){
@@ -241,7 +239,7 @@
     #filterFeed{
         top: 57px;
         width: 47vh;
-        left: calc(74px + 509px);
+        left: calc(52px + 509px);
         display: flex;
         flex-direction: column;
         border-radius: 0%;
