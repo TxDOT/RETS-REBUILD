@@ -21,180 +21,177 @@ import Legend from "@arcgis/core/widgets/Legend";
 import LegendViewModel from "@arcgis/core/widgets/Legend/LegendViewModel";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import Graphic from "@arcgis/core/Graphic";
-import { outlineFeedCards, removeOutline, removeHighlight, home, togglemenu} from "./utility.js";
-import SearchVM from "@arcgis/core/widgets/Search/SearchViewModel.js";
-import SearchViewModel from "@arcgis/core/widgets/Search/SearchViewModel.js";
-
+import { outlineFeedCards, removeOutline, removeHighlight, home} from "./utility.js";
 
 
 
 export let retsPointRenderer = new UniqueValueRenderer({
- field: "STAT", // Field based on which the symbology will be categorized
- uniqueValueInfos: [
-  {
-    value: "1",
-    symbol: new SimpleMarkerSymbol({
-      size: 8,
-      color: appConstants.CardColorMap[1],
-      outline: {
-        color: "white",
-        width: 0
-      }
+  field: "STAT", // Field based on which the symbology will be categorized
+  uniqueValueInfos: [
+   {
+     value: "1",
+     symbol: new SimpleMarkerSymbol({
+       size: 8,
+       color: appConstants.CardColorMap[1],
+       outline: {
+         color: "white",
+         width: 0
+       }
+      }),
+      label: "Not Started"
+   },
+   {
+     value: "2",
+     symbol: new SimpleMarkerSymbol({
+       size: 8,
+       color: appConstants.CardColorMap[2],
+       outline: {
+         color: "white",
+         width: 0
+       }
      }),
-     label: "Not Started"
-  },
-  {
-    value: "2",
-    symbol: new SimpleMarkerSymbol({
-      size: 8,
-      color: appConstants.CardColorMap[2],
-      outline: {
-        color: "white",
-        width: 0
-      }
-    }),
-    label: "In Progress"
-  },
-  {
-    value: "3",
+     label: "In Progress"
+   },
+   {
+     value: "3",
+       symbol: new SimpleMarkerSymbol({
+       size: 8,
+       color: appConstants.CardColorMap[3],
+         outline: {
+           color: "white",
+           width: 0
+         }
+       }),
+       label: "Complete"
+   },
+   {
+     value: "4",
+     symbol: new SimpleMarkerSymbol({
+       size: 8,
+       color: appConstants.CardColorMap[4],
+       outline: {
+         color: "white",
+         width: 0
+       }
+     }),
+     label: "On Hold"
+   },
+ 
+   // Add more unique value info objects as needed...
+   ]
+ });
+ 
+ export let retsPointRendererout = new UniqueValueRenderer({
+   field: "STAT", // Field based on which the symbology will be categorized
+   uniqueValueInfos: [
+    {
+      value: "1",
       symbol: new SimpleMarkerSymbol({
-      size: 8,
-      color: appConstants.CardColorMap[3],
+        size: 5,
+        color: appConstants.CardColorMap[1],
+        outline: {
+          color: "white",
+          width: 0
+        }
+       }),
+       label: "Not Started"
+    },
+    {
+      value: "2",
+      symbol: new SimpleMarkerSymbol({
+        size: 5,
+        color: appConstants.CardColorMap[2],
         outline: {
           color: "white",
           width: 0
         }
       }),
-      label: "Complete"
-  },
-  {
-    value: "4",
-    symbol: new SimpleMarkerSymbol({
-      size: 8,
-      color: appConstants.CardColorMap[4],
-      outline: {
-        color: "white",
-        width: 0
-      }
-    }),
-    label: "On Hold"
-  },
-
-  // Add more unique value info objects as needed...
-  ]
-});
-
-export let retsPointRendererout = new UniqueValueRenderer({
-  field: "STAT", // Field based on which the symbology will be categorized
-  uniqueValueInfos: [
-   {
-     value: "1",
-     symbol: new SimpleMarkerSymbol({
-       size: 5,
-       color: appConstants.CardColorMap[1],
-       outline: {
-         color: "white",
-         width: 0
-       }
+      label: "In Progress"
+    },
+    {
+      value: "3",
+        symbol: new SimpleMarkerSymbol({
+        size: 5,
+        color: appConstants.CardColorMap[3],
+          outline: {
+            color: "white",
+            width: 0
+          }
+        }),
+        label: "Complete"
+    },
+    {
+      value: "4",
+      symbol: new SimpleMarkerSymbol({
+        size: 5,
+        color: appConstants.CardColorMap[4],
+        outline: {
+          color: "white",
+          width: 0
+        }
       }),
-      label: "Not Started"
-   },
-   {
-     value: "2",
-     symbol: new SimpleMarkerSymbol({
-       size: 5,
-       color: appConstants.CardColorMap[2],
-       outline: {
-         color: "white",
-         width: 0
-       }
-     }),
-     label: "In Progress"
-   },
-   {
-     value: "3",
-       symbol: new SimpleMarkerSymbol({
-       size: 5,
-       color: appConstants.CardColorMap[3],
-         outline: {
-           color: "white",
-           width: 0
-         }
-       }),
-       label: "Complete"
-   },
-   {
-     value: "4",
-     symbol: new SimpleMarkerSymbol({
-       size: 5,
-       color: appConstants.CardColorMap[4],
-       outline: {
-         color: "white",
-         width: 0
-       }
-     }),
-     label: "On Hold"
-   },
+      label: "On Hold"
+    },
+  
+    // Add more unique value info objects as needed...
+    ]
+  });
  
-   // Add more unique value info objects as needed...
-   ]
- });
-
- export let retsPointRendererout2 = new UniqueValueRenderer({
-  field: "STAT", // Field based on which the symbology will be categorized
-  uniqueValueInfos: [
-   {
-     value: "1",
-     symbol: new SimpleMarkerSymbol({
-       size: 6,
-       color: appConstants.CardColorMap[1],
-       outline: {
-         color: "white",
-         width: 0
-       }
+  export let retsPointRendererout2 = new UniqueValueRenderer({
+   field: "STAT", // Field based on which the symbology will be categorized
+   uniqueValueInfos: [
+    {
+      value: "1",
+      symbol: new SimpleMarkerSymbol({
+        size: 6,
+        color: appConstants.CardColorMap[1],
+        outline: {
+          color: "white",
+          width: 0
+        }
+       }),
+       label: "Not Started"
+    },
+    {
+      value: "2",
+      symbol: new SimpleMarkerSymbol({
+        size: 6,
+        color: appConstants.CardColorMap[2],
+        outline: {
+          color: "white",
+          width: 0
+        }
       }),
-      label: "Not Started"
-   },
-   {
-     value: "2",
-     symbol: new SimpleMarkerSymbol({
-       size: 6,
-       color: appConstants.CardColorMap[2],
-       outline: {
-         color: "white",
-         width: 0
-       }
-     }),
-     label: "In Progress"
-   },
-   {
-     value: "3",
-       symbol: new SimpleMarkerSymbol({
-       size: 6,
-       color: appConstants.CardColorMap[3],
-         outline: {
-           color: "white",
-           width: 0
-         }
-       }),
-       label: "Complete"
-   },
-   {
-     value: "4",
-     symbol: new SimpleMarkerSymbol({
-       size: 6,
-       color: appConstants.CardColorMap[4],
-       outline: {
-         color: "white",
-         width: 0
-       }
-     }),
-     label: "On Hold"
-   },
- 
-   // Add more unique value info objects as needed...
-   ]
- });
+      label: "In Progress"
+    },
+    {
+      value: "3",
+        symbol: new SimpleMarkerSymbol({
+        size: 6,
+        color: appConstants.CardColorMap[3],
+          outline: {
+            color: "white",
+            width: 0
+          }
+        }),
+        label: "Complete"
+    },
+    {
+      value: "4",
+      symbol: new SimpleMarkerSymbol({
+        size: 6,
+        color: appConstants.CardColorMap[4],
+        outline: {
+          color: "white",
+          width: 0
+        }
+      }),
+      label: "On Hold"
+    },
+  
+    // Add more unique value info objects as needed...
+    ]
+  });
 
 export let roadwaysRenderer = {
   type: "simple",
@@ -205,7 +202,10 @@ export let roadwaysRenderer = {
       color: "transparent"
     }
 }
-/////////////////////////
+
+
+
+
 export const polygonsymbol = {
   type: "simple-fill",  // autocasts as new SimpleFillSymbol()
   color: [224,224,224,.4],
@@ -235,16 +235,97 @@ const highlightSymbolroadways = {
 
 //Rets Layer construction
 export const retsLayer = new FeatureLayer({
-    url: "https://testportal.txdot.gov/createags/rest/services/RETS_REF/FeatureServer/0",//"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadway_Edits_Tracking/FeatureServer/0",
-    visible: true,
-    outFields: ["*"],
-    popupEnabled: true,
-    portalItem:{
-        url: "f37dfee631244e80b12c4c6271066317"
-    }
-
+  url: "https://testportal.txdot.gov/createags/rest/services/RETS/FeatureServer/0",
+  visible: true,
+  outFields: ["*"],
+  renderer: retsPointRenderer,
+  editingEnabled: true,
 })
 
+//DFO Producer in GRID
+export const DFOProducer = new FeatureLayer({
+  url: "https://testportal.txdot.gov/createags/rest/services/RETS_PNT_HELPER/FeatureServer/0",
+  outFields:["*"],
+  returnM: true,
+  returnZ: true,
+  hasM: true,
+  hasZ: true,
+  visible: true,
+})
+//County Layer construction
+export const texasCounties = new FeatureLayer({
+  url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/Texas_County_Boundaries/FeatureServer/0",
+  visible: false,
+  
+  
+})
+
+export const txdotDistricts = new FeatureLayer({
+  url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Districts/FeatureServer/0",
+  visible: false,
+  popupEnabled: false,
+  popupTemplate: null,
+})
+
+export const texasCities = new FeatureLayer({
+  url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_City_Boundaries/FeatureServer/0",
+  visible: false,
+})
+
+// export const minuteOrders = new FeatureLayer({
+//   url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Highway_Designations/FeatureServer",
+//   visble: false, 
+// })
+
+
+//TxDotRoaways Layer construction
+export const TxDotRoaways = new FeatureLayer ({
+  url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Roadways/FeatureServer/0",
+  visible: true,
+  renderer: roadwaysRenderer,
+  outFields: ["*"],
+  returnM: true,
+  //definitionExpression: `RTE_PRFX = 'IH'`
+})
+
+//RETS History
+export const retsHistory = new FeatureLayer({
+  url: "https://testportal.txdot.gov/createags/rest/services/RETS_CMNT/FeatureServer/0",
+  outFields: ["*"]
+})
+
+//Rets User Roles
+export const retsUserRole = new FeatureLayer({
+  url: "https://testportal.txdot.gov/createags/rest/services/RETS_SUPPORT/FeatureServer/1"
+})
+
+export const flagRetsColor = new FeatureLayer({
+  url: "https://testportal.txdot.gov/createags/rest/services/RETS_SUPPORT/FeatureServer/3"
+})
+
+//Creates label class for RETS points
+export const retsLabelclass = new LabelClass({
+  labelExpressionInfo : {expression: "$feature.RETS_ID"},
+  symbol: {
+    type: "text",
+    color: "white",
+    font: {
+      size: 12
+    }
+  },
+  labelPlacement: "above-right",
+  minScale: 200000,
+})
+
+//Applies label class to rets layer
+retsLayer.labelingInfo = [retsLabelclass];
+
+export const retsGraphicLayer = new GraphicsLayer({});
+
+export const graphics = new GraphicsLayer({});
+
+////////////////////////////////////////////BASEMAPS//////////////////////////////////////////////////////////////////////////
+        
 //Dark Vector Tile construction
 export const darkVectorTile = new VectorTileLayer({
   url: "https://www.arcgis.com/sharing/rest/content/items/4bd376c56f314bc5a36446630db604a6/resources/styles/root.json"
@@ -252,7 +333,6 @@ export const darkVectorTile = new VectorTileLayer({
 
 //Add Vector Tile as a basemap
 export const darkVTBasemap = new Basemap({
-  baseLayers: darkVectorTile
   baseLayers: darkVectorTile
 })
  
@@ -274,7 +354,6 @@ export const createretssym = new SimpleMarkerSymbol({
 //Imagery Layer construction
 export const imageryTxdot = new WMTSLayer({
   url: "https://txgi.tnris.org/login/path/bucket-armada-virtual-lobby/wmts/1.0.0/WMTSCapabilities.xml",
-  //url: "https://txgi.tnris.org/login/path/food-paul-zebra-shirt/wmts/1.0.0/WMTSCapabilities.xml"
 })
 
 //Created imagery basemap
@@ -309,7 +388,6 @@ export const view = new MapView({
 
 
 
-
 //create search widget
 export const searchWidget = new Search({
   
@@ -318,7 +396,6 @@ export const searchWidget = new Search({
   allPlaceholder: "City, County, District, Route",
   popupEnabled: false,
   popupTemplate: false,
-  ///autoSelect: false,
   sources:
   [
     {
@@ -343,7 +420,8 @@ export const searchWidget = new Search({
       exactMatch: false,
       outFields: ["*"],
       maxSuggestions: 1,
-      minSuggestCharacters: 2, 
+      minSuggestCharacters: 2,
+      
     },
     {
       name: "District",
@@ -451,7 +529,9 @@ export const sketchWidgetcreate = new Sketch({
 view.ui.add(searchWidget, {
   position: "top-right",
   index: 2,
+  container: "searchcont",
 });
+
 //adds zoom widget to map 
 view.ui.add(ZoomWidget, {
   position: "top-right",
@@ -512,32 +592,44 @@ export const OSMVTBasemap = new Basemap({
 
 map.addMany([retsLayer, graphics, retsGraphicLayer, texasCounties, texasCities, TxDotRoaways, highlightLayer, txdotDistricts])
 
+
 searchWidget.on("select-result", function(event) {
   const selectedFeature = event.result.feature;
   highlightLayer.removeAll(); // Clear previous highlights
-    if (selectedFeature.geometry.type === "polygon") {
-      highlightLayer.add(new Graphic({
-        geometry: selectedFeature.geometry,
-        symbol: polygonsymbol,
-      }));
-    } 
-    else if (selectedFeature.geometry.type === "polyline") {
-      highlightLayer.add(new Graphic({
-        geometry: selectedFeature.geometry,
-        symbol: highlightSymbolroadways
-      }));
-    }
-    else if (selectedFeature.geometry.type === "point") {
-      const tempArray = [selectedFeature];
-      removeOutline();
-      outlineFeedCards(tempArray);
-    }
-  });
 
+    if (selectedFeature.geometry.type === "polygon") {
+      
+    // Highlight the selected polygon feature with highlightSymbol
+    highlightLayer.add(new Graphic({
+      geometry: selectedFeature.geometry,
+      symbol: polygonsymbol
+    }));
+    
+  } else if (selectedFeature.geometry.type === "polyline") {
+    // Highlight the selected polyline feature with highlightSymbolRoadways
+    highlightLayer.add(new Graphic({
+      geometry: selectedFeature.geometry,
+      symbol: highlightSymbolroadways
+    }));
+  } else if (selectedFeature.geometry.type === "point") {
+    const tempArray = [selectedFeature];
+    // Run the highlightRestPoints function on the selected point feature
+    removeOutline();
+    //removeHighlight(selectedFeature, true)
+    outlineFeedCards(tempArray);
+  }
+  
+
+
+});
 searchWidget.on("search-clear", function(event) {
   // Clear the highlight when the search is cleared
     highlightLayer.removeAll();
-   removeOutline();
+  
+  
+    removeOutline();
+
+
 });
 
 searchWidget.on("search-complete", function(event){
@@ -553,8 +645,15 @@ document.addEventListener('click', function(event) {
            searchInput.value = null;
            searchWidget.activeMenu = "none";
         searchWidget.focus()
+
       }
+
+      
+      
+     
+
 });
+
 
 homeWidget.on("go", function() {
   // Run your function here

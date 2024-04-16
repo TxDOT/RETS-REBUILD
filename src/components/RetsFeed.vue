@@ -1,5 +1,6 @@
 
 
+
 <template style="overflow-y:hidden;">
 
     <v-navigation-drawer width="200" height="100" permanent color="black">
@@ -93,7 +94,7 @@
             <hr id = "separator"/>
         <v-card-item id = "darkmodeitem" >
             <div id = "darkmodeswitch">
-                        <v-switch  v-model="switchValueDarkMode" label="Dark Mode" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn"></v-switch>
+                        <v-switch  v-model="switchValueDark" label="Dark Mode" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn"></v-switch>
             </div>
              
         </v-card-item>
@@ -151,7 +152,7 @@
             return{
                 shiftmap: false,
                 fontColor: '#D9D9D9',
-                switchValueDarkMode : true,
+                switchValueDark: true,
                 switchValue : false,
                 isActOpen: true,
                 shift: 200,
@@ -405,7 +406,6 @@
                         else{
                             legendWidget.visible = false;
                         }
-                    
                      },
 
                      handleSettingsTool(){
@@ -475,14 +475,10 @@
         position: relative;
         bottom: 15.5rem;
         left: 0%;
-        
     }
     #icons-top{
-        position: relative;
         left: 0%;
-        width: 69px;
     }
-    
     .v-navigation-drawer{
         overflow-y: hidden !important;
         height: 100% !important;
@@ -607,9 +603,8 @@
         position: absolute;
         font-size: 14px;
         top: 40px;
-        left: -10px;
+        left: 18px;
         height: 500px;
-        width: 400px;
     }
     #viewDiv{
         top: 0px;
@@ -636,12 +631,11 @@
         /* flex-wrap: wrap; */
         position: relative;
         width: 400px;
-        left:25px;
 
     }
     #notiswitches{
         position: relative;
-        left: -10px;
+        left: -15px;
     }
     #bottomitems{
         position: absolute;
@@ -671,18 +665,13 @@
     .iconList-item{
         position: relative;
         left: -10%;
-    } 
-    #disable-overlay .v-list-item__overlay {
-        
-        color: transparent
     }
 
     .esri-view-surface {
-    
+    width: calc(100% - 400px) !important;
     transform: translate(400px);
     transition: transform 0.1s ease;
     left: 0px;
-    width: calc(100% - 400px) !important;
 }
 
 .translateX-500px {

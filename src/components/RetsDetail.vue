@@ -405,8 +405,8 @@
     position: absolute;
     bottom: 14px;
     width: 20rem;
+    right: 8px;
     justify-content: end;
-    right: 8px;;
 }
 
 #flagBtnDetails{
@@ -454,7 +454,7 @@ div .cardDiv{
 }
 #container-div{
     position: relative;
-    top: 5.2rem;
+    top: 2.2rem;
     min-height: 0% !important;
     max-height: calc(100% - 14rem) !important;
     overflow-x: hidden;
