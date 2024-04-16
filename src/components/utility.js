@@ -320,6 +320,7 @@ export function processDomainArr(domain){
 }
 
 export function getQueryLayer(newQuery, orderFields, count){
+    const retsLayerView = view.allLayerViews._items.find(x => x.layer.title === "RETS") ?? retsLayer
 
     const query = new Query()
     query.where = `${newQuery.whereString}`
@@ -328,7 +329,7 @@ export function getQueryLayer(newQuery, orderFields, count){
     query.returnGeometry = true
     query.num = count ??= 20000
 
-    return newQuery.queryLayer === 'retsLayer' ? retsLayer.queryFeatures(query) : retsHistory.queryFeatures(query)
+    return newQuery.queryLayer === 'retsLayer' ? retsLayerView.queryFeatures(query) : retsHistory.queryFeatures(query)
 }
 
 
@@ -871,7 +872,7 @@ async function UpdatePt(pt, onStartUp){
         })
         .then(()=>{
             view.goTo(ptGraphic)
-            store.updateRetsID()
+            store.retsObj.geometry = [ptGraphic.geometry.x , ptGraphic.geometry.y]
             store.isAlert = false
             store.getHistoryChatRet()
             retsLayer.refresh()
@@ -919,7 +920,7 @@ export function getRoadInformation(){
     graphics.add(createGraphic)
     sketchWidgetcreate.update(createGraphic)
 
-    view.on(["drag", "pointer-up"], (event)=>{
+    const rdEvent = view.on(["drag", "pointer-up"], (event)=>{
         view.hitTest(event, {include: [roadsLayerView.layer]})
             .then((rd) => {
                 // if(!rd.results.length && event.type === "pointer-up"){
@@ -945,30 +946,33 @@ export function getRoadInformation(){
                     store.retsObj.attributes.RTE_NM = rd.results[0].graphic.attributes.RTE_NM
                 }
                 else if(event.type === "pointer-up" && rd.results.length){
+                    console.log(rd.results)
                     roadsLayerView.layer.queryFeatures({
                         where: `RTE_NM = '${rd.results[0].graphic.attributes.RTE_NM}'`,
                         returnM: true,
                         returnGeometry: true,
                     })
                         .then((road)=>{
+                            console.log(road)
                             store.updatedRetsPtName = road.features[0].attributes.RTE_NM
                             const roadConvertToGeo = webMercatorUtils.webMercatorToGeographic(road.features[0].geometry)
                             const ptConvertToGeo = webMercatorUtils.webMercatorToGeographic(createGraphic.geometry)
                             const {coordinate, distance, vertexIndex} = geometryEngine.nearestVertex(roadConvertToGeo, ptConvertToGeo)
                             const newDFO = road.features[0].geometry.paths[0].at(vertexIndex-1)[2] + distance
-                            store.retsObj.attributes.DFO = newDFO
-                            drawFeaturedRoad(road.features[0].geometry)
-                            plotRetsPointOnRoad(newDFO, rdSegment, onStartUp)
+                            store.retsObj.attributes.DFO = newDFO.toFixed(3)
+                            //drawFeaturedRoad(road.features[0])
+                            //plotRetsPointOnRoad(newDFO, road.features[0].geometry, false)
                             return
                         })
-                   
+                   return
                 }
-
+                return
             })
             .catch(() =>{
                 //
             })
     })
+    //rdEvent.remove()
     return
 }
 

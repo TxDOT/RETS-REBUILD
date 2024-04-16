@@ -4,7 +4,7 @@
             <div class="cardDiv regain">
                 <v-card-title style="position: relative; bottom:.5rem;">Filter Activity Feed</v-card-title>
                 <v-row no-gutters >
-                    <v-select :items="filterSort" item-title="title" item-value="sortType" return-object style="position: relative;" density="compact" label="Sort" variant="underlined" v-model="store.CREATE_DT"></v-select>
+                    <v-select :items="filterSort" item-title="title" return-object style="position: relative;" density="compact" label="Sort" variant="underlined" v-model="store.CREATE_DT"></v-select>
                 </v-row>
               
                 <v-row no-gutters dense >

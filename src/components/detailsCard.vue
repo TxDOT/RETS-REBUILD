@@ -142,7 +142,7 @@ import {store} from './store.js'
             this.ogValues = store.retsObj
             const milliDate = new Date(store.retsObj.attributes.DEADLINE)
             this.datePicker = this.returnDateFormat(milliDate)
-            store.retsObj.attributes.NO_RTE = store.retsObj.attributes.NO_RTE === 0 ? false : true
+            store.retsObj.attributes.NO_RTE = store.retsObj.attributes.NO_RTE === 0 || store.retsObj.attributes.NO_RTE === -1? false : true
             if(store.retsObj.attributes.NO_RTE === true){
                 store.isAlert = false
                 store.isDisableValidations = true

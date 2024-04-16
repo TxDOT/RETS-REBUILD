@@ -43,7 +43,7 @@ export const store = reactive({
         isAlert: false,
         alertTextInfo: {"text": "Chat Saved", "color": "#70ad47", "type":"info","toggle": true},
         logDfo: 0,
-        CREATE_DT: [{title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"}],
+        CREATE_DT: {title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"},
         JOB_TYPE:[],
         EDIT_DT: null,
         STAT:appConstants.defaultStatValues,
@@ -187,6 +187,7 @@ export const store = reactive({
                     if(obj.features.length){
                         obj.features.forEach((x) => {
                             x.attributes.flagColor = this.setFlagColor(x.attributes)
+                            x.attributes.DFO = x.attributes.DFO ? x.attributes.DFO.toFixed(3) : x.attributes.DFO
                             x.attributes.visibilty = "flex"
                             this.roadObj.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                             store.archiveRetsData.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
@@ -202,9 +203,11 @@ export const store = reactive({
                 filterMapActivityFeed(this.filter)
                         .then((resp) => {
                                 console.log(resp)
+                                console.log(this.filter)
                                 this.roadObj = []
                                 const query = {"whereString": `${resp}`, "queryLayer": "retsLayer"}
-                                const orderField = `${this.filter.createDt[0].filter} ${this.filter.createDt[0].sortType}`
+                                const orderField = `${this.filter.createDt.filter} ${this.filter.createDt.sortType}`
+                                
                                 getQueryLayer(query, orderField)
                                     .then(obj => {
                                         if(obj.features.length){
