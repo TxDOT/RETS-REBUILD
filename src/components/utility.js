@@ -192,7 +192,7 @@ export async function filterMapActivityFeed(filterOpt){
             if(key === 'user' && !filterOpt.isAssignedTo){
                 let a; 
                 for(a=0; a < value.length; a++){
-                    ASSIGNED_TO.push(`${value[a].value}`)
+                    ASSIGNED_TO.push(`'${value[a].value}'`)
                     if(value[a].type === 1){
                         GIS_ANALYST.push(`'${value[a].value}'`)
                     }
@@ -203,11 +203,11 @@ export async function filterMapActivityFeed(filterOpt){
                         DIST_ANALYST.push(`'${value[a].value}'`)
                     }
                 }
-
-                GIS_ANALYST.length ? fullFilter.push(`GIS_ANALYST in (${GIS_ANALYST.join(" , ")})`) : null
+                //(GIS_ANALYST in () and GIS_ANALYST in () and DIST_ANALYST in () OR ASSIGNED_TO in ()) AND STAT (1,2,4) 
+                GIS_ANALYST.length ? fullFilter.push(`(GIS_ANALYST in (${GIS_ANALYST.join(" , ")})`) : null
                 GRID_ANALYST.length ? fullFilter.push(`GRID_ANALYST in (${GRID_ANALYST.join(" , ")})`) : null
                 DIST_ANALYST.length ? fullFilter.push(`DIST_ANALYST in (${DIST_ANALYST.join(" , ")})`) : null
-                //ASSIGNED_TO.length ? fullFilter.push(`OR ASSIGNED_TO in (${ASSIGNED_TO.join(" , ")})`) : null
+                ASSIGNED_TO.length ? fullFilter.push(`OR ASSIGNED_TO in (${ASSIGNED_TO.join(" , ")}))`) : null
             }
             if(key === 'stat' || key === 'distNM' || key === 'cntyNM' || key === 'actv' || key === 'jobType'){
 
@@ -257,14 +257,22 @@ export async function filterMapActivityFeed(filterOpt){
             // retsDefinitionExpressionArr.push(`${key} in ('${value}')`)
         }
     }
-    console.log(fullFilter)
-    const filterDef = fullFilter.join(" AND ")
+    let filterDef = fullFilter.join(" AND ")
+    let newFilter = filterDef.replace("AND OR", "OR")
+
+    // if(!filterOpt.isAssignedTo){
+    //     const assignedToQuery = [...GIS_ANALYST, ...GRID_ANALYST, ...DIST_ANALYST]
+    //     assignedToQuery.map((i) => `${i}`).join(",")
+    //     filterDef = filterDef.concat(' OR (ASSIGNED_TO in (', assignedToQuery, '))')
+
+    // }
+    console.log(newFilter)
     const filterMapPromise = new Promise((res, rej) => {
-        retsLayer.definitionExpression = `${filterDef}`
+        retsLayer.definitionExpression = `${newFilter}`
         res(filterDef)
     })
     const returnFilterMapPromise = await filterMapPromise
-    return filterDef
+    return newFilter
 
 
     // let retsDefinitionExpressionArr = []
@@ -956,58 +964,130 @@ export function getRoadInformation(){
     })
     graphics.add(createGraphic)
     sketchWidgetcreate.update(createGraphic)
-
-    const rdEvent = view.on(["drag", "pointer-up"], (event)=>{
-        view.hitTest(event, {include: [roadsLayerView.layer]})
-            .then((rd) => {
-                if(!rd.results.length && event.type === "pointer-up"){
-                    store.isAlert = true
-                    store.alertTextInfo = {"text": `No Route has been detected`, "color": "yellow", "type":"info", "toggle": true}
-                    store.retsObj.attributes.NO_RTE = true
-                    store.retsObj.attributes.RTE_NM = ""
-                    store.retsObj.attributes.DFO = ""
-                    const ptConvertToGeo = webMercatorUtils.webMercatorToGeographic(createGraphic.geometry)
-                    UpdatePt(ptConvertToGeo, false)
-                    rdEvent.remove()
+    if(!store.isMoveRetsPt){
+        sketchWidgetcreate.complete()
+        return
+    }
+    const rdEvent = view.on(["drag", "pointer-up"], async (event)=>{
+        const hitTest = await view.hitTest(event, {include: [roadsLayerView.layer]})
+        try{
+            if(event.type === "drag" && store.isMoveRetsPt){
+                if(hitTest.results.length){
+                    store.retsObj.attributes.RTE_NM = hitTest.results[0].graphic.attributes.RTE_NM
                     return
                 }
-                if(event.type === "drag"){
-                    store.retsObj.attributes.RTE_NM = rd.results[0].graphic.attributes.RTE_NM
-                }
-                else if(event.type === "pointer-up" && rd.results.length){
-                    console.log(rd.results)
-                    roadsLayerView.layer.queryFeatures({
+            }
+
+            if(event.type === "pointer-up" && store.isMoveRetsPt){
+                if(hitTest.results.length && !store.retsObj.attributes.NO_RTE){
+                    const road = await roadsLayerView.layer.queryFeatures({
                         where: `RTE_NM = '${rd.results[0].graphic.attributes.RTE_NM}'`,
                         returnM: true,
                         returnGeometry: true,
-                    })
-                        .then((road)=>{
-                            console.log(road)
-                            store.updatedRetsPtName = road.features[0].attributes.RTE_NM
-                            const roadConvertToGeo = webMercatorUtils.webMercatorToGeographic(road.features[0].geometry)
-                            const ptConvertToGeo = webMercatorUtils.webMercatorToGeographic(createGraphic.geometry)
-                            const {coordinate, distance, vertexIndex} = geometryEngine.nearestVertex(roadConvertToGeo, ptConvertToGeo)
-                            const newDFO = road.features[0].geometry.paths[0].at(vertexIndex-1)[2] + distance
-                            store.retsObj.attributes.DFO = newDFO.toFixed(3)
-                            console.log(store.retsObj.attributes.NO_RTE)
-                            // if(store.retsObj.attributes.NO_RTE === true){
-                            //     UpdatePt(ptConvertToGeo, false)
-                            //     return
-                            // }
-                            //drawFeaturedRoad(road.features[0])
-                            //plotRetsPointOnRoad(newDFO, road.features[0].geometry, false)
-                            return
-                        })
-                   return
+                    });
+                    console.log(road)
+                    store.updatedRetsPtName = road.features[0].attributes.RTE_NM
+                    const roadConvertToGeo = webMercatorUtils.webMercatorToGeographic(road.features[0].geometry)
+                    const ptConvertToGeo = webMercatorUtils.webMercatorToGeographic(createGraphic.geometry)
+                    const {coordinate, distance, vertexIndex} = geometryEngine.nearestVertex(roadConvertToGeo, ptConvertToGeo)
+                    const newDFO = road.features[0].geometry.paths[0].at(vertexIndex-1)[2] + distance
+                    store.retsObj.attributes.DFO = newDFO.toFixed(3)
+                    console.log(store.retsObj.attributes.NO_RTE)
+                    sketchWidgetcreate.complete()
+                    //  removePts
+                    //graphics.removeAll()
                 }
+                else{
+                    const ptConvertToGeo = webMercatorUtils.webMercatorToGeographic(createGraphic.geometry)
+                    UpdatePt(ptConvertToGeo, false)
+                    sketchWidgetcreate.complete()
+                }
+            // if(!hitTest.results.length && event.type === "pointer-up"){
+            //     console.log(hitTest.results)
+            //     sketchWidgetcreate.complete()
+            //     return
+            // }
+
+            // if(event.type === "pointer-up" && rd.results.length){
+            //     console.log(rd.results)
+            //     const road = await roadsLayerView.layer.queryFeatures({
+            //         where: `RTE_NM = '${rd.results[0].graphic.attributes.RTE_NM}'`,
+            //         returnM: true,
+            //         returnGeometry: true,
+            //     });
+                           
+            //     console.log(road)
+            //     store.updatedRetsPtName = road.features[0].attributes.RTE_NM
+            //     const roadConvertToGeo = webMercatorUtils.webMercatorToGeographic(road.features[0].geometry)
+            //     const ptConvertToGeo = webMercatorUtils.webMercatorToGeographic(createGraphic.geometry)
+            //     const {coordinate, distance, vertexIndex} = geometryEngine.nearestVertex(roadConvertToGeo, ptConvertToGeo)
+            //     const newDFO = road.features[0].geometry.paths[0].at(vertexIndex-1)[2] + distance
+            //     store.retsObj.attributes.DFO = newDFO.toFixed(3)
+            //     console.log(store.retsObj.attributes.NO_RTE)
+                // if(store.retsObj.attributes.NO_RTE === true){
+                //UpdatePt(ptConvertToGeo, false)
+                //     return
+                // }
+                //drawFeaturedRoad(road.features[0])
+                //plotRetsPointOnRoad(newDFO, road.features[0].geometry, false)
                 return
-            })
-            .catch(() =>{
-                //
-            })
+                         
+            }
+        }
+        catch(err){
+            // console.log(err)
+            
+        }
+
+            // .then((rd) => {
+            //     if(!rd.results.length && event.type === "pointer-up"){
+            //         store.isAlert = true
+            //         store.alertTextInfo = {"text": `No Route has been detected`, "color": "yellow", "type":"info", "toggle": true}
+            //         store.retsObj.attributes.NO_RTE = true
+            //         store.retsObj.attributes.RTE_NM = ""
+            //         store.retsObj.attributes.DFO = ""
+            //         const ptConvertToGeo = webMercatorUtils.webMercatorToGeographic(createGraphic.geometry)
+            //         UpdatePt(ptConvertToGeo, false)
+            //         sketchWidgetcreate.complete( )
+            //         return
+            //     }
+            //     if(event.type === "drag"){
+            //         store.retsObj.attributes.RTE_NM = rd.results[0].graphic.attributes.RTE_NM
+            //     }
+            //     else if(event.type === "pointer-up" && rd.results.length){
+            //         console.log(rd.results)
+            //         roadsLayerView.layer.queryFeatures({
+            //             where: `RTE_NM = '${rd.results[0].graphic.attributes.RTE_NM}'`,
+            //             returnM: true,
+            //             returnGeometry: true,
+            //         })
+            //             .then((road)=>{
+            //                 console.log(road)
+            //                 store.updatedRetsPtName = road.features[0].attributes.RTE_NM
+            //                 const roadConvertToGeo = webMercatorUtils.webMercatorToGeographic(road.features[0].geometry)
+            //                 const ptConvertToGeo = webMercatorUtils.webMercatorToGeographic(createGraphic.geometry)
+            //                 const {coordinate, distance, vertexIndex} = geometryEngine.nearestVertex(roadConvertToGeo, ptConvertToGeo)
+            //                 const newDFO = road.features[0].geometry.paths[0].at(vertexIndex-1)[2] + distance
+            //                 store.retsObj.attributes.DFO = newDFO.toFixed(3)
+            //                 console.log(store.retsObj.attributes.NO_RTE)
+            //                 // if(store.retsObj.attributes.NO_RTE === true){
+            //                 //     UpdatePt(ptConvertToGeo, false)
+            //                 //     return
+            //                 // }
+            //                 //drawFeaturedRoad(road.features[0])
+            //                 //plotRetsPointOnRoad(newDFO, road.features[0].geometry, false)
+            //                 return
+            //             })
+            //        return
+            //     }
+            //     return
+            // })
+            // .catch(() =>{
+            //     //
+            // })
     })
-    //rdEvent.remove()
-    return
+    
+    return rdEvent
 }
 
 export function removeOutline(){

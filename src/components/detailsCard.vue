@@ -131,7 +131,8 @@ import {store} from './store.js'
                 isFocused: false,
                 typeTimeout: null,
                 isCrossHair: false,
-                retsRouteArchive: {}
+                retsRouteArchive: {},
+                removeListner: {}
             }
         },
         beforeMount(){
@@ -251,8 +252,15 @@ import {store} from './store.js'
 
             },
             crossHairFunc(){
-                // if(store.isMoveRetsPt){
-                getRoadInformation()
+                console.log(store.isMoveRetsPt)
+                store.isMoveRetsPt = !store.isMoveRetsPt
+                console.log(store.isMoveRetsPt)
+                if(store.isMoveRetsPt){
+                    this.removeListner = getRoadInformation()
+                    return
+                }
+                this.removeListner.remove()
+                console.log(this.removeListner)
                     //getPointRoadInteraction(store.retsObj)
                     //store.isMoveRetsPt = true
                     return
