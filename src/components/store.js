@@ -19,6 +19,7 @@ export const store = reactive({
         historyChat: [],
         chatAttachments: [],
         attachment: [],
+        addNoteOid: 0,
         sort: "ASC",
         roadHighlightObj: new Set(),
         isShowSelected: false,
@@ -43,6 +44,7 @@ export const store = reactive({
         isAlert: false,
         alertTextInfo: {"text": "Chat Saved", "color": "#70ad47", "type":"info","toggle": true},
         logDfo: 0,
+        archiveFilter:{},
         CREATE_DT: {title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"},
         JOB_TYPE:[],
         EDIT_DT: null,
@@ -51,6 +53,7 @@ export const store = reactive({
         DIST_NM:[],
         CNTY_NM:[],
         USER:[],
+        isAssignedTo: false,
         filterTotal: 2,
         isfilter: false,
         filterQuery: "",
@@ -70,12 +73,13 @@ export const store = reactive({
                 this.filter.distNM = this.DIST_NM
                 this.filter.cntyNM = this.CNTY_NM
                 this.filter.user = this.USER
+                this.filter.isAssignedTo = this.isAssignedTo
                 return
         },
         async getHistoryChatRet(){
                 try{    
                         if(!this.history.length) return
-                        const getRelatedHistory = JSON.parse(this.history)
+                        const getRelatedHistory = this.historyChat
                         const retsHistory = getRelatedHistory.filter(hist => hist.RETS_ID === this.historyRetsId)
                         const attachment = await getAttachmentInfo(retsHistory.map(id => id.OBJECTID))
                         retsHistory.forEach((hist) => {
@@ -95,32 +99,34 @@ export const store = reactive({
                 }
 
         },
-        addNote(cmnt, isAttach){
+        async addNote(cmnt, isAttach){
                 const date = new Date()
                 const newHistory = {RETS_ID: this.historyRetsId, CMNT: cmnt, CMNT_NM: `${appConstants.defaultUserValue[0].value}`, SYS_GEN: 0, CREATE_DT: date, EDIT_DT: date }
+                try{
+                        await sendChatHistory(newHistory, "add")
+                       
+                        const returnComments = await getCmntOID(newHistory.RETS_ID)
+                        console.log(returnComments)
 
-                return sendChatHistory(newHistory, "add")
-                        .then((res) => {
-                                getCmntOID(newHistory.RETS_ID)
-                                        .then((hist) => {
-                                                console.log(isAttach)
-                                                newHistory.OBJECTID = hist.features[0].attributes.OBJECTID
-                                                if(isAttach){
-                                                        const oid = hist.features[0].attributes.OBJECTID
-                                                        addAttachments(oid, store.attachment, true)
-                                                        newHistory.attachments = []
-                                                        Array.from(store.attachment).forEach(x => newHistory.attachments.push({name: x.name}))
-                                                }
-                                                this.historyChat.push(newHistory)
-                                                let divA = document.getElementById("chatDiv") 
-                                                let divB = document.getElementById("chatDivExpand")?.parentElement?.lastElementChild
-                                                divA.scrollIntoView({ behavior: 'smooth', block: 'start'})
-                                                divB?.scrollIntoView({ behavior: 'smooth', block: 'end'})
-                                                
-                                        })
-                                return
-                        })
-                        .catch(err => console.log(err))
+                        store.addNoteOid = returnComments.features[0].attributes.OBJECTID
+                        newHistory.OBJECTID = returnComments.features[0].attributes.OBJECTID
+                        if(isAttach){
+                                const oid = returnComments.features[0].attributes.OBJECTID
+                                addAttachments(oid, store.attachment, true)
+                                newHistory.attachments = []
+                                Array.from(store.attachment).forEach(x => newHistory.attachments.push({name: x.name}))
+                        }
+                        this.historyChat.push(newHistory)
+                        let divA = document.getElementById("chatDiv") 
+                        let divB = document.getElementById("chatDivExpand")?.parentElement?.lastElementChild
+                        divA.scrollIntoView({ behavior: 'smooth', block: 'start'})
+                        divB?.scrollIntoView({ behavior: 'smooth', block: 'end'})
+
+                }
+                catch(err){
+                        console.log(err)
+                }
+                        
                 
         },
         modifyNote(cmt, oid){
@@ -133,7 +139,9 @@ export const store = reactive({
         },
         async deleteNote(oid){
                 const noteIndex = this.historyChat.findIndex(x => x.OBJECTID === oid)
+                console.log(noteIndex)
                 this.historyChat.splice(noteIndex, 1)
+                console.log(this.historyChat)
                 await sendChatHistory({"OBJECTID": oid}, "delete")
                 return
         },
@@ -245,7 +253,7 @@ export const store = reactive({
                 
                 const resp = `RETS_ID = ${this.retsObj.attributes.RETS_ID}`
                 const query = {"whereString": `${resp}`, "queryLayer": "retsLayer"}
-                const orderField = `${this.CREATE_DT[0].filter} ${this.CREATE_DT[0].sortType}`
+                const orderField = `${this.CREATE_DT.filter} ${this.CREATE_DT.sortType}`
                 getQueryLayer(query, orderField)
                         .then(obj => {
                                 if(obj.features.length){

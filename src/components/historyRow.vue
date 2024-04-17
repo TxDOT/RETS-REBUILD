@@ -98,17 +98,21 @@
 
         }, 
         methods:{
-            addNote(){
-                store.addNote(null, false)
-                    .then(() =>{
-                        this.openNote(null, Number(document.getElementById("chatDiv").firstElementChild.id))
-                    })
+            async addNote(){
+                await store.addNote(null, false)
+                console.log(store.addNoteOid)
+                this.openNote(null, store.addNoteOid)
+                        //this.openNote(null, Number(document.getElementById("chatDiv").fiElementChild.id))
+            
             },
             openNote(n, oid){
                 this.editContent = true
                 this.isClose = true;
                 this.updateOID = oid
                 this.ogNote = n
+                console.log(oid)
+                const oidFlag = this.sortA ? `${oid}` : `${oid}Expand`
+                document.getElementById(oidFlag).classList.add("active-chat-box")
             },
             deleteNote(n,oid){
                 store.deleteNote(oid)
@@ -119,13 +123,16 @@
                 this.editContent = false
                 this.updateOID = findItem.OBJECTID
                 this.updateOID = -1
-                
+                const oidFlag = this.sortA ? `${oid}` : `${oid}Expand`
+                document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
             },
             closeNotes(n, notes){
                 notes.CMNT = this.ogNote
                 this.editContent = false
                 this.isClose = false;
                 this.updateOID = -1
+                const oidFlag = this.sortA ? `${notes.OBJECTID}` : `${notes.OBJECTID}Expand`
+                document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
                 return
             },
             async replyNote(note){
@@ -150,7 +157,8 @@
                 })
 
                 input.remove()
-
+                const oidFlag = this.sortA ? `${oid}` : `${oid}Expand`
+                document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
             },
             returnDateFormat(e){
                 //10/29/2023 09:11am

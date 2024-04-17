@@ -34,15 +34,22 @@
                         <div v-if="!store.isDetailsPage" style="position: relative; top: .1rem">
 
 
-                            <div>
-                               
+                          
+
+                                <div>
+                                    <v-btn class="banner-btn" @click="store.isfilter = !store.isfilter" density="compact" variant="flat" flat min-width="30">
+                                        <v-badge color="#4472C4" :content="store.filterTotal">
+                                            <v-icon size="x-large">mdi-filter</v-icon>
+                                        </v-badge>
+                                    </v-btn>
+                                </div>
      
                              
-                                <v-btn icon="mdi-filter" class="banner-btn" flat @click="store.isfilter = !store.isfilter"></v-btn>
+                                <!-- <v-btn icon="mdi-filter" class="banner-btn" flat @click="store.isfilter = !store.isfilter"></v-btn>
                                 <div class="filter-notification-bubble" v-if="store.filterTotal > 0">
                                     <p style="font-size: 13.5px; position: relative; left: 25%; bottom: 1.3px;"><b>{{ store.filterTotal}}</b></p>
-                                </div>
-                            </div>
+                                </div> -->
+                            
       
                                 <div class="switch">
                                     <v-tooltip text="Show Selected Cards" location="top">
@@ -120,7 +127,7 @@
     </v-card>
     <Filter v-if="store.isfilter"/>
 
-    <v-card style="position: relative; float: center; width: 25%; left: 40%; top: 30%; margin: 15px;" color="black" v-if="unsavedChanges">
+    <v-card style="position: absolute; float: center; width: 25%; left: 40%; top: 30%; margin: 15px; border-radius: 0%;" color="#212121" v-if="unsavedChanges">
         <v-card-title>Discard unsaved changes?</v-card-title>
         <v-divider style="margin-left: 15px; margin-right: 15px; color:white;"></v-divider>
         <v-card-text>
@@ -168,7 +175,6 @@ export default{
             addrets: null,
             filterOptions: appConstants.RetsStatus,
             colorTable: appConstants.CardColorMap,
-            roadObj: [],
             currRoad: {},
             isColorPicked: false,
             pickColor: "blue",
@@ -233,7 +239,10 @@ export default{
                     removeHighlight("a", true)
                     await getHighlightGraphic()
                     const graphicOid = store.clickedGraphic
+                    console.log()
+                    console.log(retsGraphicLayer)
                     const returnGraphic = retsGraphicLayer.graphics.items.find(ret => ret.attributes.OBJECTID === graphicOid)
+                    returnGraphic.attributes.flagColor = store.setFlagColor(returnGraphic.attributes)
                     this.stageData = {attributes: returnGraphic.attributes, geometry: [returnGraphic.geometry.x, returnGraphic.geometry.y]}
                     this.checkChanges()
                 }
@@ -243,7 +252,7 @@ export default{
     },
     methods:{
         checkColor(icon, atts){
-            if(icon === 'mdi-alarm' || icon === 'mdi-exclamation'){
+            if(icon === 'mdi-alarm' || icon === 'mdi-exclamation' || icon === 'mdi-check-decagram-outline'){
                 const deadlineDate = new Date(atts.DEADLINE)
                 const todaysDate = new Date()
                 const oneDay = 24*60*60*1000;
@@ -251,6 +260,9 @@ export default{
                 const pastDeadline = Math.round(calcTime/oneDay)
                 if(atts.DEADLINE && pastDeadline < 0 || icon === 'mdi-exclamation'){
                     return "red"
+                }
+                if(icon === 'mdi-check-decagram-outline'){
+                    return 'green'
                 }
                 return "white"
             }
@@ -260,7 +272,7 @@ export default{
             
             const notiIcons = {
                 'mdi-account-multiple-check' : () => {
-                    if(atts.ASSIGNED_TO && atts.GIS_ANALYST !== store.loggedInUser){
+                    if(atts.ASSIGNED_TO && atts.GIS_ANALYST !== atts.ASSIGNED_TO){
                         return true
                     }
                     return false
@@ -335,7 +347,8 @@ export default{
         },
         proceed(){
             this.unsavedChanges = false
-            this.double({attributes: this.stageData.attributes, geometry: [this.stageData.geometry.x, this.stageData.geometry.y]}, 1)
+            console.log(this.stageData)
+            this.double({attributes: this.stageData.attributes, geometry: [this.stageData.geometry[0], this.stageData.geometry[1]]}, 1)
         },
         cancelReturn(){
             this.unsavedChanges = false
@@ -346,7 +359,7 @@ export default{
         },
         checkChanges(){
             const beforeAtt = JSON.parse(store.currentInfo)
-            const afterAtt = JSON.parse(JSON.stringify(this.currRoad))
+            const afterAtt = JSON.parse(JSON.stringify(store.retsObj))
             let issue = 0
             for(const [key, value] of Object.entries(beforeAtt.attributes)){
                 if(key==='RELATED_RETS'){
@@ -358,6 +371,7 @@ export default{
                     return
                 }
             }
+            console.log()
             issue === 0 ? this.double({attributes: this.stageData.attributes, geometry: [this.stageData.geometry.x, this.stageData.geometry.y]}, 1) : null
         },
         processBanner(i){
@@ -609,8 +623,23 @@ export default{
         // }
     },
     computed:{
- 
-        },
+        roadObjs : function(){
+            let numIndex = 0
+            let numIncrease = 2
+            let totalLength = store.roadObj.length
+            let road = []
+            while(numIndex < totalLength){
+                console.log(store.roadObj)
+                let a = store.roadObj.slice(numIndex, numIncrease)
+                console.log(a)
+                numIndex = numIncrease+=1
+                numIncrease = numIncrease += 2
+                a.forEach(x => road.push(x))
+            }
+            console.log(road)
+            return road
+        }    
+    },
         
 
 }
@@ -718,8 +747,11 @@ export default{
     }
     .banner-btn{
         position: relative;
-        bottom: 2.5rem;
+        bottom: 1.7rem;
         float: right;
+        margin: 0% !important;
+        padding: 0% !important;
+        right: 15px;
     }
     .banner-txt{
         position: relative;
@@ -879,7 +911,7 @@ export default{
     .switch{
         position: relative;
         bottom: 34px;
-        left: 5px;
+        right: 45px;
         float: right;
         font-size: 10px;
     }

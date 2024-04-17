@@ -164,6 +164,7 @@ export function getGEMTasks(){
 
 //filter Map and activity feed 
 export async function filterMapActivityFeed(filterOpt){
+    console.log(filterOpt)
     let GIS_ANALYST = []
     let GRID_ANALYST = []
     let DIST_ANALYST = []
@@ -184,7 +185,11 @@ export async function filterMapActivityFeed(filterOpt){
         // console.log(`'DIST_ANALYST' in (${DIST_ANALYST.join(" and ")})`)
         if(!value) continue
         if(value){
-            if(key === 'user'){
+            if(key === 'isAssignedTo' && value){
+                console.log(value)
+                fullFilter.push(`ASSIGNED_TO in ('${store.loggedInUser}')`)
+            }
+            if(key === 'user' && !filterOpt.isAssignedTo){
                 let a; 
                 for(a=0; a < value.length; a++){
                     ASSIGNED_TO.push(`${value[a].value}`)
@@ -252,7 +257,7 @@ export async function filterMapActivityFeed(filterOpt){
             // retsDefinitionExpressionArr.push(`${key} in ('${value}')`)
         }
     }
-
+    console.log(fullFilter)
     const filterDef = fullFilter.join(" AND ")
     const filterMapPromise = new Promise((res, rej) => {
         retsLayer.definitionExpression = `${filterDef}`
@@ -320,7 +325,6 @@ export function processDomainArr(domain){
 }
 
 export function getQueryLayer(newQuery, orderFields, count){
-    const retsLayerView = view.allLayerViews._items.find(x => x.layer.title === "RETS") ?? retsLayer
 
     const query = new Query()
     query.where = `${newQuery.whereString}`
@@ -329,13 +333,15 @@ export function getQueryLayer(newQuery, orderFields, count){
     query.returnGeometry = true
     query.num = count ??= 20000
 
-    return newQuery.queryLayer === 'retsLayer' ? retsLayerView.queryFeatures(query) : retsHistory.queryFeatures(query)
+    return newQuery.queryLayer === 'retsLayer' ? retsLayer.queryFeatures(query) : retsHistory.queryFeatures(query)
 }
 
 
 export function searchCards(cardArr, string, searchParam){
     try{
+        console.log(cardArr)
         if(!string.length && !searchParam.isFilters){
+            console.log(string)
             searchParam.type === 'sortA' ?  cardArr.forEach(x =>  document.getElementById(`${x.attributes ? x.attributes[searchParam.param] : x[searchParam.param]}`).classList.add('showCards')) : cardArr.forEach(x =>  document.getElementById(`${x.attributes ? x.attributes[searchParam.param] : x[searchParam.param]}Expand`).classList.add('showCards'))
             return
         }
@@ -352,7 +358,7 @@ export function searchCards(cardArr, string, searchParam){
         return
     }
     catch(a){
-        console.warn("search is not workin")
+        console.warn(a)
     }
 
 }
@@ -465,6 +471,7 @@ export function returnHistory(query){
     const queryString = {"whereString": `${query ?? '1=1'}`, "queryLayer": "retsHistory"}
     getQueryLayer(queryString, "create_dt desc")
         .then((hist) => {
+            console.log(hist)
             const arrHist = []
             hist.features.forEach((x) => {
                 getAttachmentInfo(x.attributes.OBJECTID)
@@ -585,7 +592,10 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                 {
                                     // Access the selected features
                                     var selectedFeatures = result.features;
-                                    
+                                    if(!selectedFeatures.length && store.isShowSelected){
+                                        store.isShowSelected = false
+                                        return
+                                    }
     
                                     if (pressedkey === false){
                                         
@@ -679,7 +689,7 @@ export async function handleaddrets(newPointGraphic, addrets){
 
 export async function getCmntOID(retId){
     const queryString = {"whereString": `RETS_ID = ${retId}`, "queryLayer": "retsHistory"}
-    return await getQueryLayer(queryString, "EDIT_DT DESC")
+    return await getQueryLayer(queryString, "CREATE_DT DESC")
 }
 
 export function addAttachments(oid, files, flag){
@@ -718,6 +728,7 @@ export function deleteAttachment(oid, attachName){
                         const chat = store.historyChat.find(z => z.OBJECTID === attach.parentObjectId)
                         const index = chat.attachments.findIndex(att => att.name === attach.name)
                         chat.attachments.splice(index, 1)
+                        store.numAttachments -= 1
                     })
                 
                     .catch(err => console.log(err))
@@ -923,25 +934,17 @@ export function getRoadInformation(){
     const rdEvent = view.on(["drag", "pointer-up"], (event)=>{
         view.hitTest(event, {include: [roadsLayerView.layer]})
             .then((rd) => {
-                // if(!rd.results.length && event.type === "pointer-up"){
-                //     store.isAlert = true
-                //     store.alertTextInfo = {"text": `No Route has been detected`, "color": "yellow", "type":"info", "toggle": true}
-                //     store.retsObj.attributes.NO_RTE = true
-                //     store.retsObj.attributes.RTE_NM = ""
-                //     store.retsObj.attributes.DFO = ""
-                //     updateRETSPT(createGraphic)
-                //     retsLayer.queryFeatures({
-                //         where: `RETS_ID = ${createGraphic.attributes.RETS_ID}`
-                //     })
-                //     .then(()=>{
-                //         view.goTo(createGraphic)
-                //         //store.updateRetsID()
-                //         store.isAlert = false
-                //         store.getHistoryChatRet()
-                //         return
-                //     })
-                //     .catch(err => console.log(err))
-                // }
+                if(!rd.results.length && event.type === "pointer-up"){
+                    store.isAlert = true
+                    store.alertTextInfo = {"text": `No Route has been detected`, "color": "yellow", "type":"info", "toggle": true}
+                    store.retsObj.attributes.NO_RTE = true
+                    store.retsObj.attributes.RTE_NM = ""
+                    store.retsObj.attributes.DFO = ""
+                    const ptConvertToGeo = webMercatorUtils.webMercatorToGeographic(createGraphic.geometry)
+                    UpdatePt(ptConvertToGeo, false)
+                    rdEvent.remove()
+                    return
+                }
                 if(event.type === "drag"){
                     store.retsObj.attributes.RTE_NM = rd.results[0].graphic.attributes.RTE_NM
                 }
@@ -960,6 +963,11 @@ export function getRoadInformation(){
                             const {coordinate, distance, vertexIndex} = geometryEngine.nearestVertex(roadConvertToGeo, ptConvertToGeo)
                             const newDFO = road.features[0].geometry.paths[0].at(vertexIndex-1)[2] + distance
                             store.retsObj.attributes.DFO = newDFO.toFixed(3)
+                            console.log(store.retsObj.attributes.NO_RTE)
+                            // if(store.retsObj.attributes.NO_RTE === true){
+                            //     UpdatePt(ptConvertToGeo, false)
+                            //     return
+                            // }
                             //drawFeaturedRoad(road.features[0])
                             //plotRetsPointOnRoad(newDFO, road.features[0].geometry, false)
                             return

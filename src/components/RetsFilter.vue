@@ -3,16 +3,17 @@
         <v-card id="filterFeed" >
             <div class="cardDiv regain">
                 <v-card-title style="position: relative; bottom:.5rem;">Filter Activity Feed</v-card-title>
-                <v-row no-gutters >
+                <hr class="popup-title-border" style="position: relative; bottom: 15px"></hr>
+                <v-row no-gutters class="adjustRow">
                     <v-select :items="filterSort" item-title="title" return-object style="position: relative;" density="compact" label="Sort" variant="underlined" v-model="store.CREATE_DT"></v-select>
                 </v-row>
               
-                <v-row no-gutters dense >
+                <v-row no-gutters dense class="adjustRow">
                     <v-select :items="filterJobType" item-title="name" item-value="value" return-object multiple chips closable-chips density="compact" label="Job Type" variant="underlined" v-model="store.JOB_TYPE">
                     </v-select>
                 </v-row>
             
-                <v-row no-gutters dense id="date">
+                <v-row no-gutters dense id="date" class="adjustRow"> 
                     <v-select label="Date" chips closable-chips variant="underlined" density="compact" v-model="store.EDIT_DT" hide-no-data @click="isDate = !isDate">
                         <template v-slot:chip="{item}">
                             <v-chip closable @click:close="closeDateChip()">{{ item.props.title}}</v-chip>
@@ -20,26 +21,29 @@
                     </v-select>
                 </v-row>
                 
-                <v-row no-gutters dense>
+                <v-row no-gutters dense class="adjustRow">
                         <v-select :items="filterStatus" item-title="name" item-value="value" label="Status" return-object chips closable-chips multiple variant="underlined" density="compact" v-model="store.STAT">
                         </v-select>
                 </v-row>
        
-                <v-row no-gutters dense >
+                <v-row no-gutters dense class="adjustRow">
                     <v-autocomplete :items="filterActivity" item-title="value" item-value="value" return-object multiple label="Activity" chips closable-chips variant="underlined" density="compact" v-model="store.ACTV"></v-autocomplete>
                 </v-row>
 
-                <v-row no-gutters dense > 
+                <v-row no-gutters dense class="adjustRow"> 
                     <v-autocomplete :items="filterDistrict" item-title="name" item-value="value" return-object multiple label="District" chips closable-chips variant="underlined" density="compact" v-model="store.DIST_NM"></v-autocomplete>
                 </v-row>
-                <v-row no-gutters dense >
+                <v-row no-gutters dense class="adjustRow">
                     <v-autocomplete :items="filterCounty" item-title="name" item-value="value" return-object multiple label="County" chips closable-chips variant="underlined" density="compact" v-model="store.CNTY_NM"></v-autocomplete>
                 </v-row>
-                <v-row no-gutters dense >
-                    <v-autocomplete :items="filterUser" item-title="name" item-value="value" return-object label="Users" multiple chips closable-chips variant="underlined" density="compact" v-model="store.USER"></v-autocomplete>
+                <v-row no-gutters dense class="adjustRow"> 
+                    <v-autocomplete :items="filterUser" item-title="name" item-value="value" return-object label="Users" multiple chips closable-chips variant="underlined" density="compact" v-model="store.USER" :disabled="store.isAssignedTo"></v-autocomplete>
                 </v-row>
-
-                <v-expansion-panels flat variant="accordion">
+                <div style="position: relative; float: left; margin-left: 10px; font-size: 11px; display: flex; flex-wrap: wrap; bottom: 1rem;">
+                    <v-checkbox label="RETS Assigned to Me" density="compact" class="checkbox-size" v-model="store.isAssignedTo"></v-checkbox>
+                </div>
+                
+                <v-expansion-panels flat variant="accordion" disabled style="width: 96.5%; left: 4px; bottom:5px;">
                     <v-expansion-panel elevation="0" tile>
                         <v-expansion-panel-title expand-icon="mdi-menu-down" collapse-icon="mdi-menu-up" static> Custom SQL Query</v-expansion-panel-title>
                             <v-expansion-panel-text>
@@ -53,11 +57,13 @@
                 </v-expansion-panels>
             </div>
                     <div>
+                        <hr class="popup-title-border" style="position: relative; bottom: 0px; margin-right: 20px;"></hr>
                         <div style="float: right; margin: 10px; position: relative;" >
+                            
                             <v-btn @click="cancelFilter()" class="secondary-button" variant="plain">Cancel</v-btn>
                             <v-btn @click="setFilterNumber()" class="main-button-style" variant="outlined">Save</v-btn>
                         </div>
-                        <div style="float: left; margin: 10px; position: relative;">
+                        <div style="float: left; margin-left: 15px; position: relative; top: 9px;">
                             <v-btn id="restoreDefault" variant="plain" @click="restoreDefault()">Restore Default</v-btn>
                         </div>
                     </div>
@@ -109,6 +115,7 @@
             }
         },
         mounted(){
+            this.archiveFilter()
             //console.log(appConstants.userRoles.find(y => y.value === console.log(y.value)))
             // this.filter = JSON.parse(this.filterPros)
             // console.log(this.filterPros[appConstants.userQueryField])
@@ -116,8 +123,34 @@
             // this.filterPros[appConstants.queryField[appConstants.userRoles.find(x => x.value === store.loggedInUser).type]] = appConstants.userRoles.filter(y => y.value === this.filterPros[appConstants.queryField[appConstants.userRoles.find(x => x.value === store.loggedInUser).type]][0].value)
         },
         methods:{
+            archiveFilter(){
+                store.archiveFilter = JSON.stringify({
+                    createDt: store.CREATE_DT,
+                    jobType: store.JOB_TYPE,
+                    editDt: store.EDIT_DT,
+                    stat: store.STAT,
+                    actv: store.ACTV,
+                    distNM: store.DIST_NM,
+                    cntyNM: store.CNTY_NM,
+                    user: store.USER,
+                    isAssignedTo: store.isAssignedTo
+                })
+            return 
+            },
             cancelFilter(){
                 this.calcFilterDiff()
+                const filterParse = JSON.parse(store.archiveFilter)
+                console.log(filterParse)
+                store.CREATE_DT = filterParse.createDt
+                store.JOB_TYPE = filterParse.jobType
+                store.EDIT_DT = filterParse.editDt
+                store.STAT = filterParse.stat
+                store.ACTV = filterParse.actv
+                store.DIST_NM = filterParse.distNM
+                store.CNTY_NM = filterParse.cntyNM
+                store.USER = filterParse.user
+                store.isAssignedTo = filterParse.isAssignedTo
+
                 store.isfilter = false
                 return
             },
@@ -130,7 +163,8 @@
                     actv: store.ACTV,
                     distNM: store.DIST_NM,
                     cntyNM: store.CNTY_NM,
-                    user: store.USER
+                    user: store.USER,
+                    isAssignedTo: store.isAssignedTo
                 }
                 // console.log(this.userQuery)
                 // const filterField = appConstants.queryField[appConstants.userRoles.find(x => x.value === this.userQuery[0].value).type]
@@ -167,7 +201,7 @@
                 return
             },
             restoreDefault(){
-                store.CREATE_DT = [{title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"}]
+                store.CREATE_DT = {title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"}
                 store.JOB_TYPE.length = 0
                 store.EDIT_DT = null
                 store.STAT = appConstants.defaultStatValues
@@ -175,7 +209,7 @@
                 store.DIST_NM.length = 0
                 store.CNTY_NM.length = 0
                 store.USER = [appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value)]
-
+                store.isAssignedTo = false
             
                 store.defaultFilterSetup()
                 // this.defaultFilter.loggedInUser = appConstants.defaultUserValue[0].value
@@ -259,5 +293,13 @@
         text-decoration: underline;
         color: #4472C4;
         right: 1rem;
+    }
+    .adjustRow{
+        position: relative !important; 
+        margin-left: 15px !important; 
+        margin-right: 15px !important;
+    }
+    .checkbox-size{
+        font-size: 10px !important;
     }
 </style>

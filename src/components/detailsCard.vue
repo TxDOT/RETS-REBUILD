@@ -352,9 +352,11 @@ import {store} from './store.js'
             'store.retsObj.attributes.DFO':{
                 handler: function(a,b){
                     if(Number(a) === b) return
+                    if(!a.length) return
                     const ogDFO = this.retsRouteArchive
+                    console.log(store.retsObj.attributes.NO_RTE)
                     clearTimeout(this.typeTimeout)
-                    if(Number(a) !== ogDFO){
+                    if(Number(a) !== ogDFO && !store.retsObj.attributes.NO_RTE){
                         console.log(Number(a), ogDFO)
                         this.typeTimeout = setTimeout(()=>{
                             createRoadGraphic(store.retsObj, false)

@@ -15,14 +15,14 @@ export async function updateRETSPT(retsObj){
     if(retsObj.attributes.RELATED_RETS){
         retsObj.attributes.RELATED_RETS = retsObj.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID).toString()
     }
-
+    console.log(retsObj)
     const createGeo = {
         type: "point",
         x: retsObj.geometry.x ? retsObj.geometry.x : retsObj.geometry[0],
         y: retsObj.geometry.y ? retsObj.geometry.y : retsObj.geometry[1]
     }
 
-    retsObj.attributes.NO_RTE === true ? 1 : 0
+    retsObj.attributes.NO_RTE = retsObj.attributes.NO_RTE === true ? 1 : 0
     retsObj.attributes.ACTV = retsObj.attributes.ACTV?.value
     postFlagColor(retsObj)
     let esriUpdateGraphic = createGraphic(retsObj)
@@ -115,6 +115,7 @@ export async function sendChatHistory(chat, type){
     }
 
     const returnStatus = await chatType[type]()
+    console.log(returnStatus)
     return returnStatus
     // return addRETSPT(newGraphic, "hist")
 }

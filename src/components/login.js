@@ -52,6 +52,7 @@ async function signIn(){
           appConstants[layer.prop].push({"name" : x.name, "value": x.code})
         })
       })
+      appConstants.districtDomainValues.sort((a,b) => a.name.localeCompare(b.name))
 
       getDistinctAttributeValues('ACTV')
       return retsLayer.queryExtent();
