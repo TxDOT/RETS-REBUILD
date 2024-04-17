@@ -870,7 +870,6 @@ function plotRetsPointOnRoad(dfo, rd, onStartUp){
 async function UpdatePt(pt, onStartUp){
    //const isUpdate = compareRetsToDerivedLocation(pt, mValues)
     if(!onStartUp){
-        const newPt = webMercatorUtils.geographicToWebMercator(pt)
         const ptGraphic = new Graphic({
             geometry: pt,
             attributes: store.retsObj.attributes,
