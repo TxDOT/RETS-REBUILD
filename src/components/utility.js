@@ -598,7 +598,6 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                                 // }
                                         for (let i = 0; i < selectedFeatures.length; i++ ) {
                                             const b = store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[i].attributes.OBJECTID)
-                                            console.log(b)
 
                                             store.roadHighlightObj.add(b)
                                             highlightRETSPoint(selectedFeatures[i].attributes);
@@ -608,7 +607,6 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                         }
                                         outlineFeedCards(store.roadHighlightObj);        
                                         //clearRoadHighlightObj()
-                                        console.log(store.roadHighlightObj)
                        
                                         return
                                         
@@ -636,7 +634,6 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                                     {
                                                         graphics.removeAll();
                                                         var selectedFeaturesnew = result.features;
-                                                        console.log(selectedFeaturesnew)
                                                         let arr = Array.from(store.roadHighlightObj)
                                                         if (selectedFeaturesnew.length){
                                                             arr  = arr.filter(obj => {
@@ -645,7 +642,6 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                                             store.roadHighlightObj = new Set(arr)
                                                             removeHighlight("a", removeAll)
                                                             for (let n = 0; n < arr.length; n++){
-                                                                console.log(n)
                                                                 if (n >= 0){
                                                                     highlightRETSPoint(arr[n].attributes);
                                                                 }
