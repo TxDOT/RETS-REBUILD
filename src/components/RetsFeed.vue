@@ -1,5 +1,6 @@
 
 
+
 <template style="overflow-y:hidden;">
 
     <v-navigation-drawer width="200" height="100" permanent color="black">
@@ -93,7 +94,7 @@
             <hr id = "separator"/>
         <v-card-item id = "darkmodeitem" >
             <div id = "darkmodeswitch">
-                        <v-switch  v-model="switchValue" label="Dark Mode" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn"></v-switch>
+                        <v-switch  v-model="switchValueDark" label="Dark Mode" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn"></v-switch>
             </div>
              
         </v-card-item>
@@ -151,6 +152,7 @@
             return{
                 shiftmap: false,
                 fontColor: '#D9D9D9',
+                switchValueDark: true,
                 switchValue : false,
                 isActOpen: true,
                 shift: 200,

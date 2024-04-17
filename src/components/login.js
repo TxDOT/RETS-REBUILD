@@ -82,8 +82,3 @@ export async function getUserId(){
 
   return user.userId
 }
-
-
-
-
-

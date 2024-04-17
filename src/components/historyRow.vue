@@ -1,3 +1,4 @@
+
 <template>
     <hr class="popup-title-border" v-if="sortB"></hr>
     <div style="margin-right: 10px; margin-left: 10px; width: 100%; height: 250px;">

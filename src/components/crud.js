@@ -139,4 +139,3 @@ export function postFlagColor(rets){
     .catch(err => console.log(err)) 
     return
 }
-

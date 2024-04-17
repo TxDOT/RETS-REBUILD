@@ -590,7 +590,7 @@ export function createtool(sketchWidgetcreate, createretssym) {
                         retsLayer.queryFeatures(query)
                         .then(function (result) 
                                 {
-                                    // Access the selected features
+                                    graphics.removeAll();
                                     var selectedFeatures = result.features;
                                     if(!selectedFeatures.length && store.isShowSelected){
                                         store.isShowSelected = false
@@ -616,7 +616,6 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                                     
                                         }
                                         outlineFeedCards(store.roadHighlightObj);        
-                                                graphics.removeAll() 
                                         //clearRoadHighlightObj()
                        
                                         return
@@ -633,22 +632,50 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                             //outlineFeedCards(selectedFeatures);
     
                                         } 
-                                        graphics.removeAll();
                                         return
                                     }
                                     
-                                    if(pressedkey === "Control"){
-                                        
-                                        for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                    if(pressedkey === "Control"){                                        
+                                        // for (let i = 0; i < selectedFeatures.length; i++ ) {
+                                            
         
         
-                                            removeHighlight(selectedFeatures[i]);  
+                                        //     removeHighlight(selectedFeatures[i]);
+                                            
+                                        //     return  
+                                            
     
-                                        } 
-    
+                                        // } 
+        
                                        
-                                        graphics.removeAll();
-                                        return
+                                        // return
+
+                                        sketchWidgetselect.create("rectangle")
+                                        sketchWidgetselect.on("create", function(event){
+                                            if(event.state = "complete"){
+                                                graphics.removeAll()
+                                                var rectangleGeometry2 = event.graphic.geometry;
+                                                var query = retsLayer.createQuery();
+                                                query.geometry = rectangleGeometry2;
+                                                retsLayer.queryFeatures(query)
+                                                .then(function (result) 
+                                                {
+                                                    var selectedFeatures2 = result.features;
+                                                     for (let i = 0; i < selectedFeatures2.length; i++ ) {
+                                            
+                    
+                    
+                                                         selectedFeatures2[i].remove(graphic)
+                                                         
+                                                         return  
+                                                     }
+                                            
+    
+                                        // } 
+
+                                                })
+                                            }
+                                        })
             
                                     }
     
