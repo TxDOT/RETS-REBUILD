@@ -2,8 +2,10 @@
     <v-container id="container">
         <v-col class="d-flex flex-wrap ga-2" align-self="start">
             <v-row class="main-color">
-                <div>
-                    <header id="container-header">RETS Dashboard</header>
+                <div id="activity-header">
+                    <div id="container-header">
+                        <header>RETS Dashboard</header>
+                    </div>
                     <div class="add-new-btn">
                         <div style="float:right;">
                             <v-btn v-for="(tool, i) in addbutton" :key="i" :value="tool" @click="tool.action()" :prepend-icon="buttonIcon" color="#4472C4" rounded="0" id="add-new-btn"  class="main-button" v-if="!store.isDetailsPage" >

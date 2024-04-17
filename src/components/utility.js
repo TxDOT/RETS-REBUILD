@@ -598,6 +598,8 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                                 // }
                                         for (let i = 0; i < selectedFeatures.length; i++ ) {
                                             const b = store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[i].attributes.OBJECTID)
+                                            console.log(b)
+
                                             store.roadHighlightObj.add(b)
                                             highlightRETSPoint(selectedFeatures[i].attributes);
                                             //outlineFeedCards(b);
@@ -606,6 +608,7 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                         }
                                         outlineFeedCards(store.roadHighlightObj);        
                                         //clearRoadHighlightObj()
+                                        console.log(store.roadHighlightObj)
                        
                                         return
                                         
@@ -616,56 +619,41 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                     
                                     if(pressedkey === "Shift"){
                                         for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                            store.roadHighlightObj.add(String(selectedFeatures[i].attributes.RETS_ID).concat('-', selectedFeatures[i].attributes.OBJECTID))
+                                            const b = store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[i].attributes.OBJECTID)
+                                            store.roadHighlightObj.add(b)
                                             highlightRETSPoint(selectedFeatures[i].attributes);
-                                            //outlineFeedCards(selectedFeatures);
-    
-                                        } 
+                                        }
+                                        outlineFeedCards(store.roadHighlightObj);        
                                         return
                                     }
                                     
-                                    if(pressedkey === "Control"){                                        
-                                        // for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                            
-        
-        
-                                        //     removeHighlight(selectedFeatures[i]);
-                                            
-                                        //     return  
-                                            
-    
-                                        // } 
-        
-                                       
-                                        // return
+                                    if(pressedkey === "Control"){    
+                                            var rectangleGeometry2 = event.graphic.geometry;
+                                            var query2 = retsLayer.createQuery();
+                                            query2.geometry = rectangleGeometry2;
+                                            retsLayer.queryFeatures(query2)
+                                            .then(function (result) 
+                                                    {
+                                                        graphics.removeAll();
+                                                        var selectedFeaturesnew = result.features;
+                                                        console.log(selectedFeaturesnew)
+                                                        let arr = Array.from(store.roadHighlightObj)
+                                                        if (selectedFeaturesnew.length){
+                                                            arr  = arr.filter(obj => {
+                                                                return !selectedFeaturesnew.some(feature => feature.attributes.OBJECTID === obj.attributes.OBJECTID)
+                                                            })
+                                                            store.roadHighlightObj = new Set(arr)
+                                                            removeHighlight("a", removeAll)
+                                                            for (let n = 0; n < arr.length; n++){
+                                                                console.log(n)
+                                                                if (n >= 0){
+                                                                    highlightRETSPoint(arr[n].attributes);
+                                                                }
+                                                            }      
+                                                        }
 
-                                        sketchWidgetselect.create("rectangle")
-                                        sketchWidgetselect.on("create", function(event){
-                                            if(event.state = "complete"){
-                                                graphics.removeAll()
-                                                var rectangleGeometry2 = event.graphic.geometry;
-                                                var query = retsLayer.createQuery();
-                                                query.geometry = rectangleGeometry2;
-                                                retsLayer.queryFeatures(query)
-                                                .then(function (result) 
-                                                {
-                                                    var selectedFeatures2 = result.features;
-                                                     for (let i = 0; i < selectedFeatures2.length; i++ ) {
-                                            
-                    
-                    
-                                                         selectedFeatures2[i].remove(graphic)
-                                                         
-                                                         return  
-                                                     }
-                                            
-    
-                                        // } 
+                                                    })
 
-                                                })
-                                            }
-                                        })
-            
                                     }
     
                                     

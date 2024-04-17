@@ -393,11 +393,12 @@
     border-bottom: 1px solid ;
     margin: 0 auto;
     width: 22.5rem;
+    padding-top: 1px;
 }
 
 #archivetext{
     position: absolute;
-    top: 30%;
+    top: 25%;
     left: 2%;
 }
 
