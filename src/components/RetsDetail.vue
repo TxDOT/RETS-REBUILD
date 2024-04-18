@@ -22,8 +22,8 @@
                 <v-btn flat class="retsMetaBtn" @click="this.isDetails = true; this.isMetadata = false" density="compact">Details</v-btn>
                 <v-btn flat class="retsMetaBtn" @click="this.isMetadata = true; this.isDetails = false" density="compact">Metadata</v-btn>
             </v-btn-toggle>
-            <DetailsCard v-if="isDetails" :infoRets="store.retsObj" :taskGem="sendGemTaskNum" @disable-save="disableSave"/>
-            <MetadataCard v-if="isMetadata" :infoRets="store.retsObj"/>
+            <DetailsCard v-if="isDetails"/>
+            <MetadataCard v-if="isMetadata"/>
         </div>
         <div class="gem-search" >
             <v-icon icon="mdi-magnify" id="gem-search-icon"></v-icon>
@@ -226,6 +226,8 @@
                 store.activityBanner = "Activity Feed"
                 store.historyChat.length = 0
                 deleteRetsGraphic()
+                removeHighlight("a", true)
+                store.isMoveRetsPt = false
                 store.isCard = true
             },
             async sendToParent(){
@@ -240,6 +242,8 @@
                 store.activityBanner = "Activity Feed"
                 store.historyChat.length = 0
                 deleteRetsGraphic()
+                removeHighlight("a", true)
+                store.isMoveRetsPt = false
                 store.isCard = true
                 store.updateRetsID()
                 return
@@ -250,6 +254,7 @@
                 store.isAlert = false
                 clearGraphicsLayer()
                 removeHighlight("a", true)
+                store.isMoveRetsPt = false
                 store.historyChat.length = 0
                 //store.preserveHighlightCards()
                 store.isDetailsPage = false

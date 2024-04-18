@@ -12,25 +12,30 @@ export async function addRETSPT(retsObj){
 }
 
 export async function updateRETSPT(retsObj){
+    console.log(retsObj)
     if(retsObj.attributes.RELATED_RETS){
         retsObj.attributes.RELATED_RETS = retsObj.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID).toString()
     }
-    console.log(retsObj)
+    retsObj.attributes.ACTV = !retsObj.attributes.ACTV ? null : retsObj.attributes.ACTV
     const createGeo = {
         type: "point",
         x: retsObj.geometry.x ? retsObj.geometry.x : retsObj.geometry[0],
         y: retsObj.geometry.y ? retsObj.geometry.y : retsObj.geometry[1]
     }
 
-    retsObj.attributes.NO_RTE = retsObj.attributes.NO_RTE === true ? 1 : 0
+    console.log(retsObj.attributes.NO_RTE)
+    let setNoRTE = retsObj.attributes.NO_RTE === true ? 1 : 0
+    retsObj.attributes.NO_RTE = setNoRTE
+    console.log(retsObj.attributes.NO_RTE)
     retsObj.attributes.ACTV = retsObj.attributes.ACTV?.value
     postFlagColor(retsObj)
     let esriUpdateGraphic = createGraphic(retsObj)
+    console.log(esriUpdateGraphic)
     esriUpdateGraphic.geometry = createGeo
 
-    await retsLayer.applyEdits({
-        updateFeatures: [esriUpdateGraphic]
-    })
+    // await retsLayer.applyEdits({
+    //     updateFeatures: [esriUpdateGraphic]
+    // })
     console.log(`${retsObj.attributes.OBJECTID} updated`)
 }
 

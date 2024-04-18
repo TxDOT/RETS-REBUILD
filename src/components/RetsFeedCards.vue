@@ -24,7 +24,7 @@
                             <p>{{store.activityBanner}}</p>
                             <div class="retsSubtitle">
                                 <div id="retSubText">
-                                    <v-text-field variant="plain" v-if="store.isDetailsPage" :disabled="isSubtitle" placeholder="Enter a subtitle" style="position:relative; top: 1px;"></v-text-field>
+                                    <v-text-field variant="plain" v-if="store.isDetailsPage" :disabled="isSubtitle" placeholder="Enter a subtitle" style="position:relative; top: 1px;" class="rets-subtitle-text"></v-text-field>
                                 </div>
                             </div>
                             
@@ -67,50 +67,52 @@
             <v-row id="search-feed" v-if="!store.isDetailsPage">
                 <v-text-field density="compact" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" v-model="actvFeedSearch" variant="plain"></v-text-field>
             </v-row>
-
+            
             <div class="card-feed-div" v-if="store.isCard">
-                <v-row v-for="(rd, road) in !store.isShowSelected ? store.roadObj : store.roadHighlightObj" :key="rd.attributes.OBJECTID" :value="road" :id="rd.attributes.OBJECTID" class="rets-card-row"> 
-                    <v-btn elevation="0" @click="changeColor(rd.attributes.RETS_ID);" class="flag-btn" size="small" max-width=".5px" density="compact" variant="plain" slim>
-                        <template v-slot:prepend>
-                            <v-icon size="medium" :id="`${rd.attributes.RETS_ID}Icon`" :color="rd.attributes.flagColor.FLAG" :icon="rd.attributes.flagColor.FLAG ? changeFlagIcon(rd.attributes.flagColor.FLAG) : 'mdi-flag-outline'"></v-icon>
-                        </template>
-                    </v-btn>
-                    <v-col class="color-picker" v-if="flagClickedId === rd.attributes.RETS_ID" v-click-outside="closeFlagDiv">
-                        <v-icon size="medium" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" ></v-icon>
-                    </v-col>
-                    <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `7px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="!store.isShowSelected ? 'card' : 'card highlight-card'" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road);">
-                        <v-card-text id="retsCard">
-                            RETS {{rd.attributes.RETS_ID }}
-                        </v-card-text>
+                
+                    <v-row v-for="(rd, road) in !store.isShowSelected ? store.roadObj : store.roadHighlightObj" :key="rd.attributes.OBJECTID" :value="road" :id="rd.attributes.OBJECTID" class="rets-card-row"> 
+                        <v-btn elevation="0" @click="changeColor(rd.attributes.RETS_ID);" class="flag-btn" size="small" max-width=".5px" density="compact" variant="plain" slim>
+                            <template v-slot:prepend>
+                                <v-icon size="medium" :id="`${rd.attributes.RETS_ID}Icon`" :color="rd.attributes.flagColor.FLAG" :icon="rd.attributes.flagColor.FLAG ? changeFlagIcon(rd.attributes.flagColor.FLAG) : 'mdi-flag-outline'"></v-icon>
+                            </template>
+                        </v-btn>
+                        <v-col class="color-picker" v-if="flagClickedId === rd.attributes.RETS_ID" v-click-outside="closeFlagDiv">
+                            <v-icon size="medium" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" ></v-icon>
+                        </v-col>
+                        <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `7px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="!store.isShowSelected ? 'card' : 'card highlight-card'" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road);">
+                            <v-card-text id="retsCard">
+                                RETS {{rd.attributes.RETS_ID }}
+                            </v-card-text>
 
-                        <v-card-text class="route-name">
-                            {{ rd.attributes.RTE_NM ?? "Route name not provided" }}
-                        </v-card-text>
+                            <v-card-text class="route-name">
+                                {{ rd.attributes.RTE_NM ?? "Route name not provided" }}
+                            </v-card-text>
 
-                        <div style="position: relative; bottom: 7px; width: 100%;">
-                            <p class="text-concat">
-                                {{ rd.attributes.DESC_ ? rd.attributes.DESC_ : "If description is empty does it need to be worked ?" }}
-                            </p>
-                        </div>
-                        <div style="position: relative; top: 2%; height: 40px;">
-                            <div>
-                                <div style="position: relative; float: right; padding-top: 0px; top:0px; left: 0px;">
-                                    <v-tooltip v-for="i in alertIcons" :text="i.popup" location="top">
-                                        <template v-slot:activator="{props}" v-if="returnSand(i.icon, rd.attributes)"> 
-                                            <v-icon :icon="i.icon" class="cardPRIO" :color="checkColor(i.icon, rd.attributes)" v-bind="props"></v-icon>
-                                        </template>
-                                    </v-tooltip>
-                                </div>
-                                <div style="height:17px; position: absolute; bottom: 0px; width:fit-content;">
-                                <v-card-subtitle class="subtitle-text">
-                                    Created by {{ rd.attributes.CREATE_NM ? returnUserName(rd.attributes.CREATE_NM) : "If Create Name is empty is it really created" }} {{ rd.attributes.CREATE_DT ? returnDateFormat(rd.attributes.CREATE_DT) : returnDateFormat(rd.attributes.EDIT_DT)}}
-                                </v-card-subtitle>
+                            <div style="position: relative; bottom: 7px; width: 100%;">
+                                <p class="text-concat">
+                                    {{ rd.attributes.DESC_ ? rd.attributes.DESC_ : "If description is empty does it need to be worked ?" }}
+                                </p>
+                            </div>
+                            <div style="position: relative; top: 2%; height: 40px;">
+                                <div>
+                                    <div style="position: relative; float: right; padding-top: 0px; top:0px; left: 0px;">
+                                        <v-tooltip v-for="i in alertIcons" :text="i.popup" location="top">
+                                            <template v-slot:activator="{props}" v-if="returnSand(i.icon, rd.attributes)"> 
+                                                <v-icon :icon="i.icon" class="cardPRIO" :color="checkColor(i.icon, rd.attributes)" v-bind="props"></v-icon>
+                                            </template>
+                                        </v-tooltip>
+                                    </div>
+                                    <div style="height:17px; position: absolute; bottom: 0px; width:fit-content;">
+                                    <v-card-subtitle class="subtitle-text">
+                                        Created by {{ rd.attributes.CREATE_NM ? returnUserName(rd.attributes.CREATE_NM) : "If Create Name is empty is it really created" }} {{ rd.attributes.CREATE_DT ? returnDateFormat(rd.attributes.CREATE_DT) : returnDateFormat(rd.attributes.EDIT_DT)}}
+                                    </v-card-subtitle>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        
-                    </v-card>
-                </v-row>
+                            
+                        </v-card>
+                    </v-row>
+                
             </div>
             
             <div class="card-feed-div" v-if="store.isNoRets"><p>No RETS for you!</p></div>
@@ -272,7 +274,7 @@ export default{
             
             const notiIcons = {
                 'mdi-account-multiple-check' : () => {
-                    if(atts.ASSIGNED_TO && atts.GIS_ANALYST !== atts.ASSIGNED_TO){
+                    if(atts.ASSIGNED_TO === store.loggedInUser){
                         return true
                     }
                     return false
@@ -562,6 +564,7 @@ export default{
         actvFeedSearch:{
             handler: function(){
                 if(this.actvFeedSearch.length){
+                    console.log(this.actvFeedSearch)
                     searchCards(store.roadObj, this.actvFeedSearch, {param: "OBJECTID", type: "sortA", isFilters: false})
                     return
                 }
@@ -657,6 +660,9 @@ export default{
         padding: 0px;
         margin-left: 10px;
         bottom: .4rem;
+    }
+    .rets-subtitle-text input{
+        color: red !important;
     }
     #addbtn{
         position: relative;
