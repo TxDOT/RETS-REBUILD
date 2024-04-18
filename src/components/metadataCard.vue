@@ -25,14 +25,15 @@
 <script>
  
     import {appConstants} from '../common/constant.js'
-
+    import {store} from './store.js'
     export default{
         name: "MetadataCard",
         data(){
             return{
                 districtMetadata: appConstants.districtDomainValues,
                 countyMetadata: appConstants.countyDomainValues,
-                userRole: appConstants.userRoles
+                userRole: appConstants.userRoles,
+                store,
             }
         },
         mounted(){
