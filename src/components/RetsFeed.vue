@@ -16,22 +16,21 @@
         </v-list>
         <v-list id="icons-bottom" class="iconList">
             <v-list-item class="iconList-item" v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" :active-class="tool.name !== 'Jump To' && tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
-                <!-- <v-tooltip v-if="tool.name === 'Basemaps'" location="right" :text=tool.name  >
-                    <template v-slot:activator="{ props }">
-                    <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props"></v-icon>
-                </template>
-                </v-tooltip> -->
                 <template v-if="tool.name != 'Basemaps' && tool.name != 'Jump To'">
                     <v-tooltip location="right" :text="tool.name">
-                        <template v-slot:activator="{ props }">
-                            <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
-                        </template>
+                            <template v-slot:activator="{ props }">
+                                <v-list-item-content id="iconcontent">
+                                    <v-icon class="iconwidth" size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
+                                </v-list-item-content>
+                            </template>
+                        
                     </v-tooltip>
                 </template>
                 <template v-else>
-                    <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
+                    <v-list-item-content>
+                        <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
+                    </v-list-item-content>
                 </template>
-                
             </v-list-item>
         </v-list>
 
@@ -470,19 +469,26 @@
         cursor: pointer;
         background-color: rgba(128,128,128,.3);
     }
-
+  
+   #iconcontent  {
+    position: absolute;
+    width: 1000px !important;
+    top: 9px;
+    left: 27%;
+   }
     #icons-bottom{
         position: relative;
         bottom: 15.5rem;
-        left: 0%;
+        left: 10%;
     }
     #icons-top{
-        left: 0%;
+        left: 7%;
+        top: -3px;
     }
     .v-navigation-drawer{
         overflow-y: hidden !important;
         height: 100% !important;
-        width: 52px !important;
+        width: 58px !important;
         color: black;
     }
 
@@ -660,11 +666,12 @@
     }
     .iconList{
         position: relative;
-        width: 69px;
+        width: 58px ;
+        left:0px !important;
     }
     .iconList-item{
         position: relative;
-        left: -10%;
+        left: -5%;
     }
 
     .esri-view-surface {
