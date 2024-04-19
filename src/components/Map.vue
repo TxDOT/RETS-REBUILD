@@ -43,10 +43,7 @@ export default{
 <style>
     #viewDiv{
         position: absolute;
-        height: 100%;
-        width: calc(100% - 74px);
-        top: 0;
-        left: 74px;
+        
         /* overflow-y: hidden; */
     }
 

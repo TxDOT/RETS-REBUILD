@@ -1,4 +1,4 @@
-import {view, retsLayer, homeWidget, retsGraphicLayer, TxDotRoaways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate, retsPointRenderer} from './map-Init'
+import {view, retsLayer, homeWidget, retsGraphicLayer, TxDotRoaways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate, retsPointRenderer, texasExtent} from './map-Init'
 import Query from "@arcgis/core/rest/support/Query.js";
 import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant.js";
@@ -362,7 +362,16 @@ export function home(){
         
         retsLayer.queryExtent()
             .then((resp) =>{
-                view.goTo(resp.extent)
+                if (resp.count== 0 || resp.count > 3000){
+                    view.goTo(view.center)
+                    
+                    
+                }
+                else{
+                    view.goTo(resp.extent)
+                }
+               
+                
             })
     })
     return
@@ -590,6 +599,7 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                         
                                         removeHighlight("a", removeAll); 
                                         removeAllCardHighlight()
+                                        removeOutline();
                                         store.roadHighlightObj.clear()
                                         // for (let i = 0; i < selectedFeatures.length; i++ ) {
                                         
@@ -626,6 +636,7 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                     }
                                     
                                     if(pressedkey === "Control"){    
+                                            removeOutline()
                                             var rectangleGeometry2 = event.graphic.geometry;
                                             var query2 = retsLayer.createQuery();
                                             query2.geometry = rectangleGeometry2;
@@ -640,6 +651,7 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                                                 return !selectedFeaturesnew.some(feature => feature.attributes.OBJECTID === obj.attributes.OBJECTID)
                                                             })
                                                             store.roadHighlightObj = new Set(arr)
+                                                            outlineFeedCards(store.roadHighlightObj); 
                                                             removeHighlight("a", removeAll)
                                                             for (let n = 0; n < arr.length; n++){
                                                                 if (n >= 0){

@@ -374,7 +374,7 @@
 #archivepopup{
     position: absolute;
     border-radius: 5px;
-    left: 200%;
+    left: 150%;
     width: 25rem;
     top:40%;
     height:25%; 

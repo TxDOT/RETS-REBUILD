@@ -621,8 +621,8 @@ export default{
 <style scoped>
 #Spinner{
         position: absolute;
+        left: 250px;
         top: 50%;
-        left: 12.5%
     }
     #retSubText{
         position: relative;

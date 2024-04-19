@@ -22,8 +22,28 @@ import LegendViewModel from "@arcgis/core/widgets/Legend/LegendViewModel";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import Graphic from "@arcgis/core/Graphic";
 import { outlineFeedCards, removeOutline, removeHighlight, home} from "./utility.js";
+import Extent from "@arcgis/core/geometry/Extent.js";
 
 
+
+export const texasExtent = new Extent({
+  // xmin:-106.645646,
+  // ymin:25.837163,
+  // xmax:-93.507217,
+  // ymax:36.500695,
+
+  xmin: -103.9893061,
+  ymin: 28.6596116,
+  xmax: -94.1254072,
+  ymax: 34.5340898,
+
+  // xmin:25.7364986,
+  // ymin:-109.1882887,
+  // xmax:36.6130878,
+  // ymax:-90.9737028,
+
+
+})
 
 export let retsPointRenderer = new UniqueValueRenderer({
   field: "STAT", // Field based on which the symbology will be categorized
@@ -383,6 +403,9 @@ export const view = new MapView({
     lods: TileInfo.create().lods, //property to allow a mapview center to the imagery basemap
     rotationEnabled: false,
   },
+  navigation: {
+    mouseWheelZoomEnabled: true,
+  },
   
 })
 
@@ -464,7 +487,7 @@ export const searchWidget = new Search({
       displayField: "ACTV_NBR",
       exactMatch: false,
       outFields: ["ACTV_NBR"],
-      minSuggestCharacters: 4,
+      minSuggestCharacters: 3,
       maxSuggestions: 3,
       
     },
@@ -632,11 +655,6 @@ searchWidget.on("search-clear", function(event) {
 
 });
 
-searchWidget.on("search-complete", function(event){
-  // The results are stored in the event Object[]
-  highlightLayer.removeAll();
-});
-
 document.addEventListener('click', function(event) {
   const targetElement = event.target.className;
       if (targetElement === 'esri-search__source esri-menu__list-item' )
@@ -644,7 +662,7 @@ document.addEventListener('click', function(event) {
            const searchInput = document.querySelector(".esri-search__input");
            searchInput.value = null;
            searchWidget.activeMenu = "none";
-        searchWidget.focus()
+           searchWidget.focus()
 
       }
 
@@ -653,7 +671,6 @@ document.addEventListener('click', function(event) {
      
 
 });
-
 
 homeWidget.on("go", function() {
   // Run your function here

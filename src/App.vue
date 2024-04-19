@@ -46,7 +46,9 @@ export default{
 
 #app{
   overflow-y: hidden !important;
+  top: 0px;
 }
+
 
 
 </style>

@@ -206,3 +206,11 @@
   margin-left: 15px;
   margin-right: 15px;
 }
+
+ #app{
+  position: relative;
+  /* height: 130%; */
+  /* bottom: 100px; */
+  /* overflow-x: hidden; */
+  height: 100% !important;
+}
