@@ -150,8 +150,6 @@ import {store} from './store.js'
             }
             this.initDataCheck()
             this.retsRouteArchive = JSON.parse(store.archiveRetsDataString)
-            console.log(this.retsRouteArchive)
-            if(store.retsObj.attributes.NO_RTE)
             createRoadGraphic(store.retsObj, true)
         },
         methods:{
@@ -193,7 +191,6 @@ import {store} from './store.js'
                 let item = [store.retsObj.attributes.RTE_NM, store.retsObj.attributes.STAT, store.retsObj.attributes.DESC_].filter(x => !x)
                 if(!store.retsObj.attributes.NO_RTE){
                     if(store.retsObj.attributes.DFO === null || !store.retsObj.attributes.RTE_NM){
-                        console.log(store.retsObj.attributes.DFO)
                         store.isAlert = true
                         store.alertTextInfo = {"text": "Route Number or DFO is missing", "color": "red", "toggle": true}
                         return store.isSaveBtnDisable = true
@@ -245,21 +242,16 @@ import {store} from './store.js'
                 
             },
             paperClipFunc(){
-                store.retsObj.attributes.ACTV === 'Minute Order' ? window.open(`https://publicdocs.txdot.gov/minord/mosearch/Pages/Minute-Order-Search-Results.aspx#k=${store.retsObj.attributes.ACTV_NBR}`, '_blank') :
+                store.retsObj.attributes.ACTV.value === 'Minute Order' ? window.open(`https://publicdocs.txdot.gov/minord/mosearch/Pages/Minute-Order-Search-Results.aspx#k=${store.retsObj.attributes.ACTV_NBR}`, '_blank') :
                                                             window.open(`https://txdot.sharepoint.com/sites/division-tpp/DM-Admin/Lists/Data%20Request/EditForm.aspx?ID=${store.retsObj.attributes.ACTV_NBR}`, '_blank')
-            
-
             },
             crossHairFunc(){
-                console.log(store.isMoveRetsPt)
                 store.isMoveRetsPt = !store.isMoveRetsPt
-                console.log(store.isMoveRetsPt)
                 if(store.isMoveRetsPt){
                     this.removeListner = getRoadInformation()
                     return
                 }
                 this.removeListner.remove()
-                console.log(this.removeListner)
                     //getPointRoadInteraction(store.retsObj)
                     //store.isMoveRetsPt = true
                     return
@@ -365,10 +357,8 @@ import {store} from './store.js'
                     if(!a.length) return
                     if(Number(a) === b) return
                     const ogDFO = this.retsRouteArchive
-                    console.log(store.retsObj.attributes.NO_RTE)
                     clearTimeout(this.typeTimeout)
                     if(Number(a) !== ogDFO && !store.retsObj.attributes.NO_RTE){
-                        console.log('hey')
                         this.typeTimeout = setTimeout(()=>{
                             createRoadGraphic(store.retsObj, false)
                         },900)

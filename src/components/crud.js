@@ -4,7 +4,6 @@ import Query from "@arcgis/core/rest/support/Query";
 import {store} from './store'
 
 export async function addRETSPT(retsObj){
-    console.log(retsObj)
     //retsObj.attributes.ACTV = retsObj.attributes.ACTV.value
     return retsLayer.applyEdits({
         addFeatures: [retsObj]
@@ -12,7 +11,6 @@ export async function addRETSPT(retsObj){
 }
 
 export async function updateRETSPT(retsObj){
-    console.log(retsObj)
     if(retsObj.attributes.RELATED_RETS){
         retsObj.attributes.RELATED_RETS = retsObj.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID).toString()
     }
@@ -23,19 +21,17 @@ export async function updateRETSPT(retsObj){
         y: retsObj.geometry.y ? retsObj.geometry.y : retsObj.geometry[1]
     }
 
-    console.log(retsObj.attributes.NO_RTE)
     let setNoRTE = retsObj.attributes.NO_RTE === true ? 1 : 0
     retsObj.attributes.NO_RTE = setNoRTE
-    console.log(retsObj.attributes.NO_RTE)
+
     retsObj.attributes.ACTV = retsObj.attributes.ACTV?.value
     postFlagColor(retsObj)
     let esriUpdateGraphic = createGraphic(retsObj)
-    console.log(esriUpdateGraphic)
     esriUpdateGraphic.geometry = createGeo
 
-    // await retsLayer.applyEdits({
-    //     updateFeatures: [esriUpdateGraphic]
-    // })
+    await retsLayer.applyEdits({
+        updateFeatures: [esriUpdateGraphic]
+    })
     console.log(`${retsObj.attributes.OBJECTID} updated`)
 }
 
@@ -120,7 +116,6 @@ export async function sendChatHistory(chat, type){
     }
 
     const returnStatus = await chatType[type]()
-    console.log(returnStatus)
     return returnStatus
     // return addRETSPT(newGraphic, "hist")
 }
@@ -132,7 +127,9 @@ export function postFlagColor(rets){
         flagRetsColor.applyEdits({
             addFeatures: [flagGraphic]
         })
-        .then((x) => console.log(x))
+        .then(() => {
+            //do nothing
+        })
         .catch(err => console.log(err)) 
         return
     }
@@ -140,7 +137,9 @@ export function postFlagColor(rets){
     flagRetsColor.applyEdits({
         updateFeatures: [flagGraphic]
     })
-    .then((x) => console.log(x))
+    .then(() => {
+        //do nothing
+    })
     .catch(err => console.log(err)) 
     return
 }

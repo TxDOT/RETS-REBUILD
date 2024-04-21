@@ -243,8 +243,6 @@ export default{
                     removeHighlight("a", true)
                     await getHighlightGraphic()
                     const graphicOid = store.clickedGraphic
-                    console.log()
-                    console.log(retsGraphicLayer)
                     const returnGraphic = retsGraphicLayer.graphics.items.find(ret => ret.attributes.OBJECTID === graphicOid)
                     returnGraphic.attributes.flagColor = store.setFlagColor(returnGraphic.attributes)
                     this.stageData = {attributes: returnGraphic.attributes, geometry: [returnGraphic.geometry.x, returnGraphic.geometry.y]}
@@ -313,7 +311,6 @@ export default{
                     const oneDay = 24*60*60*1000;
                     const calcTime = todayDate.getTime() - editDt.getTime()
                     const calcDate = Math.round(calcTime/oneDay)
-                    //console.log(calcDate)
                     if(atts.STAT === 2 && calcDate > 25){
                         return true
                     }
@@ -351,7 +348,6 @@ export default{
         },
         proceed(){
             this.unsavedChanges = false
-            console.log(this.stageData)
             this.double({attributes: this.stageData.attributes, geometry: [this.stageData.geometry[0], this.stageData.geometry[1]]}, 1)
         },
         cancelReturn(){
@@ -375,12 +371,12 @@ export default{
                     return
                 }
             }
-            console.log()
+
             issue === 0 ? this.double({attributes: this.stageData.attributes, geometry: [this.stageData.geometry.x, this.stageData.geometry.y]}, 1) : null
         },
-        processBanner(i){
-            console.log(i)
-        },
+        // processBanner(i){
+        //     console.log(i)
+        // },
         // async enableFeed(e){
         //     turnAllVisibleGraphicsOff() 
         //     console.log(store.roadHighlightObj)
@@ -397,22 +393,20 @@ export default{
         //     return
         // },
 
-        highlightToggleAndProcess(){
-            console.log('not done')
-            return
-        },
+        // highlightToggleAndProcess(){
+        //     console.log('not done')
+        //     return
+        // },
         removeUndefinedIndex(delRd){
             const findRoad = store.roadObj.findIndex(road => road.attributes.OBJECTID === delRd.OBJECTID)
             store.roadObj.splice(findRoad, 1)
         },
         double(road, index){
-            console.log(store.roadHighlightObj)
             store.archiveRetsDataString = JSON.stringify(road)
             store.historyRetsId = road.attributes.RETS_ID
             returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
             road.attributes.logInUser = this.loggedInUser 
             road.attributes.index = index
-            console.log(road)
             store.retsObj = road
             clearTimeout(this.timer)
             this.timer=""
@@ -566,7 +560,6 @@ export default{
         actvFeedSearch:{
             handler: function(){
                 if(this.actvFeedSearch.length){
-                    console.log(this.actvFeedSearch)
                     searchCards(store.roadObj, this.actvFeedSearch, {param: "OBJECTID", type: "sortA", isFilters: false})
                     return
                 }
@@ -634,14 +627,11 @@ export default{
             let totalLength = store.roadObj.length
             let road = []
             while(numIndex < totalLength){
-                console.log(store.roadObj)
                 let a = store.roadObj.slice(numIndex, numIncrease)
-                console.log(a)
                 numIndex = numIncrease+=1
                 numIncrease = numIncrease += 2
                 a.forEach(x => road.push(x))
             }
-            console.log(road)
             return road
         }    
     },

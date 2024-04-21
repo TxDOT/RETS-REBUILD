@@ -101,7 +101,6 @@
         methods:{
             async addNote(){
                 await store.addNote(null, false)
-                console.log(store.addNoteOid)
                 this.openNote(null, store.addNoteOid)
                         //this.openNote(null, Number(document.getElementById("chatDiv").fiElementChild.id))
             
@@ -111,7 +110,6 @@
                 this.isClose = true;
                 this.updateOID = oid
                 this.ogNote = n
-                console.log(oid)
                 const oidFlag = this.sortA ? `${oid}` : `${oid}Expand`
                 document.getElementById(oidFlag).classList.add("active-chat-box")
             },

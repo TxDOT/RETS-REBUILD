@@ -236,7 +236,6 @@
                 // this.retsInfo.ASSIGNED_TO = this.retsInfo.ASSIGNED_TO.value
                 store.retsObj.attributes.PRIO = store.retsObj.attributes.PRIO ?? 1
                 store.retsObj.attributes.JOB_TYPE = this.isAsset === true ? 2 : 1
-                console.log(store.retsObj)
                 await updateRETSPT(store.retsObj)
                 store.isDetailsPage = false
                 store.activityBanner = "Activity Feed"
@@ -307,7 +306,6 @@
             },
             addHistoryNote(){
                 if(!this.addHistoryChat.length) return
-                console.log(store.attachment)
                 const attach = store.attachment.length ? true : false 
                 store.addNote(this.addHistoryChat, attach, store.attachment)
                 this.clearMessage()

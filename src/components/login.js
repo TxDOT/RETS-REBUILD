@@ -64,7 +64,12 @@ async function signIn(){
       })
       
 
-    });
+    })
+    .catch((err) =>{
+      
+      console.log(err)
+
+    })
 }
 
 const setDefExpRets = (userId) => {
@@ -75,7 +80,7 @@ const setDefExpRets = (userId) => {
 }
 
 export async function getUserId(){
-  console.warn('VERSION: 2.1.5')
+  console.warn('VERSION: 2.1.6')
   const user = await esriId.getCredential(authen.portalUrl + "/sharing/rest",{
     oAuthPopupConfirmation: false,
   })

@@ -150,7 +150,10 @@ export function removeAllCardHighlight() {
     return
 }
 
-export const clearGraphicsLayer = () => graphics.removeAll() 
+export const clearGraphicsLayer = () => {
+    graphics.removeAll()
+    retsGraphicLayer.removeAll()
+}
 
 export const clearRoadHighlightObj = () => store.roadHighlightObj.clear()
 
@@ -164,7 +167,6 @@ export function getGEMTasks(){
 
 //filter Map and activity feed 
 export async function filterMapActivityFeed(filterOpt){
-    console.log(filterOpt)
     let GIS_ANALYST = []
     let GRID_ANALYST = []
     let DIST_ANALYST = []
@@ -186,7 +188,6 @@ export async function filterMapActivityFeed(filterOpt){
         if(!value) continue
         if(value){
             if(key === 'isAssignedTo' && value){
-                console.log(value)
                 fullFilter.push(`ASSIGNED_TO in ('${store.loggedInUser}')`)
             }
             if(key === 'user' && !filterOpt.isAssignedTo){
@@ -266,7 +267,6 @@ export async function filterMapActivityFeed(filterOpt){
     //     filterDef = filterDef.concat(' OR (ASSIGNED_TO in (', assignedToQuery, '))')
 
     // }
-    console.log(newFilter)
     const filterMapPromise = new Promise((res, rej) => {
         retsLayer.definitionExpression = `${newFilter}`
         res(filterDef)
@@ -347,9 +347,7 @@ export function getQueryLayer(newQuery, orderFields, count){
 
 export function searchCards(cardArr, string, searchParam){
     try{
-        console.log(string)
         if(!string.length && !searchParam.isFilters ){
-            console.log(string)
             searchParam.type === 'sortA' ?  cardArr.forEach(x =>  document.getElementById(`${x.attributes ? x.attributes[searchParam.param] : x[searchParam.param]}`).classList.add('showCards')) : cardArr.forEach(x =>  document.getElementById(`${x.attributes ? x.attributes[searchParam.param] : x[searchParam.param]}Expand`).classList.add('showCards'))
             return
         }
@@ -479,8 +477,7 @@ export function returnHistory(query){
     const queryString = {"whereString": `${query ?? '1=1'}`, "queryLayer": "retsHistory"}
     getQueryLayer(queryString, "create_dt desc")
         .then((hist) => {
-            console.log(hist)
-            const arrHist = []
+            //const arrHist = []
             hist.features.forEach((x) => {
                 getAttachmentInfo(x.attributes.OBJECTID)
                     .then((att) => {
@@ -725,7 +722,7 @@ export function addAttachments(oid, files, flag){
             store.numAttachments += 1
             flag ? null : store.attachToNote(oid, arr)
         })
-        .then(() => console.log('add attachment'))
+        .then(() => console.log(`${store.loggedInUser} added an attachment!`))
         .catch(err => console.log(err))
 }
 
@@ -799,7 +796,7 @@ export async function createRoadGraphic(retsObj, onStartUp){
     //query for road
     const returnRds = await queryRoads(routeName)
     if(!returnRds.features.length){
-        store.isAlert = true
+        store.isAlert = !retsObj.attributes.NO_RTE ? false : true
         store.alertTextInfo = {"text": `Route and/or DFO are not valid`, "color": "red", "type":"error", "toggle": true}
         store.dfoIndex = "not in range"
         return
@@ -810,7 +807,6 @@ export async function createRoadGraphic(retsObj, onStartUp){
         let endM = rd.geometry.paths[0].at(-1)[2]
         //if on a road segment
         if(routeDFO >= startM && routeDFO <= endM){
-            
             return rd
         }
         //if not on a road segment range
@@ -836,7 +832,6 @@ async function queryRoads(rteName){
 }
 
 function drawFeaturedRoad(rd){
-    console.log(rd)
     const rdGraphic = new Graphic({
         geometry: rd.geometry,
         attributes:{
@@ -879,7 +874,6 @@ function plotRetsPointOnRoad(dfo, rd, onStartUp){
     //calc to get the azmiuth of the line
     const {distance, azimuth, revAzimuth} = geodesicUtils.geodesicDistance(webMerConvertPointA, webMerConvertPointB, "miles")
     const getPointLocation = geodesicUtils.pointFromDistance(webMerConvertPointA, dfoMilesToMeters, azimuth)
-    //console.log(webMercatorUtils.geographicToWebMercator(getPointLocation))
     UpdatePt(getPointLocation, onStartUp)
     
     //compare distance from closetsCoordinate to nearestVertex -1 
@@ -887,16 +881,13 @@ function plotRetsPointOnRoad(dfo, rd, onStartUp){
 }
 
 async function UpdatePt(pt, onStartUp){
-    console.log(onStartUp)
    //const isUpdate = compareRetsToDerivedLocation(pt, mValues)
     if(!onStartUp){
-        console.log(onStartUp)
         const ptGraphic = new Graphic({
             geometry: pt,
             attributes: store.retsObj.attributes,
             symbol: retsPointRenderer.uniqueValueInfos.find(symb => Number(symb.value) === store.retsObj.attributes.STAT).symbol
         })
-        console.log(ptGraphic)
        await updateRETSPT(ptGraphic)
        await retsLayer.queryFeatures({
             where: `RETS_ID = ${ptGraphic.attributes.RETS_ID}`
@@ -956,7 +947,6 @@ export function getRoadInformation(){
     })
     
     graphics.add(createGraphic)
-    console.log(graphics.graphics.find(x => x.attributes.RETS_ID === store.retsObj.attributes.RETS_ID).geometry)
     sketchWidgetcreate.update(createGraphic)
     if(!store.isMoveRetsPt){
         sketchWidgetcreate.complete()
@@ -984,31 +974,29 @@ export function getRoadInformation(){
                             const roadConvertToGeo = webMercatorUtils.webMercatorToGeographic(road.features[0].geometry)
                             const ptConvertToGeo = webMercatorUtils.webMercatorToGeographic(createGraphic.geometry)
                             const {coordinate, distance, vertexIndex} = geometryEngine.nearestVertex(roadConvertToGeo, ptConvertToGeo)
-                            console.log(distance)
-                            console.log(road.features[0].geometry.paths[0].at(vertexIndex))
-                            console.log(road.features[0].geometry.paths[0].at(vertexIndex+1))
-                            console.log(road.features[0].geometry.paths[0].at(vertexIndex-1))
+                            // console.log(distance)
+                            // console.log(road.features[0].geometry.paths[0].at(vertexIndex))
+                            // console.log(road.features[0].geometry.paths[0].at(vertexIndex+1))
+                            // console.log(road.features[0].geometry.paths[0].at(vertexIndex-1))
 
                             const newDFO = road.features[0].geometry.paths[0].at(vertexIndex)[2] + distance
                             store.retsObj.attributes.DFO = newDFO.toFixed(3)
-                            console.log(store.retsObj.attributes.NO_RTE)
                             sketchWidgetcreate.complete()
                         })
                 }
                 else{
                     const movedRetsPt = graphics.graphics.find(x => x.attributes.RETS_ID === store.retsObj.attributes.RETS_ID && x.geometry.type === "point")
-                    store.retsObj.attributes.NO_RTE = true
-                    store.retsObj.attributes.RTE_NM = null
-                    store.retsObj.attributes.DFO = null
+
                     const ptConvertToGeo = webMercatorUtils.webMercatorToGeographic(movedRetsPt.geometry)
-                    await updateRETSPT(ptConvertToGeo)
-                    //await UpdatePt(ptConvertToGeo, false)
+                    await UpdatePt(ptConvertToGeo, false)
                     sketchWidgetcreate.complete()
                     store.isAlert = true
                     store.alertTextInfo = {"text": `No Route has been detected`, "color": "yellow", "type":"info", "toggle": true}
                     store.isMoveRetsPt = false
 
-                    console.log(JSON.stringify(store.retsObj))
+                    store.retsObj.attributes.NO_RTE = true
+                    store.retsObj.attributes.RTE_NM = null
+                    store.retsObj.attributes.DFO = null
                 }
 
                 return

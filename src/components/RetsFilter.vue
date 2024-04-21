@@ -140,7 +140,6 @@
             cancelFilter(){
                 this.calcFilterDiff()
                 const filterParse = JSON.parse(store.archiveFilter)
-                console.log(filterParse)
                 store.CREATE_DT = filterParse.createDt
                 store.JOB_TYPE = filterParse.jobType
                 store.EDIT_DT = filterParse.editDt

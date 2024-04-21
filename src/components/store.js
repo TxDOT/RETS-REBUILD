@@ -106,7 +106,6 @@ export const store = reactive({
                         await sendChatHistory(newHistory, "add")
                        
                         const returnComments = await getCmntOID(newHistory.RETS_ID)
-                        console.log(returnComments)
 
                         store.addNoteOid = returnComments.features[0].attributes.OBJECTID
                         newHistory.OBJECTID = returnComments.features[0].attributes.OBJECTID
@@ -139,9 +138,7 @@ export const store = reactive({
         },
         async deleteNote(oid){
                 const noteIndex = this.historyChat.findIndex(x => x.OBJECTID === oid)
-                console.log(noteIndex)
                 this.historyChat.splice(noteIndex, 1)
-                console.log(this.historyChat)
                 await sendChatHistory({"OBJECTID": oid}, "delete")
                 return
         },
@@ -210,8 +207,6 @@ export const store = reactive({
         setFilterFeed(){
                 filterMapActivityFeed(this.filter)
                         .then((resp) => {
-                                console.log(resp)
-                                console.log(this.filter)
                                 this.roadObj = []
                                 const query = {"whereString": `${resp}`, "queryLayer": "retsLayer"}
                                 const orderField = `${this.filter.createDt.filter} ${this.filter.createDt.sortType}`
