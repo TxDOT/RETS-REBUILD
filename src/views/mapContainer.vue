@@ -1,15 +1,20 @@
 <template>
     <Map/>
     <RetsFeed/>
+    <NavBar/>
 </template>
 
 <script>
-    import Map from '../components/Map.vue'
-    import RetsFeed from '../components/RetsFeed.vue'
+
+    import { defineAsyncComponent } from 'vue'
 
     export default{
         name: "MapContainer",
-        components: {Map, RetsFeed}
+        components: {
+            Map: defineAsyncComponent(() => import('../components/Map.vue')), 
+            NavBar: defineAsyncComponent(() => import('../components/NavBar.vue')),
+            RetsFeed: defineAsyncComponent(() => import('../components/RetsFeedCards.vue'))
+        }
         
     }
 </script>

@@ -34,23 +34,13 @@
         </div>
         <!-- history section -->
         <div>
-            
             <v-card class="history-card">
                 <div style="float: right; font-size: 10px; position: relative; top: .5rem;" >
                     <v-btn icon="mdi-arrow-expand" variant="plain" density="compact" @click="expandChatHistory" style="font-size: .8rem;"></v-btn>
                 </div>
                 <v-card-title style="padding-bottom: 30px;">History</v-card-title>
-                <historyView :sortA="toSortBottom"/>
-
+                <historyViewSmall/>
             </v-card>
-            <div style="position: relative; bottom: 0px; width:100%;">
-            <div>
-                <div style="position: relative">
-                    <v-btn prepend-icon="mdi-message-plus" id="addCommentBtnSmall" variant="plain" size="small" v-if="sortA" @click="store.addNote('Enter Text', false)">Add</v-btn>
-                </div>
-            </div>
-
-        </div>
         </div>
     </div>
     <div id="commentDiv" v-if="editText">
@@ -59,13 +49,18 @@
             <div style="float: right; position: relative; bottom: 3.7rem;" >
                 <v-btn icon="mdi-close" variant="plain" density="compact" @click="editText = false" style="font-size: .9rem;"></v-btn>
             </div>
-            <historyView :sortB="toSortTop"/>
+            <historyView/>
             <div class="marginSetting" style="padding-top: 10px; position: absolute; width: 98%; bottom: 2rem;">
                 <v-text-field label="Type a message" density="compact" tile v-model="addHistoryChat" style="margin-left: 0px; margin-right: 5px;"></v-text-field>
                 <div style="float: left; bottom: 1rem; position: relative;">
                     <v-btn prepend-icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px !important;" @click="displayAttachments()">Add an Attachment</v-btn>
-                    
                 </div>
+                <div> 
+                    <div style="position:relative; float: left; width:100%;">
+                        <v-chip v-for="(attach, index) in addAttach" color="#4472C4" closable density="compact" rounded="0" variant="flat" :text="attach.name" @click:close="removeAttachment(index)"></v-chip>
+                    </div>
+                </div>
+
                 <div style="float:right; bottom: 1rem; position: relative; ">
                     <v-btn icon="mdi-close" variant="plain" density="compact" style="font-size: 15px !important;" @click="clearMessage"></v-btn>
                     <v-btn icon="mdi-check" variant="plain" density="compact" style="font-size: 15px !important;" @click="addHistoryNote"></v-btn>
@@ -81,7 +76,7 @@
         </v-card>
 
     </div>
-    <div style="position: relative; top: 93px; padding-bottom: 0px;">
+    <div style="position: relative; height:40px; top: 56px; left: 6px; width: 99%;">
         <div style="position: relative; float: left; margin-left: 10px; font-size: 11px; display: flex; flex-wrap: wrap;">
             <v-checkbox label="Asset Only Job" density="compact" class="checkbox-size" v-model="isAsset"></v-checkbox>
         </div>
@@ -110,19 +105,21 @@
 </template>
 
 <script>
-    import editHistoryNotes from './EditHistoryNotes.vue'
-    import DetailsCard from './detailsCard.vue'
-    import MetadataCard from './metadataCard.vue'
     import { appConstants } from '../common/constant.js'
     import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer} from './utility.js'
-    import detailsAlert from './detailsAlert.vue'
+
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
-    import historyView from './historyRow.vue'
 
+    import { defineAsyncComponent } from 'vue'
     export default{
         name: "RetsDetailPage",
-        components: {editHistoryNotes, DetailsCard, MetadataCard, detailsAlert, historyView},
+        components: {DetailsCard: defineAsyncComponent(()=> import('./detailsCard.vue')),
+                     MetadataCard: defineAsyncComponent(()=> import('./metadataCard.vue')), 
+                     detailsAlert: defineAsyncComponent(()=> import('./detailsAlert.vue')), 
+                     historyView: defineAsyncComponent(()=> import('./historyRow.vue')),
+                     historyViewSmall: defineAsyncComponent(()=> import('./historyRowSmall.vue'))
+                    },
         props: {
             taskGem: Number,
             alertInfo: Object,
@@ -146,6 +143,7 @@
                 noteIndex: 0,
                 gemTask: [],
                 archiveRets: [],
+                addAttach: [],
                 sendGemTaskNum: null,
                 searchHistoryFilter: '',
                 saveDisable: false,
@@ -176,6 +174,13 @@
             this.isAsset = store.retsObj.attributes.JOB_TYPE === 2 ?  true : false
         },
         methods:{
+            removeAttachment(index){
+                console.log(index)
+                console.log(store.attachment)
+                store.attachment.splice(index, 1)
+                console.log(store.attachment)
+                return
+            },
             returnDateFormat(e){
                 //10/29/2023 09:11am
                 const date = new Date(e)
@@ -231,8 +236,13 @@
                 store.isCard = true
             },
             async sendToParent(){
+                
                 store.isAlert = false
                 clearGraphicsLayer()
+                console.log(store.retsObj)
+                store.retsObj.attributes.ACTV = !store.retsObj.attributes.ACTV ? null : store.retsObj.attributes.ACTV.value ?? store.retsObj.attributes.ACTV
+                console.log(store.retsObj.attributes.ACTV)
+                console.log(store.retsObj)
                 // this.retsInfo.ASSIGNED_TO = this.retsInfo.ASSIGNED_TO.value
                 store.retsObj.attributes.PRIO = store.retsObj.attributes.PRIO ?? 1
                 store.retsObj.attributes.JOB_TYPE = this.isAsset === true ? 2 : 1
@@ -248,6 +258,9 @@
                 return
             },
             cancelDetailsMetadata(){
+                store.isDetailsPage = false
+                store.isCard = true
+                store.activityBanner = "Activity Feed"
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
                 this.replaceArchiveContent(archiveRets)
                 store.isAlert = false
@@ -255,10 +268,8 @@
                 removeHighlight("a", true)
                 store.isMoveRetsPt = false
                 store.historyChat.length = 0
-                //store.preserveHighlightCards()
-                store.isDetailsPage = false
-                store.isCard = true
-                store.activityBanner = "Activity Feed"
+                store.preserveHighlightCards()
+
                 return
             },
             replaceArchiveContent(old){
@@ -307,7 +318,7 @@
             addHistoryNote(){
                 if(!this.addHistoryChat.length) return
                 const attach = store.attachment.length ? true : false 
-                store.addNote(this.addHistoryChat, attach, store.attachment)
+                store.addNote(this.addHistoryChat, attach, store.attachment, true)
                 this.clearMessage()
                 return
             },
@@ -322,7 +333,8 @@
                 input.click()
 
                 input.addEventListener("change", (event)=>{
-                    let attach = true
+                    console.log(event.target.files)
+                    this.addAttach.push({name: [...event.target.files].at(-1).name})
                     store.attachment = event.target.files
                     //addAttaevent.target.fileschments(oid, attach, event.target.files)
                 })
@@ -335,7 +347,8 @@
             handlearchive(){
                 this.isarchiveopen = !this.isarchiveopen
                 this.deletedRETSID = store.retsObj.attributes.OBJECTID       
-            }
+            },
+
 
         },
         watch:{
@@ -459,7 +472,7 @@ div .cardDiv{
 }
 #container-div{
     position: relative;
-    top: 2.2rem;
+    top: 0rem;
     min-height: 0% !important;
     max-height: calc(100% - 14rem) !important;
     overflow-x: hidden;
@@ -537,7 +550,7 @@ div .cardDiv{
 }
 .history-card{
     position:relative; 
-    height: 27rem; 
+    height: 30rem; 
     bottom: 0.2rem; 
     border-radius: 0%; 
     margin-right: 10px;
@@ -587,7 +600,8 @@ div .cardDiv{
 #detailsHeaderIcon{
     position: relative;
     float: right;
-    bottom: 0.5rem;
+    bottom: 2rem;
+    left: 19rem;
 }
 
 .details-color-picker{

@@ -87,8 +87,6 @@
 
     export default{
         name: "Filter",
-        props:{filterPros: String},
-        emits: ['filter-set'],
         data(){
             return{
                 filterSort: [

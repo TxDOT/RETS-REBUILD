@@ -13,7 +13,7 @@
             <v-autocomplete :items="userRole" item-title="name" item-value="value" label="District Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.DIST_ANALYST"></v-autocomplete>
         </v-row>
         <v-row>
-            <v-autocomplete :items="districtMetadata" item-title="name" item-value="value" return-object label="District" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.DIST_NM"></v-autocomplete>
+            <v-autocomplete :items="districtMetadata" item-title="name" item-value="value" label="District" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.DIST_NM"></v-autocomplete>
         </v-row>
         <v-row>
             <v-autocomplete :items="countyMetadata" item-title="name" item-value="value" label="County" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.CNTY_NM"></v-autocomplete>

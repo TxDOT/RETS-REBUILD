@@ -1,7 +1,8 @@
 import { reactive } from 'vue';
 import { appConstants } from '../common/constant';
 import {sendChatHistory} from './crud.js'
-import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapActivityFeed} from './utility.js'
+import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapActivityFeed, retsLayerView, returnTopHistory} from './utility.js'
+import { retsLayer } from './map-Init.js';
 
 export const store = reactive({
         count: 0,
@@ -26,9 +27,12 @@ export const store = reactive({
         showSelected:[],
         userRetsFlag: [],
         archiveRetsData: [],
+        zoomInToEnable: true,
+        zoomInText: "Move RETS Point",
         archiveRetsDataString: "",
         roadObj: [],
         retsObj: [],
+        updateRetsSearch:[],
         updatedRetsPtName: "",
         loggedInUser:"",
         isAttachedActive: false,
@@ -99,28 +103,26 @@ export const store = reactive({
                 }
 
         },
-        async addNote(cmnt, isAttach){
+        async addNote(cmnt, isAttach, isExpand){
                 const date = new Date()
                 const newHistory = {RETS_ID: this.historyRetsId, CMNT: cmnt, CMNT_NM: `${appConstants.defaultUserValue[0].value}`, SYS_GEN: 0, CREATE_DT: date, EDIT_DT: date }
                 try{
+                        console.log(newHistory)
                         await sendChatHistory(newHistory, "add")
                        
                         const returnComments = await getCmntOID(newHistory.RETS_ID)
-
+                        console.log(returnComments)
                         store.addNoteOid = returnComments.features[0].attributes.OBJECTID
-                        newHistory.OBJECTID = returnComments.features[0].attributes.OBJECTID
+                        newHistory.OBJECTID = isExpand ? `${returnComments.features[0].attributes.OBJECTID}Expand` : returnComments.features[0].attributes.OBJECTID
                         if(isAttach){
                                 const oid = returnComments.features[0].attributes.OBJECTID
                                 addAttachments(oid, store.attachment, true)
                                 newHistory.attachments = []
                                 Array.from(store.attachment).forEach(x => newHistory.attachments.push({name: x.name}))
+                                store.attachment = []
                         }
                         this.historyChat.push(newHistory)
-                        let divA = document.getElementById("chatDiv") 
-                        let divB = document.getElementById("chatDivExpand")?.parentElement?.lastElementChild
-                        divA.scrollIntoView({ behavior: 'smooth', block: 'start'})
-                        divB?.scrollIntoView({ behavior: 'smooth', block: 'end'})
-
+                        console.log(this.historyChat)
                 }
                 catch(err){
                         console.log(err)
@@ -137,7 +139,12 @@ export const store = reactive({
                 return findItem
         },
         async deleteNote(oid){
+                console.log(oid)
+                console.log(this.historyChat)
                 const noteIndex = this.historyChat.findIndex(x => x.OBJECTID === oid)
+                if(this.historyChat.at(noteIndex).attachments){
+                        store.numAttachments -= 1
+                }
                 this.historyChat.splice(noteIndex, 1)
                 await sendChatHistory({"OBJECTID": oid}, "delete")
                 return
@@ -154,7 +161,7 @@ export const store = reactive({
         },
         async sendHistoryToFeatLayer(chatObj){
                 await sendChatHistory(chatObj, "add")
-                const getCMNT = await getQueryLayer({"whereString": `RETS_ID = ${chatObj.RETS_ID}` }, "CREATE_DT DESC")
+                const getCMNT = await getQueryLayer({"whereString": `RETS_ID = ${chatObj.RETS_ID}`, "queryLayer": "retsLayer" }, "CREATE_DT DESC")
                 const comment = getCMNT.features.find(x => x.attributes.CMNT === chatObj.CMNT)
                 chatObj.OBJECTID = comment.attributes.OBJECTID
                 this.isHistNotesEmpty = false
@@ -187,28 +194,42 @@ export const store = reactive({
                 this.loggedInUser = userid
                 const queryString = {"whereString": appConstants['defaultQuery'](userid), "queryLayer": "retsLayer"}
                 const orderField = "EDIT_DT DESC, PRIO"
-                getQueryLayer(queryString, orderField)
-                .then(obj => {
-                    if(obj.features.length){
-                        obj.features.forEach((x) => {
-                            x.attributes.flagColor = this.setFlagColor(x.attributes)
-                            x.attributes.DFO = x.attributes.DFO ? x.attributes.DFO.toFixed(3) : x.attributes.DFO
-                            x.attributes.visibilty = "flex"
-                            this.roadObj.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
-                            store.archiveRetsData.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
-                        })
-                        return
-                    }
-                    this.isDetailsPage = false
-                    this.isNoRets = true
-                    })
-                .catch((err)=> console.log(err)) 
+                const obj = await getQueryLayer(queryString, orderField)
+                try{
+                        if(obj.features.length){
+                                obj.features.forEach((x) => {
+                                        x.attributes.flagColor = this.setFlagColor(x.attributes)
+                                        x.attributes.CREATE_NM = this.returnUserName(x.attributes.CREATE_NM)
+                                        x.attributes.EDIT_NM = this.returnUserName(x.attributes.EDIT_NM)
+                                        x.attributes.CREATE_DT = this.returnDateFormat(x.attributes.CREATE_DT)
+                                        x.attributes.EDIT_DT = this.returnDateFormat(x.attributes.EDIT_DT)
+                                        x.attributes.mdiaccountmultiplecheck = this.isAssigned(x.attributes)
+                                        x.attributes.mdiaccountgroup = this.isMOTxDOTConnct(x.attributes.ACTV)
+                                        x.attributes.mdipencilboxoutline = this.isRequest(x.attributes.ACTV)
+                                        x.attributes.mdialarm = this.isDeadline(x.attributes.DEADLINE)
+                                        x.attributes.mdicheckdecagramoutline = this.isComplete(x.attributes.STAT)
+                                        x.attributes.mditimersand = this.isNoActivity(x.attributes.STAT, x.attributes.EDIT_DT)
+                                        x.attributes.mdiexclamation = this.isPrio(x.attributes.PRIO)
+                                        x.attributes.DFO = x.attributes.DFO ? x.attributes.DFO.toFixed(3) : x.attributes.DFO
+                                        
+                                        this.roadObj.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
+                                        store.archiveRetsData.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
+                                    })
+                                    return
+                                }
+                                this.isDetailsPage = false
+                                this.isNoRets = true
+                }
+                
+                catch(err){
+
+                }    
         },
         setFilterFeed(){
                 filterMapActivityFeed(this.filter)
                         .then((resp) => {
                                 this.roadObj = []
-                                const query = {"whereString": `${resp}`, "queryLayer": "retsLayer"}
+                                const query = {"whereString": `${resp}`, "queryLayer": "retsLayerLayerView"}
                                 const orderField = `${this.filter.createDt.filter} ${this.filter.createDt.sortType}`
                                 
                                 getQueryLayer(query, orderField)
@@ -216,12 +237,17 @@ export const store = reactive({
                                         if(obj.features.length){
                                             obj.features.forEach((x) => {
                                                 x.attributes.flagColor = this.setFlagColor(x.attributes)
-                                                if(store.isShowSelected){
-                                                    x.attributes.visibilty = store.roadHighlightObj.includes(String(x.attributes.RETS_ID).concat('-',x.attributes.OBJECTID)) ? "flex" : "none" 
-                                                }
-                                                else{
-                                                    x.attributes.visibilty = "flex"
-                                                }
+                                                x.attributes.CREATE_NM = this.returnUserName(x.attributes.CREATE_NM)
+                                                x.attributes.EDIT_NM = this.returnUserName(x.attributes.EDIT_NM)
+                                                x.attributes.CREATE_DT = this.returnDateFormat(x.attributes.CREATE_DT)
+                                                x.attributes.EDIT_DT = this.returnDateFormat(x.attributes.EDIT_DT)
+                                                x.attributes.mdiaccountmultiplecheck = this.isAssigned(x.attributes.ASSIGNED_TO)
+                                                x.attributes.mdiaccountgroup = this.isMOTxDOTConnct(x.attributes.ACTV)
+                                                x.attributes.mdipencilboxoutline = this.isRequest(x.attributes.ACTV)
+                                                x.attributes.mdialarm = this.isDeadline(x.attributes.DEADLINE)
+                                                x.attributes.mdicheckdecagramoutline = this.isComplete(x.attributes.STAT)
+                                                x.attributes.mditimersand = this.isNoActivity(x.attributes.STAT, x.attributes.EDIT_DT)
+                                                x.attributes.mdiexclamation = this.isPrio(x.attributes.PRIO)
                                                 this.roadObj.push({attributes:x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                                                 
                                             })
@@ -242,21 +268,37 @@ export const store = reactive({
                 this.roadObj.push(ret)
                 this.roadObj.sort((a,b) => b.attributes.EDIT_DT - a.attributes.EDIT_DT)
         },
-        updateRetsID(){
+        async updateRetsID(){
                 //find updated rets
                 //find rets in roadObj and update that index
                 
                 const resp = `RETS_ID = ${this.retsObj.attributes.RETS_ID}`
                 const query = {"whereString": `${resp}`, "queryLayer": "retsLayer"}
                 const orderField = `${this.CREATE_DT.filter} ${this.CREATE_DT.sortType}`
-                getQueryLayer(query, orderField)
-                        .then(obj => {
+                const obj = await getQueryLayer(query, orderField)
+                        
                                 if(obj.features.length){
                                         const updateItem = {attributes: obj.features[0].attributes, geometry: [obj.features[0].geometry.x, obj.features[0].geometry.y]}
-                                        store.retsObj = updateItem
                                         updateItem.attributes.flagColor = this.setFlagColor( obj.features[0].attributes)
+                                        updateItem.attributes.mdiaccountmultiplecheck = this.isAssigned(obj.features[0].attributes.ASSIGNED_TO)
+                                        updateItem.attributes.mdiaccountgroup = this.isMOTxDOTConnct(obj.features[0].attributes.ACTV)
+                                        updateItem.attributes.mdipencilboxoutline = this.isRequest(obj.features[0].attributes.ACTV)
+                                        updateItem.attributes.mdialarm = this.isDeadline(obj.features[0].attributes.DEADLINE)
+                                        updateItem.attributes.mdicheckdecagramoutline = this.isComplete(obj.features[0].attributes.STAT)
+                                        updateItem.attributes.mditimersand = this.isNoActivity(obj.features[0].attributes.STAT, obj.features[0].attributes.EDIT_DT)
+                                        updateItem.attributes.mdiexclamation = this.isPrio(obj.features[0].attributes.PRIO)
+                                        this.retsObj = updateItem
                                         const retsIndex = this.roadObj.findIndex(x => x.attributes.RETS_ID === obj.features[0].attributes.RETS_ID)
-                                        this.roadObj.splice(retsIndex, 1, updateItem)
+                                        console.log(retsIndex)
+                                        if(retsIndex === -1){
+                                                console.log(updateItem)
+                                                this.roadObj.push(updateItem)
+                                        }
+                                        else{
+                                                console.log(updateItem)
+                                                this.roadObj.splice(retsIndex, 1, updateItem)
+                                        }
+                                        
                                         //sort by no activity setting (no activity sand thingy)
                                         this.roadObj.sort((a,b) => b.attributes.EDIT_DT - a.attributes.EDIT_DT)
                                         
@@ -271,10 +313,6 @@ export const store = reactive({
                                 this.isDetailsPage = false
                                 this.isNoRets = true
                                 return
-                            })
-                            .catch((err)=> {
-                                console.log(err)
-                            })
         },
         deleteRetsID(){
                 const findIndex = this.roadObj.findIndex(ret => ret.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
@@ -282,6 +320,83 @@ export const store = reactive({
 
                 const cloneRets = [...this.roadObj]
                 this.archiveRetsData = cloneRets
-        }
+        },
+        returnUserName(n){
+                if(!n) {
+                    return "My name is Null"
+                }
+                const usernameRow = appConstants.userRoles.find(name => name.value === n)
+                return usernameRow?.name ?? 'My name is not in the RESP table :('
+        },
+        returnDateFormat(e){
+                //10/29/2023 09:11am
+                const date = new Date(e)
+                return `${date.toLocaleString('en-US')}`
+        },
+   
+        isAssigned(ASSIGNED_TO){
+                if(ASSIGNED_TO === store.loggedInUser){
+                        return true
+                }
+                return false
+        },
+        isMOTxDOTConnct(ACTV){
+                if(ACTV === "TxDOTConnect" || ACTV === 'Minute Order'){
+                        return true
+                }
+                return false
+        },
+        isRequest(ACTV){
+                if(ACTV === "Request"){
+                        return true
+                }
+                return false
+        },
+        isDeadline(DEADLINE){
+                if(!DEADLINE) return {bool: false, color: "white"}
+                 console.log(DEADLINE)
+                 if(DEADLINE){
+                        const deadlineDate = new Date(DEADLINE)
+                        const todaysDate = new Date()
+                        const oneDay = 24*60*60*1000;
+                        const calcTime = deadlineDate.getTime() - todaysDate.getTime()
+                        const pastDeadline = Math.round(calcTime/oneDay)
+                        if(DEADLINE && pastDeadline < 0){
+                                return {bool: true, color: "red"}
+                        }
+                        return {bool: true, color: "white"}
+                }
+                return {bool: false, color: "white"}
+
+        },
+        isComplete(STAT){
+                if(STAT === 3){
+                        return true
+                }
+                return false
+        },
+        isNoActivity(STAT, EDIT_DT){
+                const editDt = new Date(EDIT_DT)
+                const todayDate = new Date()
+                const oneDay = 24*60*60*1000;
+                const calcTime = todayDate.getTime() - editDt.getTime()
+                const calcDate = Math.round(calcTime/oneDay)
+                
+                if(STAT === 2 && calcDate > 25){
+                        return true
+                }
+                return false
+        },
+        isPrio(PRIO){
+                if(PRIO === 0){
+                        return true
+                }
+                return false
+        },             
+        // async returnTopCMNT(retsID){
+        //         const topCMNT = returnTopHistory(retsID)
+        //         top.CMNT.features.map(cmnt => ``)
+        // }
+
 
 })

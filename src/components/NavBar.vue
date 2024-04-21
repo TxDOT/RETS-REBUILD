@@ -131,22 +131,21 @@
 
     </v-card>
 
-    <RetsCards/>
+ 
     
 
 </template>
 
 <script>
-    import RetsCards from '../components/RetsFeedCards.vue';
+
     import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass} from '../components/map-Init.js';
-    import {addRETSPT} from '../components/crud.js'
     import { createtool, selecttool, togglemenu, logoutUser  } from '../components/utility.js';
     import { vuetify } from '../main.js';
 
+    
+
     export default{
-        components: {RetsCards},
-        name: "RetsFeed",
-        props: {addrets: Number},
+        name: "NavBar",
         data(){
             return{
                 shiftmap: false,
@@ -155,7 +154,6 @@
                 switchValue : false,
                 isActOpen: true,
                 shift: 200,
-                addrets2: null,
                 basemapcard: false,
                 jumptocard:false,
                 tester: false,
@@ -217,7 +215,7 @@
                                 },
                                {title:"Legend", icon: 'mdi-format-list-bulleted-type', color: "white", name: "Legend", action: () =>{
                                 this.handleLegendTool();
-                                //this.addrets2 = 2
+
                                },
                                hover:(i) => 
                                     {
@@ -339,18 +337,7 @@
                     mouseleavejumpto(){
                         this.jumptocard = false;
                     },
-                    async processAddPt(newPointGraphic){
-                        //handleaddrets(newPointGraphic);
-                        try{
-                            const obj = await addRETSPT(newPointGraphic)
-                            const objectid = obj.addFeatureResults[0].objectId
-                            this.addrets2 = objectid
-                            return
-                        }
-                        catch(err){
-                            console.log(err)
-                        }
-                    },
+
                     async handleCreateTool() {
                         if (this.isCreateEnabled === true) {
                             this.isCreateEnabled = !this.isCreateEnabled;
@@ -685,7 +672,7 @@
     left: 0px !important;
 
     width: 100% !important;
-    transform: translate(0px) /* Transformed position */
+    transform: translate(0px) 
 }
 
 

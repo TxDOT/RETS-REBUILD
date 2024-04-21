@@ -1,7 +1,7 @@
 import { retsLayer, DFOProducer, retsHistory, flagRetsColor } from "./map-Init";
 import Graphic from "@arcgis/core/Graphic.js";
 import Query from "@arcgis/core/rest/support/Query";
-import {store} from './store'
+import { appConstants } from "../common/constant";
 
 export async function addRETSPT(retsObj){
     //retsObj.attributes.ACTV = retsObj.attributes.ACTV.value
@@ -9,12 +9,15 @@ export async function addRETSPT(retsObj){
         addFeatures: [retsObj]
     })
 }
-
+function removeUnnecessaryFields(obj){
+    
+    return obj
+}
 export async function updateRETSPT(retsObj){
     if(retsObj.attributes.RELATED_RETS){
         retsObj.attributes.RELATED_RETS = retsObj.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID).toString()
     }
-    retsObj.attributes.ACTV = !retsObj.attributes.ACTV ? null : retsObj.attributes.ACTV
+
     const createGeo = {
         type: "point",
         x: retsObj.geometry.x ? retsObj.geometry.x : retsObj.geometry[0],
@@ -23,12 +26,30 @@ export async function updateRETSPT(retsObj){
 
     let setNoRTE = retsObj.attributes.NO_RTE === true ? 1 : 0
     retsObj.attributes.NO_RTE = setNoRTE
+    const copyRetsObj = JSON.stringify(retsObj)
+    const enable = JSON.parse(copyRetsObj)
+    enable.attributes.CREATE_DT = new Date(retsObj.attributes.CREATE_DT).getTime()
+    enable.attributes.EDIT_DT = new Date(retsObj.attributes.EDIT_DT).getTime()
+    console.log(appConstants.userRoles)
+    enable.attributes.EDIT_NM = appConstants.userRoles.find(usr => usr.name === retsObj.attributes.EDIT_NM)?.value ?? retsObj.attributes.EDIT_NM
+    delete enable.attributes?.retsPt
+    delete enable.attributes?.STATUS
+    delete enable.attributes?.index
+    delete enable.attributes?.logInUser
+    delete enable.attributes?.flagColor 
+    delete enable.attributes?.visibilty
+    delete enable.attributes?.mdiaccountgroup
+    delete enable.attributes?.mdipencilboxoutline
+    delete enable.attributes?.mdialarm
+    delete enable.attributes?.mdicheckdecagramoutline
+    delete enable.attributes?.mditimersand
+    delete enable.attributes?.mdiaccountmultiplecheck
+    delete enable.attributes?.mdiexclamation
 
-    retsObj.attributes.ACTV = retsObj.attributes.ACTV?.value
     postFlagColor(retsObj)
-    let esriUpdateGraphic = createGraphic(retsObj)
+    let esriUpdateGraphic = createGraphic(enable)
     esriUpdateGraphic.geometry = createGeo
-
+    console.log(enable)
     await retsLayer.applyEdits({
         updateFeatures: [esriUpdateGraphic]
     })
@@ -49,11 +70,10 @@ export function deleteRETSPT(retsObj){
 
 
 function createGraphic(retsObj){
-    delete retsObj?.index
-    delete retsObj?.logInUser
-    delete retsObj?.retsPt
-    delete retsObj?.STATUS
-
+    delete retsObj?.attributes?.index
+    delete retsObj?.attributes?.logInUser
+    delete retsObj?.attributes?.retsPt
+    delete retsObj?.attributes?.STATUS
     const creatGraph = new Graphic({
         attributes: retsObj.attributes ?? retsObj
     })

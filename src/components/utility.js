@@ -10,6 +10,54 @@ import esriRequest from "@arcgis/core/request.js";
 import * as geodesicUtils from "@arcgis/core/geometry/support/geodesicUtils.js";
 import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils.js";
 import * as geometryEngine from "@arcgis/core/geometry/geometryEngine.js";
+import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
+
+export let retsLayerView; 
+export let roadLayerView;
+
+export async function getRetsLayerView (){
+        const retLayerView = await view.whenLayerView(retsLayer)
+
+        reactiveUtils.when(
+            () => !retLayerView.dataUpdating,
+            async () => {
+                try{
+                    retsLayerView = retLayerView
+                    if(retsLayerView.view.zoom < 14){
+                        store.zoomInText = "Zoom in to enable"
+                        store.zoomInToEnable = true
+                        return
+                    }
+                    store.zoomInText = "Move RETS Point"
+                    store.zoomInToEnable = false
+                    console.log(retLayerView)
+                    return
+                }
+                catch(err){
+                    console.log(err)
+                }
+            },
+        )
+
+    return
+}
+
+export async function getTxDotRdWayLayerView(){
+    const rdLayerView = await view.whenLayerView(TxDotRoaways)
+
+    reactiveUtils.when(
+        () => !rdLayerView.dataUpdating,
+        async () => {
+            try{
+                roadLayerView = rdLayerView
+                console.log(rdLayerView)
+            }
+            catch(err){
+                console.log(err)
+            }
+        }
+    )
+}
 
 export function clickRetsPoint(){
     try{
@@ -18,9 +66,13 @@ export function clickRetsPoint(){
                 if(!evt.results.length){
                     removeHighlight("a", true)
                     removeAllCardHighlight()
+                    if(store.isSelectEnabled){
+                        store.isShowSelected = false
+                        return
+                    }
                     return
                 }
-                clearRoadHighlightObj()
+                //clearRoadHighlightObj()
                 store.roadHighlightObj.clear()
                 const retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
                 store.roadHighlightObj.add(retsPt)
@@ -43,7 +95,7 @@ export function clickRetsPoint(){
 
 export function hoverRetsPoint(){
     view.on("pointer-move", (event)=>{
-        view.hitTest(event, {include: [retsLayer, retsGraphicLayer, graphics]}).then((evt) =>{
+        view.hitTest(event, {include: [retsLayer, retsGraphicLayer, graphics, TxDotRoaways]}).then((evt) =>{
             if(!evt.results.length){
                 document.getElementById("viewDiv").style.cursor = "default"
                 return
@@ -105,7 +157,7 @@ export function outlineFeedCards(cards){
             document.getElementById(objectcomparison).classList.add('highlight-card')
             //store.roadHighlightObj.add(objectcomparison)
             //zoom to card in feed
-            document.getElementById(objectcomparison).scrollIntoView({behavior: 'smooth'})
+            document.getElementById(objectcomparison).scrollIntoView({ block: 'start', behavior: 'smooth' })
             // const zoomToCard = document.createElement('a')
             // zoomToCard.href = `#${objectcomparison}`
             // zoomToCard.click(preventHashUrl())
@@ -117,27 +169,6 @@ export function outlineFeedCards(cards){
         //res("done too")
         //Sstore.isShowSelected ? toggleHighlightCards(bool) : null
     //})
-}
-
-export async function toggleHighlightCards(bool){
-    const togglePromise = new Promise((res,rej) => {
-        const getCardRows = document.getElementsByClassName("rets-card-row")
-        let i;
-        
-        for(i=0; i < getCardRows.length; i++){
-            if(bool === true){
-                getCardRows[i].style.display = getCardRows[i].lastElementChild.classList.contains("highlight-card") ? "flex" : "none"
-                continue
-            }
-            getCardRows[i].style.display = "flex"
-        }
-        if(!bool){
-            store.roadObj = store.archiveRetsData
-        }
-        res("done")
-        return
-    })
-    return await togglePromise
 }
 
 export function removeAllCardHighlight() {
@@ -170,6 +201,7 @@ export async function filterMapActivityFeed(filterOpt){
     let GIS_ANALYST = []
     let GRID_ANALYST = []
     let DIST_ANALYST = []
+    let ANALYST = []
     let ASSIGNED_TO = []
     let STAT = []
     let DIST_NM = []
@@ -205,9 +237,17 @@ export async function filterMapActivityFeed(filterOpt){
                     }
                 }
                 //(GIS_ANALYST in () and GIS_ANALYST in () and DIST_ANALYST in () OR ASSIGNED_TO in ()) AND STAT (1,2,4) 
-                GIS_ANALYST.length ? fullFilter.push(`(GIS_ANALYST in (${GIS_ANALYST.join(" , ")})`) : null
-                GRID_ANALYST.length ? fullFilter.push(`GRID_ANALYST in (${GRID_ANALYST.join(" , ")})`) : null
-                DIST_ANALYST.length ? fullFilter.push(`DIST_ANALYST in (${DIST_ANALYST.join(" , ")})`) : null
+                //[GIS_ANALYST in () , GIS_ANALYST in () , DIST_ANALYST in ()]
+                GIS_ANALYST.length ? ANALYST.push(`GIS_ANALYST in (${GIS_ANALYST.join(" , ")})`) : null
+                GRID_ANALYST.length ? ANALYST.push(`GRID_ANALYST in (${GRID_ANALYST.join(" , ")})`) : null
+                DIST_ANALYST.length ? ANALYST.push(`DIST_ANALYST in (${DIST_ANALYST.join(" , ")})`) : null
+                let mapAnalyst = ANALYST.map((analyst, index) =>{
+                    if(index === 0){
+                        return `(${analyst}`
+                    }
+                    return analyst
+                })
+                fullFilter = [...fullFilter, ...mapAnalyst]
                 ASSIGNED_TO.length ? fullFilter.push(`OR ASSIGNED_TO in (${ASSIGNED_TO.join(" , ")}))`) : null
             }
             if(key === 'stat' || key === 'distNM' || key === 'cntyNM' || key === 'actv' || key === 'jobType'){
@@ -268,8 +308,13 @@ export async function filterMapActivityFeed(filterOpt){
 
     // }
     const filterMapPromise = new Promise((res, rej) => {
-        retsLayer.definitionExpression = `${newFilter}`
+        retsLayerView.layer.definitionExpression = `${newFilter}`
         res(filterDef)
+    })
+
+    retsLayerView.layer.queryExtent()
+    .then((resp) =>{
+        view.goTo(resp.extent)
     })
     const returnFilterMapPromise = await filterMapPromise
     return newFilter
@@ -305,6 +350,7 @@ export async function filterMapActivityFeed(filterOpt){
 export const getDomainValues = (fieldName) => retsLayer.getFieldDomain(fieldName)
 
 export function getDistinctAttributeValues(field){
+
     const query = new Query()
     query.where = `${field} is not null`
     query.orderByFields = [`${field}`]
@@ -333,7 +379,6 @@ export function processDomainArr(domain){
 }
 
 export function getQueryLayer(newQuery, orderFields, count){
-
     const query = new Query()
     query.where = `${newQuery.whereString}`
     query.orderByFields = [`${orderFields}`]
@@ -341,30 +386,64 @@ export function getQueryLayer(newQuery, orderFields, count){
     query.returnGeometry = true
     query.num = count ??= 20000
 
-    return newQuery.queryLayer === 'retsLayer' ? retsLayer.queryFeatures(query) : retsHistory.queryFeatures(query)
+    if(newQuery.queryLayer === 'retsLayer'){
+        return retsLayer.queryFeatures(query)
+    }
+    if(newQuery.queryLayer === 'retsLayerLayerView'){
+        return retsLayerView.layer.queryFeatures(query)
+    }
+    return retsHistory.queryFeatures(query)
+ 
 }
 
 
 export function searchCards(cardArr, string, searchParam){
     try{
+        const searchString = string.toLowerCase()
+        let s;
+        const acceptedObj = []
+        for(s of cardArr){
+            const createObjKey = Object.values(s)
+            createObjKey.forEach(x => {
+                if(String(x).toLowerCase().includes(searchString)){
+                    acceptedObj.push(s)
+                }
+            })
+
+        }
+        console.log(acceptedObj)
         if(!string.length && !searchParam.isFilters ){
             searchParam.type === 'sortA' ?  cardArr.forEach(x =>  document.getElementById(`${x.attributes ? x.attributes[searchParam.param] : x[searchParam.param]}`).classList.add('showCards')) : cardArr.forEach(x =>  document.getElementById(`${x.attributes ? x.attributes[searchParam.param] : x[searchParam.param]}Expand`).classList.add('showCards'))
             return
         }
-        cardArr.forEach((x) => {
-            const a = !searchParam.isFilters ? Object.values(x.attributes ?? x).find(t => String(t).includes(string)) : x.attachments
-            if(a){
-                searchParam.type === 'sortA' ? document.getElementById(`${x.attributes ? x.attributes[searchParam.param] : x[searchParam.param]}`).classList.add('showCards') : document.getElementById(`${x.attributes ? x.attributes[searchParam.param] : x[searchParam.param]}Expand`).classList.add('showCards')
-            }
-            else{
-                searchParam.type === 'sortA' ? document.getElementById(`${x.attributes ? x.attributes[searchParam.param] : x[searchParam.param]}`).classList.remove('showCards') : document.getElementById(`${x.attributes ? x.attributes[searchParam.param] : x[searchParam.param]}Expand`).classList.remove('showCards')
-                searchParam.type === 'sortA' ? document.getElementById(`${x.attributes ? x.attributes[searchParam.param] : x[searchParam.param]}`).classList.add('hideCards') : document.getElementById(`${x.attributes ? x.attributes[searchParam.param] : x[searchParam.param]}Expand`).classList.add('hideCards')
-            }
-        })
+        // console.log(cardArr)
+        // cardArr.forEach((x) => {
+            // Object.values(x).forEach(s => {
+            //     const toLowerString = String(s).toLowerCase()
+            //     const searchString = string.toLowerCase()
+            //     document.getElementById(`${x.OBJECTID}`).classList.toggle('hideCards', toLowerString.includes(searchString))
+            //     // if(toLowerString.includes(searchString)){
+            //     //     document.getElementById(`${x.OBJECTID}`).classList.add("hideCards")
+            //     //     console.log("cool")
+            //     // }
+            //     // else{
+            //     //     console.log("not cool")
+            //     // }
+               
+            //     //document.getElementById(`${x.attributes.OBJECTID}`).classList.toggle('hideCards', !toLowerString.includes(searchString))
+            // })
+            // // if(a){
+            // //     searchParam.type === 'sortA' ? document.getElementById(`${x.attributes ? x.attributes[searchParam.param] : x[searchParam.param]}`).classList.add('showCards') : document.getElementById(`${x.attributes ? x.attributes[searchParam.param] : x[searchParam.param]}Expand`).classList.add('showCards')
+            // // }
+            // // else{
+            // //     searchParam.type === 'sortA' ? document.getElementById(`${x.attributes ? x.attributes[searchParam.param] : x[searchParam.param]}`).classList.remove('showCards') : document.getElementById(`${x.attributes ? x.attributes[searchParam.param] : x[searchParam.param]}Expand`).classList.remove('showCards')
+            // //     searchParam.type === 'sortA' ? document.getElementById(`${x.attributes ? x.attributes[searchParam.param] : x[searchParam.param]}`).classList.add('hideCards') : document.getElementById(`${x.attributes ? x.attributes[searchParam.param] : x[searchParam.param]}Expand`).classList.add('hideCards')
+            // // }
+        //})
         return
     }
     catch(a){
-        console.warn(a)
+        //console.warn(a)
     }
 
 }
@@ -523,6 +602,7 @@ export async function getUniqueQueryValues(layer, constantsProp){
     query.outFields = ["*"]
     
     const getUserInfo = await layer.queryFeatures(query)
+    console.log(getUserInfo.features)
     getUserInfo.features.forEach(x => constantsProp.push({
         "value" : x.attributes.USERNAME,
         "name": x.attributes.NAME,
@@ -623,7 +703,7 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                         }
                                         outlineFeedCards(store.roadHighlightObj);        
                                         //clearRoadHighlightObj()
-                       
+                                        console.log(store.roadHighlightObj)
                                         return
                                         
                                     }
@@ -706,6 +786,15 @@ export async function handleaddrets(newPointGraphic, addrets){
 export async function getCmntOID(retId){
     const queryString = {"whereString": `RETS_ID = ${retId}`, "queryLayer": "retsHistory"}
     return await getQueryLayer(queryString, "CREATE_DT DESC")
+}
+
+export async function returnTopHistory(retsID){
+    return await retsHistory.queryFeatures({
+        num: 1,
+        where: `RETS_ID = ${retsID}`,
+        outFields:["CMNT", "CMNT_NM", "CREATE_DT"],
+        orderByFields: ["CREATE_DT DESC"]
+    })
 }
 
 export function addAttachments(oid, files, flag){
@@ -796,24 +885,30 @@ export async function createRoadGraphic(retsObj, onStartUp){
     //query for road
     const returnRds = await queryRoads(routeName)
     if(!returnRds.features.length){
-        store.isAlert = !retsObj.attributes.NO_RTE ? false : true
+        store.isAlert = true
         store.alertTextInfo = {"text": `Route and/or DFO are not valid`, "color": "red", "type":"error", "toggle": true}
         store.dfoIndex = "not in range"
         return
     }
     //determine if dfo is on a roadSegment
     const rdSegment = returnRds.features.find((rd) => {
+        console.log(rd)
+        console.log(routeDFO)
         let startM = rd.geometry.paths[0].at(0)[2]
         let endM = rd.geometry.paths[0].at(-1)[2]
         //if on a road segment
         if(routeDFO >= startM && routeDFO <= endM){
             return rd
         }
-        //if not on a road segment range
-        store.isAlert = true
-        store.alertTextInfo = {"text": `DFO is out of Range. Begin DFO: ${startM} End DFO: ${endM}`, "color": "red", "type":"error", "toggle": true}
-        store.dfoIndex = "not in range"
     })
+    
+    //if not on a road segment range
+    if(!rdSegment){
+        store.isAlert = true
+        store.alertTextInfo = {"text": `DFO is out of Range. Begin DFO: ${startM.toFixed(3)} End DFO: ${endM.toFixed(3)}`, "color": "red", "type":"error", "toggle": true}
+        store.dfoIndex = "not in range"
+        return
+    }
 
     drawFeaturedRoad(rdSegment)
     plotRetsPointOnRoad(routeDFO, rdSegment, onStartUp)
@@ -822,8 +917,7 @@ export async function createRoadGraphic(retsObj, onStartUp){
 }
 
 async function queryRoads(rteName){
-    const roadsLayerView = view.allLayerViews._items.find(x => x.layer.title === "TxDOT Roadways")
-    return await roadsLayerView.layer.queryFeatures({
+    return await roadLayerView.layer.queryFeatures({
         where: `RTE_NM = '${rteName}'`,
         returnM: true,
         returnGeometry: true,
@@ -932,9 +1026,10 @@ async function UpdatePt(pt, onStartUp){
 //     console.log(store.retsObj.attributes.DFO)
 //     return Number(Math.round(distance)) === 0 ? false : true
 // }
+export const completeMovePtSketch = () => sketchWidgetcreate.complete()
 
 export function getRoadInformation(){
-    const roadsLayerView = view.allLayerViews._items.find(x => x.layer.title === "TxDOT Roadways")
+    view.cursor = "crosshair"
 
     const createGraphic = new Graphic({
         geometry: {
@@ -947,56 +1042,63 @@ export function getRoadInformation(){
     })
     
     graphics.add(createGraphic)
-    sketchWidgetcreate.update(createGraphic)
+    console.log(store.isMoveRetsPt)
     if(!store.isMoveRetsPt){
-        sketchWidgetcreate.complete()
+        completeMovePtSketch()
         return
     }
-    const rdEvent = view.on(["drag", "pointer-up"], async (event)=>{
-        const hitTest = await view.hitTest(event, {include: [TxDotRoaways]})
+    const rdEvent = view.on(["click", "pointer-move"], async (event)=>{
+        const hitTest = await view.hitTest(event, {include: [roadLayerView.layer]})
         try{
-            if(event.type === "drag" && store.isMoveRetsPt){
+            if(event.type === "pointer-move" && store.isMoveRetsPt){
                 if(hitTest.results.length){
                     store.retsObj.attributes.RTE_NM = hitTest.results[0].graphic.attributes.RTE_NM
-                    return
                 }
             }
-
-            if(event.type === "pointer-up" && store.isMoveRetsPt){
+            
+            if(event.type === "click" && store.isMoveRetsPt){
+                const createMapPts = view.toMap(hitTest.screenPoint)
+                const convertMapPts = webMercatorUtils.webMercatorToGeographic(createMapPts)
+                console.log(convertMapPts)
                 if(hitTest.results.length && (store.retsObj.attributes.NO_RTE === false || store.retsObj.attributes.NO_RTE === 0)){
-                    TxDotRoaways.queryFeatures({
-                        where: `GID = '${hitTest.results[0].graphic.attributes.GID}'`,
+                    roadLayerView.layer.queryFeatures({
+                        where: `GID = ${hitTest.results[0].graphic.attributes.GID}`,
                         returnM: true,
                         returnGeometry: true,
                     })
                         .then((road) =>{
+                            store.retsObj.attributes.RTE_NM = road.features[0].attributes.RTE_NM
                             store.updatedRetsPtName = road.features[0].attributes.RTE_NM
                             const roadConvertToGeo = webMercatorUtils.webMercatorToGeographic(road.features[0].geometry)
-                            const ptConvertToGeo = webMercatorUtils.webMercatorToGeographic(createGraphic.geometry)
-                            const {coordinate, distance, vertexIndex} = geometryEngine.nearestVertex(roadConvertToGeo, ptConvertToGeo)
-                            // console.log(distance)
-                            // console.log(road.features[0].geometry.paths[0].at(vertexIndex))
-                            // console.log(road.features[0].geometry.paths[0].at(vertexIndex+1))
-                            // console.log(road.features[0].geometry.paths[0].at(vertexIndex-1))
+                            
+                            console.log(createGraphic.geometry)
+                            const returnCoord = geometryEngine.nearestCoordinate(roadConvertToGeo, convertMapPts)
+                            console.log(roadConvertToGeo)
 
-                            const newDFO = road.features[0].geometry.paths[0].at(vertexIndex)[2] + distance
+                            const newDFO = buildDFOLines(roadConvertToGeo.paths[0], returnCoord) //roadConvertToGeo.paths[0].at(vertexIndex)[2] + distance
                             store.retsObj.attributes.DFO = newDFO.toFixed(3)
-                            sketchWidgetcreate.complete()
+                            completeMovePtSketch()
+                            store.isMoveRetsPt = false
+                            view.cursor = "default"
                         })
                 }
                 else{
                     const movedRetsPt = graphics.graphics.find(x => x.attributes.RETS_ID === store.retsObj.attributes.RETS_ID && x.geometry.type === "point")
 
                     const ptConvertToGeo = webMercatorUtils.webMercatorToGeographic(movedRetsPt.geometry)
-                    await UpdatePt(ptConvertToGeo, false)
-                    sketchWidgetcreate.complete()
-                    store.isAlert = true
-                    store.alertTextInfo = {"text": `No Route has been detected`, "color": "yellow", "type":"info", "toggle": true}
+                    console.log(ptConvertToGeo)
+                    //await UpdatePt(ptConvertToGeo, false)
+                    completeMovePtSketch()
                     store.isMoveRetsPt = false
+                    view.cursor = "default"
 
                     store.retsObj.attributes.NO_RTE = true
                     store.retsObj.attributes.RTE_NM = null
                     store.retsObj.attributes.DFO = null
+
+                    store.isAlert = true
+                    store.alertTextInfo = {"text": `No Route has been detected`, "color": "yellow", "type":"info", "toggle": true}
+                    store.isMoveRetsPt = false
                 }
 
                 return
@@ -1015,12 +1117,40 @@ export function removeOutline(){
     const classList = document.querySelectorAll('.highlight-card');
     classList.forEach(element => {
     element.classList.remove('highlight-card'); // Remove each element individually
-    });
-    
+    });    
 }
 
 export function logoutUser(){
     esriId.destroyCredentials({
     })
+}
 
+export function buildDFOLines(rd, retsPt){
+    console.log(retsPt)
+    const constructLineA = new Graphic({
+        geometry: {
+            type: "polyline",
+            paths:[
+                rd.at(retsPt.vertexIndex),
+                rd.at(retsPt.vertexIndex+1)
+            ]
+        }
+    })
+
+    const constructLineB = new Graphic({
+        geometry: {
+            type: "polyline",
+            paths: [
+                rd.at(retsPt.vertexIndex),
+                rd.at(retsPt.vertexIndex-1)
+            ]
+        }
+    })
+
+    const distance = geometryEngine.intersects(constructLineA.geometry, retsPt.coordinate) ? rd.at(retsPt.vertexIndex)[2] + retsPt.distance : rd.at(retsPt.vertexIndex)[2] - retsPt.distance
+    console.log(distance)
+    console.log(geometryEngine.intersects(constructLineA.geometry, retsPt.coordinate))
+    console.log(geometryEngine.intersects(constructLineB.geometry, retsPt.coordinate))
+
+    return distance
 }

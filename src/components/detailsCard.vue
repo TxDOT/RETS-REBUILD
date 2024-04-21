@@ -15,13 +15,20 @@
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom: 1.3rem; height: 70px; padding-bottom: 0% !important;" >
             <v-col cols="3" offset="0" style="position: relative; bottom: 5px !important;">
-                <v-text-field label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.isDisableValidations ? [valueRequired] : [] " id="route"></v-text-field>
+                <v-text-field label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.isDisableValidations ? [valueRequired] : false " id="route"></v-text-field>
             </v-col>
             <v-col cols="4" offset="4">
-                <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" v-model="store.retsObj.attributes.DFO" :rules="!store.isDisableValidations ? [onlyNumbers]: []" @update:model-value="onlyNumbers(store.retsObj.attributes.DFO)">
-                    <template v-slot:append-inner >
-                        <v-btn id="dfoCrosshair" variant="plain" density="compact" class="number-field-icon" v-model="isCrossHair" @click="crossHairFunc"><v-icon icon="mdi-drag-variant" small></v-icon></v-btn>
-                    </template>
+                <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" v-model="store.retsObj.attributes.DFO" :rules="onlyNumbers" @update:model-value="onlyNumberss(store.retsObj.attributes.DFO)">
+                        <template v-slot:append-inner>
+                            <v-tooltip :text="store.zoomInText" location="top">
+                                <template v-slot:activator="{props}">
+                                    <div v-bind="props">
+                                        <v-btn id="dfoCrosshair"  variant="plain" density="compact" class="number-field-icon" v-model="isCrossHair" @click="crossHairFunc" :disabled="store.zoomInToEnable"><v-icon :icon="!store.isMoveRetsPt ? 'mdi-drag-variant' : 'mdi-close'" small ></v-icon></v-btn>
+                                    </div>
+                                </template>
+                            </v-tooltip>
+                        </template>
+                    
                 </v-text-field>
             </v-col>
         </v-row>
@@ -106,7 +113,7 @@
 
 <script>
 import { appConstants } from '../common/constant'
-import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets, zoomTo, createRoadGraphic, getRoadInformation} from './utility.js'
+import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets, zoomTo, createRoadGraphic, getRoadInformation, completeMovePtSketch} from './utility.js'
 
 import {store} from './store.js'
     export default{
@@ -131,7 +138,16 @@ import {store} from './store.js'
                 typeTimeout: null,
                 isCrossHair: false,
                 retsRouteArchive: {},
-                removeListner: {}
+                removeListner: {},
+                onlyNumbers: [
+                    value =>{
+                        if(!value) return false
+                        const num = Number(value)
+                        if(!/[\d]/.test(num) && !store.retsObj.attributes.NO_RTE ) return `Whoa! Numbers are more my vibe!`
+                        if(!value.length && !store.retsObj.attributes.NO_RTE ) return `But where am I? Don't leave me blank!`
+                        
+                    }
+                ]
             }
         },
         beforeMount(){
@@ -142,20 +158,31 @@ import {store} from './store.js'
             this.ogValues = store.retsObj
             const milliDate = new Date(store.retsObj.attributes.DEADLINE)
             this.datePicker = this.returnDateFormat(milliDate)
-            store.retsObj.attributes.NO_RTE = store.retsObj.attributes.NO_RTE === 0 || store.retsObj.attributes.NO_RTE === -1 ? false : true
+            
+            store.retsObj.attributes.NO_RTE = this.convertNoRTE(store.retsObj.attributes.NO_RTE)
             if(store.retsObj.attributes.NO_RTE === true){
                 store.isAlert = false
                 store.isDisableValidations = true
                 store.retsObj.attributes.NO_RTE = true
+                return
             }
-            this.initDataCheck()
+            //this.initDataCheck()
             this.retsRouteArchive = JSON.parse(store.archiveRetsDataString)
             createRoadGraphic(store.retsObj, true)
         },
         methods:{
+            convertNoRTE(noRte){
+                if(noRte === 0 || noRte === -1){
+                    return false
+                }
+                if(noRte === 1){
+                    return true
+                }
+                return noRte
+            },
             disableACTVNum(actv){
                 if(!actv) return true
-                if(actv.value === 'Minute Order' || actv.value === 'TxDOTConnect'){
+                if((actv?.value ?? actv) === 'Minute Order' || (actv?.value ?? actv) === 'TxDOTConnect'){
                     return false
                 }
                 return true
@@ -208,6 +235,7 @@ import {store} from './store.js'
                 }
                 store.isAlert = false
                 store.isSaveBtnDisable = false
+                return false
             },
             valueRequired(e){
                 if(e === null) return false
@@ -217,28 +245,35 @@ import {store} from './store.js'
                 }
                 store.isSaveBtnDisable = false
                 
-                return true
+                return false
             },
             sendDisabledSave(bool){
                 this.$emit("disable-save", bool)
             },
-           onlyNumbers(i){
+           onlyNumberss(i, event){
+                if(store.isDisableValidations) return true
                 if(!i){
+                    console.log(i)
                     store.isSaveBtnDisable = true
                     return `But where am I? Don't leave me blank!`
                 }
                 if(!store.retsObj.attributes.NO_RTE){
+                    console.log(i)
                     let convert = Number(i)
 
                     if(!convert){
+                        console.log(i)
                         store.isSaveBtnDisable = true
                         return `Whoa! Numbers are more my vibe!`
                     }
                     //createRoadGraphic(store.retsObj)
-                    return store.isSaveBtnDisable = false
+                    console.log(i)
+                    store.isSaveBtnDisable = false
+                    return false
                 }
-                
-                return store.isSaveBtnDisable = false
+                console.log(i)
+                store.isSaveBtnDisable = false
+                return false
                 
             },
             paperClipFunc(){
@@ -247,11 +282,13 @@ import {store} from './store.js'
             },
             crossHairFunc(){
                 store.isMoveRetsPt = !store.isMoveRetsPt
+                console.log(store.isMoveRetsPt)
                 if(store.isMoveRetsPt){
                     this.removeListner = getRoadInformation()
                     return
                 }
                 this.removeListner.remove()
+                completeMovePtSketch()
                     //getPointRoadInteraction(store.retsObj)
                     //store.isMoveRetsPt = true
                     return
@@ -336,6 +373,7 @@ import {store} from './store.js'
             },
             'store.retsObj.attributes.NO_RTE':{
                 handler: function(){
+                    console.log(store.retsObj.attributes.NO_RTE)
                     if(store.retsObj.attributes.NO_RTE){
                         store.isDisableValidations = true
                         store.isSaveBtnDisable = false
@@ -354,11 +392,11 @@ import {store} from './store.js'
                     if(a === null){
                         a = ""
                     }
-                    if(!a.length) return
+                    if(!a.length || !Number(a)) return
                     if(Number(a) === b) return
                     const ogDFO = this.retsRouteArchive
                     clearTimeout(this.typeTimeout)
-                    if(Number(a) !== ogDFO && !store.retsObj.attributes.NO_RTE){
+                    if(Number(a) !== ogDFO && !store.retsObj.attributes.NO_RTE && !store.isMoveRetsPt){
                         this.typeTimeout = setTimeout(()=>{
                             createRoadGraphic(store.retsObj, false)
                         },900)

@@ -14,12 +14,13 @@
 import {view} from './map-Init.js'
 import {home, hoverRetsPoint} from './utility.js'
 import {store} from './store.js'
-import detailsAlert from './detailsAlert.vue'
+
 // import ShowChanges from './showChanges.vue'
 //import ESRI JS ESM class
+import { defineAsyncComponent } from 'vue'
 export default{
     name: "Map",
-    components: {detailsAlert},
+    components: {detailsAlert: defineAsyncComponent(()=>import('./detailsAlert.vue'))},
     data(){
         return{
           store

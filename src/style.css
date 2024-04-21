@@ -33,7 +33,6 @@
   padding: 50px;
   margin-right: 10px;
   margin-left: 10px;
-  /* background-color: transparent !important; */
 }
 
 .secondary-button{
@@ -52,9 +51,7 @@
   margin-right: 19px !important;
   margin-left: 0px !important;
 }
-/* .secondary-button{
-  color: white
-} */
+
 .card{
     margin: 0px !important;
     width: 98% !important;
@@ -146,7 +143,7 @@
 }
 .retsSubtitle{
   position: relative;
-  width: 30%;
+  width: 170px;
   max-height: 50px;
   bottom: 1rem;
   margin-left: 10px;
