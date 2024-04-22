@@ -1,11 +1,8 @@
-
-
-
 <template style="overflow-y:hidden;">
 
     <v-navigation-drawer width="200" height="100" permanent color="black">
         <v-list height="100%" id="icons-top" class="iconList">
-            <v-list-item class="iconList-item" v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" :active-class="tool.name !== 'Menu' ? 'btn-left-brder' : ''" >    
+            <v-list-item class="iconList-item"  id="popoutitems" v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" >    
                 <v-tooltip location="right bottom" :text=tool.name >
                     <template v-slot:activator="{ props}">
                         <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
@@ -15,21 +12,19 @@
             </v-list-item>
         </v-list>
         <v-list id="icons-bottom" class="iconList">
-            <v-list-item class="iconList-item" v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" :active-class="tool.name !== 'Jump To' && tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
+            <v-list-item id="popoutitems" class="iconList-item" v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" :active-class="tool.name !== 'Jump To' && tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
                 <template v-if="tool.name != 'Basemaps' && tool.name != 'Jump To'">
                     <v-tooltip location="right" :text="tool.name">
                             <template v-slot:activator="{ props }">
-                                <v-list-item-content id="iconcontent">
-                                    <v-icon class="iconwidth" size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
-                                </v-list-item-content>
+                                <div id="iconcontent">
+                                    <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
+                                </div>
                             </template>
                         
                     </v-tooltip>
                 </template>
                 <template v-else>
-                    <v-list-item-content>
                         <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
-                    </v-list-item-content>
                 </template>
             </v-list-item>
         </v-list>
@@ -93,7 +88,7 @@
             <hr id = "separator"/>
         <v-card-item id = "darkmodeitem" >
             <div id = "darkmodeswitch">
-                        <v-switch  v-model="switchValueDark" label="Dark Mode" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn"></v-switch>
+                <v-switch  v-model="switchValueDark" label="Dark Mode" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn" disabled></v-switch>
             </div>
              
         </v-card-item>
@@ -105,7 +100,7 @@
                 Send notifications for: <br>
                 <div id="notiswitches">
                     <v-card-item v-for="(item, index) in switches" :key="index" :id="'switch-container-' + index" class="switch-item">
-                        <v-switch  v-model="item.value" :label="item.label" color="primary" :style="switchStyle(item.fontColor)" @change="switchTurnedOn(index)"></v-switch>
+                        <v-switch  v-model="item.value" :label="item.label" color="primary" :style="switchStyle(item.fontColor)" @change="switchTurnedOn(index)" disabled></v-switch>
                     </v-card-item>
                 </div>
                 
@@ -141,8 +136,6 @@
     import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass} from '../components/map-Init.js';
     import { createtool, selecttool, togglemenu, logoutUser  } from '../components/utility.js';
     import { vuetify } from '../main.js';
-
-    
 
     export default{
         name: "NavBar",
@@ -183,7 +176,7 @@
                                 color: "#D9D9D9", 
                                 name: "Menu", 
                                 action: () =>{
-                                    document.getElementById("container").style.display = document.getElementById("container").style.display === "none" ? "block" : "none",
+                                    document.getElementById("card-container").style.display = document.getElementById("card-container").style.display === "none" ? "flex" : "none",
                                     //this.resizemap();
                                     this.shiftDiv();
                                 }, 
@@ -273,7 +266,7 @@
 
 
                         //elements[0].classList.toggle('esri-view-surface');
-                        const viewSurface = document.querySelector('.esri-view-surface');
+                        const viewSurface = document.querySelector('.esri-view');
                         viewSurface.classList.toggle('translateX-500px');
 
                     },
@@ -456,6 +449,10 @@
         cursor: pointer;
         background-color: rgba(128,128,128,.3);
     }
+
+    #popoutitems .v-list-item__overlay {
+        color: transparent;
+    }
   
    #iconcontent  {
     position: absolute;
@@ -534,8 +531,8 @@
     #containersettings{
         position: absolute;
         width: 400px;
-        bottom: 10rem;
-        left: 50%;
+        top: 13%;
+        left: 118vh;
         z-index: 9999;
         border-radius: 0px;
         
@@ -661,19 +658,18 @@
         left: -5%;
     }
 
-    .esri-view-surface {
-    width: calc(100% - 400px) !important;
-    transform: translate(400px);
-    transition: transform 0.1s ease;
-    left: 0px;
-}
+    .esri-view {
+        width: calc(100% - 555px) !important;
+        transform: translate(555px);
+        transition: transform 0.1s ease;
+        left: 0px;
+    }
 
-.translateX-500px {
-    left: 0px !important;
-
-    width: 100% !important;
-    transform: translate(0px) 
-}
+    .translateX-500px {
+        left: 0px !important;
+        width: 100% !important;
+        transform: translate(0px) 
+    }
 
 
  

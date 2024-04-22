@@ -1,4 +1,3 @@
-//import ESRI JS ESM classes
 import Map from "@arcgis/core/Map.js";
 import MapView from "@arcgis/core/views/MapView.js";
 import VectorTileLayer from "@arcgis/core/layers/VectorTileLayer.js"
@@ -22,7 +21,28 @@ import LegendViewModel from "@arcgis/core/widgets/Legend/LegendViewModel";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import Graphic from "@arcgis/core/Graphic";
 import { outlineFeedCards, removeOutline, removeHighlight, home} from "./utility.js";
+import Extent from "@arcgis/core/geometry/Extent.js";
 
+
+
+export const texasExtent = new Extent({
+  // xmin:-106.645646,
+  // ymin:25.837163,
+  // xmax:-93.507217,
+  // ymax:36.500695,
+
+  xmin: -91.38737499794775,
+  ymin: 24.375094465969866,
+  xmax: -108.18225494002854,
+  ymax: 38.26802942526595,
+
+  // xmin:25.7364986,
+  // ymin:-109.1882887,
+  // xmax:36.6130878,
+  // ymax:-90.9737028,
+
+
+})
 
 
 export let retsPointRenderer = new UniqueValueRenderer({
@@ -281,12 +301,12 @@ export const texasCities = new FeatureLayer({
 //TxDotRoaways Layer construction
 export const TxDotRoaways = new FeatureLayer ({
   url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Roadways/FeatureServer/0",
-  visible: false,
+  visible: true,
   renderer: roadwaysRenderer,
   outFields: ["*"],
   returnM: true,
-  hasM: true
-  //definitionExpression: `RTE_PRFX = 'IH'`
+  hasM: true,
+  definitionExpression: `RTE_PRFX = 'IH'`
 })
 
 //RETS History
@@ -384,6 +404,9 @@ export const view = new MapView({
     lods: TileInfo.create().lods, //property to allow a mapview center to the imagery basemap
     rotationEnabled: false,
   },
+  navigation: {
+    mouseWheelZoomEnabled: true,
+  },
   
 })
 
@@ -465,7 +488,7 @@ export const searchWidget = new Search({
       displayField: "ACTV_NBR",
       exactMatch: false,
       outFields: ["ACTV_NBR"],
-      minSuggestCharacters: 4,
+      minSuggestCharacters: 3,
       maxSuggestions: 3,
       
     },
@@ -678,4 +701,7 @@ view.watch("scale", function(newValue) {
 view.ui.remove("attribution")
 // </></>
 
-//create RETS FeatureLayerView
+// view.constraints = {
+//   geometry: texasExtent,
+//   rotationEnabled: false // Disables map rotation
+// };

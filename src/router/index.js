@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
-    { path: '/apps/statewide_mapping/rets_rebuild/login', name:"Inital", component: () => import('../views/initial.vue')},
-    { path: '/apps/statewide_mapping/rets_rebuild/map', name:"Map", component: () => import('../views/mapContainer.vue')}
+    { path: `${import.meta.env.BASE_URL}login`, name:"Inital", component: () => import('../views/initial.vue')},
+    { path: `${import.meta.env.BASE_URL}map`, name:"Map", component: () => import('../views/mapContainer.vue')}
 ]
   
   const router = createRouter({

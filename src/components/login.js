@@ -59,7 +59,7 @@ async function signIn(){
       return retsLayer.queryExtent();
     })
     .then((response) => {
-      router.push('/apps/statewide_mapping/rets_rebuild/map')
+      router.push({name: "Map"})
       getRetsLayerView()
       getTxDotRdWayLayerView()
       view.when(function(){

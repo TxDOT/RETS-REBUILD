@@ -32,7 +32,7 @@ export default{
   watch:{
     auth:{
       handler: function(){
-        this.$router.push('/apps/statewide_mapping/rets_rebuild/login')
+        this.$router.push({name: "Inital"})
       },
       immediate: true,
     }
@@ -46,6 +46,7 @@ export default{
 
 #app{
   overflow-y: hidden !important;
+  top: 0px;
 }
 
 

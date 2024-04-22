@@ -5,7 +5,7 @@
         <div id="search">
             <v-text-field class="search-history" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" append-inner-icon="mdi-close" density="compact" v-model="searchHistoryFilter" variant="plain" elevation="0" @click:append-inner="clearContent"></v-text-field>
         </div>
-        <div style="position: relative; bottom: 2rem;">
+        <div style="position: relative; bottom: 2rem; left: 43px;">
                 <v-btn variant="plain" density="compact" style="font-size: 10px; float: right; position: relative; top:7px; margin:0%; padding: 0%; padding:0px 10px 0px 10px; margin-right: 10px; margin-bottom: 0px" @click="queryAttachments" :disabled="store.numAttachments === 0" v-model="isAttachedActive" :active="isAttachedActive" active-class="active-button">
                     <template v-slot:prepend>
                         <v-icon icon="mdi-filter"></v-icon>
@@ -20,17 +20,31 @@
             <v-progress-circular indeterminate v-if="isHistNotesEmpty"></v-progress-circular>
                 <div v-for="(note, i) in histNotes" :key="note.OBJECTID" track-by="OBJECTID" v-if="!isHistNotesEmpty">
                     <v-banner :id="`${note.OBJECTID}Expand`" v-model="note[i]" density="compact" style="padding: 0px; padding-left: 5px; border-left: 3px solid #4472C4 !important;">
-                        <v-banner-text>
-                            <span v-if="note.PARENT_ID" style="margin:0% !important; "> <p id="replyingToCmnt">Replying to "{{store.historyChat.find(x => x.OBJECTID === note.PARENT_ID)?.CMNT ?? "Referenced Note has been deleted"}}"</p></span>
-                            <v-text-field style="width:100%; position: relative; width: 40rem !important; height: 2rem; margin:0% !important; z-index:9999;" density="compact" variant="plain" :disabled="note.OBJECTID !== updateOID" v-model="note.CMNT"  placeholder="Enter Comment"></v-text-field>                                
-                            <span style="font-size: 10px; color: grey; padding-left: 5px;">{{ returnUserName(note.CMNT_NM) }} {{ returnDateFormat(note.CREATE_DT) }} <b v-if="note.CREATE_DT !== note.EDIT_DT && note.SYS_GEN === 0" class="main-color">{{ `Edited ${returnDateFormat(note.EDIT_DT)}` }}</b></span>
-                            <div style="position: relative; bottom: 0rem;" v-if="note.attachments">
-                                <span v-for="attach in note.attachments" style="padding-right: 3px;">
-                                    <v-chip :text="attach.name" color="#4472C4" class="" :closable="editContent && updateOID === note.OBJECTID ? true: false" density="compact" rounded="0" variant="flat" @click="openAttachement(attach.url)" @click:close="deleteAttach(note.OBJECTID, attach.name)"></v-chip>
-                                </span>
+                        <v-banner-text class="mx-auto">
+                            <div>
+                                <div>
+                                    <span v-if="note.PARENT_ID" style="margin:0% !important; ">
+                                            <p id="replyingToCmnt">Replying to "{{store.historyChat.find(x => x.OBJECTID === note.PARENT_ID)?.CMNT ?? "Referenced Note has been deleted"}}"</p>
+                                        </span>
+                                    
+                                </div>
+                                        <v-textarea class="history-note mx-2" rows="1" auto-grow density="compact" variant="plain" :disabled="note.OBJECTID !== updateOID" v-model="note.CMNT"  placeholder="Enter Comment"></v-textarea>
+                                    
+                                    <div style="position: absolute; bottom: 1px;">
+                                        <span style="font-size: 10px; color: grey; padding-left: 2px;">{{ returnUserName(note.CMNT_NM) }} {{ returnDateFormat(note.CREATE_DT) }} <b v-if="note.CREATE_DT !== note.EDIT_DT && note.SYS_GEN === 0" class="main-color">{{ `Edited ${returnDateFormat(note.EDIT_DT)}` }}</b></span>
+                                    </div>
+                                    <div style="position: relative; bottom: 0px;" v-if="note.attachments">
+                                        <span v-for="attach in note.attachments" style="padding-right: 3px;">
+                                            <v-chip :text="attach.name" color="#4472C4" class="" :closable="editContent && updateOID === note.OBJECTID ? true: false" density="compact" rounded="0" variant="flat" @click="openAttachement(attach.url)" @click:close="deleteAttach(note.OBJECTID, attach.name)"></v-chip>
+                                        </span>
+                                    </div>
+                               
+                               
+                                        
                             </div>
+
                         </v-banner-text>
-                        <div v-if="note.SYS_GEN === 0" style="width: 100%; position: absolute;">
+                        <div v-if="note.SYS_GEN === 0" style="width: 11%; position: relative; right: 60px;">
                             <div style="position: relative; float: right; top: 14px; right: 15px;" v-if="note.SYS_GEN === 0">
                                 <v-btn variant="plain" density="compact" icon="mdi-pencil-outline" style="font-size: 13px; bottom: 15px;" @click="openNote(note.CMNT, note.OBJECTID)" :disabled="note.CMNT_NM !== loggedInUserName"></v-btn>
                                 <v-btn variant="plain" density="compact" icon="mdi-reply" style="font-size: 13px; bottom: 15px;" @click="replyNote(note)"></v-btn>
@@ -100,9 +114,9 @@
             async addNote(){
                 await store.addNote(null, false)
                 this.emptyHist = false
-                console.log(store.addNoteOid)
                 this.orderList
-                this.openNote(null, `${store.addNoteOid}Expand`)
+                this.openNote(null, `${store.addNoteOid}`)
+                
             },
             openNote(n, oid){
                 this.editContent = true
@@ -110,11 +124,9 @@
                 this.updateOID = oid
                 this.ogNote = n
                 const oidFlag = `${oid}`    
-                console.log(oidFlag)
-                console.log(document.getElementById(oidFlag))
+                document.getElementById(`${oidFlag}Expand`).classList.add("active-chat-box")
             },
             deleteNote(n,oid){
-                console.log(oid)
                 store.deleteNote(oid)
                 this.orderList
                 if(!this.histNotes.length){
@@ -127,7 +139,7 @@
                 this.editContent = false
                 this.updateOID = findItem.OBJECTID
                 this.updateOID = -1
-                const oidFlag = `${oid}Expand`
+                const oidFlag = `${oid}`
                 document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
             },
             closeNotes(n, notes){
@@ -140,6 +152,7 @@
                 return
             },
             async replyNote(note){
+                this.emptyHist = false
                 const cmnt = null
                 const sortType = "end"
                 const returnOid = await store.replyNote(note, sortType)
@@ -203,8 +216,7 @@
                     try{
                         this.noSearch = false
                         if(!a.length || !a){
-                            this.histNotes = store.historyChat.slice().sort((a,b) => b.CREATE_DT - a.CREATE_DT)
-                            console.log(this.histNotes)
+                            this.histNotes = store.historyChat.slice().sort((a,b) => a.CREATE_DT - b.CREATE_DT)
                             if(!this.histNotes.length){
                                 return this.emptyHist = true
                             }
@@ -230,8 +242,7 @@
                         if(!acceptedObj.length){
                             this.noSearch = true
                         }
-                        console.log(acceptedObj)
-                        this.histNotes = acceptedObj.sort((a,b) => b.CREATE_DT - a.CREATE_DT)
+                        this.histNotes = acceptedObj.sort((a,b) => a.CREATE_DT - b.CREATE_DT)
                     }
                     catch(a){
                         console.log(a)
@@ -242,7 +253,8 @@
             },
             'store.historyChat.length':{
                 handler: function(a,b){
-                    console.log(a,b)
+                    // if(store.historyChat.length) return this.emptyHist = false
+                    // if(!store.historyChat.length) return this.emptyHist = true
                    this.orderList
                 },
                 immediate: true
@@ -250,7 +262,7 @@
         },
         computed:{
             orderList: function(){
-                return this.histNotes = store.historyChat.slice().sort((a,b) => b.CREATE_DT - a.CREATE_DT)
+                return this.histNotes = store.historyChat.slice().sort((a,b) => a.CREATE_DT - b.CREATE_DT)
             }
         }
     }
@@ -270,7 +282,7 @@
         display: flex;
         flex-direction: column;
         min-height: 185px;
-        max-height: 263px;
+        max-height: 239px;
         width: 98.7%;
         overflow-y: auto;
         padding-bottom: 30px;
@@ -324,6 +336,19 @@
         padding-left: 10px;
         padding-right: 10px;
         bottom: 2px;
+    }
+    .history-note{
+        width: 700px;
+        z-index: 9999;
+        /* position: relative; 
+        width: 380px;
+        position: relative;
+        padding-bottom: 4px;
+        display: flex; 
+        flex-direction: column; 
+        min-height: 2px; 
+        max-height: 38px;
+        overflow: hidden; */
     }
 
 </style>

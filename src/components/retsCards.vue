@@ -1,4 +1,7 @@
 <template>
+    <div>
+        <v-text-field v-if="!store.roadObj.length" disabled variant="plain" style="position: relative; left: 15px;">{{store.RetsCardStatus}}</v-text-field>
+    </div>
     <div v-for="(rd, road) in store.updateRetsSearch" :key="rd.attributes.OBJECTID" :id="rd.attributes.OBJECTID" class="rets-card-row">
         <v-btn elevation="0" @click="changeColor(rd.attributes.RETS_ID);" class="flag-btn" size="small" max-width=".5px" density="compact" flat slim variant="plain">
             <template v-slot:prepend>
@@ -6,6 +9,7 @@
             </template>
         </v-btn>
         <div>
+            
             <div class="color-picker" v-if="flagClickedId === rd.attributes.RETS_ID" v-click-outside="closeFlagDiv">
                 <v-icon style="font-size: 13.5px;" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" ></v-icon>
             </div>
@@ -28,43 +32,43 @@
                     <div style="position: relative; top: 17px; height: 40px; z-index: 9999;">
                         <div style="position:relative; width: 100%; height: 10px;">
                             <div style="position:relative; float:right; font-size: 11px; bottom: 5px;">
-                                <v-tooltip text="Assigned to you" location="top" v-memo="[rd.attributes.mdiaccountmultiplecheck]">
+                                <v-tooltip text="Assigned to you" location="top">
                                     <template v-slot:activator="{props}">
                                         <v-icon icon="mdi-account-multiple-check" color="white" v-if="rd.attributes.mdiaccountmultiplecheck === true" class="cardPRIO" v-bind="props"></v-icon>
                                     </template>
                                 </v-tooltip>
 
-                                <v-tooltip text="MO/TxDOT Connect" location="top" v-memo="[rd.attributes.mdiaccountgroup]">
+                                <v-tooltip text="MO/TxDOT Connect" location="top">
                                     <template v-slot:activator="{props}">
                                         <v-icon icon="mdi-account-group" color="white" v-if="rd.attributes.mdiaccountgroup === true" class="cardPRIO" v-bind="props"></v-icon>
                                     </template>
                                 </v-tooltip>
 
-                                <v-tooltip text="District Request" location="top" v-memo="[rd.attributes.mdipencilboxoutline]">
+                                <v-tooltip text="District Request" location="top">
                                     <template v-slot:activator="{props}">
                                         <v-icon icon="mdi-pencil-box-outline" color="white" v-if="rd.attributes.mdipencilboxoutline === true" class="cardPRIO" v-bind="props"></v-icon>
                                     </template>
                                 </v-tooltip>
 
-                                <v-tooltip text="Deadline set (with date)" location="top" v-memo="[rd.attributes['mdialarm'].bool]">
+                                <v-tooltip text="Deadline set (with date)" location="top">
                                     <template v-slot:activator="{props}">
                                         <v-icon icon="mdi-alarm" :color="rd.attributes['mdialarm'].color" v-if="rd.attributes['mdialarm'].bool" class="cardPRIO" v-bind="props"></v-icon>
                                     </template>
                                 </v-tooltip>
 
-                                <v-tooltip text="Job Complete" location="top" v-memo="[rd.attributes.mdicheckdecagramoutline]">
+                                <v-tooltip text="Job Complete" location="top">
                                     <template v-slot:activator="{props}">
                                         <v-icon icon="mdi-check-decagram-outline" color="green" v-if="rd.attributes.mdicheckdecagramoutline === true" class="cardPRIO" v-bind="props"></v-icon>
                                     </template>
                                 </v-tooltip>
 
-                                <v-tooltip text="No activity for (# days)" location="top" v-memo="[rd.attributes.mditimersand]">
+                                <v-tooltip text="No activity for (# days)" location="top">
                                     <template v-slot:activator="{props}">
                                         <v-icon icon="mdi-timer-sand" color="" v-if="rd.attributes.mditimersand === true" class="cardPRIO" v-bind="props"></v-icon>
                                     </template>
                                 </v-tooltip>
 
-                                <v-tooltip text="Priority Job" location="top" v-memo="[rd.attributes.mdiexclamation]">
+                                <v-tooltip text="Priority Job" location="top">
                                     <template v-slot:activator="{props}">
                                         <v-icon icon="mdi-exclamation" color="red" v-if="rd.attributes.mdiexclamation === true" class="cardPRIO" v-bind="props"></v-icon>
                                     </template>
@@ -116,6 +120,7 @@ export default{
             ],
             store,
             flagClickedId: "",
+            isColorPicked: true,
             roads: []
         }
     },
@@ -123,10 +128,14 @@ export default{
         //
     },
     mounted(){
-        console.log("mounted")
         //this.roadsNext
         this.loadData()
         this.retsToGet
+
+        // setTimeout(()=>{
+        //     store.roadObj[1].attributes.mdipencilboxoutline = true
+        //     console.log("check")
+        // },3000)
     },
 
     methods:{
@@ -169,7 +178,6 @@ export default{
             },250)
         },
         double(road, index){
-            console.log(road)
             store.loading = false
             store.archiveRetsDataString = JSON.stringify(road)
             store.historyRetsId = road.attributes.RETS_ID
@@ -263,6 +271,8 @@ export default{
         },
 
         changeColor(id){
+            console.log(this.flagClickedId)
+            console.log(id)
             this.flagClickedId = ""
             this.flagClickedId = id
             this.isColorPicked = true;
@@ -272,16 +282,12 @@ export default{
     watch:{
         'store.isShowSelected':{
             handler: function(){
-                console.log(store.isShowSelected)
-                console.log(store.roadObj)
-                store.roadObj.find(x => !x.mdialarm)
                 this.retsToGet
             },
             immediate: true
         },
         'store.roadObj.length':{
             handler: function(){
-                console.log(store.roadObj.length)
                 this.retsToGet
             },
             immediate: true
@@ -329,7 +335,7 @@ export default{
 .color-picker{
     position: absolute;
     background-color: black;
-    left: 99%;
+    left: 496px;
     top: 2.7rem;
     width: 19px;
     /* top right bottom left */
@@ -338,6 +344,7 @@ export default{
     display: flex;
     flex-direction: column;
     z-index: 9999;
+    float: right;
 }
 .card-rets{
     position: relative !important;
@@ -350,7 +357,7 @@ export default{
     box-sizing: border-box;
 }
 .highlight-card{
-    background-color: #404040;
+    background-color: #404040 !important;
 }
 .boundary-rets-card{
     position: relative;
@@ -392,5 +399,8 @@ export default{
 .cardPRIO{
     margin-left:10px;
     font-size: 20px;
+}
+.v-card{
+    background-color: rgba(255,0,0,0);
 }
 </style>

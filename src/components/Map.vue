@@ -44,10 +44,7 @@ export default{
 <style>
     #viewDiv{
         position: absolute;
-        height: 100%;
-        width: calc(100% - 74px);
-        top: 0;
-        left: 74px;
+
         /* overflow-y: hidden; */
     }
 
@@ -64,7 +61,7 @@ export default{
 
     #showAlert{
         position: absolute;
-        left: 50%;
+        left: 37%;
         border-radius: 0% !important;
     }
 

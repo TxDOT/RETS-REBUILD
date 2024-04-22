@@ -15,6 +15,7 @@ import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 export let retsLayerView; 
 export let roadLayerView;
 
+
 export async function getRetsLayerView (){
         const retLayerView = await view.whenLayerView(retsLayer)
 
@@ -23,14 +24,14 @@ export async function getRetsLayerView (){
             async () => {
                 try{
                     retsLayerView = retLayerView
-                    if(retsLayerView.view.zoom < 14){
+
+                    if(retsLayerView.view.zoom < 12){
                         store.zoomInText = "Zoom in to enable"
                         store.zoomInToEnable = true
                         return
                     }
                     store.zoomInText = "Move RETS Point"
                     store.zoomInToEnable = false
-                    console.log(retLayerView)
                     return
                 }
                 catch(err){
@@ -49,8 +50,17 @@ export async function getTxDotRdWayLayerView(){
         () => !rdLayerView.dataUpdating,
         async () => {
             try{
+                if( rdLayerView.view.zoom > 12 ){
+                    if(TxDotRoaways.definitionExpression === "") return
+                    TxDotRoaways.definitionExpression = ""
+                }
+                if(rdLayerView.view.zoom < 13 ){
+                    if(TxDotRoaways.definitionExpression === "RTE_PRFX = 'IH'") return
+                    TxDotRoaways.definitionExpression = "RTE_PRFX = 'IH'"
+                }
                 roadLayerView = rdLayerView
-                console.log(rdLayerView)
+                
+                
             }
             catch(err){
                 console.log(err)
@@ -157,7 +167,7 @@ export function outlineFeedCards(cards){
             document.getElementById(objectcomparison).classList.add('highlight-card')
             //store.roadHighlightObj.add(objectcomparison)
             //zoom to card in feed
-            document.getElementById(objectcomparison).scrollIntoView({ block: 'start', behavior: 'smooth' })
+            document.getElementById(objectcomparison).scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'end' })
             // const zoomToCard = document.createElement('a')
             // zoomToCard.href = `#${objectcomparison}`
             // zoomToCard.click(preventHashUrl())
@@ -314,6 +324,10 @@ export async function filterMapActivityFeed(filterOpt){
 
     retsLayerView.layer.queryExtent()
     .then((resp) =>{
+        if(resp.count === 0){
+            view.goTo(view.goTo(texasExtent))
+            return
+        }
         view.goTo(resp.extent)
     })
     const returnFilterMapPromise = await filterMapPromise
@@ -411,7 +425,7 @@ export function searchCards(cardArr, string, searchParam){
             })
 
         }
-        console.log(acceptedObj)
+
         if(!string.length && !searchParam.isFilters ){
             searchParam.type === 'sortA' ?  cardArr.forEach(x =>  document.getElementById(`${x.attributes ? x.attributes[searchParam.param] : x[searchParam.param]}`).classList.add('showCards')) : cardArr.forEach(x =>  document.getElementById(`${x.attributes ? x.attributes[searchParam.param] : x[searchParam.param]}Expand`).classList.add('showCards'))
             return
@@ -454,7 +468,12 @@ export function home(){
         
         retsLayer.queryExtent()
             .then((resp) =>{
-                view.goTo(resp.extent)
+                if (resp.count== 0 || resp.count > 3000){
+                    view.goTo(view.center)
+                }
+                else{
+                    view.goTo(resp.extent)
+                }
             })
     })
     return
@@ -602,7 +621,7 @@ export async function getUniqueQueryValues(layer, constantsProp){
     query.outFields = ["*"]
     
     const getUserInfo = await layer.queryFeatures(query)
-    console.log(getUserInfo.features)
+
     getUserInfo.features.forEach(x => constantsProp.push({
         "value" : x.attributes.USERNAME,
         "name": x.attributes.NAME,
@@ -703,7 +722,6 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                         }
                                         outlineFeedCards(store.roadHighlightObj);        
                                         //clearRoadHighlightObj()
-                                        console.log(store.roadHighlightObj)
                                         return
                                         
                                     }
@@ -892,8 +910,7 @@ export async function createRoadGraphic(retsObj, onStartUp){
     }
     //determine if dfo is on a roadSegment
     const rdSegment = returnRds.features.find((rd) => {
-        console.log(rd)
-        console.log(routeDFO)
+
         let startM = rd.geometry.paths[0].at(0)[2]
         let endM = rd.geometry.paths[0].at(-1)[2]
         //if on a road segment
@@ -901,7 +918,7 @@ export async function createRoadGraphic(retsObj, onStartUp){
             return rd
         }
     })
-    
+
     //if not on a road segment range
     if(!rdSegment){
         store.isAlert = true
@@ -986,7 +1003,8 @@ async function UpdatePt(pt, onStartUp){
        await retsLayer.queryFeatures({
             where: `RETS_ID = ${ptGraphic.attributes.RETS_ID}`
         })
-        
+        graphics.add(ptGraphic)
+        //hideRetsPt(ptGraphic.attributes.RETS_ID)
         view.goTo(ptGraphic)
         store.retsObj.geometry = [ptGraphic.geometry.x , ptGraphic.geometry.y]
         store.isAlert = false
@@ -1029,8 +1047,8 @@ async function UpdatePt(pt, onStartUp){
 export const completeMovePtSketch = () => sketchWidgetcreate.complete()
 
 export function getRoadInformation(){
-    view.cursor = "crosshair"
-
+    changeCursor('crosshair')
+    
     const createGraphic = new Graphic({
         geometry: {
             type: "point",
@@ -1040,9 +1058,9 @@ export function getRoadInformation(){
         attributes: store.retsObj.attributes,
         symbol: retsPointRenderer.uniqueValueInfos.find(symb => Number(symb.value) === store.retsObj.attributes.STAT).symbol
     })
-    
+
+
     graphics.add(createGraphic)
-    console.log(store.isMoveRetsPt)
     if(!store.isMoveRetsPt){
         completeMovePtSketch()
         return
@@ -1059,7 +1077,6 @@ export function getRoadInformation(){
             if(event.type === "click" && store.isMoveRetsPt){
                 const createMapPts = view.toMap(hitTest.screenPoint)
                 const convertMapPts = webMercatorUtils.webMercatorToGeographic(createMapPts)
-                console.log(convertMapPts)
                 if(hitTest.results.length && (store.retsObj.attributes.NO_RTE === false || store.retsObj.attributes.NO_RTE === 0)){
                     roadLayerView.layer.queryFeatures({
                         where: `GID = ${hitTest.results[0].graphic.attributes.GID}`,
@@ -1068,37 +1085,49 @@ export function getRoadInformation(){
                     })
                         .then((road) =>{
                             store.retsObj.attributes.RTE_NM = road.features[0].attributes.RTE_NM
+                            store.retsObj.geometry = [convertMapPts.x, convertMapPts.y]
                             store.updatedRetsPtName = road.features[0].attributes.RTE_NM
+                            //hideRetsPt(store.retsObj.attributes.RETS_ID)
                             const roadConvertToGeo = webMercatorUtils.webMercatorToGeographic(road.features[0].geometry)
+                            createGraphic.geometry = convertMapPts
                             
-                            console.log(createGraphic.geometry)
                             const returnCoord = geometryEngine.nearestCoordinate(roadConvertToGeo, convertMapPts)
-                            console.log(roadConvertToGeo)
+                            const neareastVertexPoint = new Graphic({
+                                geometry:{
+                                    type: "point",
+                                    longitude: roadConvertToGeo.paths[0].at(returnCoord.vertexIndex)[0],
+                                    latitude: roadConvertToGeo.paths[0].at(returnCoord.vertexIndex)[1]
+                                },
+                                spatialReference:{
+                                    wkid: 4326
+                                }
+                            })
+                            const {distance} = geodesicUtils.geodesicDistance(returnCoord.coordinate, neareastVertexPoint.geometry, "miles")
 
-                            const newDFO = buildDFOLines(roadConvertToGeo.paths[0], returnCoord) //roadConvertToGeo.paths[0].at(vertexIndex)[2] + distance
+                            const newDFO = buildDFOLines(roadConvertToGeo.paths[0], returnCoord, distance) //roadConvertToGeo.paths[0].at(vertexIndex)[2] + distance
                             store.retsObj.attributes.DFO = newDFO.toFixed(3)
                             completeMovePtSketch()
                             store.isMoveRetsPt = false
-                            view.cursor = "default"
+                            changeCursor("default")
                         })
                 }
                 else{
-                    const movedRetsPt = graphics.graphics.find(x => x.attributes.RETS_ID === store.retsObj.attributes.RETS_ID && x.geometry.type === "point")
-
-                    const ptConvertToGeo = webMercatorUtils.webMercatorToGeographic(movedRetsPt.geometry)
-                    console.log(ptConvertToGeo)
-                    //await UpdatePt(ptConvertToGeo, false)
+                    createGraphic.geometry = convertMapPts
+                   // hideRetsPt(createGraphic.attributes.RETS_ID)
+                    await UpdatePt(createGraphic.geometry, false)
                     completeMovePtSketch()
                     store.isMoveRetsPt = false
-                    view.cursor = "default"
+                    changeCursor("default")
 
                     store.retsObj.attributes.NO_RTE = true
                     store.retsObj.attributes.RTE_NM = null
                     store.retsObj.attributes.DFO = null
-
-                    store.isAlert = true
-                    store.alertTextInfo = {"text": `No Route has been detected`, "color": "yellow", "type":"info", "toggle": true}
-                    store.isMoveRetsPt = false
+                
+                    if(!hitTest.results.length){
+                        store.isAlert = true
+                        store.alertTextInfo = {"text": `No Route has been detected`, "color": "yellow", "type":"info", "toggle": true}
+                        store.isMoveRetsPt = false
+                    }
                 }
 
                 return
@@ -1125,8 +1154,7 @@ export function logoutUser(){
     })
 }
 
-export function buildDFOLines(rd, retsPt){
-    console.log(retsPt)
+export function buildDFOLines(rd, retsPt, dist){
     const constructLineA = new Graphic({
         geometry: {
             type: "polyline",
@@ -1147,10 +1175,28 @@ export function buildDFOLines(rd, retsPt){
         }
     })
 
-    const distance = geometryEngine.intersects(constructLineA.geometry, retsPt.coordinate) ? rd.at(retsPt.vertexIndex)[2] + retsPt.distance : rd.at(retsPt.vertexIndex)[2] - retsPt.distance
-    console.log(distance)
-    console.log(geometryEngine.intersects(constructLineA.geometry, retsPt.coordinate))
-    console.log(geometryEngine.intersects(constructLineB.geometry, retsPt.coordinate))
+    const distance = geometryEngine.intersects(constructLineA.geometry, retsPt.coordinate) ? rd.at(retsPt.vertexIndex)[2] + dist : rd.at(retsPt.vertexIndex)[2] - dist
 
     return distance
+}
+
+export const changeCursor = (c) => view.cursor = c
+
+// export function getCardsExtent(){
+    
+//     retsLayerView.queryExtent({
+//     })
+//         .then(x => {
+//             console.log(x)
+//             // const extentPoly = {
+//             //     type: "polygon",
+//             //     extent: x.extent
+//             // }
+//             //geometryEngine.intersects(extentPoly)
+//         })
+// }
+
+
+export function hideRetsPt(retsID){
+    retsLayerView.layer.definitionExpression = `${appConstants['defaultQuery'](store.loggedInUser)} AND (RETS_ID not in (${retsID}))`
 }

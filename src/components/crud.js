@@ -9,10 +9,7 @@ export async function addRETSPT(retsObj){
         addFeatures: [retsObj]
     })
 }
-function removeUnnecessaryFields(obj){
-    
-    return obj
-}
+
 export async function updateRETSPT(retsObj){
     if(retsObj.attributes.RELATED_RETS){
         retsObj.attributes.RELATED_RETS = retsObj.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID).toString()
@@ -30,7 +27,6 @@ export async function updateRETSPT(retsObj){
     const enable = JSON.parse(copyRetsObj)
     enable.attributes.CREATE_DT = new Date(retsObj.attributes.CREATE_DT).getTime()
     enable.attributes.EDIT_DT = new Date(retsObj.attributes.EDIT_DT).getTime()
-    console.log(appConstants.userRoles)
     enable.attributes.EDIT_NM = appConstants.userRoles.find(usr => usr.name === retsObj.attributes.EDIT_NM)?.value ?? retsObj.attributes.EDIT_NM
     delete enable.attributes?.retsPt
     delete enable.attributes?.STATUS

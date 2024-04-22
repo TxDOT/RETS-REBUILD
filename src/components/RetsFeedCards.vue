@@ -1,5 +1,5 @@
 <template>
-    <div class="card-container">
+    <div id="card-container">
         <div id="activity-header" class="main-color">
             <div id="container-header">
                 <header>RETS Dashboard</header>
@@ -157,7 +157,6 @@ export default{
         clickRetsPoint()
     },
     mounted(){
-        console.log("mounted")
         this.showChanges = true
         reactiveUtils.on(() => view.popup, "trigger-action",
             async (event) => {
@@ -167,13 +166,13 @@ export default{
                     const graphicOid = store.clickedGraphic
                     const returnGraphic = retsGraphicLayer.graphics.items.find(ret => ret.attributes.OBJECTID === graphicOid)
                     returnGraphic.attributes.flagColor = store.setFlagColor(returnGraphic.attributes)
-                    returnGraphic.attributes.mdiaccountmultiplecheck = store.isAssigned(x.attributes)
-                    returnGraphic.attributes.mdiaccountgroup = store.isMOTxDOTConnct(x.attributes.ACTV)
-                    returnGraphic.attributes.mdipencilboxoutline = store.isRequest(x.attributes.ACTV)
-                    returnGraphic.attributes.mdialarm = store.isDeadline(x.attributes.DEADLINE)
-                    returnGraphic.attributes.mdicheckdecagramoutline = store.isComplete(x.attributes.STAT)
-                    returnGraphic.attributes.mditimersand = store.isNoActivity(x.attributes.STAT, x.attributes.EDIT_DT)
-                    returnGraphic.attributes.mdiexclamation = store.isPrio(x.attributes.PRIO)
+                    returnGraphic.attributes.mdiaccountmultiplecheck = store.isAssigned(returnGraphic.attributes)
+                    returnGraphic.attributes.mdiaccountgroup = store.isMOTxDOTConnct(returnGraphic.attributes.ACTV)
+                    returnGraphic.attributes.mdipencilboxoutline = store.isRequest(returnGraphic.attributes.ACTV)
+                    returnGraphic.attributes.mdialarm = store.isDeadline(returnGraphic.attributes.DEADLINE)
+                    returnGraphic.attributes.mdicheckdecagramoutline = store.isComplete(returnGraphic.attributes.STAT)
+                    returnGraphic.attributes.mditimersand = store.isNoActivity(returnGraphic.attributes.STAT, returnGraphic.attributes.EDIT_DT)
+                    returnGraphic.attributes.mdiexclamation = store.isPrio(returnGraphic.attributes.PRIO)
                     
                     this.stageData = {attributes: returnGraphic.attributes, geometry: [returnGraphic.geometry.x, returnGraphic.geometry.y]}
                     this.checkChanges()
@@ -222,7 +221,7 @@ export default{
             const afterAtt = JSON.parse(JSON.stringify(store.retsObj))
             let issue = 0
             for(const [key, value] of Object.entries(beforeAtt.attributes)){
-                if(key==='RELATED_RETS'){
+                if(key==='RELATED_RETS' || key==='flagColor' || key==='mdialarm'){
                     continue
                 }
                 if(value !== afterAtt.attributes[key]){
@@ -235,7 +234,6 @@ export default{
             issue === 0 ? this.double({attributes: this.stageData.attributes, geometry: [this.stageData.geometry.x, this.stageData.geometry.y]}, 1) : null
         },
         double(road, index){
-            console.log(road)
             store.loading = false
             store.archiveRetsDataString = JSON.stringify(road)
             store.historyRetsId = road.attributes.RETS_ID
@@ -397,8 +395,7 @@ export default{
                 try{
                     this.noSearch = false
                     if(!a.length || !a){
-                        store.updateRetsSearch = !store.isShowSelected ? store.roadObj.sort((a,b) => b.EDIT_DT - a.EDIT_DT) : store.roadHighlightObj
-                        console.log(store.updateRetsSearch)
+                        store.updateRetsSearch = !store.isShowSelected ? store.roadObj.slice().sort((a,b) => b.EDIT_DT - a.EDIT_DT) : store.roadHighlightObj
                         // if(!this.histNotes.length){
                         //     return this.emptyHist = true
                         // }
@@ -422,7 +419,6 @@ export default{
                         if(!acceptedObj.length){
                             this.noSearch = true
                         }
-                        console.log(acceptedObj)
                         store.updateRetsSearch = acceptedObj.sort((a,b) => b.EDIT_DT - a.EDIT_DT)
                 }
                 catch(a){
@@ -455,7 +451,7 @@ export default{
 </script>
 
 <style scoped>
-    .card-container{
+    #card-container{
         display: flex;
         flex-direction: column;
         gap: 1rem;
@@ -500,7 +496,7 @@ export default{
         padding: 0px;
         margin-left: 10px;
         bottom: .4rem;
-        max-width: 290px;
+        max-width: 310px;
         min-width: 20px;
         height:0px;
     }

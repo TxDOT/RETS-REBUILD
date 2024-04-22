@@ -207,3 +207,11 @@
 .active-chat-box{
   background-color: rgba(211, 211, 211, .1) !important;
 }
+
+#app{
+  position: relative;
+  /* height: 130%; */
+  /* bottom: 100px; */
+  /* overflow-x: hidden; */
+  height: 100% !important;
+}

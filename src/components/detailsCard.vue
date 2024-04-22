@@ -15,7 +15,7 @@
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom: 1.3rem; height: 70px; padding-bottom: 0% !important;" >
             <v-col cols="3" offset="0" style="position: relative; bottom: 5px !important;">
-                <v-text-field label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.isDisableValidations ? [valueRequired] : false " id="route"></v-text-field>
+                <v-text-field label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.isDisableValidations ? [valueRequired] : [false] " id="route"></v-text-field>
             </v-col>
             <v-col cols="4" offset="4">
                 <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" v-model="store.retsObj.attributes.DFO" :rules="onlyNumbers" @update:model-value="onlyNumberss(store.retsObj.attributes.DFO)">
@@ -113,7 +113,7 @@
 
 <script>
 import { appConstants } from '../common/constant'
-import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets, zoomTo, createRoadGraphic, getRoadInformation, completeMovePtSketch} from './utility.js'
+import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets, zoomTo, createRoadGraphic, getRoadInformation, completeMovePtSketch, changeCursor} from './utility.js'
 
 import {store} from './store.js'
     export default{
@@ -127,7 +127,7 @@ import {store} from './store.js'
                 gemTasks: [],
                 isDatePicker: false,
                 datePicked: null,
-                datePicker: '',
+                datePicker: 'Pick a Date',
                 disabledRoute: false,
                 disableSave: false,
                 detailsStat: appConstants.statDomainValues,
@@ -156,8 +156,8 @@ import {store} from './store.js'
         mounted(){
 
             this.ogValues = store.retsObj
-            const milliDate = new Date(store.retsObj.attributes.DEADLINE)
-            this.datePicker = this.returnDateFormat(milliDate)
+            
+            this.datePicker = !store.retsObj.attributes.DEADLINE ? "Pick a date" : this.returnDateFormat(new Date(store.retsObj.attributes.DEADLINE)) 
             
             store.retsObj.attributes.NO_RTE = this.convertNoRTE(store.retsObj.attributes.NO_RTE)
             if(store.retsObj.attributes.NO_RTE === true){
@@ -253,25 +253,20 @@ import {store} from './store.js'
            onlyNumberss(i, event){
                 if(store.isDisableValidations) return true
                 if(!i){
-                    console.log(i)
                     store.isSaveBtnDisable = true
                     return `But where am I? Don't leave me blank!`
                 }
                 if(!store.retsObj.attributes.NO_RTE){
-                    console.log(i)
                     let convert = Number(i)
 
                     if(!convert){
-                        console.log(i)
                         store.isSaveBtnDisable = true
                         return `Whoa! Numbers are more my vibe!`
                     }
                     //createRoadGraphic(store.retsObj)
-                    console.log(i)
                     store.isSaveBtnDisable = false
                     return false
                 }
-                console.log(i)
                 store.isSaveBtnDisable = false
                 return false
                 
@@ -282,11 +277,11 @@ import {store} from './store.js'
             },
             crossHairFunc(){
                 store.isMoveRetsPt = !store.isMoveRetsPt
-                console.log(store.isMoveRetsPt)
                 if(store.isMoveRetsPt){
                     this.removeListner = getRoadInformation()
                     return
                 }
+                changeCursor("default")
                 this.removeListner.remove()
                 completeMovePtSketch()
                     //getPointRoadInteraction(store.retsObj)
@@ -364,7 +359,7 @@ import {store} from './store.js'
                     this.gemTasks.push(this.taskGem)
                 },
             },
-            'store.attributes.RETS_ID':{ //<= neccessary?
+            'store.attributes.RETS_ID':{
                 handler: function(){
                     store.currentInfo = JSON.stringify(store.retsObj)
                     this.splitAndAddRelatedRets(store.retsObj.attributes.RELATED_RETS)
@@ -373,7 +368,6 @@ import {store} from './store.js'
             },
             'store.retsObj.attributes.NO_RTE':{
                 handler: function(){
-                    console.log(store.retsObj.attributes.NO_RTE)
                     if(store.retsObj.attributes.NO_RTE){
                         store.isDisableValidations = true
                         store.isSaveBtnDisable = false

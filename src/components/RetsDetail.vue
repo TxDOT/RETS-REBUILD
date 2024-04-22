@@ -60,12 +60,13 @@
                         <v-chip v-for="(attach, index) in addAttach" color="#4472C4" closable density="compact" rounded="0" variant="flat" :text="attach.name" @click:close="removeAttachment(index)"></v-chip>
                     </div>
                 </div>
-
-                <div style="float:right; bottom: 1rem; position: relative; ">
+                <hr class="popup-title-border" style="position: relative; top: 1.8rem; width: 99.1%; right: 15px;"></hr>
+                <div style="float:right; bottom: 2.7rem; position: relative; left: 7px;">
                     <v-btn icon="mdi-close" variant="plain" density="compact" style="font-size: 15px !important;" @click="clearMessage"></v-btn>
                     <v-btn icon="mdi-check" variant="plain" density="compact" style="font-size: 15px !important;" @click="addHistoryNote"></v-btn>
                 </div>
             </div>
+            
             <div style="position: absolute; width: 98%; bottom: 1rem;">
                 <div style="position: relative; float: right; padding-top: .5rem; left: 20px;">
                     <!-- <v-btn variant="plain" @click="deleteNote" class="secondary-button">Delete</v-btn>
@@ -106,7 +107,7 @@
 
 <script>
     import { appConstants } from '../common/constant.js'
-    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer} from './utility.js'
+    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, retsLayerView} from './utility.js'
 
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
@@ -175,10 +176,7 @@
         },
         methods:{
             removeAttachment(index){
-                console.log(index)
-                console.log(store.attachment)
                 store.attachment.splice(index, 1)
-                console.log(store.attachment)
                 return
             },
             returnDateFormat(e){
@@ -239,10 +237,7 @@
                 
                 store.isAlert = false
                 clearGraphicsLayer()
-                console.log(store.retsObj)
                 store.retsObj.attributes.ACTV = !store.retsObj.attributes.ACTV ? null : store.retsObj.attributes.ACTV.value ?? store.retsObj.attributes.ACTV
-                console.log(store.retsObj.attributes.ACTV)
-                console.log(store.retsObj)
                 // this.retsInfo.ASSIGNED_TO = this.retsInfo.ASSIGNED_TO.value
                 store.retsObj.attributes.PRIO = store.retsObj.attributes.PRIO ?? 1
                 store.retsObj.attributes.JOB_TYPE = this.isAsset === true ? 2 : 1
@@ -255,6 +250,7 @@
                 store.isMoveRetsPt = false
                 store.isCard = true
                 store.updateRetsID()
+                //retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
                 return
             },
             cancelDetailsMetadata(){
@@ -264,12 +260,11 @@
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
                 this.replaceArchiveContent(archiveRets)
                 store.isAlert = false
-                clearGraphicsLayer()
-                removeHighlight("a", true)
+                //clearGraphicsLayer() 
                 store.isMoveRetsPt = false
                 store.historyChat.length = 0
-                store.preserveHighlightCards()
-
+                //store.preserveHighlightCards()
+                // retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
                 return
             },
             replaceArchiveContent(old){
@@ -333,7 +328,6 @@
                 input.click()
 
                 input.addEventListener("change", (event)=>{
-                    console.log(event.target.files)
                     this.addAttach.push({name: [...event.target.files].at(-1).name})
                     store.attachment = event.target.files
                     //addAttaevent.target.fileschments(oid, attach, event.target.files)
@@ -472,9 +466,9 @@ div .cardDiv{
 }
 #container-div{
     position: relative;
-    top: 0rem;
+    top: 1.1rem;
     min-height: 0% !important;
-    max-height: calc(100% - 14rem) !important;
+    max-height: calc(100%) !important;
     overflow-x: hidden;
     scroll-behavior: smooth;
     scrollbar-width: thin;
@@ -593,14 +587,14 @@ div .cardDiv{
 #detailsHeaderDiv{
     width: 40%;
     position: relative;
-    height: 54px;
-    top: 40px;
+    height: 30px;
+    top: 7px;
     float: right;
 }
 #detailsHeaderIcon{
     position: relative;
     float: right;
-    bottom: 2rem;
+    bottom: 0rem;
     left: 19rem;
 }
 
