@@ -1,11 +1,8 @@
-
-
-
 <template style="overflow-y:hidden;">
 
     <v-navigation-drawer width="200" height="100" permanent color="black">
         <v-list height="100%" id="icons-top" class="iconList">
-            <v-list-item class="iconList-item" id="popoutitems" v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" >    
+            <v-list-item class="iconList-item"  id="popoutitems" v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" >    
                 <v-tooltip location="right bottom" :text=tool.name >
                     <template v-slot:activator="{ props}">
                         <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
@@ -15,7 +12,7 @@
             </v-list-item>
         </v-list>
         <v-list id="icons-bottom" class="iconList">
-            <v-list-item id= "popoutitems" class="iconList-item" v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" :active-class="tool.name !== 'Jump To' && tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
+            <v-list-item id="popoutitems" class="iconList-item" v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" :active-class="tool.name !== 'Jump To' && tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
                 <template v-if="tool.name != 'Basemaps' && tool.name != 'Jump To'">
                     <v-tooltip location="right" :text="tool.name">
                             <template v-slot:activator="{ props }">
@@ -91,7 +88,7 @@
             <hr id = "separator"/>
         <v-card-item id = "darkmodeitem" >
             <div id = "darkmodeswitch">
-                        <v-switch  v-model="switchValueDark" label="Dark Mode" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn" :disabled= true></v-switch>
+                <v-switch  v-model="switchValueDark" label="Dark Mode" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn" disabled></v-switch>
             </div>
              
         </v-card-item>
@@ -103,7 +100,7 @@
                 Send notifications for: <br>
                 <div id="notiswitches">
                     <v-card-item v-for="(item, index) in switches" :key="index" :id="'switch-container-' + index" class="switch-item">
-                        <v-switch  v-model="item.value" :label="item.label" color="primary" :style="switchStyle(item.fontColor)" @change="switchTurnedOn(index)" :disabled= true></v-switch>
+                        <v-switch  v-model="item.value" :label="item.label" color="primary" :style="switchStyle(item.fontColor)" @change="switchTurnedOn(index)" disabled></v-switch>
                     </v-card-item>
                 </div>
                 
@@ -129,22 +126,19 @@
 
     </v-card>
 
-    <RetsCards/>
+ 
     
 
 </template>
 
 <script>
-    import RetsCards from '../components/RetsFeedCards.vue';
+
     import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass} from '../components/map-Init.js';
-    import {addRETSPT} from '../components/crud.js'
     import { createtool, selecttool, togglemenu, logoutUser  } from '../components/utility.js';
     import { vuetify } from '../main.js';
 
     export default{
-        components: {RetsCards},
-        name: "RetsFeed",
-        props: {addrets: Number},
+        name: "NavBar",
         data(){
             return{
                 shiftmap: false,
@@ -153,7 +147,6 @@
                 switchValue : false,
                 isActOpen: true,
                 shift: 200,
-                addrets2: null,
                 basemapcard: false,
                 jumptocard:false,
                 tester: false,
@@ -183,7 +176,7 @@
                                 color: "#D9D9D9", 
                                 name: "Menu", 
                                 action: () =>{
-                                    document.getElementById("container").style.display = document.getElementById("container").style.display === "none" ? "block" : "none",
+                                    document.getElementById("card-container").style.display = document.getElementById("card-container").style.display === "none" ? "flex" : "none",
                                     //this.resizemap();
                                     this.shiftDiv();
                                 }, 
@@ -215,7 +208,7 @@
                                 },
                                {title:"Legend", icon: 'mdi-format-list-bulleted-type', color: "white", name: "Legend", action: () =>{
                                 this.handleLegendTool();
-                                //this.addrets2 = 2
+
                                },
                                hover:(i) => 
                                     {
@@ -337,18 +330,7 @@
                     mouseleavejumpto(){
                         this.jumptocard = false;
                     },
-                    async processAddPt(newPointGraphic){
-                        //handleaddrets(newPointGraphic);
-                        try{
-                            const obj = await addRETSPT(newPointGraphic)
-                            const objectid = obj.addFeatureResults[0].objectId
-                            this.addrets2 = objectid
-                            return
-                        }
-                        catch(err){
-                            console.log(err)
-                        }
-                    },
+
                     async handleCreateTool() {
                         if (this.isCreateEnabled === true) {
                             this.isCreateEnabled = !this.isCreateEnabled;
@@ -549,7 +531,7 @@
     #containersettings{
         position: absolute;
         width: 400px;
-        top: 13%;  
+        top: 13%;
         left: 118vh;
         z-index: 9999;
         border-radius: 0px;
@@ -677,19 +659,18 @@
     }
     .esri-view{
 
-    width: calc(100% - 555px) !important;
-    transform: translate(555px);
-    transition: transform 0.1s ease;
-    left: 0px;
+    .esri-view {
+        width: calc(100% - 555px) !important;
+        transform: translate(555px);
+        transition: transform 0.1s ease;
+        left: 0px;
     }
 
     .translateX-500px {
         left: 0px !important;
-
         width: 100% !important;
-        transform: translate(0px) /* Transformed position */
+        transform: translate(0px) 
     }
-
 
 
  

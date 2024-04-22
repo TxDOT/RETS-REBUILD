@@ -1,4 +1,3 @@
-//import ESRI JS ESM classes
 import Map from "@arcgis/core/Map.js";
 import MapView from "@arcgis/core/views/MapView.js";
 import VectorTileLayer from "@arcgis/core/layers/VectorTileLayer.js"
@@ -305,7 +304,8 @@ export const TxDotRoaways = new FeatureLayer ({
   renderer: roadwaysRenderer,
   outFields: ["*"],
   returnM: true,
-  //definitionExpression: `RTE_PRFX = 'IH'`
+  hasM: true,
+  definitionExpression: `RTE_PRFX = 'IH'`
 })
 
 //RETS History
@@ -487,8 +487,8 @@ export const searchWidget = new Search({
       searchFields: [ "ACTV_NBR"],
       displayField: "ACTV_NBR",
       exactMatch: false,
-      outFields: ["*"],
-      minSuggestCharacters: 6,
+      outFields: ["ACTV_NBR"],
+      minSuggestCharacters: 3,
       maxSuggestions: 3,
       
     },
@@ -702,4 +702,7 @@ view.watch("scale", function(newValue) {
 view.ui.remove("attribution")
 // </></>
 
-//create RETS FeatureLayerView
+// view.constraints = {
+//   geometry: texasExtent,
+//   rotationEnabled: false // Disables map rotation
+// };

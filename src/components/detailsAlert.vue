@@ -31,6 +31,5 @@
         height: 44px;
         margin: 10px;
         width: 95.5%;
-        
     }
 </style>

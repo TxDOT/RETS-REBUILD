@@ -14,12 +14,13 @@
 import {view} from './map-Init.js'
 import {home, hoverRetsPoint} from './utility.js'
 import {store} from './store.js'
-import detailsAlert from './detailsAlert.vue'
+
 // import ShowChanges from './showChanges.vue'
 //import ESRI JS ESM class
+import { defineAsyncComponent } from 'vue'
 export default{
     name: "Map",
-    components: {detailsAlert},
+    components: {detailsAlert: defineAsyncComponent(()=>import('./detailsAlert.vue'))},
     data(){
         return{
           store
@@ -43,7 +44,6 @@ export default{
 <style>
     #viewDiv{
         position: absolute;
-        
         /* overflow-y: hidden; */
     }
 
@@ -60,7 +60,7 @@ export default{
 
     #showAlert{
         position: absolute;
-        left: 50%;
+        left: 37%;
         border-radius: 0% !important;
     }
 

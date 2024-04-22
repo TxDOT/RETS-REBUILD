@@ -3,32 +3,39 @@
     <v-container>
         <v-row align="start" no-gutters dense style="position: relative; bottom: .5rem; height: 50px;">
             <v-col cols="4" offset="0">
-                <v-autocomplete :items="activityList" label="Activity" variant="underlined" density="compact" item-title="value" item-value="name" return-object flat v-model="infoRets.attributes.ACTV"></v-autocomplete>
+                <v-autocomplete :items="activityList" label="Activity" variant="underlined" density="compact" item-title="value" item-value="name" return-object flat v-model="store.retsObj.attributes.ACTV"></v-autocomplete>
             </v-col>
             <v-col cols="4" offset="3">
-                <v-text-field label="Number" density="compact" class="number-field" variant="underlined" :disabled="disableACTVNum(infoRets.attributes.ACTV)" v-model="infoRets.attributes.ACTV_NBR">
+                <v-text-field label="Number" density="compact" class="number-field" variant="underlined" :disabled="disableACTVNum(store.retsObj.attributes.ACTV)" v-model="store.retsObj.attributes.ACTV_NBR">
                     <template v-slot:append-inner >
-                        <v-icon icon="mdi-paperclip" small class="number-field-icon" @click="paperClipFunc" ></v-icon>
+                        <v-icon icon="mdi-link" small class="number-field-icon" @click="paperClipFunc" ></v-icon>
                     </template>
                 </v-text-field>
             </v-col>
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom: 1.3rem; height: 70px; padding-bottom: 0% !important;" >
             <v-col cols="3" offset="0" style="position: relative; bottom: 5px !important;">
-                <v-text-field label="Route" variant="underlined" v-model="infoRets.attributes.RTE_NM" :rules="!store.isDisableValidations ? [valueRequired] : [] " id="route"></v-text-field>
+                <v-text-field label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.isDisableValidations ? [valueRequired] : [false] " id="route"></v-text-field>
             </v-col>
             <v-col cols="4" offset="4">
-                <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" v-model="infoRets.attributes.DFO" :rules="!store.isDisableValidations ? [onlyNumbers]: []" @update:model-value="onlyNumbers(infoRets.attributes.DFO)">
-                    <template v-slot:append-inner >
-                        <v-btn id="dfoCrosshair" variant="plain" density="compact" class="number-field-icon" v-model="isCrossHair" @click="crossHairFunc"><v-icon icon="mdi-drag-variant" small></v-icon></v-btn>
-                    </template>
+                <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" v-model="store.retsObj.attributes.DFO" :rules="onlyNumbers" @update:model-value="onlyNumberss(store.retsObj.attributes.DFO)">
+                        <template v-slot:append-inner>
+                            <v-tooltip :text="store.zoomInText" location="top">
+                                <template v-slot:activator="{props}">
+                                    <div v-bind="props">
+                                        <v-btn id="dfoCrosshair"  variant="plain" density="compact" class="number-field-icon" v-model="isCrossHair" @click="crossHairFunc" :disabled="store.zoomInToEnable"><v-icon :icon="!store.isMoveRetsPt ? 'mdi-drag-variant' : 'mdi-close'" small ></v-icon></v-btn>
+                                    </div>
+                                </template>
+                            </v-tooltip>
+                        </template>
+                    
                 </v-text-field>
             </v-col>
         </v-row>
         <v-row align="center" no-gutters dense>
             <v-col>
                 <div class="new-proposed-route">
-                    <v-checkbox density="compact" class="checkbox-size" v-model="infoRets.attributes.NO_RTE">
+                    <v-checkbox density="compact" class="checkbox-size" v-model="store.retsObj.attributes.NO_RTE">
                         <template v-slot:label>
                             <v-label class="main-color subtitle-text" text="Check for new or proposed routes"></v-label>
                         </template>
@@ -38,7 +45,7 @@
         </v-row>       
         <v-row align="center" no-gutters dense style="position: relative; bottom: 5.4rem;">
             <v-col cols="8" offset="0">
-                <v-autocomplete label="Related RETS" no-filter multiple variant="underlined" class="related-rets" v-model="infoRets.attributes.RELATED_RETS" :items="RETSData" item-title="name" item-value="name" return-object @update:search="gimmeRETS($event)" @update:modelValue="addGraphic($event)">
+                <v-autocomplete label="Related RETS" no-filter multiple variant="underlined" class="related-rets" v-model="store.retsObj.attributes.RELATED_RETS" :items="RETSData" item-title="name" item-value="name" return-object @update:search="gimmeRETS($event)" @update:modelValue="addGraphic($event)">
                     <template v-slot:chip="{props, item}">
                         <v-chip v-bind="props" closable @click:close="closeRelatedRetsChip(item)" @click="zoomToRelateRet(item.raw.geometry)" style="z-index: 9999;">{{item.props.title}}</v-chip>
                     </template>
@@ -54,12 +61,12 @@
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom:5.7rem;">
             <v-col cols="12" offset="0">
-                <v-autocomplete auto-select-first label="Status" variant="underlined" density="compact" class="rets-status" :items="detailsStat" item-title="name" item-value="value" v-model="infoRets.attributes.STAT"></v-autocomplete>
+                <v-autocomplete auto-select-first label="Status" variant="underlined" density="compact" class="rets-status" :items="detailsStat" item-title="name" item-value="value" v-model="store.retsObj.attributes.STAT"></v-autocomplete>
             </v-col>
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom: 6.1rem; height: 0px;">
             <v-col cols="12" offset="0">
-                <v-textarea label="Description" no-resize variant="underlined" class="rets-description" rows="3" v-model="infoRets.attributes.DESC_" :rules="!store.isDisableValidations ? [valueRequired]: []"></v-textarea>
+                <v-textarea label="Description" no-resize variant="underlined" class="rets-description" rows="3" v-model="store.retsObj.attributes.DESC_" :rules="!store.isDisableValidations ? [valueRequired]: []"></v-textarea>
             </v-col>
         </v-row>
         <v-row align="center" style="position: relative; bottom: 2.1rem; height: 25px;">
@@ -106,13 +113,12 @@
 
 <script>
 import { appConstants } from '../common/constant'
-import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets, zoomTo, createRoadGraphic, getRoadInformation} from './utility.js'
+import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets, zoomTo, createRoadGraphic, getRoadInformation, completeMovePtSketch, changeCursor} from './utility.js'
 
 import {store} from './store.js'
     export default{
         name: "DetailsCard",
         props: {
-            infoRets: Object,
             taskGem: Number
         },
         data(){
@@ -121,7 +127,7 @@ import {store} from './store.js'
                 gemTasks: [],
                 isDatePicker: false,
                 datePicked: null,
-                datePicker: '',
+                datePicker: 'Pick a Date',
                 disabledRoute: false,
                 disableSave: false,
                 detailsStat: appConstants.statDomainValues,
@@ -131,7 +137,17 @@ import {store} from './store.js'
                 isFocused: false,
                 typeTimeout: null,
                 isCrossHair: false,
-                retsRouteArchive: {}
+                retsRouteArchive: {},
+                removeListner: {},
+                onlyNumbers: [
+                    value =>{
+                        if(!value) return false
+                        const num = Number(value)
+                        if(!/[\d]/.test(num) && !store.retsObj.attributes.NO_RTE ) return `Whoa! Numbers are more my vibe!`
+                        if(!value.length && !store.retsObj.attributes.NO_RTE ) return `But where am I? Don't leave me blank!`
+                        
+                    }
+                ]
             }
         },
         beforeMount(){
@@ -140,24 +156,33 @@ import {store} from './store.js'
         mounted(){
 
             this.ogValues = store.retsObj
-            const milliDate = new Date(store.retsObj.attributes.DEADLINE)
-            this.datePicker = this.returnDateFormat(milliDate)
-            store.retsObj.attributes.NO_RTE = store.retsObj.attributes.NO_RTE === 0 ? false : true
+            
+            this.datePicker = !store.retsObj.attributes.DEADLINE ? "Pick a date" : this.returnDateFormat(new Date(store.retsObj.attributes.DEADLINE)) 
+            
+            store.retsObj.attributes.NO_RTE = this.convertNoRTE(store.retsObj.attributes.NO_RTE)
             if(store.retsObj.attributes.NO_RTE === true){
                 store.isAlert = false
                 store.isDisableValidations = true
                 store.retsObj.attributes.NO_RTE = true
                 return
             }
-            this.initDataCheck()
+            //this.initDataCheck()
             this.retsRouteArchive = JSON.parse(store.archiveRetsDataString)
-            console.log(this.retsRouteArchive)
             createRoadGraphic(store.retsObj, true)
         },
         methods:{
+            convertNoRTE(noRte){
+                if(noRte === 0 || noRte === -1){
+                    return false
+                }
+                if(noRte === 1){
+                    return true
+                }
+                return noRte
+            },
             disableACTVNum(actv){
                 if(!actv) return true
-                if(actv.value === 'Minute Order' || actv.value === 'TxDOTConnect'){
+                if((actv?.value ?? actv) === 'Minute Order' || (actv?.value ?? actv) === 'TxDOTConnect'){
                     return false
                 }
                 return true
@@ -193,7 +218,6 @@ import {store} from './store.js'
                 let item = [store.retsObj.attributes.RTE_NM, store.retsObj.attributes.STAT, store.retsObj.attributes.DESC_].filter(x => !x)
                 if(!store.retsObj.attributes.NO_RTE){
                     if(store.retsObj.attributes.DFO === null || !store.retsObj.attributes.RTE_NM){
-                        console.log(store.retsObj.attributes.DFO)
                         store.isAlert = true
                         store.alertTextInfo = {"text": "Route Number or DFO is missing", "color": "red", "toggle": true}
                         return store.isSaveBtnDisable = true
@@ -211,6 +235,7 @@ import {store} from './store.js'
                 }
                 store.isAlert = false
                 store.isSaveBtnDisable = false
+                return false
             },
             valueRequired(e){
                 if(e === null) return false
@@ -220,12 +245,13 @@ import {store} from './store.js'
                 }
                 store.isSaveBtnDisable = false
                 
-                return true
+                return false
             },
             sendDisabledSave(bool){
                 this.$emit("disable-save", bool)
             },
-           onlyNumbers(i){
+           onlyNumberss(i, event){
+                if(store.isDisableValidations) return true
                 if(!i){
                     store.isSaveBtnDisable = true
                     return `But where am I? Don't leave me blank!`
@@ -238,21 +264,26 @@ import {store} from './store.js'
                         return `Whoa! Numbers are more my vibe!`
                     }
                     //createRoadGraphic(store.retsObj)
-                    return store.isSaveBtnDisable = false
+                    store.isSaveBtnDisable = false
+                    return false
                 }
-                
-                return store.isSaveBtnDisable = false
+                store.isSaveBtnDisable = false
+                return false
                 
             },
             paperClipFunc(){
-                store.retsObj.attributes.ACTV === 'Minute Order' ? window.open(`https://publicdocs.txdot.gov/minord/mosearch/Pages/Minute-Order-Search-Results.aspx#k=${store.retsObj.attributes.ACTV_NBR}`, '_blank') :
+                store.retsObj.attributes.ACTV.value === 'Minute Order' ? window.open(`https://publicdocs.txdot.gov/minord/mosearch/Pages/Minute-Order-Search-Results.aspx#k=${store.retsObj.attributes.ACTV_NBR}`, '_blank') :
                                                             window.open(`https://txdot.sharepoint.com/sites/division-tpp/DM-Admin/Lists/Data%20Request/EditForm.aspx?ID=${store.retsObj.attributes.ACTV_NBR}`, '_blank')
-            
-
             },
             crossHairFunc(){
-                // if(store.isMoveRetsPt){
-                getRoadInformation()
+                store.isMoveRetsPt = !store.isMoveRetsPt
+                if(store.isMoveRetsPt){
+                    this.removeListner = getRoadInformation()
+                    return
+                }
+                changeCursor("default")
+                this.removeListner.remove()
+                completeMovePtSketch()
                     //getPointRoadInteraction(store.retsObj)
                     //store.isMoveRetsPt = true
                     return
@@ -317,6 +348,7 @@ import {store} from './store.js'
                 const newDateConstruct = new Date(this.datePicked)
                 const dateToEpoch = newDateConstruct.getTime()
                 store.retsObj.attributes.DEADLINE = dateToEpoch
+                this.isDatePicker = false
                 return
             },
         },
@@ -327,14 +359,14 @@ import {store} from './store.js'
                     this.gemTasks.push(this.taskGem)
                 },
             },
-            'store.attributes.RETS_ID':{ //<= neccessary?
+            'store.attributes.RETS_ID':{
                 handler: function(){
                     store.currentInfo = JSON.stringify(store.retsObj)
                     this.splitAndAddRelatedRets(store.retsObj.attributes.RELATED_RETS)
                 },
                 immediate: true
             },
-            'infoRets.attributes.NO_RTE':{
+            'store.retsObj.attributes.NO_RTE':{
                 handler: function(){
                     if(store.retsObj.attributes.NO_RTE){
                         store.isDisableValidations = true
@@ -351,11 +383,14 @@ import {store} from './store.js'
             },
             'store.retsObj.attributes.DFO':{
                 handler: function(a,b){
+                    if(a === null){
+                        a = ""
+                    }
+                    if(!a.length || !Number(a)) return
                     if(Number(a) === b) return
                     const ogDFO = this.retsRouteArchive
                     clearTimeout(this.typeTimeout)
-                    if(Number(a) !== ogDFO){
-                        console.log(Number(a), ogDFO)
+                    if(Number(a) !== ogDFO && !store.retsObj.attributes.NO_RTE && !store.isMoveRetsPt){
                         this.typeTimeout = setTimeout(()=>{
                             createRoadGraphic(store.retsObj, false)
                         },900)

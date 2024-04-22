@@ -1,7 +1,7 @@
 import OAuthInfo from "@arcgis/core/identity/OAuthInfo.js";
 import esriId from "@arcgis/core/identity/IdentityManager.js";
 import { retsLayer, view, retsUserRole} from './map-Init.js'
-import {getDomainValues, getDistinctAttributeValues, returnHistory, getUniqueQueryValues, queryFlags} from './utility.js'
+import {getDomainValues, getDistinctAttributeValues, returnHistory, getUniqueQueryValues, queryFlags, getRetsLayerView, getTxDotRdWayLayerView} from './utility.js'
 import { appConstants } from "../common/constant.js";
 import router from '../router/index.js'
 import {store} from './store.js'
@@ -40,10 +40,11 @@ async function signIn(){
   await getUniqueQueryValues(retsUserRole, appConstants.userRoles)
   const userId = await getUserId()
   await queryFlags(userId)
-  store.getRetsLayer(userId)
+  await store.getRetsLayer(userId)
   setDefExpRets(userId)
   appConstants.userQueryField = appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]
   store.USER = [appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value)]
+  //needs to be worked on//
   retsLayer
     .when(() => {
 
@@ -52,12 +53,15 @@ async function signIn(){
           appConstants[layer.prop].push({"name" : x.name, "value": x.code})
         })
       })
+      appConstants.districtDomainValues.sort((a,b) => a.name.localeCompare(b.name))
 
       getDistinctAttributeValues('ACTV')
       return retsLayer.queryExtent();
     })
     .then((response) => {
-      router.push('/apps/statewide_mapping/rets_rebuild/map')
+      router.push({name: "Map"})
+      getRetsLayerView()
+      getTxDotRdWayLayerView()
       view.when(function(){
         view.goTo(response.extent)
       })
@@ -74,7 +78,7 @@ const setDefExpRets = (userId) => {
 }
 
 export async function getUserId(){
-  console.warn('VERSION: 2.1.4')
+  console.warn('VERSION: 2.1.7')
   const user = await esriId.getCredential(authen.portalUrl + "/sharing/rest",{
     oAuthPopupConfirmation: false,
   })
