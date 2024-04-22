@@ -18,6 +18,7 @@ export function clickRetsPoint(){
                 if(!evt.results.length){
                     removeHighlight("a", true)
                     removeAllCardHighlight()
+                    removeOutline()
                     return
                 }
                 clearRoadHighlightObj()
@@ -357,7 +358,7 @@ export function searchCards(cardArr, string, searchParam){
 }
 
 export function home(){
-    homeWidget.cancelGo()
+    //homeWidget.cancelGo()
     homeWidget.on("go", ()=>{
         
         retsLayer.queryExtent()
@@ -596,11 +597,11 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                     
     
                                     if (pressedkey === false){
-                                        
                                         removeHighlight("a", removeAll); 
                                         removeAllCardHighlight()
                                         removeOutline();
                                         store.roadHighlightObj.clear()
+                                        
                                         // for (let i = 0; i < selectedFeatures.length; i++ ) {
                                         
                                         //clearRoadHighlightObj()

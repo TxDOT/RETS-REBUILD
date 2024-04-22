@@ -442,7 +442,7 @@ export const searchWidget = new Search({
       displayField: "CNTY_NM", 
       exactMatch: false,
       outFields: ["*"],
-      maxSuggestions: 1,
+      maxSuggestions: 3,
       minSuggestCharacters: 2,
       
     },
@@ -466,6 +466,7 @@ export const searchWidget = new Search({
       exactMatch: false,
       outFields: ["*"],
       minSuggestCharacters: 2,
+      maxSuggestions: 3,
     },
     {
       name: "Cities",
@@ -475,7 +476,7 @@ export const searchWidget = new Search({
       displayField: "CITY_NM", 
       exactMatch: false,
       outFields: ["*"],
-      //maxSuggestions: 1,
+      maxSuggestions: 3,
       minSuggestCharacters: 3,
     },
     {
@@ -487,7 +488,7 @@ export const searchWidget = new Search({
       displayField: "ACTV_NBR",
       exactMatch: false,
       outFields: ["ACTV_NBR"],
-      minSuggestCharacters: 3,
+      //minSuggestCharacters: 3,
       maxSuggestions: 3,
       
     },
@@ -670,6 +671,13 @@ document.addEventListener('click', function(event) {
       
      
 
+});
+
+searchWidget.on("suggest-complete", function(event) {
+  const suggestions = event.results; // Get the search suggestions
+  if (suggestions[5].results[0].text === "" || suggestions[5].results[1].text === "" || suggestions[5].results[2].text === ""){
+    suggestions.pop()
+  }
 });
 
 homeWidget.on("go", function() {
