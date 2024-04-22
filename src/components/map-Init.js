@@ -487,8 +487,8 @@ export const searchWidget = new Search({
       searchFields: [ "ACTV_NBR"],
       displayField: "ACTV_NBR",
       exactMatch: false,
-      outFields: ["ACTV_NBR"],
-      //minSuggestCharacters: 3,
+      outFields: ["*"],
+      minSuggestCharacters: 6,
       maxSuggestions: 3,
       
     },
@@ -673,12 +673,12 @@ document.addEventListener('click', function(event) {
 
 });
 
-searchWidget.on("suggest-complete", function(event) {
-  const suggestions = event.results; // Get the search suggestions
-  if (suggestions[5].results[0].text === "" || suggestions[5].results[1].text === "" || suggestions[5].results[2].text === ""){
-    suggestions.pop()
-  }
-});
+// searchWidget.on("suggest-complete", function(event) {
+//   const suggestions = event.results; // Get the search suggestions
+//   if (suggestions[5].results[0].text === "" || suggestions[5].results[1].text === "" || suggestions[5].results[2].text === ""){
+//     suggestions.pop()
+//   }
+// });
 
 homeWidget.on("go", function() {
   // Run your function here

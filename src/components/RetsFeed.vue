@@ -549,8 +549,8 @@
     #containersettings{
         position: absolute;
         width: 400px;
-        bottom: 10rem;
-        left: 50%;
+        top: 13%;  
+        left: 118vh;
         z-index: 9999;
         border-radius: 0px;
         
