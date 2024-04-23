@@ -31,10 +31,13 @@ export const texasExtent = new Extent({
   // xmax:-93.507217,
   // ymax:36.500695,
 
-  xmin: -91.38737499794775,
-  ymin: 24.375094465969866,
-  xmax: -108.18225494002854,
-  ymax: 38.26802942526595,
+  xmin: -106.649513,
+  ymin: 25.837163,
+  xmax: -93.507217,
+  ymax: 36.500704,
+  spatialReference: {
+    wkid: 4326 // WGS84 coordinate system
+  }
 
   // xmin:25.7364986,
   // ymin:-109.1882887,
@@ -43,7 +46,6 @@ export const texasExtent = new Extent({
 
 
 })
-
 
 export let retsPointRenderer = new UniqueValueRenderer({
   field: "STAT", // Field based on which the symbology will be categorized
@@ -443,7 +445,7 @@ export const searchWidget = new Search({
       displayField: "CNTY_NM", 
       exactMatch: false,
       outFields: ["*"],
-      maxSuggestions: 1,
+      maxSuggestions: 3,
       minSuggestCharacters: 2,
       
     },
@@ -467,6 +469,7 @@ export const searchWidget = new Search({
       exactMatch: false,
       outFields: ["*"],
       minSuggestCharacters: 2,
+      maxSuggestions: 3,
     },
     {
       name: "Cities",
@@ -476,7 +479,7 @@ export const searchWidget = new Search({
       displayField: "CITY_NM", 
       exactMatch: false,
       outFields: ["*"],
-      //maxSuggestions: 1,
+      maxSuggestions: 3,
       minSuggestCharacters: 3,
     },
     {
@@ -485,10 +488,10 @@ export const searchWidget = new Search({
       placeholder: "Minute Order",
       zoomScale: 5000,
       searchFields: [ "ACTV_NBR"],
-      displayField: "ACTV_NBR",
-      exactMatch: false,
+      displayField: "RETS_ID",
+      exactMatch: true,
       outFields: ["ACTV_NBR"],
-      minSuggestCharacters: 3,
+      minSuggestCharacters: 6,
       maxSuggestions: 3,
       
     },
@@ -656,11 +659,6 @@ searchWidget.on("search-clear", function(event) {
 
 });
 
-searchWidget.on("search-complete", function(event){
-  // The results are stored in the event Object[]
-  highlightLayer.removeAll();
-});
-
 document.addEventListener('click', function(event) {
   const targetElement = event.target.className;
       if (targetElement === 'esri-search__source esri-menu__list-item' )
@@ -668,7 +666,7 @@ document.addEventListener('click', function(event) {
            const searchInput = document.querySelector(".esri-search__input");
            searchInput.value = null;
            searchWidget.activeMenu = "none";
-        searchWidget.focus()
+           searchWidget.focus()
 
       }
 
@@ -678,6 +676,12 @@ document.addEventListener('click', function(event) {
 
 });
 
+// searchWidget.on("suggest-complete", function(event) {
+//   const suggestions = event.results; // Get the search suggestions
+//   if (suggestions[5].results[0].text === "" || suggestions[5].results[1].text === "" || suggestions[5].results[2].text === ""){
+//     suggestions.pop()
+//   }
+// });
 
 homeWidget.on("go", function() {
   // Run your function here

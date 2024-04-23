@@ -1,4 +1,4 @@
-import {view, retsLayer, homeWidget, retsGraphicLayer, TxDotRoaways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate, retsPointRenderer} from './map-Init'
+import {view, retsLayer, homeWidget, retsGraphicLayer, TxDotRoaways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate, retsPointRenderer, texasExtent} from './map-Init'
 import Query from "@arcgis/core/rest/support/Query.js";
 import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant.js";
@@ -76,6 +76,8 @@ export function clickRetsPoint(){
                 if(!evt.results.length){
                     removeHighlight("a", true)
                     removeAllCardHighlight()
+                    removeOutline()
+                    scrollToTopOfFeed(store.roadHighlightObj.size)
                     if(store.isSelectEnabled){
                         store.isShowSelected = false
                         return
@@ -463,13 +465,13 @@ export function searchCards(cardArr, string, searchParam){
 }
 
 export function home(){
-    homeWidget.cancelGo()
+    //homeWidget.cancelGo()
     homeWidget.on("go", ()=>{
         
         retsLayer.queryExtent()
             .then((resp) =>{
                 if (resp.count== 0 || resp.count > 3000){
-                    view.goTo(view.center)
+                    view.goTo(texasExtent)
                 }
                 else{
                     view.goTo(resp.extent)
@@ -702,9 +704,9 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                     }
     
                                     if (pressedkey === false){
-                                        
                                         removeHighlight("a", removeAll); 
                                         removeAllCardHighlight()
+                                        removeOutline();
                                         store.roadHighlightObj.clear()
                                         // for (let i = 0; i < selectedFeatures.length; i++ ) {
                                         
@@ -716,11 +718,14 @@ export function createtool(sketchWidgetcreate, createretssym) {
 
                                             store.roadHighlightObj.add(b)
                                             highlightRETSPoint(selectedFeatures[i].attributes);
-                                            //outlineFeedCards(b);
                                                     
                                                     
                                         }
-                                        outlineFeedCards(store.roadHighlightObj);        
+                                        outlineFeedCards(store.roadHighlightObj); 
+                                        
+                                        scrollToTopOfFeed(store.roadHighlightObj.size)
+
+                                          
                                         //clearRoadHighlightObj()
                                         return
                                         
@@ -740,34 +745,44 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                     }
                                     
                                     if(pressedkey === "Control"){    
+
+                                            // removeOutline()
                                             var rectangleGeometry2 = event.graphic.geometry;
                                             var query2 = retsLayer.createQuery();
                                             query2.geometry = rectangleGeometry2;
                                             retsLayer.queryFeatures(query2)
                                             .then(function (result) 
                                                     {
+                                                        
                                                         graphics.removeAll();
                                                         var selectedFeaturesnew = result.features;
-                                                        let arr = Array.from(store.roadHighlightObj)
-                                                        if (selectedFeaturesnew.length){
+                                                        for (let i = 0; i < selectedFeaturesnew.length; i++ ) {
+                                                            const b = store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeaturesnew[i].attributes.OBJECTID)
+                                                            store.roadHighlightObj.delete(b)
+                                                            removeOutline()
+
+                                                            outlineFeedCards(store.roadHighlightObj);
+                                                            removeHighlight("a", removeAll)
+                                                            scrollToTopOfFeed(store.roadHighlightObj.size)
+                                                            let arr = Array.from(store.roadHighlightObj)
+
                                                             arr  = arr.filter(obj => {
                                                                 return !selectedFeaturesnew.some(feature => feature.attributes.OBJECTID === obj.attributes.OBJECTID)
                                                             })
-                                                            store.roadHighlightObj = new Set(arr)
-                                                            removeHighlight("a", removeAll)
                                                             for (let n = 0; n < arr.length; n++){
                                                                 if (n >= 0){
                                                                     highlightRETSPoint(arr[n].attributes);
+                                                                    
                                                                 }
                                                             }      
+                                                            
                                                         }
+                                                        
 
                                                     })
+                                                    return
 
                                     }
-    
-                                    
-                                   
                                 });
     
                                 
@@ -777,6 +792,7 @@ export function createtool(sketchWidgetcreate, createretssym) {
             });
     
             isSelectEnabled = !isSelectEnabled; 
+            
         }
         else{
             isSelectEnabled = !isSelectEnabled;
@@ -786,6 +802,12 @@ export function createtool(sketchWidgetcreate, createretssym) {
         
         
         return
+      }
+      export function scrollToTopOfFeed(setsize) {
+        const feedElement = document.querySelector('.card-feed-div');
+        if (setsize === 0)
+            feedElement.scrollTop = 0; // Scroll the feed div to the top
+         
       }
 
 export async function handleaddrets(newPointGraphic, addrets){

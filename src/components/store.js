@@ -1,7 +1,7 @@
 import { reactive } from 'vue';
 import { appConstants } from '../common/constant';
 import {sendChatHistory} from './crud.js'
-import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapActivityFeed, returnTopHistory} from './utility.js'
+import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapActivityFeed, returnTopHistory, home} from './utility.js'
 import { retsLayer } from './map-Init.js';
 
 export const store = reactive({
