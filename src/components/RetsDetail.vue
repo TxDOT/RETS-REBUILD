@@ -60,7 +60,7 @@
                         <v-chip v-for="(attach, index) in addAttach" color="#4472C4" closable density="compact" rounded="0" variant="flat" :text="attach.name" @click:close="removeAttachment(index)"></v-chip>
                     </div>
                 </div>
-                <hr class="popup-title-border" style="position: relative; top: 1.8rem; width: 99.1%; right: 15px;"></hr>
+                
                 <div style="float:right; bottom: 2.7rem; position: relative; left: 7px;">
                     <v-btn icon="mdi-close" variant="plain" density="compact" style="font-size: 15px !important;" @click="clearMessage"></v-btn>
                     <v-btn icon="mdi-check" variant="plain" density="compact" style="font-size: 15px !important;" @click="addHistoryNote"></v-btn>
@@ -77,15 +77,15 @@
         </v-card>
 
     </div>
-    <div style="position: relative; height:40px; top: 56px; left: 6px; width: 99%;">
-        <div style="position: relative; float: left; margin-left: 10px; font-size: 11px; display: flex; flex-wrap: wrap;">
+    <div style="position: absolute; height:40px; top: calc(100% - 44px); left: 6px; width: 99%;">
+        <div style="position: relative; float: left; margin-left: 10px; font-size: 11px; display: flex; flex-wrap: wrap; top: 3px;">
             <v-checkbox label="Asset Only Job" density="compact" class="checkbox-size" v-model="isAsset"></v-checkbox>
         </div>
-        <v-btn-toggle id="trigger-buttons" density="compact">
-            <v-btn @click="handlearchive" variant="plain" flat size="small" class="secondary-button">Delete</v-btn>
-            <v-btn @click="cancelDetailsMetadata" class="secondary-button" variant="plain" flat size="small">Cancel</v-btn>
-            <v-btn @click="sendToParent" variant="outlined" class="main-button-style" size="small" :disabled="store.isSaveBtnDisable">Save</v-btn>
-        </v-btn-toggle>
+            <v-btn-toggle id="trigger-buttons" density="compact">
+                <v-btn @click="handlearchive" variant="plain" flat size="small" class="secondary-button">Delete</v-btn>
+                <v-btn @click="cancelDetailsMetadata" class="secondary-button" variant="plain" flat size="small">Cancel</v-btn>
+                <v-btn @click="sendToParent" variant="outlined" class="main-button-style" size="small" :disabled="store.isSaveBtnDisable">Save</v-btn>
+            </v-btn-toggle>
     </div>
 
     <v-card id="archivepopup" v-if="isarchiveopen" >
@@ -260,7 +260,9 @@
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
                 this.replaceArchiveContent(archiveRets)
                 store.isAlert = false
-                //clearGraphicsLayer() 
+                clearGraphicsLayer()
+    
+                
                 store.isMoveRetsPt = false
                 store.historyChat.length = 0
                 //store.preserveHighlightCards()
@@ -466,9 +468,9 @@ div .cardDiv{
 }
 #container-div{
     position: relative;
-    top: 1.1rem;
+    top: 1.5rem;
     min-height: 0% !important;
-    max-height: calc(100%) !important;
+    max-height: calc(100% - 14rem) !important;
     overflow-x: hidden;
     scroll-behavior: smooth;
     scrollbar-width: thin;
@@ -587,8 +589,8 @@ div .cardDiv{
 #detailsHeaderDiv{
     width: 40%;
     position: relative;
-    height: 30px;
-    top: 7px;
+    height: 27px;
+    top: 10px;
     float: right;
 }
 #detailsHeaderIcon{

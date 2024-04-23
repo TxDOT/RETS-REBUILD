@@ -43,7 +43,7 @@
                             </div>
 
                         </v-banner-text>
-                        <div v-if="note.SYS_GEN === 0" style="width: 15%; position: relative; right: 60px;;">
+                        <div v-if="note.SYS_GEN === 0" style="width: 100%; position: absolute;">
                             <div style="position: relative; float: right; top: 14px;" v-if="note.SYS_GEN === 0">
                                 <v-btn variant="plain" density="compact" icon="mdi-pencil-outline" style="font-size: 13px; bottom: 15px;" @click="openNote(note.CMNT, note.OBJECTID)" :disabled="note.CMNT_NM !== loggedInUserName"></v-btn>
                                 <v-btn variant="plain" density="compact" icon="mdi-reply" style="font-size: 13px; bottom: 15px;" @click="replyNote(note)"></v-btn>
@@ -115,6 +115,7 @@
         mounted(){
             //store.historyChat.sort((a,b) => a.CREATE_DT - b.CREATE_DT)
             this.orderList
+            console.log(this.histNotes)
             // if(!this.histNotes.length){
             //     return this.emptyHist = true
             // }
@@ -264,6 +265,7 @@
             },
             'store.historyChat.length':{
                 handler: function(a,b){
+                    console.log(a,b)
                    this.orderList
                 },
                 immediate: true

@@ -19,11 +19,10 @@
                     <p>{{store.activityBanner}}</p>
                     <div class="retsSubtitle">
                         <div id="retSubText">
-                            <v-text-field variant="plain" v-if="store.isDetailsPage" :disabled="isSubtitle" placeholder="Enter a subtitle" style="position:relative; top: 1px;" class="rets-subtitle-text" append-inner-icon="mdi-pencil-outline" @click:append-inner="displaySubtitle($event)" v-model="store.retsObj.attributes.CMNT">
+                            <v-text-field variant="plain" v-if="store.isDetailsPage" :disabled="isSubtitle" placeholder="Enter a subtitle" style="position:relative; top: 1px; right: 3px;" class="rets-subtitle-text" v-model="store.retsObj.attributes.RETS_NM">
                             </v-text-field>
                         </div>
                     </div>
-                    <!-- <v-btn v-if="store.isDetailsPage" icon="mdi-pencil-outline" density="compact" flat id="renameRets" @click="displaySubtitle($event)"></v-btn> -->
                 </div>
 
                 <div v-if="!store.isDetailsPage" style="position: relative; top: .1rem">
@@ -212,9 +211,6 @@ export default{
         cancelReturn(){
             this.unsavedChanges = false
             //do nothing
-        },
-        displaySubtitle(e){ 
-            this.isSubtitle = !this.isSubtitle
         },
         checkChanges(){
             const beforeAtt = JSON.parse(store.currentInfo)
@@ -481,9 +477,12 @@ export default{
         padding: 0px;
         margin-left: 10px;
         bottom: .4rem;
+        width: 200px;
     }
     .rets-subtitle-text :deep(input){
         color: #4472C4 !important;
+        font-weight: bold;
+
     }
     #addbtn{
         position: relative;

@@ -94,7 +94,6 @@
                 isClose: false,
                 ogNote: "",
                 loggedInUserName: "",
-                attach: ["hello.txt", "Jaas.pdf"],
                 hasAttachment: false,
                 numAttachments: 0,
                 isAttachedActive: false,
@@ -282,7 +281,7 @@
         display: flex;
         flex-direction: column;
         min-height: 185px;
-        max-height: 239px;
+        max-height: 217px;
         width: 98.7%;
         overflow-y: auto;
         padding-bottom: 30px;
