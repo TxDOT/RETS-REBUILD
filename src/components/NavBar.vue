@@ -449,13 +449,14 @@
         cursor: pointer;
         background-color: rgba(128,128,128,.3);
     }
+
     #popoutitems .v-list-item__overlay {
         color: transparent;
     }
   
    #iconcontent  {
     position: absolute;
-    width: 1000px !important;
+    width: 48px !important;
     top: 9px;
     left: 27%;
    }
@@ -466,7 +467,7 @@
     }
     #icons-top{
         left: 7%;
-        top: -3px;
+        top: -7px;
     }
     .v-navigation-drawer{
         overflow-y: hidden !important;
@@ -487,7 +488,6 @@
         border-left: 10px solid #4472C4 !important;
         
     }
-    
     .nav-bar-btn{
         height: 2rem;
         width: 100%;
@@ -657,7 +657,6 @@
         position: relative;
         left: -5%;
     }
-    .esri-view{
 
     .esri-view {
         width: calc(100% - 555px) !important;

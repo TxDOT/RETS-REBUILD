@@ -31,10 +31,13 @@ export const texasExtent = new Extent({
   // xmax:-93.507217,
   // ymax:36.500695,
 
-  xmin: -103.9893061,
-  ymin: 28.6596116,
-  xmax: -94.1254072,
-  ymax: 34.5340898,
+  xmin: -106.649513,
+  ymin: 25.837163,
+  xmax: -93.507217,
+  ymax: 36.500704,
+  spatialReference: {
+    wkid: 4326 // WGS84 coordinate system
+  }
 
   // xmin:25.7364986,
   // ymin:-109.1882887,
@@ -485,10 +488,10 @@ export const searchWidget = new Search({
       placeholder: "Minute Order",
       zoomScale: 5000,
       searchFields: [ "ACTV_NBR"],
-      displayField: "ACTV_NBR",
-      exactMatch: false,
+      displayField: "RETS_ID",
+      exactMatch: true,
       outFields: ["ACTV_NBR"],
-      minSuggestCharacters: 3,
+      minSuggestCharacters: 6,
       maxSuggestions: 3,
       
     },

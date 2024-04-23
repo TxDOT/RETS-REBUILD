@@ -81,7 +81,7 @@
 </template>
 
 <script>
-    import {filterMapActivityFeed} from './utility.js'
+    import {filterMapActivityFeed, home} from './utility.js'
     import {appConstants} from '../common/constant.js'
     import { store } from './store'
 
@@ -176,6 +176,7 @@
                 // filterMapActivityFeed(store.filter)
                 
                 store.isfilter = false
+                
                 return
             },
             addNumFilter(){
@@ -185,6 +186,7 @@
             calcFilterDiff(){
                 const typeField = [store.JOB_TYPE, store.STAT, store.ACTV, store.DIST_NM, store.CNTY_NM, store.USER]
                 store.filterTotal = typeField.filter(x => x.length).length
+                home()
                 // for(const [key, value] of Object.entries(this.filterPros)){
                 //     if(ignoreField.includes(key) || !value) continue
                 //     if(value.length){
