@@ -20,7 +20,7 @@ import Legend from "@arcgis/core/widgets/Legend";
 import LegendViewModel from "@arcgis/core/widgets/Legend/LegendViewModel";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import Graphic from "@arcgis/core/Graphic";
-import { outlineFeedCards, removeOutline, removeHighlight, home} from "./utility.js";
+import { outlineFeedCards, removeOutline, removeHighlight, home, scrollToTopOfFeed} from "./utility.js";
 import Extent from "@arcgis/core/geometry/Extent.js";
 
 
@@ -303,12 +303,13 @@ export const texasCities = new FeatureLayer({
 //TxDotRoaways Layer construction
 export const TxDotRoaways = new FeatureLayer ({
   url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Roadways/FeatureServer/0",
-  visible: true,
+  visible: false,
   renderer: roadwaysRenderer,
   outFields: ["*"],
   returnM: true,
   hasM: true,
-  definitionExpression: `RTE_PRFX = 'IH'`
+  definitionExpression: `RTE_PRFX = 'IH'`,
+  
 })
 
 //RETS History
@@ -490,9 +491,8 @@ export const searchWidget = new Search({
       searchFields: [ "ACTV_NBR"],
       displayField: "RETS_ID",
       exactMatch: true,
-      outFields: ["ACTV_NBR"],
-      minSuggestCharacters: 6,
-      maxSuggestions: 3,
+      outFields: ["*"],
+      maxSuggestions: 1,
       
     },
     
@@ -639,10 +639,9 @@ searchWidget.on("select-result", function(event) {
       symbol: highlightSymbolroadways
     }));
   } else if (selectedFeature.geometry.type === "point") {
+
     const tempArray = [selectedFeature];
-    // Run the highlightRestPoints function on the selected point feature
     removeOutline();
-    //removeHighlight(selectedFeature, true)
     outlineFeedCards(tempArray);
   }
   
@@ -652,6 +651,7 @@ searchWidget.on("select-result", function(event) {
 searchWidget.on("search-clear", function(event) {
   // Clear the highlight when the search is cleared
     highlightLayer.removeAll();
+    scrollToTopOfFeed(0);
   
   
     removeOutline();
@@ -676,12 +676,27 @@ document.addEventListener('click', function(event) {
 
 });
 
-// searchWidget.on("suggest-complete", function(event) {
-//   const suggestions = event.results; // Get the search suggestions
-//   if (suggestions[5].results[0].text === "" || suggestions[5].results[1].text === "" || suggestions[5].results[2].text === ""){
-//     suggestions.pop()
-//   }
-// });
+searchWidget.on("suggest-complete", function(event) {
+  const suggestions = event.results; // Get the search suggestions
+  // if (suggestions[5].results[0].text === "" || suggestions[5].results[1].text === "" || suggestions[5].results[2].text === ""){
+  //   suggestions.pop()
+  // }
+
+  const searchTerm = event.searchTerm;
+  const hasLetters = /[a-zA-Z]/.test(searchTerm);
+
+  if (hasLetters && suggestions[5]?.results[0]?.text) {
+    suggestions.pop()
+  }
+  else{
+    const content = suggestions[5].results[0].text
+    suggestions[5].results[0].text = "RETS: " + content + " (MO: " + searchTerm + ")";
+  }
+
+  
+  
+
+});
 
 homeWidget.on("go", function() {
   // Run your function here
