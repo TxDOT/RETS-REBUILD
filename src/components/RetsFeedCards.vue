@@ -456,7 +456,6 @@ export default{
         flex-direction: column;
         gap: 1rem;
         align-items: flex-start;
-
         width: 509px;
         height: 100%;
         background-color: black;
