@@ -63,7 +63,8 @@ async function signIn(){
       getRetsLayerView()
       getTxDotRdWayLayerView()
       view.when(function(){
-        view.goTo(response.extent)
+        //view.goTo(response.extent)
+        home()
       })
       
 

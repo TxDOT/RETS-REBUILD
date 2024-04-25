@@ -113,6 +113,9 @@
     import {store} from './store.js'
 
     import { defineAsyncComponent } from 'vue'
+    import { view } from './map-Init'
+    import Popup from "@arcgis/core/widgets/Popup.js";
+
     export default{
         name: "RetsDetailPage",
         components: {DetailsCard: defineAsyncComponent(()=> import('./detailsCard.vue')),
@@ -266,6 +269,7 @@
                 store.isCancelBtnDisable = false
                 store.isMoveRetsPt = false
                 store.historyChat.length = 0
+                removeHighlight("a", true)
                 //store.preserveHighlightCards()
                 // retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
                 return
