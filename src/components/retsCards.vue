@@ -68,9 +68,9 @@
                             </template>
                         </v-tooltip>
 
-                        <v-tooltip text="No activity for (# days)" location="top">
+                        <v-tooltip :text="`No activity for ${rd.attributes['mditimersand'].numDays} days`" location="top">
                             <template v-slot:activator="{props}">
-                                <v-icon icon="mdi-timer-sand" color="" v-if="rd.attributes.mditimersand === true" class="cardPRIO" v-bind="props"></v-icon>
+                                <v-icon icon="mdi-timer-sand" color="" v-if="rd.attributes['mditimersand'].bool === true" class="cardPRIO" v-bind="props"></v-icon>
                             </template>
                         </v-tooltip>
 
@@ -104,7 +104,7 @@
 
 <script>
 import {postFlagColor} from '../components/crud.js'
-import {zoomTo, highlightRETSPoint, toggleRelatedRets,returnHistory} from './utility.js'
+import {zoomTo, highlightRETSPoint, toggleRelatedRets,returnHistory, removeAllCardHighlight, removeHighlight} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {store} from './store.js'
 
@@ -130,6 +130,7 @@ export default{
             roads: []
         }
     },
+
     beforeMount(){
         //
     },
@@ -137,9 +138,18 @@ export default{
         //this.roadsNext
         this.loadData()
         this.retsToGet
-
+        console.log("mounted", new Date())
         // setTimeout(()=>{
-        //     store.roadObj[1].attributes.mdipencilboxoutline = true
+        //     let rd;
+        //     for(rd=0; rd < store.roadObj.length; rd++){
+        //         store.roadObj[rd].attributes.mdiaccountmultiplecheck = store.isAssigned(store.roadObj[rd].attributes)
+        //         store.roadObj[rd].attributes.mdiaccountgroup = store.isMOTxDOTConnct(store.roadObj[rd].attributes.ACTV)
+        //         store.roadObj[rd].attributes.mdipencilboxoutline = store.isRequest(store.roadObj[rd].attributes.ACTV)
+        //         store.roadObj[rd].attributes.mdialarm = store.isDeadline(store.roadObj[rd].attributes.DEADLINE)
+        //         store.roadObj[rd].attributes.mdicheckdecagramoutline = store.isComplete(store.roadObj[rd].attributes.STAT)
+        //         store.roadObj[rd].attributes.mditimersand = store.isNoActivity(store.roadObj[rd].attributes.STAT, store.roadObj[rd].attributes.EDIT_DT)
+        //         store.roadObj[rd].attributes.mdiexclamation = store.isPrio(store.roadObj[rd].attributes.PRIO)
+        //     }
         //     console.log("check")
         // },3000)
     },
@@ -169,11 +179,16 @@ export default{
             document.getElementById(`${this.flagClickedId}Icon`).style.color = clr
             const rets = store.roadObj.find(rd => rd.attributes.RETS_ID === this.flagClickedId)
             rets.attributes.flagColor.FLAG = clr
+            console.log(rets)
             postFlagColor(rets)
             this.isColorPicked = false;
             this.closeFlagDiv()
         },
         zoomToRetsPt(rets){
+            removeAllCardHighlight()
+            removeHighlight("a", true)
+            document.getElementById(String(rets.attributes.RETS_ID).concat('-', rets.attributes.OBJECTID)).classList.toggle('highlight-card')
+            console.log(document.getElementById(String(rets.attributes.RETS_ID).concat('-', rets.attributes.OBJECTID)))
             //removeAllCardHighlight()
             clearTimeout(this.timer)
             this.timer = ""
@@ -301,7 +316,7 @@ export default{
     },
     computed:{
         retsToGet: function(){
-            return store.updateRetsSearch = !store.isShowSelected ? store.roadObj.sort((a,b) => b.EDIT_DT - a.EDIT_DT) : store.roadHighlightObj
+            return store.updateRetsSearch = !store.isShowSelected ? store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT)) : store.roadHighlightObj
         }
     }
 
@@ -331,7 +346,7 @@ export default{
     opacity: 1;
     /* transform: translateX(0); */
     padding: 0px;
-    width: 95% !important;
+    width: 96% !important;
 }
 .flag-btn{
     font-size: 10px;
@@ -385,11 +400,12 @@ export default{
 }
 #retsCMNT{
     position: relative;
-    max-width: 149px;
+    max-width: 34ch;
     overflow: hidden;
     padding: 0px 0px 0px 10px;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-weight: bold;
     color: #4472C4;
     bottom: 28px;
     left:75px;

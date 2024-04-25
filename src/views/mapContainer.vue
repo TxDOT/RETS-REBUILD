@@ -14,7 +14,10 @@
             Map: defineAsyncComponent(() => import('../components/Map.vue')), 
             NavBar: defineAsyncComponent(() => import('../components/NavBar.vue')),
             RetsFeed: defineAsyncComponent(() => import('../components/RetsFeedCards.vue'))
-        }
+        },
+        beforeRouteLeave(){
+            return false
+        },
         
     }
 </script>

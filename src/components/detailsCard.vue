@@ -15,7 +15,7 @@
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom: 1.3rem; height: 70px; padding-bottom: 0% !important;" >
             <v-col cols="3" offset="0" style="position: relative; bottom: 5px !important;">
-                <v-text-field label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.isDisableValidations ? [valueRequired] : [false] " id="route"></v-text-field>
+                <v-text-field label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="[valueRequired]" id="route"></v-text-field>
             </v-col>
             <v-col cols="4" offset="4">
                 <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" v-model="store.retsObj.attributes.DFO" :rules="onlyNumbers" @update:model-value="onlyNumberss(store.retsObj.attributes.DFO)">
@@ -61,12 +61,12 @@
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom:5.7rem;">
             <v-col cols="12" offset="0">
-                <v-autocomplete auto-select-first label="Status" variant="underlined" density="compact" class="rets-status" :items="detailsStat" item-title="name" item-value="value" v-model="store.retsObj.attributes.STAT"></v-autocomplete>
+                <v-select auto-select-first label="Status" variant="underlined" density="compact" class="rets-status" :items="detailsStat" item-title="name" item-value="value" v-model="store.retsObj.attributes.STAT"></v-select>
             </v-col>
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom: 6.1rem; height: 0px;">
             <v-col cols="12" offset="0">
-                <v-textarea label="Description" no-resize variant="underlined" class="rets-description" rows="3" v-model="store.retsObj.attributes.DESC_" :rules="!store.isDisableValidations ? [valueRequired]: []"></v-textarea>
+                <v-textarea label="Description" no-resize variant="underlined" class="rets-description" rows="3" v-model="store.retsObj.attributes.DESC_" :rules="[valueRequired]"></v-textarea>
             </v-col>
         </v-row>
         <v-row align="center" style="position: relative; bottom: 2.1rem; height: 25px;">
@@ -145,18 +145,18 @@ import {store} from './store.js'
                         const num = Number(value)
                         if(!/[\d]/.test(num) && !store.retsObj.attributes.NO_RTE ) return `Whoa! Numbers are more my vibe!`
                         if(!value.length && !store.retsObj.attributes.NO_RTE ) return `But where am I? Don't leave me blank!`
-                        
                     }
-                ]
+                ],
             }
         },
         beforeMount(){
             this.splitAndAddRelatedRets(store.retsObj.attributes.RELATED_RETS)
         },
         mounted(){
-
+            // if(!store.retsObj.attributes.DESC_.length){
+            //     this.onlyNumbers[0] = true
+            // }
             this.ogValues = store.retsObj
-            
             this.datePicker = !store.retsObj.attributes.DEADLINE ? "Pick a date" : this.returnDateFormat(new Date(store.retsObj.attributes.DEADLINE)) 
             
             store.retsObj.attributes.NO_RTE = this.convertNoRTE(store.retsObj.attributes.NO_RTE)
@@ -245,7 +245,7 @@ import {store} from './store.js'
                 }
                 store.isSaveBtnDisable = false
                 
-                return false
+                return [false]
             },
             sendDisabledSave(bool){
                 this.$emit("disable-save", bool)
@@ -387,9 +387,11 @@ import {store} from './store.js'
                         a = ""
                     }
                     if(!a.length || !Number(a)) return
+                    a = Number((a).toFixed(3))
                     if(Number(a) === b) return
                     const ogDFO = this.retsRouteArchive
                     clearTimeout(this.typeTimeout)
+                    console.log(store.isMoveRetsPt)
                     if(Number(a) !== ogDFO && !store.retsObj.attributes.NO_RTE && !store.isMoveRetsPt){
                         this.typeTimeout = setTimeout(()=>{
                             createRoadGraphic(store.retsObj, false)

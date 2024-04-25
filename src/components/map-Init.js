@@ -31,10 +31,10 @@ export const texasExtent = new Extent({
   // xmax:-93.507217,
   // ymax:36.500695,
 
-  xmin: -106.649513,
-  ymin: 25.837163,
-  xmax: -93.507217,
-  ymax: 36.500704,
+  xmin: -91.38737499794775,
+  ymin: 24.375094465969866,
+  xmax: -108.18225494002854,
+  ymax: 38.26802942526595,
   spatialReference: {
     wkid: 4326 // WGS84 coordinate system
   }
@@ -46,6 +46,7 @@ export const texasExtent = new Extent({
 
 
 })
+
 
 export let retsPointRenderer = new UniqueValueRenderer({
   field: "STAT", // Field based on which the symbology will be categorized
@@ -219,9 +220,9 @@ export let roadwaysRenderer = {
   type: "simple",
     symbol: {
       type: "simple-line",
-      width: 0,
+      width: .2,
       opacity: 0,
-      color: "transparent"
+      color: "blue"
     }
 }
 
@@ -666,7 +667,7 @@ document.addEventListener('click', function(event) {
            const searchInput = document.querySelector(".esri-search__input");
            searchInput.value = null;
            searchWidget.activeMenu = "none";
-           searchWidget.focus()
+        searchWidget.focus()
 
       }
 
@@ -676,12 +677,6 @@ document.addEventListener('click', function(event) {
 
 });
 
-// searchWidget.on("suggest-complete", function(event) {
-//   const suggestions = event.results; // Get the search suggestions
-//   if (suggestions[5].results[0].text === "" || suggestions[5].results[1].text === "" || suggestions[5].results[2].text === ""){
-//     suggestions.pop()
-//   }
-// });
 
 homeWidget.on("go", function() {
   // Run your function here

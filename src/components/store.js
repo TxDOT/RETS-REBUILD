@@ -1,7 +1,7 @@
 import { reactive } from 'vue';
 import { appConstants } from '../common/constant';
 import {sendChatHistory} from './crud.js'
-import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapActivityFeed, returnTopHistory, home} from './utility.js'
+import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapActivityFeed, returnTopHistory} from './utility.js'
 import { retsLayer } from './map-Init.js';
 
 export const store = reactive({
@@ -33,7 +33,12 @@ export const store = reactive({
         archiveRetsDataString: "",
         roadObj: [],
         roadObjOverflow: [],
-        retsObj: [],
+        retsObj: {
+                attributes:{
+                    RTE_NM: "",
+                    DFO: 0
+                }
+            },
         updateRetsSearch:[],
         updatedRetsPtName: "",
         loggedInUser:"",
@@ -44,6 +49,7 @@ export const store = reactive({
                          //"filterTotal": 2},
         isDisableValidations: false,
         isSaveBtnDisable: false,
+        isCancelBtnDisable: false,
         isMoveRetsPt: false,
         showPopUp: false,
         dfoIndex: 0,
@@ -65,6 +71,10 @@ export const store = reactive({
         filterQuery: "",
         filter: {},
         editText: false,
+        addPtRd: "",
+        DFO: null,
+        isAdd: false,
+        cancelEvent: null,
         defaultFilterSetup(){
                 // this.CREATE_DT.push({title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"})
                 // this.STAT = appConstants.defaultStatValues
@@ -255,7 +265,7 @@ export const store = reactive({
                                                 x.attributes.mdicheckdecagramoutline = this.isComplete(x.attributes.STAT)
                                                 x.attributes.mditimersand = this.isNoActivity(x.attributes.STAT, x.attributes.EDIT_DT)
                                                 x.attributes.mdiexclamation = this.isPrio(x.attributes.PRIO)
-                                                if(this.roadObj.length < 200){
+                                                if(this.roadObj.length < 1000){
                                                         this.roadObj.push({attributes:x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                                                 }
                                                 this.roadObjOverflow.push({attributes:x.attributes, geometry: [x.geometry.x, x.geometry.y]})
@@ -276,8 +286,9 @@ export const store = reactive({
                         
         },
         addRetsID(ret){
+                console.log(this.roadObj)
                 this.roadObj.push(ret)
-                this.roadObj.sort((a,b) => b.attributes.EDIT_DT - a.attributes.EDIT_DT)
+                this.roadObj.sort((a,b) => new Date(b.attributes.EDIT_DT) - new Date(a.attributes.EDIT_DT))
         },
         async updateRetsID(){
                 //find updated rets
@@ -287,42 +298,41 @@ export const store = reactive({
                 const query = {"whereString": `${resp}`, "queryLayer": "retsLayer"}
                 const orderField = `${this.CREATE_DT.filter} ${this.CREATE_DT.sortType}`
                 const obj = await getQueryLayer(query, orderField)
-                        
-                                if(obj.features.length){
-                                        const updateItem = {attributes: obj.features[0].attributes, geometry: [obj.features[0].geometry.x, obj.features[0].geometry.y]}
-                                        updateItem.attributes.flagColor = this.setFlagColor(obj.features[0].attributes)
-                                        updateItem.attributes.CREATE_NM = this.returnUserName(obj.features[0].attributes.CREATE_NM)
-                                        updateItem.attributes.EDIT_NM = this.returnUserName(obj.features[0].attributes.EDIT_NM)
-                                        updateItem.attributes.CREATE_DT = this.returnDateFormat(obj.features[0].attributes.CREATE_DT)
-                                        updateItem.attributes.EDIT_DT = this.returnDateFormat(obj.features[0].attributes.EDIT_DT)
-                                        updateItem.attributes.mdiaccountmultiplecheck = this.isAssigned(obj.features[0].attributes.ASSIGNED_TO)
-                                        updateItem.attributes.mdiaccountgroup = this.isMOTxDOTConnct(obj.features[0].attributes.ACTV)
-                                        updateItem.attributes.mdipencilboxoutline = this.isRequest(obj.features[0].attributes.ACTV)
-                                        updateItem.attributes.mdialarm = this.isDeadline(obj.features[0].attributes.DEADLINE)
-                                        updateItem.attributes.mdicheckdecagramoutline = this.isComplete(obj.features[0].attributes.STAT)
-                                        updateItem.attributes.mditimersand = this.isNoActivity(obj.features[0].attributes.STAT, obj.features[0].attributes.EDIT_DT)
-                                        updateItem.attributes.mdiexclamation = this.isPrio(obj.features[0].attributes.PRIO)
-                                        this.retsObj = updateItem
-                                        const retsIndex = this.roadObj.findIndex(x => x.attributes.RETS_ID === obj.features[0].attributes.RETS_ID)
-                                        if(retsIndex === -1){
-                                                this.roadObj.push(updateItem)
-                                        }
-                                        else{
-                                                this.roadObj.splice(retsIndex, 1, updateItem)
-                                        }
+                        if(obj.features.length){
+                                const updateItem = {attributes: obj.features[0].attributes, geometry: [obj.features[0].geometry.x, obj.features[0].geometry.y]}
+                                updateItem.attributes.flagColor = this.setFlagColor(obj.features[0].attributes)
+                                updateItem.attributes.CREATE_NM = this.returnUserName(obj.features[0].attributes.CREATE_NM)
+                                updateItem.attributes.EDIT_NM = this.returnUserName(obj.features[0].attributes.EDIT_NM)
+                                updateItem.attributes.CREATE_DT = this.returnDateFormat(obj.features[0].attributes.CREATE_DT)
+                                updateItem.attributes.EDIT_DT = this.returnDateFormat(obj.features[0].attributes.EDIT_DT)
+                                updateItem.attributes.mdiaccountmultiplecheck = this.isAssigned(obj.features[0].attributes.ASSIGNED_TO)
+                                updateItem.attributes.mdiaccountgroup = this.isMOTxDOTConnct(obj.features[0].attributes.ACTV)
+                                updateItem.attributes.mdipencilboxoutline = this.isRequest(obj.features[0].attributes.ACTV)
+                                updateItem.attributes.mdialarm = this.isDeadline(obj.features[0].attributes.DEADLINE)
+                                updateItem.attributes.mdicheckdecagramoutline = this.isComplete(obj.features[0].attributes.STAT)
+                                updateItem.attributes.mditimersand = this.isNoActivity(obj.features[0].attributes.STAT, obj.features[0].attributes.EDIT_DT)
+                                updateItem.attributes.mdiexclamation = this.isPrio(obj.features[0].attributes.PRIO)
+                                this.retsObj = updateItem
+                                const retsIndex = this.roadObj.findIndex(x => x.attributes.RETS_ID === obj.features[0].attributes.RETS_ID)
+                                if(retsIndex === -1){
+                                        this.roadObj.push(updateItem)
+                                }
+                                else{
+                                        this.roadObj.splice(retsIndex, 1, updateItem)
+                                }
                                         
                                         //sort by no activity setting (no activity sand thingy)
-                                        this.roadObj.sort((a,b) => b.attributes.EDIT_DT - a.attributes.EDIT_DT)
+                                this.roadObj.sort((a,b) => new Date(b.attributes.EDIT_DT) - new Date(a.attributes.EDIT_DT))
                                         
-                                        const cloneRets = [...this.roadObj]
-                                        this.archiveRetsData = cloneRets
+                                const cloneRets = [...this.roadObj]
+                                this.archiveRetsData = cloneRets
 
-                                        this.isNoRets = false
-                                        return
-                                }
-                                this.isDetailsPage = false
-                                this.isNoRets = true
+                                this.isNoRets = false
                                 return
+                        }
+                this.isDetailsPage = false
+                this.isNoRets = true
+                return
         },
         deleteRetsID(){
                 const findIndex = this.roadObj.findIndex(ret => ret.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
@@ -390,11 +400,10 @@ export const store = reactive({
                 const oneDay = 24*60*60*1000;
                 const calcTime = todayDate.getTime() - editDt.getTime()
                 const calcDate = Math.round(calcTime/oneDay)
-                
                 if(STAT === 2 && calcDate > 25){
-                        return true
+                        return {bool: true, numDays: calcDate}
                 }
-                return false
+                return {bool: false, numDays: calcDate}
         },
         isPrio(PRIO){
                 if(PRIO === 0){

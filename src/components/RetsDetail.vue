@@ -8,7 +8,7 @@
                 </template>
             </v-btn>
             <v-col class="details-color-picker" v-if="flagClickedId === store.retsObj.attributes.RETS_ID" v-click-outside="closeFlagDiv">
-                <v-icon size="20px" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" style="position: relative; right: 6px;"></v-icon>
+                <v-icon size="20px" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" style="position: relative; right: 9px;"></v-icon>
             </v-col>
             <v-btn-toggle v-model="store.retsObj.attributes.PRIO" density="compact">
                 <v-btn icon="mdi-exclamation" density="compact" style="color: #d9d9d9; opacity: 1;" selected-class="toggle-exclamation" variant="plain" active></v-btn>
@@ -83,7 +83,7 @@
         </div>
             <v-btn-toggle id="trigger-buttons" density="compact">
                 <v-btn @click="handlearchive" variant="plain" flat size="small" class="secondary-button">Delete</v-btn>
-                <v-btn @click="cancelDetailsMetadata" class="secondary-button" variant="plain" flat size="small">Cancel</v-btn>
+                <v-btn @click="cancelDetailsMetadata" class="secondary-button" variant="plain" flat size="small" :disabled="store.isCancelBtnDisable">Cancel</v-btn>
                 <v-btn @click="sendToParent" variant="outlined" class="main-button-style" size="small" :disabled="store.isSaveBtnDisable">Save</v-btn>
             </v-btn-toggle>
     </div>
@@ -232,9 +232,10 @@
                 removeHighlight("a", true)
                 store.isMoveRetsPt = false
                 store.isCard = true
+                store.isCancelBtnDisable = false
             },
             async sendToParent(){
-                
+                store.isCancelBtnDisable = false
                 store.isAlert = false
                 clearGraphicsLayer()
                 store.retsObj.attributes.ACTV = !store.retsObj.attributes.ACTV ? null : store.retsObj.attributes.ACTV.value ?? store.retsObj.attributes.ACTV
@@ -262,7 +263,7 @@
                 store.isAlert = false
                 clearGraphicsLayer()
     
-                
+                store.isCancelBtnDisable = false
                 store.isMoveRetsPt = false
                 store.historyChat.length = 0
                 //store.preserveHighlightCards()
@@ -387,7 +388,7 @@
 #archivepopup{
     position: absolute;
     border-radius: 5px;
-    left: 150%;
+    left: 200%;
     width: 25rem;
     top:40%;
     height:25%; 
@@ -587,17 +588,19 @@ div .cardDiv{
     font-size: 18px;
 }
 #detailsHeaderDiv{
-    width: 40%;
+    width: 15%;
     position: relative;
     height: 27px;
     top: 10px;
     float: right;
+
 }
 #detailsHeaderIcon{
     position: relative;
     float: right;
-    bottom: 0rem;
-    left: 19rem;
+    bottom: 0.5rem;
+    left: 27rem;
+    width: 99px
 }
 
 .details-color-picker{
@@ -605,11 +608,11 @@ div .cardDiv{
     display: flex; 
     flex-direction: column; 
     z-index: 9999; 
-    width: 30px; 
+    width: 20px; 
     float: right;
-    margin-left: .8rem;
+    margin-left: 1rem;
     background-color: black;
-    top: 52px;
+    top: 45px;
 }
 
 .toggleExclamation{

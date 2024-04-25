@@ -456,7 +456,7 @@
   
    #iconcontent  {
     position: absolute;
-    width: 48px !important;
+    width: 1000px !important;
     top: 9px;
     left: 27%;
    }
@@ -467,7 +467,7 @@
     }
     #icons-top{
         left: 7%;
-        top: -7px;
+        top: -3px;
     }
     .v-navigation-drawer{
         overflow-y: hidden !important;
