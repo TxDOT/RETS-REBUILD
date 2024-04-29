@@ -81,7 +81,7 @@
 </template>
 
 <script>
-    import {filterMapActivityFeed} from './utility.js'
+    import {filterMapActivityFeed, home} from './utility.js'
     import {appConstants} from '../common/constant.js'
     import { store } from './store'
 
@@ -174,7 +174,7 @@
                 this.calcFilterDiff()
                 store.setFilterFeed()
                 // filterMapActivityFeed(store.filter)
-                
+
                 store.isfilter = false
                 return
             },

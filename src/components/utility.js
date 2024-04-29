@@ -77,10 +77,12 @@ export async function getTxDotRdWayLayerView(){
 export function clickRetsPoint(){
     try{
         view.on("click", (event)=>{
-            view.hitTest(event, {include: [retsLayer, retsGraphicLayer, roadLayerView]}).then((evt) =>{
+            view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt) =>{
                 if(!evt.results.length){
+                    removeOutline()
                     removeHighlight("a", true)
                     removeAllCardHighlight()
+                    scrollToTopOfFeed(0)
                     if(store.isSelectEnabled){
                         store.isShowSelected = false
                         return
@@ -88,10 +90,10 @@ export function clickRetsPoint(){
                     return
                 }
                 //clearRoadHighlightObj()
-                console.log(evt)
                 store.roadHighlightObj.clear()
                 const retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
                 store.roadHighlightObj.add(retsPt)
+                removeOutline()
                 outlineFeedCards(evt.results)
                 removeHighlight("a", true)
                 if(store.isMoveRetsPt){
@@ -331,7 +333,7 @@ export async function filterMapActivityFeed(filterOpt){
     retsLayerView.layer.queryExtent()
     .then((resp) =>{
         if(resp.count === 0){
-            view.goTo(view.goTo(texasExtent))
+            view.goTo(texasExtent)
             return
         }
         view.goTo(resp.extent)
@@ -468,7 +470,18 @@ export function searchCards(cardArr, string, searchParam){
 
 }
 
-export function home(){
+export function home(onrender){
+    if (onrender){
+        retsLayer.queryExtent()
+        .then((resp) =>{
+            if (resp.count== 0 || resp.count > 3000){
+                view.goTo(view.center)
+            }
+            else{
+                view.goTo(resp.extent)
+            }
+        })
+    }
     homeWidget.cancelGo()
     homeWidget.on("go", ()=>{
         
@@ -734,7 +747,8 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                                     
                                                     
                                         }
-                                        outlineFeedCards(store.roadHighlightObj);        
+                                        outlineFeedCards(store.roadHighlightObj); 
+                                        scrollToTopOfFeed(store.roadHighlightObj.size)             
                                         //clearRoadHighlightObj()
                                         return
                                         
@@ -749,7 +763,7 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                             store.roadHighlightObj.add(b)
                                             highlightRETSPoint(selectedFeatures[i].attributes);
                                         }
-                                        outlineFeedCards(store.roadHighlightObj);        
+                                        outlineFeedCards(store.roadHighlightObj);  
                                         return
                                     }
                                     
@@ -762,18 +776,26 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                                     {
                                                         graphics.removeAll();
                                                         var selectedFeaturesnew = result.features;
-                                                        let arr = Array.from(store.roadHighlightObj)
-                                                        if (selectedFeaturesnew.length){
+                                                        for (let i = 0; i < selectedFeaturesnew.length; i++ ) {
+                                                            const b = store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeaturesnew[i].attributes.OBJECTID)
+                                                            store.roadHighlightObj.delete(b)
+                                                            removeOutline()
+
+                                                            outlineFeedCards(store.roadHighlightObj);
+                                                            removeHighlight("a", removeAll)
+                                                            scrollToTopOfFeed(store.roadHighlightObj.size)
+                                                            let arr = Array.from(store.roadHighlightObj)
+
                                                             arr  = arr.filter(obj => {
                                                                 return !selectedFeaturesnew.some(feature => feature.attributes.OBJECTID === obj.attributes.OBJECTID)
                                                             })
-                                                            store.roadHighlightObj = new Set(arr)
-                                                            removeHighlight("a", removeAll)
                                                             for (let n = 0; n < arr.length; n++){
                                                                 if (n >= 0){
                                                                     highlightRETSPoint(arr[n].attributes);
+                                                                    
                                                                 }
                                                             }      
+                                                            
                                                         }
 
                                                     })
@@ -800,6 +822,12 @@ export function createtool(sketchWidgetcreate, createretssym) {
         
         
         return
+      }
+      export function scrollToTopOfFeed(setsize) {
+        const feedElement = document.querySelector('.card-feed-div');
+        if (setsize === 0)
+            feedElement.scrollTop = 0; // Scroll the feed div to the top
+         
       }
 
 export async function handleaddrets(newPointGraphic, addrets){
