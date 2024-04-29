@@ -18,9 +18,9 @@ import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer.js";
 import TileInfo from "@arcgis/core/layers/support/TileInfo.js";
 import Legend from "@arcgis/core/widgets/Legend";
 import LegendViewModel from "@arcgis/core/widgets/Legend/LegendViewModel";
-import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
+
 import Graphic from "@arcgis/core/Graphic";
-import { outlineFeedCards, removeOutline, removeHighlight, home, scrollToTopOfFeed} from "./utility.js";
+import { outlineFeedCards, removeOutline, home, scrollToTopOfFeed} from "./utility.js";
 import Extent from "@arcgis/core/geometry/Extent.js";
 
 
