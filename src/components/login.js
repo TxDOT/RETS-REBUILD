@@ -1,7 +1,7 @@
 import OAuthInfo from "@arcgis/core/identity/OAuthInfo.js";
 import esriId from "@arcgis/core/identity/IdentityManager.js";
 import { retsLayer, view, retsUserRole, TxDotRoaways} from './map-Init.js'
-import {getDomainValues, getDistinctAttributeValues, returnHistory, getUniqueQueryValues, queryFlags, getRetsLayerView, getTxDotRdWayLayerView} from './utility.js'
+import {getDomainValues, getDistinctAttributeValues, returnHistory, getUniqueQueryValues, queryFlags, getRetsLayerView, getTxDotRdWayLayerView, home} from './utility.js'
 import { appConstants } from "../common/constant.js";
 import router from '../router/index.js'
 import {store} from './store.js'
@@ -63,8 +63,10 @@ async function signIn(){
       getRetsLayerView()
       getTxDotRdWayLayerView()
       view.when(function(){
-        view.goTo(response.extent)
+        //view.goTo(response.extent)
+         home(true)
       })
+   
       
 
     });

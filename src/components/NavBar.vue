@@ -547,7 +547,7 @@
     #headerfont{
 
         left: 10px;
-        font-size: 18px;
+        /* font-size: 18px; */
         
         
     }
@@ -635,11 +635,13 @@
         
     }
     #logoutbutton{
+        position: absolute;
         text-align: start;
     }
     #savebutton{
-        float: right;
-    color: green;    }
+        position: absolute;
+        right: 6px;
+    }
     #darkmodeswitch{
         position: absolute;
         bottom: 2.3rem;
