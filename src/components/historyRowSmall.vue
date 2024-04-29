@@ -2,7 +2,11 @@
 <template>
     <div style="margin-right: 10px; margin-left: 10px; width: 100%; height: 250px;">
         <div id="search">
-            <v-text-field class="search-history" placeholder="Search..." rounded="0" append-inner-icon="mdi-close" prepend-inner-icon="mdi-magnify" density="compact" v-model="searchHistoryFilter" variant="plain" elevation="0" @click:append-inner="clearContent"></v-text-field>
+            <v-text-field class="search-history" flat placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" density="compact" v-model="searchHistoryFilter" variant="solo-filled">
+                <template v-slot:append-inner>
+                    <v-icon icon="mdi-close" @click="clearContent" v-if="searchHistoryFilter.length"></v-icon>
+                </template>
+            </v-text-field>
         </div>
         <div style="position: relative; bottom: 2rem;">
                 <v-btn variant="plain" density="compact" style="font-size: 10px; float: right; position: relative; top:7px; margin:0%; padding: 0%; padding:0px 10px 0px 10px; margin-right: 10px; margin-bottom: 0px" @click="queryAttachments" :disabled="store.numAttachments === 0" v-model="isAttachedActive" :active="isAttachedActive" active-class="active-button">
@@ -29,7 +33,7 @@
                                 </div>
                                         <v-textarea class="history-note mx-2" rows="1" auto-grow density="compact" variant="plain" :disabled="note.OBJECTID !== updateOID" v-model="note.CMNT"  placeholder="Enter Comment"></v-textarea>
                                     
-                                    <div style="position: absolute; bottom: 1px;">
+                                    <div style="position: relative; bottom: 1px;">
                                         <span style="font-size: 10px; color: grey; padding-left: 2px;">{{ returnUserName(note.CMNT_NM) }} {{ returnDateFormat(note.CREATE_DT) }} <b v-if="note.CREATE_DT !== note.EDIT_DT && note.SYS_GEN === 0" class="main-color">{{ `Edited ${returnDateFormat(note.EDIT_DT)}` }}</b></span>
                                     </div>
                                     <div style="position: relative; bottom: 0px;" v-if="note.attachments">
@@ -43,7 +47,7 @@
                             </div>
 
                         </v-banner-text>
-                        <div v-if="note.SYS_GEN === 0" style="width: 15%; position: relative; right: 60px;;">
+                        <div v-if="note.SYS_GEN === 0" style="width: 100%; position: absolute;">
                             <div style="position: relative; float: right; top: 14px;" v-if="note.SYS_GEN === 0">
                                 <v-btn variant="plain" density="compact" icon="mdi-pencil-outline" style="font-size: 13px; bottom: 15px;" @click="openNote(note.CMNT, note.OBJECTID)" :disabled="note.CMNT_NM !== loggedInUserName"></v-btn>
                                 <v-btn variant="plain" density="compact" icon="mdi-reply" style="font-size: 13px; bottom: 15px;" @click="replyNote(note)"></v-btn>
@@ -115,6 +119,7 @@
         mounted(){
             //store.historyChat.sort((a,b) => a.CREATE_DT - b.CREATE_DT)
             this.orderList
+            console.log(this.histNotes)
             // if(!this.histNotes.length){
             //     return this.emptyHist = true
             // }
@@ -264,6 +269,7 @@
             },
             'store.historyChat.length':{
                 handler: function(a,b){
+                    console.log(a,b)
                    this.orderList
                 },
                 immediate: true

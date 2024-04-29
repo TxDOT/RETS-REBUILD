@@ -1,7 +1,7 @@
 import OAuthInfo from "@arcgis/core/identity/OAuthInfo.js";
 import esriId from "@arcgis/core/identity/IdentityManager.js";
-import { retsLayer, view, retsUserRole} from './map-Init.js'
-import {getDomainValues, getDistinctAttributeValues, returnHistory, getUniqueQueryValues, queryFlags, getRetsLayerView, getTxDotRdWayLayerView, home} from './utility.js'
+import { retsLayer, view, retsUserRole, TxDotRoaways} from './map-Init.js'
+import {getDomainValues, getDistinctAttributeValues, returnHistory, getUniqueQueryValues, queryFlags, getRetsLayerView, getTxDotRdWayLayerView} from './utility.js'
 import { appConstants } from "../common/constant.js";
 import router from '../router/index.js'
 import {store} from './store.js'
@@ -45,7 +45,7 @@ async function signIn(){
   appConstants.userQueryField = appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]
   store.USER = [appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value)]
   //needs to be worked on//
-  retsLayer
+  TxDotRoaways
     .when(() => {
 
       [{name: 'JOB_TYPE', prop: "jobTypeDomainValues"},{name: 'STAT', prop: "statDomainValues"}, {name: 'DIST_NM', prop: "districtDomainValues"}, {name: 'CNTY_NM', prop: "countyDomainValues"}].forEach((layer) => {
@@ -79,7 +79,7 @@ const setDefExpRets = (userId) => {
 }
 
 export async function getUserId(){
-  console.warn('VERSION: 2.1.7')
+  console.warn('VERSION: 2.1.8')
   const user = await esriId.getCredential(authen.portalUrl + "/sharing/rest",{
     oAuthPopupConfirmation: false,
   })

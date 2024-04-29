@@ -8,7 +8,7 @@
                 </template>
             </v-btn>
             <v-col class="details-color-picker" v-if="flagClickedId === store.retsObj.attributes.RETS_ID" v-click-outside="closeFlagDiv">
-                <v-icon size="20px" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" style="position: relative; right: 6px;"></v-icon>
+                <v-icon size="20px" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" style="position: relative; right: 9px;"></v-icon>
             </v-col>
             <v-btn-toggle v-model="store.retsObj.attributes.PRIO" density="compact">
                 <v-btn icon="mdi-exclamation" density="compact" style="color: #d9d9d9; opacity: 1;" selected-class="toggle-exclamation" variant="plain" active></v-btn>
@@ -60,7 +60,7 @@
                         <v-chip v-for="(attach, index) in addAttach" color="#4472C4" closable density="compact" rounded="0" variant="flat" :text="attach.name" @click:close="removeAttachment(index)"></v-chip>
                     </div>
                 </div>
-                <hr class="popup-title-border" style="position: relative; top: 1.8rem; width: 99.1%; right: 15px;"></hr>
+                
                 <div style="float:right; bottom: 2.7rem; position: relative; left: 7px;">
                     <v-btn icon="mdi-close" variant="plain" density="compact" style="font-size: 15px !important;" @click="clearMessage"></v-btn>
                     <v-btn icon="mdi-check" variant="plain" density="compact" style="font-size: 15px !important;" @click="addHistoryNote"></v-btn>
@@ -77,15 +77,15 @@
         </v-card>
 
     </div>
-    <div style="position: relative; height:40px; top: 56px; left: 6px; width: 99%;">
-        <div style="position: relative; float: left; margin-left: 10px; font-size: 11px; display: flex; flex-wrap: wrap;">
+    <div style="position: absolute; height:40px; top: calc(100% - 44px); left: 6px; width: 99%;">
+        <div style="position: relative; float: left; margin-left: 10px; font-size: 11px; display: flex; flex-wrap: wrap; top: 3px;">
             <v-checkbox label="Asset Only Job" density="compact" class="checkbox-size" v-model="isAsset"></v-checkbox>
         </div>
-        <v-btn-toggle id="trigger-buttons" density="compact">
-            <v-btn @click="handlearchive" variant="plain" flat size="small" class="secondary-button">Delete</v-btn>
-            <v-btn @click="cancelDetailsMetadata" class="secondary-button" variant="plain" flat size="small">Cancel</v-btn>
-            <v-btn @click="sendToParent" variant="outlined" class="main-button-style" size="small" :disabled="store.isSaveBtnDisable">Save</v-btn>
-        </v-btn-toggle>
+            <v-btn-toggle id="trigger-buttons" density="compact">
+                <v-btn @click="handlearchive" variant="plain" flat size="small" class="secondary-button">Delete</v-btn>
+                <v-btn @click="cancelDetailsMetadata" class="secondary-button" variant="plain" flat size="small" :disabled="store.isCancelBtnDisable">Cancel</v-btn>
+                <v-btn @click="sendToParent" variant="outlined" class="main-button-style" size="small" :disabled="store.isSaveBtnDisable">Save</v-btn>
+            </v-btn-toggle>
     </div>
 
     <v-card id="archivepopup" v-if="isarchiveopen" >
@@ -235,9 +235,10 @@
                 removeHighlight("a", true)
                 store.isMoveRetsPt = false
                 store.isCard = true
+                store.isCancelBtnDisable = false
             },
             async sendToParent(){
-                
+                store.isCancelBtnDisable = false
                 store.isAlert = false
                 clearGraphicsLayer()
                 store.retsObj.attributes.ACTV = !store.retsObj.attributes.ACTV ? null : store.retsObj.attributes.ACTV.value ?? store.retsObj.attributes.ACTV
@@ -263,7 +264,9 @@
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
                 this.replaceArchiveContent(archiveRets)
                 store.isAlert = false
-                //clearGraphicsLayer() 
+                clearGraphicsLayer()
+    
+                store.isCancelBtnDisable = false
                 store.isMoveRetsPt = false
                 store.historyChat.length = 0
                 removeHighlight("a", true)
@@ -389,7 +392,7 @@
 #archivepopup{
     position: absolute;
     border-radius: 5px;
-    left: 150%;
+    left: 200%;
     width: 25rem;
     top:40%;
     height:25%; 
@@ -470,9 +473,9 @@ div .cardDiv{
 }
 #container-div{
     position: relative;
-    top: 1.1rem;
+    top: 1.5rem;
     min-height: 0% !important;
-    max-height: calc(100%) !important;
+    max-height: calc(100% - 14rem) !important;
     overflow-x: hidden;
     scroll-behavior: smooth;
     scrollbar-width: thin;
@@ -589,17 +592,19 @@ div .cardDiv{
     font-size: 18px;
 }
 #detailsHeaderDiv{
-    width: 40%;
+    width: 15%;
     position: relative;
-    height: 30px;
-    top: 7px;
+    height: 27px;
+    top: 10px;
     float: right;
+
 }
 #detailsHeaderIcon{
     position: relative;
     float: right;
-    bottom: 0rem;
-    left: 19rem;
+    bottom: 0.5rem;
+    left: 27rem;
+    width: 99px
 }
 
 .details-color-picker{
@@ -607,11 +612,11 @@ div .cardDiv{
     display: flex; 
     flex-direction: column; 
     z-index: 9999; 
-    width: 30px; 
+    width: 20px; 
     float: right;
-    margin-left: .8rem;
+    margin-left: 1rem;
     background-color: black;
-    top: 52px;
+    top: 45px;
 }
 
 .toggleExclamation{

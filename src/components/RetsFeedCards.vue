@@ -15,15 +15,14 @@
 
         <v-banner id="feed-banner" lines="two" density="default" min-width="0%">
             <div style="width: 100%;">
-                <div :class="store.isDetailsPage ? 'retsSubtitleTxt' : 'banner-txt'">
+                <div class="banner-txt">
                     <p>{{store.activityBanner}}</p>
                     <div class="retsSubtitle">
                         <div id="retSubText">
-                            <v-text-field variant="plain" v-if="store.isDetailsPage" :disabled="isSubtitle" placeholder="Enter a subtitle" style="position:relative; top: 1px;" class="rets-subtitle-text" append-inner-icon="mdi-pencil-outline" @click:append-inner="displaySubtitle($event)" v-model="store.retsObj.attributes.CMNT">
+                            <v-text-field variant="plain" v-if="store.isDetailsPage" :disabled="isSubtitle" placeholder="Enter a subtitle" style="position:relative; top: 1px; right: 3px; max-width: 34ch" class="rets-subtitle-text" v-model="store.retsObj.attributes.RETS_NM">
                             </v-text-field>
                         </div>
                     </div>
-                    <!-- <v-btn v-if="store.isDetailsPage" icon="mdi-pencil-outline" density="compact" flat id="renameRets" @click="displaySubtitle($event)"></v-btn> -->
                 </div>
 
                 <div v-if="!store.isDetailsPage" style="position: relative; top: .1rem">
@@ -48,7 +47,11 @@
         </v-banner>
 
         <div id="search-feed" v-if="!store.isDetailsPage">
-            <v-text-field density="compact" placeholder="Search..." rounded="0" append-inner-icon="mdi-close" prepend-inner-icon="mdi-magnify" v-model="actvFeedSearch" variant="plain" @click:append-inner="clearContent"></v-text-field>
+            <v-text-field density="compact" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" v-model="actvFeedSearch" variant="solo-filled" >
+                <template v-slot:append-inner>
+                    <v-icon icon="mdi-close" v-if="actvFeedSearch.length" @click="clearContent"></v-icon>
+                </template>
+            </v-text-field>
         </div>
         <div class="card-feed-div" v-if="store.isCard">
             <RetsCards/>
@@ -86,7 +89,7 @@
 </template>
 
 <script>
-import {clickRetsPoint, getQueryLayer, returnHistory, getHighlightGraphic, removeHighlight, createtool, highlightRETSPoint, toggleRelatedRets, zoomTo} from './utility.js'
+import {clickRetsPoint, getQueryLayer, returnHistory, getHighlightGraphic, removeHighlight, createtool, highlightRETSPoint, toggleRelatedRets, zoomTo, changeCursor} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import {store} from './store.js'
@@ -137,10 +140,12 @@ export default{
             unsavedChanges: false,
             showChanges: false,
             showChanges: false,
+            addNewPtEvent: false,
             isCreateEnabled: true,
             addbutton: [
                 {title:"New", action: async () =>{
                                 const graphicAdd = await this.handlecreate();
+                                console.log(graphicAdd)
                                 if (graphicAdd){
                                     this.processAddPt(graphicAdd)
                                 }
@@ -182,6 +187,9 @@ export default{
         this.retsFilters[appConstants.queryField[appConstants.userRoles.find(x => x.value === store.loggedInUser).type]] = appConstants.defaultUserValue
     },
     methods:{
+        test(x){
+            console.log(x)
+        },
         clearContent(){
             this.actvFeedSearch = ""
         },
@@ -192,7 +200,8 @@ export default{
                 store.isCard = false
                 const obj = await addRETSPT(newPointGraphic, "rets")
                 const objectid = obj.addFeatureResults[0].objectId
-                this.addrets = objectid
+                await this.addretss(objectid)
+                //this.addrets = objectid
                 this.isSpinner = false
                 this.Spinneractive = true
                 return
@@ -212,9 +221,6 @@ export default{
         cancelReturn(){
             this.unsavedChanges = false
             //do nothing
-        },
-        displaySubtitle(e){ 
-            this.isSubtitle = !this.isSubtitle
         },
         checkChanges(){
             const beforeAtt = JSON.parse(store.currentInfo)
@@ -291,8 +297,8 @@ export default{
             store.roadObj.splice(findRoad, 1)
         },
 
-        async addretss(){
-            const querystring = {"whereString":`OBJECTID = ${this.addrets}`, "queryLayer": "retsLayer"}
+        async addretss(objectid){
+            const querystring = {"whereString":`OBJECTID = ${objectid}`, "queryLayer": "retsLayer"}
             try{const querypromise = await getQueryLayer(querystring, "PRIO, CREATE_DT DESC")
                 if (querypromise.features.length){
                     querypromise.features.forEach(
@@ -309,7 +315,12 @@ export default{
                             feat.attributes.EDIT_NM = store.returnUserName(feat.attributes.EDIT_NM)
                             feat.attributes.CREATE_DT = store.returnDateFormat(feat.attributes.CREATE_DT)
                             feat.attributes.EDIT_DT = store.returnDateFormat(feat.attributes.EDIT_DT)
-                            const addNewRetsPt = {attributes:feat.attributes,geometry:[feat.geometry.x,feat.geometry.y]}
+                            feat.attributes.RTE_NM = store.addPtRd
+                            feat.attributes.DFO = store.DFO ? Number((store.DFO).toFixed(3)) : null
+                            feat.attributes.ASSIGNED_TO = store.loggedInUser
+                            console.log(store.DFO, store.loggedInUser)
+                            const addNewRetsPt = {attributes:feat.attributes, geometry:[feat.geometry.x,feat.geometry.y]}
+                            store.isCancelBtnDisable = true
                             store.addRetsID(addNewRetsPt)
                             this.double(addNewRetsPt)
                         }
@@ -376,7 +387,11 @@ export default{
                             
                 } 
             else {
+                changeCursor("default")
+                store.isMoveRetsPt = false
                 sketchWidgetcreate.cancel();
+                store.cancelEvent.remove()
+                store.isAdd = false
                 this.isCreateEnabled = !this.isCreateEnabled;
                 this.addbtntext = "New"
                 this.buttonIcon = "mdi-plus"
@@ -406,20 +421,22 @@ export default{
                     let s;
                     const acceptedObj = []
                     for(s of !store.isShowSelected ? store.roadObj : store.roadHighlightObj){
-                        const createObjKey = Object.values(s.attributes)
-                            createObjKey.forEach(x => {
-                                if(String(x).toLowerCase().includes(searchString) && (acceptedObj.findIndex(oid => oid.attributes.OBJECTID === s.attributes.OBJECTID) === -1)){
+                        // const createObjKey = Object.values(s.attributes)
+                        for(const [key, value] of Object.entries(s.attributes)){
+                            if(key === "RETS_ID" || key === "RETS_NM" || key === "DESC_" || key === "RTE_NM" || key === "ACTV" || key === "ACTV_NBR"){
+                                if(String(value).toLowerCase().includes(searchString) && (acceptedObj.findIndex(oid => oid.attributes.OBJECTID === s.attributes.OBJECTID) === -1)){
                                     if(acceptedObj.length === 10){
                                         return
                                     }
                                     acceptedObj.push(s)
                                 }
-                            })
-                        }
-                        if(!acceptedObj.length){
-                            this.noSearch = true
-                        }
-                        store.updateRetsSearch = acceptedObj.sort((a,b) => b.EDIT_DT - a.EDIT_DT)
+                            }
+                        } 
+                    }
+                    if(!acceptedObj.length){
+                        this.noSearch = true
+                    }
+                    store.updateRetsSearch = acceptedObj.sort((a,b) => b.EDIT_DT - a.EDIT_DT)
                 }
                 catch(a){
                     console.log(a)
@@ -435,12 +452,21 @@ export default{
                 },1000)
             }
         },
-        addrets:{
-            handler: async function(){
-                await this.addretss()
-            },
-            immediate: true
-        }, 
+        // addrets:{
+        //     handler: async function(){
+        //         await this.addretss()
+        //     },
+        //     immediate: true
+        // },
+        'store.retsObj.attributes.RETS_NM':{
+            handler: function(a,b){
+                if(!b) return
+                if(b.length === 30){
+                    store.retsObj.attributes.RETS_NM = a.slice(0, -1)
+                    return
+                }
+            }
+        }
     },
     computed:{
 
@@ -471,18 +497,13 @@ export default{
     }
     #Spinner{
         position: absolute;
-        left: 250px;
         top: 50%;
-    }
-    #retSubText{
-        position: relative;
-        right: 15px;
-        padding: 0px;
-        margin-left: 10px;
-        bottom: .4rem;
+        left: 12.5%
     }
     .rets-subtitle-text :deep(input){
         color: #4472C4 !important;
+        font-weight: bold;
+        padding-left: 10px;
     }
     #addbtn{
         position: relative;
@@ -494,7 +515,7 @@ export default{
         right: 15px;
         padding: 0px;
         margin-left: 10px;
-        bottom: .4rem;
+        bottom: .3rem;
         max-width: 310px;
         min-width: 20px;
         height:0px;
@@ -510,8 +531,7 @@ export default{
 
     #feed-banner{
         font-size: 20px;
-        height: 50px;
-        padding-bottom: 5px;
+        height: 6%;
         position: absolute;
         top: 50px;
         width:100%;
@@ -535,7 +555,7 @@ export default{
     }
 
     .card-feed-div{
-        top: 7rem;
+        top: 2rem;
         width: 100%;
         display: flex;
         flex-direction: column;
@@ -550,17 +570,19 @@ export default{
 
     #container-header{
         position: relative;
-        top: 50%;
-        top: 50%;
+        top: 9px;
         font-size: 23px;
         font-weight: bold; 
         padding-left: 20px;
-        height:1.5rem;
-        display: block;
+    }
+    #activity-header{
+        position: relative;
+        top: 0px;
+        width: 100%;
     }
     .banner-btn{
         position: relative;
-        bottom: 1.7rem;
+        bottom: 24px;
         float: right;
         margin: 0% !important;
         padding: 0% !important;
@@ -568,7 +590,7 @@ export default{
     }
     .banner-txt{
         position: relative;
-        bottom: 0.5px;
+        top: 2.1px;
         font-weight: bold;
         font-size: 23px;
         left: 5px;
@@ -578,16 +600,13 @@ export default{
     }
     .retsSubtitleTxt{
         position: relative;
-        bottom: 10.5px;
-        font-weight: bold;
         font-size: 23px;
         left: 5px;
     }
     .add-new-btn{
         position: absolute;
         right: 1rem;
-        top: 14px;
-        top: 14px;
+        top: 11px;
         text-align: center;
     }
     .text-btn{
@@ -597,12 +616,12 @@ export default{
     }
 
     #search-feed{
-        position: absolute;
-        height: 5px;
+        position: relative;
+        height: 54px;
         width: 100%;
-        top: 100px;
+        top: 58px;
         border-radius: 0px;
-        padding: 0px 10px 10px 10px;
+        padding: 0px 10px 10px 14px;
     }
 
     #test{
@@ -648,16 +667,9 @@ export default{
         border-radius: 50%;
     }
 
-   /* .card-feed-div > .v-row{
-        margin-top: 0px;
-        margin-bottom: 0px;
-        flex: none;
-    } */
-
-
     .switch{
         position: relative;
-        bottom: 34px;
+        bottom: 32px;
         right: 45px;
         float: right;
         font-size: 10px;

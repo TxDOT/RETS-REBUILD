@@ -81,7 +81,7 @@
 </template>
 
 <script>
-    import {filterMapActivityFeed, home} from './utility.js'
+    import {filterMapActivityFeed} from './utility.js'
     import {appConstants} from '../common/constant.js'
     import { store } from './store'
 
@@ -176,7 +176,6 @@
                 // filterMapActivityFeed(store.filter)
                 
                 store.isfilter = false
-                
                 return
             },
             addNumFilter(){

@@ -3,7 +3,11 @@
     <hr class="popup-title-border"></hr>
     <div style="margin-right: 10px; margin-left: 10px; width: 100%; height: 250px;">
         <div id="search">
-            <v-text-field class="search-history" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" append-inner-icon="mdi-close" density="compact" v-model="searchHistoryFilter" variant="plain" elevation="0" @click:append-inner="clearContent"></v-text-field>
+            <v-text-field class="search-history" placeholder="Search..." flat rounded="0" prepend-inner-icon="mdi-magnify" density="compact" v-model="searchHistoryFilter" variant="solo-filled" elevation="0" >
+                <template v-slot:append-inner>
+                    <v-icon icon="mdi-close" @click="clearContent" v-if="searchHistoryFilter.length"></v-icon>
+                </template>
+            </v-text-field>
         </div>
         <div style="position: relative; bottom: 2rem; left: 43px;">
                 <v-btn variant="plain" density="compact" style="font-size: 10px; float: right; position: relative; top:7px; margin:0%; padding: 0%; padding:0px 10px 0px 10px; margin-right: 10px; margin-bottom: 0px" @click="queryAttachments" :disabled="store.numAttachments === 0" v-model="isAttachedActive" :active="isAttachedActive" active-class="active-button">
@@ -24,13 +28,13 @@
                             <div>
                                 <div>
                                     <span v-if="note.PARENT_ID" style="margin:0% !important; ">
-                                            <p id="replyingToCmnt">Replying to "{{store.historyChat.find(x => x.OBJECTID === note.PARENT_ID)?.CMNT ?? "Referenced Note has been deleted"}}"</p>
-                                        </span>
+                                        <p id="replyingToCmnt">Replying to "{{store.historyChat.find(x => x.OBJECTID === note.PARENT_ID)?.CMNT ?? "Referenced Note has been deleted"}}"</p>
+                                    </span>
                                     
                                 </div>
                                         <v-textarea class="history-note mx-2" rows="1" auto-grow density="compact" variant="plain" :disabled="note.OBJECTID !== updateOID" v-model="note.CMNT"  placeholder="Enter Comment"></v-textarea>
                                     
-                                    <div style="position: absolute; bottom: 1px;">
+                                    <div style="position: relative; bottom: 1px;">
                                         <span style="font-size: 10px; color: grey; padding-left: 2px;">{{ returnUserName(note.CMNT_NM) }} {{ returnDateFormat(note.CREATE_DT) }} <b v-if="note.CREATE_DT !== note.EDIT_DT && note.SYS_GEN === 0" class="main-color">{{ `Edited ${returnDateFormat(note.EDIT_DT)}` }}</b></span>
                                     </div>
                                     <div style="position: relative; bottom: 0px;" v-if="note.attachments">
@@ -94,7 +98,6 @@
                 isClose: false,
                 ogNote: "",
                 loggedInUserName: "",
-                attach: ["hello.txt", "Jaas.pdf"],
                 hasAttachment: false,
                 numAttachments: 0,
                 isAttachedActive: false,
@@ -282,7 +285,7 @@
         display: flex;
         flex-direction: column;
         min-height: 185px;
-        max-height: 239px;
+        max-height: 217px;
         width: 98.7%;
         overflow-y: auto;
         padding-bottom: 30px;
