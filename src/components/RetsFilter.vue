@@ -186,7 +186,6 @@
             calcFilterDiff(){
                 const typeField = [store.JOB_TYPE, store.STAT, store.ACTV, store.DIST_NM, store.CNTY_NM, store.USER]
                 store.filterTotal = typeField.filter(x => x.length).length
-                home()
                 // for(const [key, value] of Object.entries(this.filterPros)){
                 //     if(ignoreField.includes(key) || !value) continue
                 //     if(value.length){
