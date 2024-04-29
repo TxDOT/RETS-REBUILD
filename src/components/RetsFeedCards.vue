@@ -56,6 +56,9 @@
         <div class="card-feed-div" v-if="store.isCard">
             <RetsCards/>
         </div>
+        <div id="Spinner" v-if="isSpinner">
+            <v-progress-circular color="blue" indeterminate size="60" ></v-progress-circular>
+        </div>
         <RetsDetailPage v-if="store.isDetailsPage"/>
     </div>
 
@@ -83,9 +86,7 @@
             </div>
         </div>
     </v-card>
-    <v-container id="Spinner" v-if="isSpinner" >
-        <v-progress-circular color="blue" indeterminate size="60" ></v-progress-circular>
-    </v-container>
+
 </template>
 
 <script>
@@ -145,11 +146,12 @@ export default{
             addbutton: [
                 {title:"New", action: async () =>{
                                 const graphicAdd = await this.handlecreate();
-                                console.log(graphicAdd)
                                 if (graphicAdd){
                                     this.processAddPt(graphicAdd)
+                                    return
                                 }
-                                
+
+                                return
                 }}
                           
             ],
@@ -187,9 +189,6 @@ export default{
         this.retsFilters[appConstants.queryField[appConstants.userRoles.find(x => x.value === store.loggedInUser).type]] = appConstants.defaultUserValue
     },
     methods:{
-        test(x){
-            console.log(x)
-        },
         clearContent(){
             this.actvFeedSearch = ""
         },
@@ -315,10 +314,9 @@ export default{
                             feat.attributes.EDIT_NM = store.returnUserName(feat.attributes.EDIT_NM)
                             feat.attributes.CREATE_DT = store.returnDateFormat(feat.attributes.CREATE_DT)
                             feat.attributes.EDIT_DT = store.returnDateFormat(feat.attributes.EDIT_DT)
-                            feat.attributes.RTE_NM = store.addPtRd
-                            feat.attributes.DFO = store.DFO ? Number((store.DFO).toFixed(3)) : null
-                            feat.attributes.ASSIGNED_TO = store.loggedInUser
-                            console.log(store.DFO, store.loggedInUser)
+                            feat.attributes.RTE_NM = store.retsObj.attributes.RTE_NM
+                            console.log(store.retsObj.attributes.DFO)
+                            feat.attributes.DFO = store.retsObj.attributes.DFO ? store.retsObj.attributes.DFO : null
                             const addNewRetsPt = {attributes:feat.attributes, geometry:[feat.geometry.x,feat.geometry.y]}
                             store.isCancelBtnDisable = true
                             store.addRetsID(addNewRetsPt)
@@ -379,6 +377,7 @@ export default{
                 this.isCreateEnabled = !this.isCreateEnabled;
                 //console.log("true")
                 const newPointGraphic = await createtool(sketchWidgetcreate, createretssym);
+                console.log(newPointGraphic)
                 // Process the newPointGraphic as needed
                 this.isCreateEnabled = !this.isCreateEnabled;
                 this.addbtntext = "New"  
@@ -387,10 +386,10 @@ export default{
                             
                 } 
             else {
+                
                 changeCursor("default")
                 store.isMoveRetsPt = false
                 sketchWidgetcreate.cancel();
-                store.cancelEvent.remove()
                 store.isAdd = false
                 this.isCreateEnabled = !this.isCreateEnabled;
                 this.addbtntext = "New"
@@ -426,6 +425,7 @@ export default{
                             if(key === "RETS_ID" || key === "RETS_NM" || key === "DESC_" || key === "RTE_NM" || key === "ACTV" || key === "ACTV_NBR"){
                                 if(String(value).toLowerCase().includes(searchString) && (acceptedObj.findIndex(oid => oid.attributes.OBJECTID === s.attributes.OBJECTID) === -1)){
                                     if(acceptedObj.length === 10){
+                                        store.updateRetsSearch = acceptedObj.sort((a,b) => b.EDIT_DT - a.EDIT_DT)
                                         return
                                     }
                                     acceptedObj.push(s)
@@ -482,6 +482,7 @@ export default{
         flex-direction: column;
         gap: 1rem;
         align-items: flex-start;
+
         width: 509px;
         height: 100%;
         background-color: black;
@@ -496,9 +497,12 @@ export default{
         opacity: 1;
     }
     #Spinner{
-        position: absolute;
-        top: 50%;
-        left: 12.5%
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        left: 49%;
+        min-height: 90%;
     }
     .rets-subtitle-text :deep(input){
         color: #4472C4 !important;
@@ -590,7 +594,7 @@ export default{
     }
     .banner-txt{
         position: relative;
-        top: 2.1px;
+        bottom: 2px;
         font-weight: bold;
         font-size: 23px;
         left: 5px;
@@ -624,14 +628,6 @@ export default{
         padding: 0px 10px 10px 14px;
     }
 
-    #test{
-        display: none;
-
-        background-color: #404040;
-    }
-    #test{
-        display: none;
-    }
     .route-card{
         position: relative;
         max-width: 50%;

@@ -45,7 +45,6 @@ export async function updateRETSPT(retsObj){
     postFlagColor(retsObj)
     let esriUpdateGraphic = createGraphic(enable)
     esriUpdateGraphic.geometry = createGeo
-    console.log(enable)
     await retsLayer.applyEdits({
         updateFeatures: [esriUpdateGraphic]
     })

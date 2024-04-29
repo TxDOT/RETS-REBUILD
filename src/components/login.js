@@ -63,8 +63,7 @@ async function signIn(){
       getRetsLayerView()
       getTxDotRdWayLayerView()
       view.when(function(){
-        //view.goTo(response.extent)
-        home()
+        view.goTo(response.extent)
       })
       
 
@@ -79,7 +78,7 @@ const setDefExpRets = (userId) => {
 }
 
 export async function getUserId(){
-  console.warn('VERSION: 2.1.8')
+  console.warn('VERSION: 2.1.9')
   const user = await esriId.getCredential(authen.portalUrl + "/sharing/rest",{
     oAuthPopupConfirmation: false,
   })

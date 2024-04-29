@@ -48,7 +48,8 @@ export const store = reactive({
                          //"ACTV": null, "DIST_NM" : null, "CNTY_NM": null, "GIS_ANALYST": appConstants.defaultUserValue, 
                          //"filterTotal": 2},
         isDisableValidations: false,
-        isSaveBtnDisable: false,
+        isSaveBtnDisable: true,
+        closeIsRoadExist: false,
         isCancelBtnDisable: false,
         isMoveRetsPt: false,
         showPopUp: false,
@@ -75,6 +76,8 @@ export const store = reactive({
         DFO: null,
         isAdd: false,
         cancelEvent: null,
+        highlight: null,
+        isSaving: false,
         defaultFilterSetup(){
                 // this.CREATE_DT.push({title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"})
                 // this.STAT = appConstants.defaultStatValues

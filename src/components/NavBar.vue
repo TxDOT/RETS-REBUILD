@@ -474,7 +474,7 @@
         height: 100% !important;
         width: 58px !important;
         color: black;
-        border: 0px;
+        border: 0;
     }
 
     .v-navigation-drawer__content{

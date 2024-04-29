@@ -84,7 +84,7 @@
             <v-btn-toggle id="trigger-buttons" density="compact">
                 <v-btn @click="handlearchive" variant="plain" flat size="small" class="secondary-button">Delete</v-btn>
                 <v-btn @click="cancelDetailsMetadata" class="secondary-button" variant="plain" flat size="small" :disabled="store.isCancelBtnDisable">Cancel</v-btn>
-                <v-btn @click="sendToParent" variant="outlined" class="main-button-style" size="small" :disabled="store.isSaveBtnDisable">Save</v-btn>
+                <v-btn @click="sendToParent" variant="outlined" class="main-button-style" size="small" :disabled="store.isSaveBtnDisable" :loading="store.isSaving">Save</v-btn>
             </v-btn-toggle>
     </div>
 
@@ -107,15 +107,12 @@
 
 <script>
     import { appConstants } from '../common/constant.js'
-    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, retsLayerView} from './utility.js'
+    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, retsLayerView, isRoadExist} from './utility.js'
 
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
 
     import { defineAsyncComponent } from 'vue'
-    import { view } from './map-Init'
-    import Popup from "@arcgis/core/widgets/Popup.js";
-
     export default{
         name: "RetsDetailPage",
         components: {DetailsCard: defineAsyncComponent(()=> import('./detailsCard.vue')),
@@ -238,6 +235,13 @@
                 store.isCancelBtnDisable = false
             },
             async sendToParent(){
+                store.isSaving = true
+                const roadExist = await isRoadExist()
+                if(roadExist && !store.retsObj.attributes.NO_RTE){
+                    store.closeIsRoadExist = true
+                    return
+                }
+                console.log(roadExist)
                 store.isCancelBtnDisable = false
                 store.isAlert = false
                 clearGraphicsLayer()
@@ -269,7 +273,6 @@
                 store.isCancelBtnDisable = false
                 store.isMoveRetsPt = false
                 store.historyChat.length = 0
-                removeHighlight("a", true)
                 //store.preserveHighlightCards()
                 // retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
                 return

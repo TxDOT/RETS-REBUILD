@@ -119,7 +119,6 @@
         mounted(){
             //store.historyChat.sort((a,b) => a.CREATE_DT - b.CREATE_DT)
             this.orderList
-            console.log(this.histNotes)
             // if(!this.histNotes.length){
             //     return this.emptyHist = true
             // }
@@ -236,7 +235,6 @@
                             // if(!this.histNotes.length){
                             //     return this.emptyHist = true
                             // }
-                            console.log("no value")
                             return
                         }
                         const searchString = a.toLowerCase()
@@ -269,7 +267,6 @@
             },
             'store.historyChat.length':{
                 handler: function(a,b){
-                    console.log(a,b)
                    this.orderList
                 },
                 immediate: true

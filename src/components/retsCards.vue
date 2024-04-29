@@ -33,7 +33,7 @@
                 
                 <div style="position: relative; bottom: 27px; width: 100%; max-height: 40px;">
                     <p class="text-concat">
-                            {{ rd.attributes.DESC_ ? rd.attributes.DESC_ : "If description is empty does it need to be worked ?" }}
+                            {{ rd.attributes.DESC_ ? rd.attributes.DESC_ : "Description is empty" }}
                     </p>
                 </div>
                 <div class="bottomCardText">
@@ -138,7 +138,6 @@ export default{
         //this.roadsNext
         this.loadData()
         this.retsToGet
-        console.log("mounted", new Date())
         // setTimeout(()=>{
         //     let rd;
         //     for(rd=0; rd < store.roadObj.length; rd++){
@@ -152,6 +151,7 @@ export default{
         //     }
         //     console.log("check")
         // },3000)
+        store.isSaving = false
     },
 
     methods:{
@@ -179,17 +179,13 @@ export default{
             document.getElementById(`${this.flagClickedId}Icon`).style.color = clr
             const rets = store.roadObj.find(rd => rd.attributes.RETS_ID === this.flagClickedId)
             rets.attributes.flagColor.FLAG = clr
-            console.log(rets)
             postFlagColor(rets)
             this.isColorPicked = false;
             this.closeFlagDiv()
         },
         zoomToRetsPt(rets){
-            removeAllCardHighlight()
             removeHighlight("a", true)
             document.getElementById(String(rets.attributes.RETS_ID).concat('-', rets.attributes.OBJECTID)).classList.toggle('highlight-card')
-            console.log(document.getElementById(String(rets.attributes.RETS_ID).concat('-', rets.attributes.OBJECTID)))
-            //removeAllCardHighlight()
             clearTimeout(this.timer)
             this.timer = ""
             this.timer = setTimeout(()=>{
@@ -292,8 +288,6 @@ export default{
         },
 
         changeColor(id){
-            console.log(this.flagClickedId)
-            console.log(id)
             this.flagClickedId = ""
             this.flagClickedId = id
             this.isColorPicked = true;

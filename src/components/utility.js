@@ -54,7 +54,6 @@ export async function getTxDotRdWayLayerView(){
         () => !rdLayerView.dataUpdating,
         async () => {
             try{
-                console.log(rdLayerView.view.zoom)
                 if( rdLayerView.view.zoom > 9 ){
                     if(TxDotRoaways.definitionExpression === "") return
                     rdLayerView.layer.definitionExpression = ""
@@ -77,7 +76,7 @@ export async function getTxDotRdWayLayerView(){
 export function clickRetsPoint(){
     try{
         view.on("click", (event)=>{
-            view.hitTest(event, {include: [retsLayer, retsGraphicLayer, roadLayerView]}).then((evt) =>{
+            view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt) =>{
                 if(!evt.results.length){
                     removeHighlight("a", true)
                     removeAllCardHighlight()
@@ -88,7 +87,6 @@ export function clickRetsPoint(){
                     return
                 }
                 //clearRoadHighlightObj()
-                console.log(evt)
                 store.roadHighlightObj.clear()
                 const retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
                 store.roadHighlightObj.add(retsPt)
@@ -258,12 +256,14 @@ export async function filterMapActivityFeed(filterOpt){
                 GRID_ANALYST.length ? ANALYST.push(`GRID_ANALYST in (${GRID_ANALYST.join(" , ")})`) : null
                 DIST_ANALYST.length ? ANALYST.push(`DIST_ANALYST in (${DIST_ANALYST.join(" , ")})`) : null
                 let mapAnalyst = ANALYST.map((analyst, index) =>{
+                   
                     if(index === 0){
                         return `(${analyst}`
                     }
                     return analyst
                 })
-                fullFilter = [...fullFilter, ...mapAnalyst]
+                
+                fullFilter = [...fullFilter, mapAnalyst.join(' OR ')]
                 ASSIGNED_TO.length ? fullFilter.push(`OR ASSIGNED_TO in (${ASSIGNED_TO.join(" , ")}))`) : null
             }
             if(key === 'stat' || key === 'distNM' || key === 'cntyNM' || key === 'actv' || key === 'jobType'){
@@ -314,57 +314,38 @@ export async function filterMapActivityFeed(filterOpt){
             // retsDefinitionExpressionArr.push(`${key} in ('${value}')`)
         }
     }
-    let filterDef = fullFilter.join(" AND ")
+    const removeEmpty = fullFilter.filter(x => x.length)
+    console.log(removeEmpty)
+    let filterDef = removeEmpty.join(" AND ")
+    console.log(filterDef)
     let newFilter = filterDef.replace("AND OR", "OR")
-
+    console.log(newFilter)
     // if(!filterOpt.isAssignedTo){
     //     const assignedToQuery = [...GIS_ANALYST, ...GRID_ANALYST, ...DIST_ANALYST]
     //     assignedToQuery.map((i) => `${i}`).join(",")
     //     filterDef = filterDef.concat(' OR (ASSIGNED_TO in (', assignedToQuery, '))')
 
     // }
-    const filterMapPromise = new Promise((res, rej) => {
-        retsLayerView.layer.definitionExpression = `${newFilter}`
-        res(filterDef)
-    })
+    try{
+        const filterMapPromise = new Promise((res, rej) => {
+            retsLayerView.layer.definitionExpression = `${newFilter}`
+            res(filterDef)
+        })
 
-    retsLayerView.layer.queryExtent()
-    .then((resp) =>{
-        if(resp.count === 0){
-            view.goTo(view.goTo(texasExtent))
-            return
-        }
-        view.goTo(resp.extent)
-    })
-    const returnFilterMapPromise = await filterMapPromise
-    return newFilter
+        retsLayerView.layer.queryExtent()
+        .then((resp) =>{
+            if(resp.count === 0){
+                view.goTo(view.goTo(texasExtent))
+                return
+            }
+            view.goTo(resp.extent)
+        })
+        return newFilter
+    }
+    catch(err){
+        store.RetsCardStatus = "Oops! There is an issue with the filter expression"
+    }
 
-
-    // let retsDefinitionExpressionArr = []
-    // for(let [key, value] of Object.entries(filterOpt)){
-    //     if(!value || key === 'CREATE_DT' || key === 'filterTotal' || !value.length || key==='loggedInUser') continue
-    //     if(value){
-    //         if(key === `${appConstants.queryField[appConstants.userRoles.find(x => x.value === store.loggedInUser).type]}` || key === 'STAT' || key === 'DIST_NM' || key === 'CNTY_NM' || key === 'ACTV' || key === 'JOB_TYPE'){
-    //             retsDefinitionExpressionArr.push(`${key} in (${processDomainArr(value)})`)
-    //             continue
-    //         }
-    //         if(key === "EDIT_DT"){
-    //             const splitDate = value.split("-")
-    //             splitDate.length === 1 ? retsDefinitionExpressionArr.push(`${key} between timestamp '${splitDate[0]}' and timestamp '${splitDate[0]}'`) : retsDefinitionExpressionArr.push(`${key} between timestamp '${splitDate[0]}' and timestamp '${splitDate[1]}'`)
-    //             ///retsDefinitionExpressionArr.push(`${key} between timestamp '${splitDate[0]}' and timestamp '${splitDate[1]}'`)
-    //             continue
-    //         }
-    //         retsDefinitionExpressionArr.push(`${key} in ('${value}')`)
-    //     }
-    // }
-
-    // const filterMapPromise = new Promise((res, rej) => {
-    //     const filterDef = retsDefinitionExpressionArr.join(' AND ')
-    //     retsLayer.definitionExpression = `${filterDef}`
-    //     res(filterDef)
-    // })
-    // const returnFilterMapPromise = await filterMapPromise
-    // return returnFilterMapPromise
 }
 
 export const getDomainValues = (fieldName) => retsLayer.getFieldDomain(fieldName)
@@ -649,28 +630,32 @@ export function highlightpoints(event){
 
 export function createtool(sketchWidgetcreate, createretssym) {
     return new Promise((resolve, reject) => {
-        store.isAdd = true
-        store.isMoveRetsPt = true
-        store.cancelEvent = getRoadInformation()
         sketchWidgetcreate.create("point");
         sketchWidgetcreate.on("create", (event) => {
             if (event.state === "complete") {
-                changeCursor("default")
-                store.isMoveRetsPt = false
-                store.cancelEvent.remove()
-                store.isAdd = false
                 const pointGeometry = event.graphic.geometry;
+                const graphicToScreenPt = view.toScreen(pointGeometry)
+                view.hitTest(graphicToScreenPt, {include: roadLayerView.layer})
+                    .then((hit) =>{
+                        console.log(hit)
+                        if(!hit.results.length){
+                            store.retsObj.attributes.RTE_NM = ""
+                            store.retsObj.attributes.DFO = ""
+                            return
+                        }
+                        const convertMapPts = webMercatorUtils.webMercatorToGeographic(event.graphic.geometry)
+                        findDFOLocation(convertMapPts, hit.results[0].graphic.attributes.GID)
+                    })  
                 const newPointGraphic = new Graphic({
                     geometry: pointGeometry,
                     spatialReference: { wkid: 3857 }
                 });
-                
+                    
                 event.graphic.symbol = createretssym;
                 resolve(newPointGraphic);
             }
-
         });
-        });
+    });
   }
 
   export function deleteRetsGraphic(){
@@ -801,6 +786,12 @@ export function createtool(sketchWidgetcreate, createretssym) {
         
         return
       }
+export function scrollToTopOfFeed(setsize){
+    const feedElement = document.querySelector('.card-feed-div')
+    if(setsize === 0){
+        feedElement.scrollTop = 0; //Scroll the feed dive to the top
+    }
+}
 
 export async function handleaddrets(newPointGraphic, addrets){
     try{
@@ -924,16 +915,18 @@ export async function createRoadGraphic(retsObj, onStartUp){
     }
     //determine if dfo is on a roadSegment
     const rdSegment = returnRds.features.find((rd) => {
-
         let startM = rd.geometry.paths[0].at(0)[2]
         let endM = rd.geometry.paths[0].at(-1)[2]
         //if on a road segment
+        console.log(startM)
         if(routeDFO >= startM && routeDFO <= endM){
             return rd
         }
     })
 
     //if not on a road segment range
+
+    console.log(rdSegment)
     if(!rdSegment){
         store.isAlert = true
         store.alertTextInfo = {"text": `DFO is out of Range. Begin DFO: ${startM.toFixed(3)} End DFO: ${endM.toFixed(3)}`, "color": "red", "type":"error", "toggle": true}
@@ -1061,7 +1054,7 @@ async function UpdatePt(pt, onStartUp){
 export const completeMovePtSketch = () => sketchWidgetcreate.complete()
 
 export function getRoadInformation(){
-    changeCursor('crosshair')
+    // changeCursor('crosshair')
     
     // const createGraphic = new Graphic({
     //     geometry: {
@@ -1075,83 +1068,122 @@ export function getRoadInformation(){
 
 
     // graphics.add(createGraphic)
-    if(!store.isMoveRetsPt){
-        completeMovePtSketch()
+
+    try{
+        sketchWidgetcreate.create("point", {mode: "click"})
+        sketchWidgetcreate.on("create", (event) => {
+            if(event.state === "complete"){
+                console.log(event)
+                const getGraphic = event.graphic
+                const graphicToScreenPt = view.toScreen(getGraphic.geometry)
+                getGraphic.attributes = store.retsObj.attributes
+                const convertToGeoCoord = webMercatorUtils.webMercatorToGeographic(getGraphic.geometry)
+                view.hitTest(graphicToScreenPt, {include: roadLayerView.layer})
+                    .then((hit) => {
+                        if(!hit.results.length){
+                            UpdatePt(convertToGeoCoord, false)
+                            store.retsObj.attributes.NO_RTE = false
+                            return
+                        }
+                        const convertMapPts = webMercatorUtils.webMercatorToGeographic(event.graphic.geometry)
+                        findDFOLocation(convertMapPts, hit.results[0].graphic.attributes.GID)
+                        completeMovePtSketch()
+                        console.log(hit)
+                        UpdatePt(convertToGeoCoord, false)
+                        store.cancelEvent.remove()
+                        store.isMoveRetsPt = false
+                    })
+                    .catch(() => {
+                        //
+                    })
+                return
+            }
+        })
+    
+        if(!store.isMoveRetsPt){
+            completeMovePtSketch()
+            return
+        }
+    }
+    catch(err){
+        store.cancelEvent.remove()
         return
     }
-    let highlight;
-
-    const rdEvent = view.on(["click", "pointer-move"], async (event)=>{
-        const hitTest = await view.hitTest(event, {include: [roadLayerView.layer]})
-        try{
-            if(event.type === "pointer-move" && store.isMoveRetsPt){
-                if(highlight){
-                    highlight.remove()
-                    highlight = null
-                }
-
-                if(!hitTest.results.length){
-                    store.addPtRd = ""
-                    store.DFO = null
-                }
-                if(hitTest.results.length){
-                    if(store.isAdd){
-                        const createMapPts = view.toMap(hitTest.screenPoint)
-                        const convertMapPts = webMercatorUtils.webMercatorToGeographic(createMapPts)
-                        store.addPtRd = hitTest.results[0].graphic.attributes.RTE_NM
-                        highlight = roadLayerView.highlight(hitTest.results[0].graphic)
-                        findDFOLocation(convertMapPts, hitTest.results[0].graphic.attributes.GID)
-                            .then(dfo => store.DFO = dfo ? Number((dfo).toFixed(3)) : null)
-                        // store.addPtGID = hitTest.results[0].graphic.geometry
-                        return
-                    }
-  
-                    store.retsObj.attributes.RTE_NM = hitTest.results[0].graphic.attributes.RTE_NM
-                    highlight = roadLayerView.highlight(hitTest.results[0].graphic)
-                    return
-                }
-               
-            }
-            
-            if(event.type === "click" && store.isMoveRetsPt){
-                const createMapPts = view.toMap(hitTest.screenPoint)
-                const convertMapPts = webMercatorUtils.webMercatorToGeographic(createMapPts)
-                if(hitTest.results.length && (store.retsObj.attributes.NO_RTE === false || store.retsObj.attributes.NO_RTE === 0)){     
-                    findDFOLocation(convertMapPts, hitTest.results[0].graphic.attributes.GID)
-                    completeMovePtSketch()
-                    store.isMoveRetsPt = false
-                    changeCursor("default")
-                       
-                }
-                else{
-                    store.retsObj.geometry = convertMapPts
-                   // hideRetsPt(createGraphic.attributes.RETS_ID)
-                    await UpdatePt(store.retsObj.geometry, false)
-                    completeMovePtSketch()
-                    
-                    changeCursor("default")
-
-                    store.retsObj.attributes.NO_RTE = true
-                    store.retsObj.attributes.RTE_NM = null
-                    store.retsObj.attributes.DFO = null
-                
-                    if(!hitTest.results.length){
-                        store.isAlert = true
-                        store.alertTextInfo = {"text": `No Route has been detected`, "color": "yellow", "type":"info", "toggle": true}
-                        store.isMoveRetsPt = false
-                    }
-                }
-
-                return
-                         
-            }
-        }
-        catch(err){
-            console.log(err)
-        }
-    })
     
-    return rdEvent
+
+    // const rdEvent = view.on(["click", "pointer-move"], async (event)=>{
+    //     const hitTest = await view.hitTest(event, {include: [roadLayerView.layer]})
+    //     try{
+    //         if(event.type === "pointer-move" && store.isMoveRetsPt){
+    //             if(!hitTest.results.length){
+    //                 store.addPtRd = ""
+    //                 store.DFO = null
+    //             }
+    //             if(hitTest.results.length){
+    //                 if(store.isAdd){
+    //                     const createMapPts = view.toMap(hitTest.screenPoint)
+    //                     const convertMapPts = webMercatorUtils.webMercatorToGeographic(createMapPts)
+                       
+    //                     store.addPtRd = hitTest.results[0].graphic.attributes.RTE_NM
+    //                     findDFOLocation(convertMapPts, hitTest.results[0].graphic.attributes.GID)
+    //                         .then(dfo => store.DFO = dfo ? Number((dfo).toFixed(3)) : null)
+                        
+                        
+                        
+
+    //                     // store.addPtGID = hitTest.results[0].graphic.geometry
+    //                     return
+    //                 }
+                   
+    //                 store.retsObj.attributes.RTE_NM = hitTest.results[0].graphic.attributes.RTE_NM
+    //                 return
+    //             }
+               
+    //         }
+            
+    //         if(event.type === "click" && store.isMoveRetsPt){
+
+    //             const createMapPts = view.toMap(hitTest.screenPoint)
+    //             const convertMapPts = webMercatorUtils.webMercatorToGeographic(createMapPts)
+    //             if(hitTest.results.length && (store.retsObj.attributes.NO_RTE === false || store.retsObj.attributes.NO_RTE === 0)){     
+    //                 findDFOLocation(convertMapPts, hitTest.results[0].graphic.attributes.GID)
+    //                 completeMovePtSketch()
+    //                 store.isMoveRetsPt = false
+    //                 changeCursor("default")
+                       
+    //             }
+    //             else{
+                    
+    //                 store.retsObj.geometry = {
+    //                     type: "point",
+    //                     x: convertMapPts.x,
+    //                     y: convertMapPts.y,
+    //                 }
+    //                // hideRetsPt(createGraphic.attributes.RETS_ID)
+    //                 await UpdatePt(store.retsObj.geometry, false)
+    //                 completeMovePtSketch()
+                    
+    //                 changeCursor("default")
+
+    //                 store.retsObj.attributes.NO_RTE = true
+    //                 store.isMoveRetsPt = false
+    //                 if(!hitTest.results.length){
+    //                     store.isAlert = true
+    //                     store.alertTextInfo = {"text": `No Route has been detected`, "color": "yellow", "type":"info", "toggle": true}
+    //                     store.isMoveRetsPt = false
+    //                 }
+    //             }
+
+    //             return
+                         
+    //         }
+    //     }
+    //     catch(err){
+    //         console.log(err)
+    //     }
+    // })
+    
+    // return rdEvent
 }
 
 export function removeOutline(){
@@ -1216,8 +1248,8 @@ export function hideRetsPt(retsID){
 async function findDFOLocation(convertMapPts, gid){
     try{
         const road = await queryRoads("GID", gid)
+        console.log(road)
         store.retsObj.attributes.RTE_NM = road.features[0].attributes.RTE_NM
-        store.retsObj.geometry = [convertMapPts.x, convertMapPts.y]
     
         const roadConvertToGeo = webMercatorUtils.webMercatorToGeographic(road.features[0].geometry)
                                 
@@ -1235,6 +1267,8 @@ async function findDFOLocation(convertMapPts, gid){
         const {distance} = geodesicUtils.geodesicDistance(returnCoord.coordinate, neareastVertexPoint.geometry, "miles")
         //store.isMoveRetsPt = false
         const newDFO = buildDFOLines(roadConvertToGeo.paths[0], returnCoord, distance) //roadConvertToGeo.paths[0].at(vertexIndex)[2] + distance
+        console.log(newDFO)
+        store.retsObj.geometry = [returnCoord.coordinate.x, returnCoord.coordinate.y]
         store.retsObj.attributes.DFO = newDFO.toFixed(3)
         return newDFO
     }
@@ -1242,4 +1276,41 @@ async function findDFOLocation(convertMapPts, gid){
         console.log(err)
     }
     
+}
+
+export function hitTestMoveRETS(){
+    let destoryTimeout;
+    const movePointHitTest = view.on("pointer-move", (event) => {
+        view.hitTest(event, {include: roadLayerView.layer})
+            .then((hit) => {
+                
+                if(destoryTimeout){
+                    clearTimeout(destoryTimeout)
+                }
+                if(!hit.results.length){
+                    store.addPtRd = ""
+                    store.DFO = null
+                    return
+                }
+                destoryTimeout = setTimeout(()=>{
+                    store.retsObj.attributes.RTE_NM = hit.results[0].graphic.attributes.RTE_NM
+                },300)
+                    
+                return 
+            })
+            .catch(err => console.log(err))
+    })
+
+    return movePointHitTest
+}
+
+export async function isRoadExist(){
+    const exist = await roadLayerView.queryFeatures({
+        where: `RTE_NM = '${store.retsObj.attributes.RTE_NM}'`
+    })
+    
+    if(!exist.features.length){
+        return true
+    }
+    return false
 }

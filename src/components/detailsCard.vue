@@ -15,10 +15,10 @@
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom: 1.3rem; height: 70px; padding-bottom: 0% !important;" >
             <v-col cols="3" offset="0" style="position: relative; bottom: 5px !important;">
-                <v-text-field label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="[valueRequired]" id="route"></v-text-field>
+                <v-text-field label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required] : []" id="route" @update:model-value="rteNumSearch(store.retsObj.attributes.RTE_NM)"></v-text-field>
             </v-col>
             <v-col cols="4" offset="4">
-                <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" v-model="store.retsObj.attributes.DFO" :rules="onlyNumbers" @update:model-value="onlyNumberss(store.retsObj.attributes.DFO)">
+                <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" v-model="store.retsObj.attributes.DFO" :rules="!store.retsObj.attributes.NO_RTE ? [onlyNumbers.required, onlyNumbers.numbers]: []" @update:model-value="DFOCheck(store.retsObj.attributes.DFO)">
                         <template v-slot:append-inner>
                             <v-tooltip :text="store.zoomInText" location="top">
                                 <template v-slot:activator="{props}">
@@ -35,7 +35,7 @@
         <v-row align="center" no-gutters dense>
             <v-col>
                 <div class="new-proposed-route">
-                    <v-checkbox density="compact" class="checkbox-size" v-model="store.retsObj.attributes.NO_RTE">
+                    <v-checkbox density="compact" class="checkbox-size" v-model="store.retsObj.attributes.NO_RTE" @update:model-value="noRTECheck(store.retsObj.attributes.RTE_NM)">
                         <template v-slot:label>
                             <v-label class="main-color subtitle-text" text="Check for new or proposed routes"></v-label>
                         </template>
@@ -56,7 +56,7 @@
                 <v-btn variant="plain" icon="mdi-magnify-plus-outline" @click="zoomToRETS"></v-btn>
             </v-col>
             <v-col cols="1" offset="0">
-                <v-btn variant="plain" icon="mdi-cursor-default"></v-btn>
+                <v-btn variant="plain" icon="mdi-cursor-default" disabled></v-btn>
             </v-col>
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom:5.7rem;">
@@ -66,14 +66,14 @@
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom: 6.1rem; height: 0px;">
             <v-col cols="12" offset="0">
-                <v-textarea label="Description" no-resize variant="underlined" class="rets-description" rows="3" v-model="store.retsObj.attributes.DESC_" :rules="[valueRequired]"></v-textarea>
+                <v-textarea label="Description" no-resize variant="underlined" class="rets-description" rows="3" v-model="store.retsObj.attributes.DESC_" :rules="[descRequired.required]" @update:modelValue="descCheck()"></v-textarea>
             </v-col>
         </v-row>
         <v-row align="center" style="position: relative; bottom: 2.1rem; height: 25px;">
             <div style="width: 100%; height: 5%">
                 <!-- <v-col cols="5" offset="0" style="z-index: 999;"> -->
                 <div style="width: 35%;">
-                    <v-btn icon="mdi-plus" variant="plain" @click="displayGemSearch" style="bottom: 0px;"></v-btn>
+                    <v-btn icon="mdi-plus" variant="plain" @click="displayGemSearch" style="bottom: 0px;" disabled></v-btn>
                     <div id="chips">
                         <v-chip 
                             v-for="i in gemTasks"
@@ -105,7 +105,6 @@
                 <v-date-picker v-model="datePicked" class="date" hide-header @update:modelValue="selectDates()"></v-date-picker>
             </div>
         </v-row>
-        
     </v-container>
     </div>
     
@@ -113,9 +112,11 @@
 
 <script>
 import { appConstants } from '../common/constant'
-import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets, zoomTo, createRoadGraphic, getRoadInformation, completeMovePtSketch, changeCursor} from './utility.js'
+import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets, zoomTo, 
+        createRoadGraphic, getRoadInformation, completeMovePtSketch, hitTestMoveRETS} from './utility.js'
 
 import {store} from './store.js'
+
     export default{
         name: "DetailsCard",
         props: {
@@ -139,23 +140,22 @@ import {store} from './store.js'
                 isCrossHair: false,
                 retsRouteArchive: {},
                 removeListner: {},
-                onlyNumbers: [
-                    value =>{
-                        if(!value) return false
-                        const num = Number(value)
-                        if(!/[\d]/.test(num) && !store.retsObj.attributes.NO_RTE ) return `Whoa! Numbers are more my vibe!`
-                        if(!value.length && !store.retsObj.attributes.NO_RTE ) return `But where am I? Don't leave me blank!`
-                    }
-                ],
+                onlyNumbers: {
+                    required: value => !!value || "But where am I? Don't leave me blank!",
+                    numbers: value => /[\d]/.test(Number(value)) || `Whoa! Numbers are more my vibe!`
+                },
+                valueRequired:{
+                    required: value => !!value || "Gimme a route a name!"
+                },
+                descRequired:{
+                    required: value => !!value || "Description is empty."
+                }
             }
         },
         beforeMount(){
             this.splitAndAddRelatedRets(store.retsObj.attributes.RELATED_RETS)
         },
         mounted(){
-            // if(!store.retsObj.attributes.DESC_.length){
-            //     this.onlyNumbers[0] = true
-            // }
             this.ogValues = store.retsObj
             this.datePicker = !store.retsObj.attributes.DEADLINE ? "Pick a date" : this.returnDateFormat(new Date(store.retsObj.attributes.DEADLINE)) 
             
@@ -166,9 +166,10 @@ import {store} from './store.js'
                 store.retsObj.attributes.NO_RTE = true
                 return
             }
+            //this.valueRequired()
             //this.initDataCheck()
             this.retsRouteArchive = JSON.parse(store.archiveRetsDataString)
-            createRoadGraphic(store.retsObj, true)
+            //createRoadGraphic(store.retsObj, true)
         },
         methods:{
             convertNoRTE(noRte){
@@ -213,77 +214,89 @@ import {store} from './store.js'
                 })
                 return this.RETSData
             },
-            initDataCheck(){
-                // if Route, status or description; save button disabled
-                let item = [store.retsObj.attributes.RTE_NM, store.retsObj.attributes.STAT, store.retsObj.attributes.DESC_].filter(x => !x)
-                if(!store.retsObj.attributes.NO_RTE){
-                    if(store.retsObj.attributes.DFO === null || !store.retsObj.attributes.RTE_NM){
-                        store.isAlert = true
-                        store.alertTextInfo = {"text": "Route Number or DFO is missing", "color": "red", "toggle": true}
-                        return store.isSaveBtnDisable = true
-                    }
-                    if(!store.retsObj.attributes.RTE_NM.length){
-                        store.isAlert = true
-                        store.alertTextInfo = {"text": "Route Number or DFO is missing", "color": "red", "toggle": true}
-                        return store.isSaveBtnDisable = true
-                    }
-                }
-                if(item.length > 0){
-                    store.isAlert = false
+            mulitpleFieldValidCheck(){
+                let numNotValid = [store.retsObj.attributes.RTE_NM, store.retsObj.attributes.DFO, store.retsObj.attributes.STAT, store.retsObj.attributes.DESC_].filter(x => !x)
+                if(numNotValid.length && !store.retsObj.attributes.NO_RTE){
                     store.isSaveBtnDisable = true
-                    return true
+                    return
                 }
-                store.isAlert = false
                 store.isSaveBtnDisable = false
-                return false
+                return
             },
-            valueRequired(e){
-                if(e === null) return false
-                if(!e.length){
+            rteNumSearch(){
+                this.mulitpleFieldValidCheck()
+
+            },
+            noRTECheck(){
+                console.log(store.retsObj.attributes.NO_RTE)
+                if(store.retsObj.attributes.NO_RTE){
+                    store.isDisableValidations = true
+                    store.isSaveBtnDisable = false
+                    store.isAlert = false
+                    return
+                }
+
+                if(!this.isDFOValid() || !this.isRTENMValid()){
+                    console.log(this.onlyNumbers.numbers(store.retsObj.attributes.DFO))
                     store.isSaveBtnDisable = true
-                    return `Field is required`
+                    return
                 }
                 store.isSaveBtnDisable = false
-                
-                return [false]
+                return
+            },
+            descCheck(){
+                this.mulitpleFieldValidCheck()
+                return
+            },
+            isDFOValid(){
+                if(this.onlyNumbers.numbers(store.retsObj.attributes.DFO) !== true || this.onlyNumbers.required(store.retsObj.attributes.DFO) !== true){
+                    return false
+                }
+                return true
+            },
+            isRTENMValid(){
+                if(this.onlyNumbers.required(store.retsObj.attributes.RTE_NM) !== true){
+                    return false
+                }
+                return true
             },
             sendDisabledSave(bool){
                 this.$emit("disable-save", bool)
             },
-           onlyNumberss(i, event){
-                if(store.isDisableValidations) return true
-                if(!i){
+            DFOCheck(i){
+                let item = [store.retsObj.attributes.RTE_NM, store.retsObj.attributes.DFO, store.retsObj.attributes.STAT, store.retsObj.attributes.DESC_].filter(x => !x)
+                if(item.length && !store.retsObj.attributes.NO_RTE){
                     store.isSaveBtnDisable = true
-                    return `But where am I? Don't leave me blank!`
-                }
-                if(!store.retsObj.attributes.NO_RTE){
-                    let convert = Number(i)
-
-                    if(!convert){
-                        store.isSaveBtnDisable = true
-                        return `Whoa! Numbers are more my vibe!`
-                    }
-                    //createRoadGraphic(store.retsObj)
-                    store.isSaveBtnDisable = false
-                    return false
+                    return
                 }
                 store.isSaveBtnDisable = false
-                return false
-                
+                return
             },
             paperClipFunc(){
-                store.retsObj.attributes.ACTV.value === 'Minute Order' ? window.open(`https://publicdocs.txdot.gov/minord/mosearch/Pages/Minute-Order-Search-Results.aspx#k=${store.retsObj.attributes.ACTV_NBR}`, '_blank') :
+                store.retsObj.attributes.ACTV.value === 'Minute Order' || store.retsObj.attributes.ACTV === 'Minute Order' ? window.open(`https://publicdocs.txdot.gov/minord/mosearch/Pages/Minute-Order-Search-Results.aspx#k=${store.retsObj.attributes.ACTV_NBR}`, '_blank') :
                                                             window.open(`https://txdot.sharepoint.com/sites/division-tpp/DM-Admin/Lists/Data%20Request/EditForm.aspx?ID=${store.retsObj.attributes.ACTV_NBR}`, '_blank')
             },
             crossHairFunc(){
-                store.isMoveRetsPt = !store.isMoveRetsPt
-                if(store.isMoveRetsPt){
-                    this.removeListner = getRoadInformation()
-                    return
+                try{
+                    store.isMoveRetsPt = !store.isMoveRetsPt
+                    if(store.isMoveRetsPt){this.valueRequired
+                        store.cancelEvent = hitTestMoveRETS()
+                        getRoadInformation()
+                        return
+                    }
+                    store.isMoveRetsPt = false
+                    store.cancelEvent.remove()
+                    completeMovePtSketch()
                 }
-                changeCursor("default")
-                this.removeListner.remove()
-                completeMovePtSketch()
+                catch(err){
+                    console.log(err)
+                    if(store.cancelEvent){
+                        store.isMoveRetsPt = false
+                        store.cancelEvent.remove()
+                    }
+                    
+                }
+                
                     //getPointRoadInteraction(store.retsObj)
                     //store.isMoveRetsPt = true
                     return
@@ -340,9 +353,6 @@ import {store} from './store.js'
                 // console.log(retsPos)
                 //store.retsObj.attributes.RELATED_RETS.splice(retsPos,1)
             },
-            queryRdFeatureLayer(){
-                
-            },
             selectDates(){
                 this.datePicker = this.returnDateFormat(this.datePicked)
                 const newDateConstruct = new Date(this.datePicked)
@@ -351,6 +361,9 @@ import {store} from './store.js'
                 this.isDatePicker = false
                 return
             },
+            checkIfRouteExists(){
+
+            }
         },
         watch:{
             taskGem:{
@@ -368,26 +381,17 @@ import {store} from './store.js'
             },
             'store.retsObj.attributes.NO_RTE':{
                 handler: function(){
-                    if(store.retsObj.attributes.NO_RTE){
-                        store.isDisableValidations = true
-                        store.isSaveBtnDisable = false
-                        store.isAlert = false
-                        return
-                    }
-                    store.isDisableValidations = false
-                    this.initDataCheck()
-
-                    return
+                    
                 },
                 immediate: true
             },
             'store.retsObj.attributes.DFO':{
                 handler: function(a,b){
                     if(a === null){
+                        //this.initDataCheck()
                         a = ""
                     }
                     if(!a.length || !Number(a)) return
-                    a = Number((a).toFixed(3))
                     if(Number(a) === b) return
                     const ogDFO = this.retsRouteArchive
                     clearTimeout(this.typeTimeout)
@@ -400,7 +404,7 @@ import {store} from './store.js'
                     return
 
                 }
-            }
+            },
         },
 
     }

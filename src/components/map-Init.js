@@ -20,7 +20,7 @@ import Legend from "@arcgis/core/widgets/Legend";
 import LegendViewModel from "@arcgis/core/widgets/Legend/LegendViewModel";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import Graphic from "@arcgis/core/Graphic";
-import { outlineFeedCards, removeOutline, removeHighlight, home, scrollToTopOfFeed} from "./utility.js";
+import { outlineFeedCards, removeOutline, removeHighlight, home} from "./utility.js";
 import Extent from "@arcgis/core/geometry/Extent.js";
 
 
@@ -31,13 +31,14 @@ export const texasExtent = new Extent({
   // xmax:-93.507217,
   // ymax:36.500695,
 
-  xmin: -91.38737499794775,
-  ymin: 24.375094465969866,
-  xmax: -108.18225494002854,
-  ymax: 38.26802942526595,
+  xmin: -106.649513,
+  ymin: 25.837163,
+  xmax: -93.507217,
+  ymax: 36.500704,
   spatialReference: {
     wkid: 4326 // WGS84 coordinate system
   }
+
 
   // xmin:25.7364986,
   // ymin:-109.1882887,
@@ -222,7 +223,7 @@ export let roadwaysRenderer = {
       type: "simple-line",
       width: .2,
       opacity: 0,
-      color: "blue"
+      color: "rgba(65, 66, 66, .1)"
     }
 }
 
@@ -304,13 +305,12 @@ export const texasCities = new FeatureLayer({
 //TxDotRoaways Layer construction
 export const TxDotRoaways = new FeatureLayer ({
   url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Roadways/FeatureServer/0",
-  visible: false,
+  visible: true,
   renderer: roadwaysRenderer,
   outFields: ["*"],
   returnM: true,
   hasM: true,
-  definitionExpression: `RTE_PRFX = 'IH'`,
-  
+  definitionExpression: `RTE_PRFX = 'IH'`
 })
 
 //RETS History
@@ -493,7 +493,8 @@ export const searchWidget = new Search({
       displayField: "RETS_ID",
       exactMatch: true,
       outFields: ["*"],
-      maxSuggestions: 1,
+      minSuggestCharacters: 6,
+      maxSuggestions: 3,
       
     },
     
@@ -640,9 +641,10 @@ searchWidget.on("select-result", function(event) {
       symbol: highlightSymbolroadways
     }));
   } else if (selectedFeature.geometry.type === "point") {
-
     const tempArray = [selectedFeature];
+    // Run the highlightRestPoints function on the selected point feature
     removeOutline();
+    //removeHighlight(selectedFeature, true)
     outlineFeedCards(tempArray);
   }
   
@@ -652,8 +654,7 @@ searchWidget.on("select-result", function(event) {
 searchWidget.on("search-clear", function(event) {
   // Clear the highlight when the search is cleared
     highlightLayer.removeAll();
-    scrollToTopOfFeed(0);
-  
+    scrollToTopOfFeed(0)
   
     removeOutline();
 
@@ -670,11 +671,6 @@ document.addEventListener('click', function(event) {
         searchWidget.focus()
 
       }
-
-      
-      
-     
-
 });
 
 searchWidget.on("suggest-complete", function(event) {
@@ -693,11 +689,8 @@ searchWidget.on("suggest-complete", function(event) {
     const content = suggestions[5].results[0].text
     suggestions[5].results[0].text = "RETS: " + content + " (MO: " + searchTerm + ")";
   }
-
-  
-  
-
 });
+
 
 homeWidget.on("go", function() {
   // Run your function here
