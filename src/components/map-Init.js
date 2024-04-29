@@ -20,7 +20,7 @@ import Legend from "@arcgis/core/widgets/Legend";
 import LegendViewModel from "@arcgis/core/widgets/Legend/LegendViewModel";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import Graphic from "@arcgis/core/Graphic";
-import { outlineFeedCards, removeOutline, removeHighlight, home} from "./utility.js";
+import { outlineFeedCards, removeOutline, removeHighlight, home, scrollToTopOfFeed} from "./utility.js";
 import Extent from "@arcgis/core/geometry/Extent.js";
 
 
