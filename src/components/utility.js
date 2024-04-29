@@ -338,7 +338,7 @@ export async function filterMapActivityFeed(filterOpt){
         retsLayerView.layer.queryExtent()
         .then((resp) =>{
             if(resp.count === 0){
-                view.goTo(view.goTo(texasExtent))
+                view.goTo(texasExtent)
                 return
             }
             view.goTo(resp.extent)
@@ -457,7 +457,7 @@ export function home(onrender){
         retsLayer.queryExtent()
         .then((resp) =>{
             if (resp.count== 0 || resp.count > 3000){
-                view.goTo(view.center)
+                view.goTo(texasExtent)
             }
             else{
                 view.goTo(resp.extent)
