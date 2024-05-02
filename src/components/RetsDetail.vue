@@ -269,7 +269,7 @@
                 this.replaceArchiveContent(archiveRets)
                 store.isAlert = false
                 clearGraphicsLayer()
-    
+                removeHighlight("a", true)
                 store.isCancelBtnDisable = false
                 store.isMoveRetsPt = false
                 store.historyChat.length = 0

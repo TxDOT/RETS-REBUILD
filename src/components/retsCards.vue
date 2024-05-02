@@ -104,7 +104,7 @@
 
 <script>
 import {postFlagColor} from '../components/crud.js'
-import {zoomTo, highlightRETSPoint, toggleRelatedRets,returnHistory, removeAllCardHighlight, removeHighlight} from './utility.js'
+import {zoomTo, highlightRETSPoint, toggleRelatedRets,returnHistory, removeAllCardHighlight, removeHighlight, removeOutline} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {store} from './store.js'
 
@@ -184,6 +184,7 @@ export default{
             this.closeFlagDiv()
         },
         zoomToRetsPt(rets){
+            removeOutline()
             removeHighlight("a", true)
             document.getElementById(String(rets.attributes.RETS_ID).concat('-', rets.attributes.OBJECTID)).classList.toggle('highlight-card')
             clearTimeout(this.timer)

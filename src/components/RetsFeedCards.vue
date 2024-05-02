@@ -90,7 +90,7 @@
 </template>
 
 <script>
-import {clickRetsPoint, getQueryLayer, returnHistory, getHighlightGraphic, removeHighlight, createtool, highlightRETSPoint, toggleRelatedRets, zoomTo, changeCursor} from './utility.js'
+import {clickRetsPoint, getQueryLayer, returnHistory, getHighlightGraphic, removeHighlight, createtool, highlightRETSPoint, toggleRelatedRets, zoomTo, changeCursor, removeOutline} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import {store} from './store.js'
@@ -259,7 +259,6 @@ export default{
             return
         },
         zoomToRetsPt(rets){
-            //removeAllCardHighlight()
             clearTimeout(this.timer)
             this.timer = ""
             this.timer = setTimeout(()=>{
@@ -501,7 +500,7 @@ export default{
         display: flex;
         justify-content: center;
         align-items: center;
-        left: 49%;
+        left: 45%;
         min-height: 90%;
     }
     .rets-subtitle-text :deep(input){

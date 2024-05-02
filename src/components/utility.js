@@ -112,7 +112,7 @@ export function clickRetsPoint(){
 
 export function hoverRetsPoint(){
     view.on("pointer-move", (event)=>{
-        view.hitTest(event, {include: [retsLayer, retsGraphicLayer, graphics, TxDotRoaways]}).then((evt) =>{
+        view.hitTest(event, {include: [retsLayer, retsGraphicLayer, graphics]}).then((evt) =>{
             if(!evt.results.length){
                 document.getElementById("viewDiv").style.cursor = "default"
                 return
@@ -205,7 +205,7 @@ export const clearGraphicsLayer = () => {
 
 export const clearRoadHighlightObj = () => store.roadHighlightObj.clear()
 
-export const zoomTo = (geom) => view.goTo({center: [geom[0], geom[1]], scale: 30000})
+export const zoomTo = (geom) => view.goTo({center: [geom[0], geom[1]], zoom: 16}) 
 
 export function getGEMTasks(){
 
@@ -457,7 +457,7 @@ export function home(onrender){
         retsLayer.queryExtent()
         .then((resp) =>{
             if (resp.count== 0 || resp.count > 3000){
-                view.goTo(view.center)
+                view.goTo(texasExtent)
             }
             else{
                 view.goTo(resp.extent)
@@ -711,12 +711,14 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                     var selectedFeatures = result.features;
                                     if(!selectedFeatures.length && store.isShowSelected){
                                         store.isShowSelected = false
+                                        
                                         return
                                     }
     
                                     if (pressedkey === false){
                                         
                                         removeHighlight("a", removeAll); 
+                                        removeOutline()
                                         removeAllCardHighlight()
                                         store.roadHighlightObj.clear()
                                         // for (let i = 0; i < selectedFeatures.length; i++ ) {
