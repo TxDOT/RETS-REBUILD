@@ -205,6 +205,7 @@ export const store = reactive({
 
                 try{
                         this.roadObj.length = 0
+                        this.updateRetsSearch = 0
                         const obj = await getQueryLayer(queryString, orderField)
                         if(obj.features.length){
                                 obj.features.forEach((x) => {
@@ -225,6 +226,7 @@ export const store = reactive({
                                         this.roadObj.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                                         store.archiveRetsData.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                                 })
+                                this.updateRetsSearch = this.roadObj
                         }
 
 
