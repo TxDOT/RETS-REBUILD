@@ -204,7 +204,7 @@ export const clearGraphicsLayer = () => {
 
 export const clearRoadHighlightObj = () => store.roadHighlightObj.clear()
 
-export const zoomTo = (geom) => view.goTo({center: [geom[0], geom[1]], scale: 30000})
+export const zoomTo = (geom) => view.goTo({center: [geom[0], geom[1]], zoom: 16}) 
 
 export function getGEMTasks(){
 
@@ -712,12 +712,14 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                     var selectedFeatures = result.features;
                                     if(!selectedFeatures.length && store.isShowSelected){
                                         store.isShowSelected = false
+                                        
                                         return
                                     }
     
                                     if (pressedkey === false){
                                         
                                         removeHighlight("a", removeAll); 
+                                        removeOutline()
                                         removeAllCardHighlight()
                                         store.roadHighlightObj.clear()
                                         // for (let i = 0; i < selectedFeatures.length; i++ ) {

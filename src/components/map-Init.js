@@ -19,7 +19,7 @@ import TileInfo from "@arcgis/core/layers/support/TileInfo.js";
 import Legend from "@arcgis/core/widgets/Legend";
 import LegendViewModel from "@arcgis/core/widgets/Legend/LegendViewModel";
 import Graphic from "@arcgis/core/Graphic";
-import { outlineFeedCards, removeOutline, home, scrollToTopOfFeed, roadLayerView} from "./utility.js";
+import { outlineFeedCards, removeOutline, removeHighlight, home, scrollToTopOfFeed} from "./utility.js";
 import Extent from "@arcgis/core/geometry/Extent.js";
 
 
@@ -412,8 +412,6 @@ export const view = new MapView({
   
 })
 
-
-
 //create search widget
 export const searchWidget = new Search({
   
@@ -422,6 +420,7 @@ export const searchWidget = new Search({
   allPlaceholder: "City, County, District, Route",
   popupEnabled: false,
   popupTemplate: false,
+  maxSuggestions: 3,
   sources:
   [
     {
@@ -429,11 +428,12 @@ export const searchWidget = new Search({
       layer: retsLayer, 
       placeholder: "RETS ID",
       zoomScale: 5000,
-      searchFields: ["RETS_ID","RTE_NM","CNTY_NM","DIST_NM"],
+      searchFields: ["RETS_ID"],
       displayField: "RETS_ID",
       exactMatch: false,
       outFields: ["*"],
       maxSuggestions: 3,
+      
       
     },
     
@@ -446,7 +446,7 @@ export const searchWidget = new Search({
       exactMatch: false,
       outFields: ["*"],
       maxSuggestions: 3,
-      minSuggestCharacters: 2,
+      minSuggestCharacters: 3,
       
     },
     {
@@ -472,9 +472,9 @@ export const searchWidget = new Search({
       maxSuggestions: 3,
     },
     {
-      name: "Cities",
+      name: "City",
       layer: texasCities, 
-      placeholder: "Cities",
+      placeholder: "City",
       searchFields: ["CITY_NM"],
       displayField: "CITY_NM", 
       exactMatch: false,
@@ -489,15 +489,16 @@ export const searchWidget = new Search({
       zoomScale: 5000,
       searchFields: [ "ACTV_NBR"],
       displayField: "RETS_ID",
-      exactMatch: true,
+      exactMatch: false,
       outFields: ["*"],
-      minSuggestCharacters: 6,
+      minSuggestCharacters: 3,
       maxSuggestions: 3,
+      suggestionTemplate: "RETS: {RETS_ID} (MO: {ACTV_NBR})"
       
     },
     
     
-  ],
+  ]
 
 });
 
@@ -556,7 +557,6 @@ export const sketchWidgetcreate = new Sketch({
 view.ui.add(searchWidget, {
   position: "top-right",
   index: 2,
-  container: "searchcont",
 });
 
 //adds zoom widget to map 
@@ -617,7 +617,7 @@ export const OSMVTBasemap = new Basemap({
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-map.addMany([retsLayer, graphics, retsGraphicLayer, texasCounties, texasCities, TxDotRoaways, highlightLayer, txdotDistricts])
+map.addMany([TxDotRoaways,retsLayer, graphics, retsGraphicLayer, texasCounties, texasCities,  highlightLayer, txdotDistricts])
 
 
 searchWidget.on("select-result", function(event) {
@@ -672,21 +672,18 @@ document.addEventListener('click', function(event) {
 });
 
 searchWidget.on("suggest-complete", function(event) {
-  const suggestions = event.results; // Get the search suggestions
-  // if (suggestions[5].results[0].text === "" || suggestions[5].results[1].text === "" || suggestions[5].results[2].text === ""){
-  //   suggestions.pop()
-  // }
-
+  const suggestions = event.results; 
   const searchTerm = event.searchTerm;
   const hasLetters = /[a-zA-Z]/.test(searchTerm);
 
-  if (hasLetters && suggestions[5]?.results[0]?.text) {
-    suggestions.pop()
+  if ((hasLetters) && (suggestions[0]?.results[0]?.text || suggestions[6]?.results[0]?.text )) {
+    suggestions[0] = []
+    suggestions[5] = []
+
   }
-  else{
-    const content = suggestions[5].results[0].text
-    suggestions[5].results[0].text = "RETS: " + content + " (MO: " + searchTerm + ")";
-  }
+  suggestions[5].results[0].text = suggestions[5].results[0].text.replace(/,/g, '')
+  suggestions[5].results[1].text = suggestions[5].results[1].text.replace(/,/g, '')
+  suggestions[5].results[2].text = suggestions[5].results[2].text.replace(/,/g, '')
 });
 
 
