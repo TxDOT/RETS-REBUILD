@@ -21,13 +21,13 @@ export async function updateRETSPT(retsObj){
         y: retsObj.geometry.y ? retsObj.geometry.y : retsObj.geometry[1]
     }
 
-    let setNoRTE = retsObj.attributes.NO_RTE === true ? 1 : 0
-    retsObj.attributes.NO_RTE = setNoRTE
     const copyRetsObj = JSON.stringify(retsObj)
     const enable = JSON.parse(copyRetsObj)
     enable.attributes.CREATE_DT = new Date(retsObj.attributes.CREATE_DT).getTime()
     enable.attributes.EDIT_DT = new Date(retsObj.attributes.EDIT_DT).getTime()
     enable.attributes.EDIT_NM = appConstants.userRoles.find(usr => usr.name === retsObj.attributes.EDIT_NM)?.value ?? retsObj.attributes.EDIT_NM
+    enable.attributes.CREATE_NM = appConstants.userRoles.find(usr => usr.name === retsObj.attributes.CREATE_NM)?.value ?? retsObj.attributes.CREATE_NM
+    enable.attributes.NO_RTE = enable.attributes.NO_RTE === true ? 1 : 0
     delete enable.attributes?.retsPt
     delete enable.attributes?.STATUS
     delete enable.attributes?.index
@@ -41,7 +41,7 @@ export async function updateRETSPT(retsObj){
     delete enable.attributes?.mditimersand
     delete enable.attributes?.mdiaccountmultiplecheck
     delete enable.attributes?.mdiexclamation
-
+    
     postFlagColor(retsObj)
     let esriUpdateGraphic = createGraphic(enable)
     esriUpdateGraphic.geometry = createGeo

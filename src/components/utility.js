@@ -15,7 +15,6 @@ import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 export let retsLayerView; 
 export let roadLayerView;
 
-
 export async function getRetsLayerView (){
         const retLayerView = await view.whenLayerView(retsLayer)
 
@@ -63,8 +62,7 @@ export async function getTxDotRdWayLayerView(){
                     rdLayerView.layer.definitionExpression = "RTE_PRFX = 'IH'"
                 }
                 roadLayerView = rdLayerView
-                
-                
+                sketchWidgetcreate.snappingOptions.featureSources.push({layer: roadLayerView.layer, enable: true})
             }
             catch(err){
                 console.log(err)
@@ -81,6 +79,7 @@ export function clickRetsPoint(){
                     removeOutline()
                     removeHighlight("a", true)
                     removeAllCardHighlight()
+                    clearRoadHighlightObj()
                     scrollToTopOfFeed(0)
                     if(store.isSelectEnabled){
                         store.isShowSelected = false
@@ -112,7 +111,7 @@ export function clickRetsPoint(){
 
 export function hoverRetsPoint(){
     view.on("pointer-move", (event)=>{
-        view.hitTest(event, {include: [retsLayer, retsGraphicLayer, graphics, TxDotRoaways]}).then((evt) =>{
+        view.hitTest(event, {include: [retsLayer, retsGraphicLayer, graphics]}).then((evt) =>{
             if(!evt.results.length){
                 document.getElementById("viewDiv").style.cursor = "default"
                 return
@@ -192,9 +191,9 @@ export function removeAllCardHighlight() {
     const getHighlightCardRows = document.getElementsByClassName("highlight-card")
     let i;
     for(i=0; i < getHighlightCardRows.length; i++){
-        getHighlightCardRows[i].classList.remove('highlight-card')
+        getHighlightCardRows[i].classList.toggle('highlight-card')
     }
-    clearRoadHighlightObj()
+    //clearRoadHighlightObj()
     return
 }
 
@@ -318,11 +317,8 @@ export async function filterMapActivityFeed(filterOpt){
         }
     }
     const removeEmpty = fullFilter.filter(x => x.length)
-    console.log(removeEmpty)
     let filterDef = removeEmpty.join(" AND ")
-    console.log(filterDef)
     let newFilter = filterDef.replace("AND OR", "OR")
-    console.log(newFilter)
     // if(!filterOpt.isAssignedTo){
     //     const assignedToQuery = [...GIS_ANALYST, ...GRID_ANALYST, ...DIST_ANALYST]
     //     assignedToQuery.map((i) => `${i}`).join(",")
@@ -331,7 +327,7 @@ export async function filterMapActivityFeed(filterOpt){
     // }
     try{
         const filterMapPromise = new Promise((res, rej) => {
-            retsLayerView.layer.definitionExpression = `${newFilter}`
+            retsLayerView.layer.definitionExpression = store.savedFilter = `${newFilter}`
             res(filterDef)
         })
 
@@ -643,6 +639,8 @@ export function highlightpoints(event){
 }
 
 export function createtool(sketchWidgetcreate, createretssym) {
+    
+
     return new Promise((resolve, reject) => {
         sketchWidgetcreate.create("point");
         sketchWidgetcreate.on("create", (event) => {
@@ -651,7 +649,6 @@ export function createtool(sketchWidgetcreate, createretssym) {
                 const graphicToScreenPt = view.toScreen(pointGeometry)
                 view.hitTest(graphicToScreenPt, {include: roadLayerView.layer})
                     .then((hit) =>{
-                        console.log(hit)
                         if(!hit.results.length){
                             store.retsObj.attributes.RTE_NM = ""
                             store.retsObj.attributes.DFO = ""
@@ -667,6 +664,10 @@ export function createtool(sketchWidgetcreate, createretssym) {
                     
                 event.graphic.symbol = createretssym;
                 resolve(newPointGraphic);
+            }
+            if(event.state === "cancel"){
+                reject("cancelled")
+                return
             }
         });
     });
@@ -847,7 +848,7 @@ export function addAttachments(oid, files, flag){
     const arr = Array.from(files)
     const formData = new FormData()
     formData.append("attachment", arr[0], arr[0].name)
-    
+
     esriRequest(`https://testportal.txdot.gov/createags/rest/services/RETS_CMNT/FeatureServer/0/${oid}/addAttachment`, {
         body: formData,
         method: "post",
@@ -1033,7 +1034,7 @@ async function UpdatePt(pt, onStartUp){
        await retsLayer.queryFeatures({
             where: `RETS_ID = ${ptGraphic.attributes.RETS_ID}`
         })
-        graphics.add(ptGraphic)
+        // graphics.add(ptGraphic)
         //hideRetsPt(ptGraphic.attributes.RETS_ID)
         view.goTo(ptGraphic)
         store.retsObj.geometry = [ptGraphic.geometry.x , ptGraphic.geometry.y]
@@ -1075,6 +1076,8 @@ async function UpdatePt(pt, onStartUp){
 //     return Number(Math.round(distance)) === 0 ? false : true
 // }
 export const completeMovePtSketch = () => sketchWidgetcreate.complete()
+export const cancelSketchPt = () => sketchWidgetcreate.cancel()
+
 
 export function getRoadInformation(){
     // changeCursor('crosshair')
@@ -1105,7 +1108,11 @@ export function getRoadInformation(){
                     .then((hit) => {
                         if(!hit.results.length){
                             UpdatePt(convertToGeoCoord, false)
-                            store.retsObj.attributes.NO_RTE = false
+                            store.retsObj.attributes.NO_RTE = true
+                            store.isSaveBtnDisable = false
+                            store.isAlert = true
+                            store.alertTextInfo = {"text": `No Route has been detected`, "color": "yellow", "type":"info", "toggle": true}
+                            store.isMoveRetsPt = false
                             return
                         }
                         const convertMapPts = webMercatorUtils.webMercatorToGeographic(event.graphic.geometry)
@@ -1115,6 +1122,9 @@ export function getRoadInformation(){
                         UpdatePt(convertToGeoCoord, false)
                         store.cancelEvent.remove()
                         store.isMoveRetsPt = false
+                        // store.isSaveBtnDisable = false
+                        // console.log(store.retsObj.attributes.NO_RTE)
+                        return
                     })
                     .catch(() => {
                         //

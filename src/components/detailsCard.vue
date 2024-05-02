@@ -6,7 +6,7 @@
                 <v-autocomplete :items="activityList" label="Activity" variant="underlined" density="compact" item-title="value" item-value="name" return-object flat v-model="store.retsObj.attributes.ACTV"></v-autocomplete>
             </v-col>
             <v-col cols="4" offset="3">
-                <v-text-field label="Number" density="compact" class="number-field" variant="underlined" :disabled="disableACTVNum(store.retsObj.attributes.ACTV)" v-model="store.retsObj.attributes.ACTV_NBR">
+                <v-text-field label="Number" density="compact" class="number-field" variant="underlined" :disabled="disableACTVNum(store.retsObj.attributes.ACTV)" v-model="store.retsObj.attributes.ACTV_NBR" @update:model-value="actvNbrUpdate(store.retsObj.attributes.ACTV_NBR)">
                     <template v-slot:append-inner >
                         <v-icon icon="mdi-link" small class="number-field-icon" @click="paperClipFunc" ></v-icon>
                     </template>
@@ -15,7 +15,7 @@
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom: 1.3rem; height: 70px; padding-bottom: 0% !important;" >
             <v-col cols="3" offset="0" style="position: relative; bottom: 5px !important;">
-                <v-text-field label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required] : []" id="route" @update:model-value="rteNumSearch(store.retsObj.attributes.RTE_NM)"></v-text-field>
+                <v-text-field :disabled="store.retsObj.attributes.NO_RTE === false" label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required] : []" id="route" @update:model-value="rteNumSearch(store.retsObj.attributes.RTE_NM)"></v-text-field>
             </v-col>
             <v-col cols="4" offset="4">
                 <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" v-model="store.retsObj.attributes.DFO" :rules="!store.retsObj.attributes.NO_RTE ? [onlyNumbers.required, onlyNumbers.numbers]: []" @update:model-value="DFOCheck(store.retsObj.attributes.DFO)">
@@ -113,7 +113,7 @@
 <script>
 import { appConstants } from '../common/constant'
 import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets, zoomTo, 
-        createRoadGraphic, getRoadInformation, completeMovePtSketch, hitTestMoveRETS} from './utility.js'
+        createRoadGraphic, getRoadInformation, cancelSketchPt, hitTestMoveRETS} from './utility.js'
 
 import {store} from './store.js'
 
@@ -264,6 +264,7 @@ import {store} from './store.js'
                 this.$emit("disable-save", bool)
             },
             DFOCheck(i){
+                console.log(i)
                 let item = [store.retsObj.attributes.RTE_NM, store.retsObj.attributes.DFO, store.retsObj.attributes.STAT, store.retsObj.attributes.DESC_].filter(x => !x)
                 if(item.length && !store.retsObj.attributes.NO_RTE){
                     store.isSaveBtnDisable = true
@@ -286,7 +287,7 @@ import {store} from './store.js'
                     }
                     store.isMoveRetsPt = false
                     store.cancelEvent.remove()
-                    completeMovePtSketch()
+                    cancelSketchPt()
                 }
                 catch(err){
                     console.log(err)
@@ -359,10 +360,18 @@ import {store} from './store.js'
                 const dateToEpoch = newDateConstruct.getTime()
                 store.retsObj.attributes.DEADLINE = dateToEpoch
                 this.isDatePicker = false
+                store.isSaveBtnDisable = false
                 return
             },
             checkIfRouteExists(){
 
+            },
+            actvNbrUpdate(txt){
+                if(txt){
+                        const regex = new RegExp(/[^\d]/)
+                        store.retsObj.attributes.ACTV_NBR = regex.test(store.retsObj.attributes.ACTV_NBR) ? store.retsObj.attributes.ACTV_NBR.slice(0,-1) : store.retsObj.attributes.ACTV_NBR.slice()
+                        return
+                    }
             }
         },
         watch:{
@@ -405,18 +414,20 @@ import {store} from './store.js'
 
                 }
             },
+            'store.retsObj.attributes.ACTV_NBR':{
+                handler: function(txt){
+
+
+                },
+                immediate: true
+            }
         },
 
     }
 </script>
 
 <style scoped>
-:deep(#route-messages){
-    position: absolute !important;
-    width: 55px !important;
-    left: 120px !important;
-    bottom: 1.5rem
-}
+
 #route{
     width: 50px;
 }

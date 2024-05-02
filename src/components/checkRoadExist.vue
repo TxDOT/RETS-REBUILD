@@ -28,6 +28,7 @@
         methods:{
             closeCard(){
                 store.closeIsRoadExist = false
+                store.isSaving = false
             }
         }
     }

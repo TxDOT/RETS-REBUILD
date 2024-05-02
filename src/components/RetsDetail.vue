@@ -79,7 +79,7 @@
     </div>
     <div style="position: absolute; height:40px; top: calc(100% - 44px); left: 6px; width: 99%;">
         <div style="position: relative; float: left; margin-left: 10px; font-size: 11px; display: flex; flex-wrap: wrap; top: 3px;">
-            <v-checkbox label="Asset Only Job" density="compact" class="checkbox-size" v-model="isAsset"></v-checkbox>
+            <v-checkbox label="Asset Only Job" density="compact" class="checkbox-size" v-model="isAsset" @update:model-value="isAssetJob"></v-checkbox>
         </div>
             <v-btn-toggle id="trigger-buttons" density="compact">
                 <v-btn @click="handlearchive" variant="plain" flat size="small" class="secondary-button">Delete</v-btn>
@@ -107,7 +107,7 @@
 
 <script>
     import { appConstants } from '../common/constant.js'
-    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, retsLayerView, isRoadExist} from './utility.js'
+    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt} from './utility.js'
 
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
@@ -177,6 +177,7 @@
         methods:{
             removeAttachment(index){
                 store.attachment.splice(index, 1)
+                this.addAttach.splice(index, 1)
                 return
             },
             returnDateFormat(e){
@@ -205,6 +206,8 @@
                 store.retsObj.attributes.flagColor.FLAG = clr
                 this.isColorPicked = false;
                 this.closeFlagDiv()
+                store.isSaveBtnDisable = false
+                return
             },
             changeColor(id){
                 this.flagClickedId = ""
@@ -218,61 +221,61 @@
                 }
                 this.saveDisable = bool
             },
-            deleteRets(){
+            returnToFeed(){
+                if(store.cancelEvent){
+                    store.cancelEvent.remove()
+                    cancelSketchPt()
+                }
                 store.isAlert = false
                 clearGraphicsLayer()
+                store.isDetailsPage = false
+                store.isCancelBtnDisable = false
+                store.activityBanner = "Activity Feed"
+                store.isMoveRetsPt = false
+                store.isCard = true
+                store.historyChat.length = 0
+                store.isSaveBtnDisable = true
+                console.log(store.activityBanner)
+                return
+            },
+            deleteRets(){
+                this.returnToFeed()
                 store.retsObj.attributes.isDelete = true
                 deleteRETSPT(store.retsObj)
                 removeRelatedRetsFromMap(store.retsObj.attributes.OBJECTID)
                 store.deleteRetsID()
-                store.isDetailsPage = false
-                store.activityBanner = "Activity Feed"
-                store.historyChat.length = 0
                 deleteRetsGraphic()
                 removeHighlight("a", true)
-                store.isMoveRetsPt = false
-                store.isCard = true
-                store.isCancelBtnDisable = false
+                return
             },
             async sendToParent(){
-                store.isSaving = true
                 const roadExist = await isRoadExist()
                 if(roadExist && !store.retsObj.attributes.NO_RTE){
                     store.closeIsRoadExist = true
                     return
                 }
-                console.log(roadExist)
-                store.isCancelBtnDisable = false
-                store.isAlert = false
-                clearGraphicsLayer()
+                store.isSaving = true
+                
                 store.retsObj.attributes.ACTV = !store.retsObj.attributes.ACTV ? null : store.retsObj.attributes.ACTV.value ?? store.retsObj.attributes.ACTV
                 // this.retsInfo.ASSIGNED_TO = this.retsInfo.ASSIGNED_TO.value
                 store.retsObj.attributes.PRIO = store.retsObj.attributes.PRIO ?? 1
                 store.retsObj.attributes.JOB_TYPE = this.isAsset === true ? 2 : 1
+                
                 await updateRETSPT(store.retsObj)
-                store.isDetailsPage = false
-                store.activityBanner = "Activity Feed"
-                store.historyChat.length = 0
+                store.getRetsLayer(store.loggedInUser)
+                this.returnToFeed()
                 deleteRetsGraphic()
                 removeHighlight("a", true)
-                store.isMoveRetsPt = false
-                store.isCard = true
-                store.updateRetsID()
+                
+                //store.updateRetsID()
                 //retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
                 return
             },
             cancelDetailsMetadata(){
-                store.isDetailsPage = false
-                store.isCard = true
-                store.activityBanner = "Activity Feed"
+                this.returnToFeed()
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
                 this.replaceArchiveContent(archiveRets)
-                store.isAlert = false
-                clearGraphicsLayer()
     
-                store.isCancelBtnDisable = false
-                store.isMoveRetsPt = false
-                store.historyChat.length = 0
                 //store.preserveHighlightCards()
                 // retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
                 return
@@ -313,6 +316,9 @@
             addGemChip(gemId){
                 this.sendGemTaskNum = gemId
             },
+            isAssetJob(){
+                store.isSaveBtnDisable = false
+            },
             closeGEMTask(){
                 document.querySelectorAll(".gem-search")[0].style.display = "none"
             },
@@ -320,11 +326,12 @@
                 this.editText = true
                 this.sendHistory = ""
             },
-            addHistoryNote(){
+            async addHistoryNote(){
                 if(!this.addHistoryChat.length) return
                 const attach = store.attachment.length ? true : false 
-                store.addNote(this.addHistoryChat, attach, store.attachment, true)
+                await store.addNote(this.addHistoryChat, attach, store.attachment, true)
                 this.clearMessage()
+                this.addAttach.length = 0
                 return
             },
             clearMessage(){

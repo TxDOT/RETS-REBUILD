@@ -40,8 +40,8 @@ async function signIn(){
   await getUniqueQueryValues(retsUserRole, appConstants.userRoles)
   const userId = await getUserId()
   await queryFlags(userId)
-  await store.getRetsLayer(userId)
   setDefExpRets(userId)
+  await store.getRetsLayer(userId)
   appConstants.userQueryField = appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]
   store.USER = [appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value)]
   //needs to be worked on//
@@ -54,6 +54,7 @@ async function signIn(){
         })
       })
       appConstants.districtDomainValues.sort((a,b) => a.name.localeCompare(b.name))
+      appConstants.userRoles.sort((a,b) => a.name.localeCompare(b.name))
 
       getDistinctAttributeValues('ACTV')
       return retsLayer.queryExtent();
@@ -75,12 +76,12 @@ async function signIn(){
 const setDefExpRets = (userId) => {
   if(appConstants.defaultUserValue.length) return
   appConstants.defaultUserValue.push({"name": "Username", "value": `${userId}`})
-  retsLayer.definitionExpression = appConstants['defaultQuery'](userId)
+  retsLayer.definitionExpression = store.savedFilter = appConstants['defaultQuery'](userId)
   return
 }
 
 export async function getUserId(){
-  console.warn('VERSION: 2.1.9')
+  console.warn('VERSION: 2.0.2')
   const user = await esriId.getCredential(authen.portalUrl + "/sharing/rest",{
     oAuthPopupConfirmation: false,
   })

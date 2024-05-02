@@ -18,9 +18,8 @@ import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer.js";
 import TileInfo from "@arcgis/core/layers/support/TileInfo.js";
 import Legend from "@arcgis/core/widgets/Legend";
 import LegendViewModel from "@arcgis/core/widgets/Legend/LegendViewModel";
-
 import Graphic from "@arcgis/core/Graphic";
-import { outlineFeedCards, removeOutline, home, scrollToTopOfFeed} from "./utility.js";
+import { outlineFeedCards, removeOutline, home, scrollToTopOfFeed, roadLayerView} from "./utility.js";
 import Extent from "@arcgis/core/geometry/Extent.js";
 
 
@@ -222,7 +221,6 @@ export let roadwaysRenderer = {
     symbol: {
       type: "simple-line",
       width: .2,
-      opacity: 0,
       color: "rgba(65, 66, 66, .1)"
     }
 }
@@ -305,7 +303,7 @@ export const texasCities = new FeatureLayer({
 //TxDotRoaways Layer construction
 export const TxDotRoaways = new FeatureLayer ({
   url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Roadways/FeatureServer/0",
-  visible: false,
+  visible: true,
   renderer: roadwaysRenderer,
   outFields: ["*"],
   returnM: true,

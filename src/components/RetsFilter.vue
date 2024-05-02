@@ -183,8 +183,8 @@
                 return
             },  
             calcFilterDiff(){
-                const typeField = [store.JOB_TYPE, store.STAT, store.ACTV, store.DIST_NM, store.CNTY_NM, store.USER]
-                store.filterTotal = typeField.filter(x => x.length).length
+                const typeField = [store.JOB_TYPE.length, store.STAT.length, store.ACTV.length, store.DIST_NM.length, store.CNTY_NM.length, store.USER.length, store.isAssignedTo]
+                store.filterTotal = typeField.filter(x => x).length
                 // for(const [key, value] of Object.entries(this.filterPros)){
                 //     if(ignoreField.includes(key) || !value) continue
                 //     if(value.length){

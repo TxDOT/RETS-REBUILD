@@ -90,7 +90,7 @@
 </template>
 
 <script>
-import {clickRetsPoint, getQueryLayer, returnHistory, getHighlightGraphic, removeHighlight, createtool, highlightRETSPoint, toggleRelatedRets, zoomTo, changeCursor} from './utility.js'
+import {clickRetsPoint, getQueryLayer, returnHistory, getHighlightGraphic, removeHighlight, createtool, highlightRETSPoint, toggleRelatedRets, zoomTo, changeCursor, removeAllCardHighlight} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import {store} from './store.js'
@@ -238,14 +238,14 @@ export default{
 
             issue === 0 ? this.double({attributes: this.stageData.attributes, geometry: [this.stageData.geometry.x, this.stageData.geometry.y]}, 1) : null
         },
-        double(road, index){
-            store.loading = false
+        double(road){
+            store.isSaving = false
+            store.isSaveBtnDisable = true
             store.archiveRetsDataString = JSON.stringify(road)
-            store.historyRetsId = road.attributes.RETS_ID
-            returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
-            road.attributes.logInUser = this.loggedInUser 
-            road.attributes.index = index
             store.retsObj = road
+            store.historyRetsId = road.attributes.RETS_ID
+           
+            returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
             clearTimeout(this.timer)
             this.timer=""
             store.isCard = false
@@ -254,19 +254,18 @@ export default{
             highlightRETSPoint(road.attributes)
             //outlineFeedCards()
             this.zoomToRetsPt(road)
-            
             toggleRelatedRets(JSON.stringify(road))
             return
         },
         zoomToRetsPt(rets){
-            //removeAllCardHighlight()
-            clearTimeout(this.timer)
-            this.timer = ""
-            this.timer = setTimeout(()=>{
-                const zoomToRETS = rets.geometry
-                highlightRETSPoint(rets.attributes)
-                zoomTo(zoomToRETS)
-            },250)
+            // removeAllCardHighlight()
+            // clearTimeout(this.timer)
+            // this.timer = ""
+            // this.timer = setTimeout(()=>{
+            //     const zoomToRETS = rets.geometry
+            //     highlightRETSPoint(rets.attributes)
+            //     zoomTo(zoomToRETS)
+            // },250)
         },
         // processBanner(i){
         //     console.log(i)
@@ -318,7 +317,6 @@ export default{
                             console.log(store.retsObj.attributes.DFO)
                             feat.attributes.DFO = store.retsObj.attributes.DFO ? store.retsObj.attributes.DFO : null
                             const addNewRetsPt = {attributes:feat.attributes, geometry:[feat.geometry.x,feat.geometry.y]}
-                            store.isCancelBtnDisable = true
                             store.addRetsID(addNewRetsPt)
                             this.double(addNewRetsPt)
                         }
@@ -354,16 +352,6 @@ export default{
             this.isfilter = false
             store.setFilterFeed()
         },
-
-        changeNumFilter(filter){
-            if(filter === 'cancel'){
-                this.isfilter = false;
-                return
-            }
-            store.retsFilters = filter
-            this.isfilter = false
-            store.setFilterFeed()
-        },
         changeFlagIcon(color){
             if(color === '#FFFFFF'){
                 return 'mdi-flag-outline'
@@ -371,6 +359,8 @@ export default{
             return 'mdi-flag'
         },
         async handlecreate(){
+            // const abortPromise = new AbortController()
+            // const signal = abortPromise.signal
             if (this.isCreateEnabled === true) {
                 this.addbtntext = "Cancel"
                 this.buttonIcon = null
@@ -386,7 +376,6 @@ export default{
                             
                 } 
             else {
-                
                 changeCursor("default")
                 store.isMoveRetsPt = false
                 sketchWidgetcreate.cancel();
@@ -399,7 +388,11 @@ export default{
         },
 
         updateSelection(e){
-            console.log(e)
+            if(!e){
+                    store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+                    return
+                }
+                store.updateRetsSearch = store.roadHighlightObj
         },
 
     },
