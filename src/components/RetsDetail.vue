@@ -10,7 +10,7 @@
             <v-col class="details-color-picker" v-if="flagClickedId === store.retsObj.attributes.RETS_ID" v-click-outside="closeFlagDiv">
                 <v-icon size="20px" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" style="position: relative; right: 9px;"></v-icon>
             </v-col>
-            <v-btn-toggle v-model="store.retsObj.attributes.PRIO" density="compact">
+            <v-btn-toggle v-model="store.retsObj.attributes.PRIO" density="compact" @update:modelValue="updatePRIO">
                 <v-btn icon="mdi-exclamation" density="compact" style="color: #d9d9d9; opacity: 1;" selected-class="toggle-exclamation" variant="plain" active></v-btn>
             </v-btn-toggle>   
         </div>
@@ -175,6 +175,9 @@
             this.isAsset = store.retsObj.attributes.JOB_TYPE === 2 ?  true : false
         },
         methods:{
+            updatePRIO(){
+                store.checkDetailsForComplete()
+            },
             removeAttachment(index){
                 store.attachment.splice(index, 1)
                 this.addAttach.splice(index, 1)
@@ -206,7 +209,7 @@
                 store.retsObj.attributes.flagColor.FLAG = clr
                 this.isColorPicked = false;
                 this.closeFlagDiv()
-                store.isSaveBtnDisable = false
+                store.checkDetailsForComplete()
                 return
             },
             changeColor(id){
@@ -236,6 +239,7 @@
                 store.historyChat.length = 0
                 store.isSaveBtnDisable = true
                 console.log(store.activityBanner)
+                removeHighlight("a", true)
                 return
             },
             deleteRets(){
@@ -245,7 +249,6 @@
                 removeRelatedRetsFromMap(store.retsObj.attributes.OBJECTID)
                 store.deleteRetsID()
                 deleteRetsGraphic()
-                removeHighlight("a", true)
                 return
             },
             async sendToParent(){
@@ -265,7 +268,6 @@
                 store.getRetsLayer(store.loggedInUser)
                 this.returnToFeed()
                 deleteRetsGraphic()
-                removeHighlight("a", true)
                 
                 //store.updateRetsID()
                 //retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)

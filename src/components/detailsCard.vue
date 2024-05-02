@@ -3,7 +3,7 @@
     <v-container>
         <v-row align="start" no-gutters dense style="position: relative; bottom: .5rem; height: 50px;">
             <v-col cols="4" offset="0">
-                <v-autocomplete :items="activityList" label="Activity" variant="underlined" density="compact" item-title="value" item-value="name" return-object flat v-model="store.retsObj.attributes.ACTV"></v-autocomplete>
+                <v-autocomplete :items="activityList" label="Activity" variant="underlined" density="compact" item-title="value" item-value="name" return-object flat v-model="store.retsObj.attributes.ACTV" @update:model-value="completeDataSearch()"></v-autocomplete>
             </v-col>
             <v-col cols="4" offset="3">
                 <v-text-field label="Number" density="compact" class="number-field" variant="underlined" :disabled="disableACTVNum(store.retsObj.attributes.ACTV)" v-model="store.retsObj.attributes.ACTV_NBR" @update:model-value="actvNbrUpdate(store.retsObj.attributes.ACTV_NBR)">
@@ -15,10 +15,10 @@
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom: 1.3rem; height: 70px; padding-bottom: 0% !important;" >
             <v-col cols="3" offset="0" style="position: relative; bottom: 5px !important;">
-                <v-text-field :disabled="store.retsObj.attributes.NO_RTE === false" label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required] : []" id="route" @update:model-value="rteNumSearch(store.retsObj.attributes.RTE_NM)"></v-text-field>
+                <v-text-field :disabled="store.retsObj.attributes.NO_RTE === false" label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required] : []" id="route" @update:model-value="completeDataSearch()"></v-text-field>
             </v-col>
             <v-col cols="4" offset="4">
-                <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" v-model="store.retsObj.attributes.DFO" :rules="!store.retsObj.attributes.NO_RTE ? [onlyNumbers.required, onlyNumbers.numbers]: []" @update:model-value="DFOCheck(store.retsObj.attributes.DFO)">
+                <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" v-model="store.retsObj.attributes.DFO" :rules="!store.retsObj.attributes.NO_RTE ? [onlyNumbers.required, onlyNumbers.numbers]: []" @update:model-value="completeDataSearch()">
                         <template v-slot:append-inner>
                             <v-tooltip :text="store.zoomInText" location="top">
                                 <template v-slot:activator="{props}">
@@ -61,12 +61,12 @@
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom:5.7rem;">
             <v-col cols="12" offset="0">
-                <v-select auto-select-first label="Status" variant="underlined" density="compact" class="rets-status" :items="detailsStat" item-title="name" item-value="value" v-model="store.retsObj.attributes.STAT"></v-select>
+                <v-select auto-select-first label="Status" variant="underlined" density="compact" class="rets-status" :items="detailsStat" item-title="name" item-value="value" v-model="store.retsObj.attributes.STAT" @update:modelValue="completeDataSearch()"></v-select>
             </v-col>
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom: 6.1rem; height: 0px;">
             <v-col cols="12" offset="0">
-                <v-textarea label="Description" no-resize variant="underlined" class="rets-description" rows="3" v-model="store.retsObj.attributes.DESC_" :rules="[descRequired.required]" @update:modelValue="descCheck()"></v-textarea>
+                <v-textarea label="Description" no-resize variant="underlined" class="rets-description" rows="3" v-model="store.retsObj.attributes.DESC_" :rules="[descRequired.required]" @update:modelValue="completeDataSearch()"></v-textarea>
             </v-col>
         </v-row>
         <v-row align="center" style="position: relative; bottom: 2.1rem; height: 25px;">
@@ -214,18 +214,8 @@ import {store} from './store.js'
                 })
                 return this.RETSData
             },
-            mulitpleFieldValidCheck(){
-                let numNotValid = [store.retsObj.attributes.RTE_NM, store.retsObj.attributes.DFO, store.retsObj.attributes.STAT, store.retsObj.attributes.DESC_].filter(x => !x)
-                if(numNotValid.length && !store.retsObj.attributes.NO_RTE){
-                    store.isSaveBtnDisable = true
-                    return
-                }
-                store.isSaveBtnDisable = false
-                return
-            },
-            rteNumSearch(){
-                this.mulitpleFieldValidCheck()
-
+            completeDataSearch(){
+                store.checkDetailsForComplete()
             },
             noRTECheck(){
                 console.log(store.retsObj.attributes.NO_RTE)
@@ -236,16 +226,8 @@ import {store} from './store.js'
                     return
                 }
 
-                if(!this.isDFOValid() || !this.isRTENMValid()){
-                    console.log(this.onlyNumbers.numbers(store.retsObj.attributes.DFO))
-                    store.isSaveBtnDisable = true
-                    return
-                }
+                this.completeDataSearch()
                 store.isSaveBtnDisable = false
-                return
-            },
-            descCheck(){
-                this.mulitpleFieldValidCheck()
                 return
             },
             isDFOValid(){
@@ -262,16 +244,6 @@ import {store} from './store.js'
             },
             sendDisabledSave(bool){
                 this.$emit("disable-save", bool)
-            },
-            DFOCheck(i){
-                console.log(i)
-                let item = [store.retsObj.attributes.RTE_NM, store.retsObj.attributes.DFO, store.retsObj.attributes.STAT, store.retsObj.attributes.DESC_].filter(x => !x)
-                if(item.length && !store.retsObj.attributes.NO_RTE){
-                    store.isSaveBtnDisable = true
-                    return
-                }
-                store.isSaveBtnDisable = false
-                return
             },
             paperClipFunc(){
                 store.retsObj.attributes.ACTV.value === 'Minute Order' || store.retsObj.attributes.ACTV === 'Minute Order' ? window.open(`https://publicdocs.txdot.gov/minord/mosearch/Pages/Minute-Order-Search-Results.aspx#k=${store.retsObj.attributes.ACTV_NBR}`, '_blank') :

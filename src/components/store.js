@@ -416,7 +416,15 @@ export const store = reactive({
                         return true
                 }
                 return false
-        },             
+        },
+        checkDetailsForComplete(){
+                let item = [this.retsObj.attributes.RTE_NM, this.retsObj.attributes.DFO, this.retsObj.attributes.STAT, this.retsObj.attributes.DESC_].filter(x => !x)
+                if(item.length && !store.retsObj.attributes.NO_RTE){
+                    this.isSaveBtnDisable = true
+                    return
+                }
+                this.isSaveBtnDisable = false
+        }         
         // async returnTopCMNT(retsID){
         //         const topCMNT = returnTopHistory(retsID)
         //         top.CMNT.features.map(cmnt => ``)
