@@ -433,8 +433,6 @@ export const searchWidget = new Search({
       exactMatch: false,
       outFields: ["*"],
       maxSuggestions: 3,
-      
-      
     },
     
     {
