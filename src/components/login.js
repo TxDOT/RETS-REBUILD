@@ -1,7 +1,7 @@
 import OAuthInfo from "@arcgis/core/identity/OAuthInfo.js";
 import esriId from "@arcgis/core/identity/IdentityManager.js";
-import { retsLayer, view, retsUserRole, TxDotRoaways} from './map-Init.js'
-import {getDomainValues, getDistinctAttributeValues, returnHistory, getUniqueQueryValues, queryFlags, getRetsLayerView, getTxDotRdWayLayerView, home} from './utility.js'
+import { retsLayer, view, retsUserRole} from './map-Init.js'
+import {getDomainValues, getDistinctAttributeValues, getUniqueQueryValues, queryFlags, getRetsLayerView, getTxDotRdWayLayerView, home} from './utility.js'
 import { appConstants } from "../common/constant.js";
 import router from '../router/index.js'
 import {store} from './store.js'
@@ -15,62 +15,52 @@ const authen = new OAuthInfo({
 })
 
 export function login(){
-  try{
     esriId.registerOAuthInfos([authen]);
-    esriId.checkSignInStatus(authen.portalUrl)
-      .then((x) => setDefExpRets(x.userId)) //already signed in
-      .catch(() => signIn()) //not signed in; proceed to sign in 
-  }
-  catch(err){
-    console.log(err)
-  }
-
-  // try{
-  //   return setDefExpRets(getUserId.userId)
-  // } 
-  // catch{
-  //   signIn()
-
-  // }
-    //.then((x) => setDefExpRets(x.userId)) //already signed in
-    //.catch(() => signIn()) //not signed in; proceed to sign in 
+    esriId.checkSignInStatus(`${authen.portalUrl}/sharing/rest`)
+      .then((x) => alreadySignedIn(x.userId)) //already signed in
+      .catch(() => generateLogin()) //not signed in; proceed to sign in 
 }
 
-async function signIn(){ 
+function generateLogin(){
+  esriId.getCredential(`${authen.portalUrl}/sharing/rest`, {
+    oAuthPopupConfirmation: false
+  })
+  .then(() => signIn())
+}
+
+async function signIn(){
   await getUniqueQueryValues(retsUserRole, appConstants.userRoles)
   const userId = await getUserId()
   await queryFlags(userId)
   setDefExpRets(userId)
-  await store.getRetsLayer(userId)
+  await store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
   appConstants.userQueryField = appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]
   store.USER = [appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value)]
   //needs to be worked on//
-  TxDotRoaways
-    .when(() => {
-
-      [{name: 'JOB_TYPE', prop: "jobTypeDomainValues"},{name: 'STAT', prop: "statDomainValues"}, {name: 'DIST_NM', prop: "districtDomainValues"}, {name: 'CNTY_NM', prop: "countyDomainValues"}].forEach((layer) => {
-        getDomainValues(layer.name).codedValues.forEach((x) => {
-          appConstants[layer.prop].push({"name" : x.name, "value": x.code})
-        })
+  router.push({name: "Map"})
+  
+  view.when(() => {
+    [{name: 'JOB_TYPE', prop: "jobTypeDomainValues"},{name: 'STAT', prop: "statDomainValues"}, {name: 'DIST_NM', prop: "districtDomainValues"}, {name: 'CNTY_NM', prop: "countyDomainValues"}].forEach((layer) => {
+      getDomainValues(layer.name).codedValues.forEach((x) => {
+         appConstants[layer.prop].push({"name" : x.name, "value": x.code})
       })
-      appConstants.districtDomainValues.sort((a,b) => a.name.localeCompare(b.name))
-      appConstants.userRoles.sort((a,b) => a.name.localeCompare(b.name))
-
-      getDistinctAttributeValues('ACTV')
-      return retsLayer.queryExtent();
     })
-    .then((response) => {
-      router.push({name: "Map"})
-      getRetsLayerView()
-      getTxDotRdWayLayerView()
-      view.when(function(){
-        //view.goTo(response.extent)
-         home(true)
-      })
-   
-      
+    appConstants.districtDomainValues.sort((a,b) => a.name.localeCompare(b.name))
+    appConstants.userRoles.sort((a,b) => a.name.localeCompare(b.name))
 
-    });
+    getDistinctAttributeValues('ACTV')
+    getRetsLayerView()
+    getTxDotRdWayLayerView()
+
+    home(true)
+
+  })
+
+  return
+}
+
+function alreadySignedIn(userId){
+  signIn()
 }
 
 const setDefExpRets = (userId) => {
@@ -81,8 +71,8 @@ const setDefExpRets = (userId) => {
 }
 
 export async function getUserId(){
-  console.warn('VERSION: 2.0.2')
-  const user = await esriId.getCredential(authen.portalUrl + "/sharing/rest",{
+  console.warn(`VERSION: 2.0.5 -- dev status: ${store.devStatus}`)
+  const user = await esriId.getCredential(`${authen.portalUrl}/sharing/rest`,{
     oAuthPopupConfirmation: false,
   })
 

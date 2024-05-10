@@ -27,17 +27,17 @@
                 </v-row>
        
                 <v-row no-gutters dense class="adjustRow">
-                    <v-autocomplete :items="filterActivity" item-title="value" item-value="value" return-object multiple label="Activity" chips closable-chips variant="underlined" density="compact" v-model="store.ACTV"></v-autocomplete>
+                    <v-autocomplete :items="filterActivity" item-title="value" item-value="value" return-object multiple label="Activity" chips closable-chips variant="underlined" density="compact" v-model="store.ACTV" @update:modelValue="actvSearch = ''" :search="actvSearch" @update:search="this.actvSearch = $event" @update:menu="actvSearch = ''"></v-autocomplete>
                 </v-row>
 
                 <v-row no-gutters dense class="adjustRow"> 
-                    <v-autocomplete :items="filterDistrict" item-title="name" item-value="value" return-object multiple label="District" chips closable-chips variant="underlined" density="compact" v-model="store.DIST_NM"></v-autocomplete>
+                    <v-autocomplete :items="filterDistrict" item-title="name" item-value="value" return-object multiple label="District" chips closable-chips variant="underlined" density="compact" v-model="store.DIST_NM" @update:modelValue="this.districtSearch = ''" :search="this.districtSearch" @update:search="this.districtSearch = $event" @update:menu="districtSearch = ''"></v-autocomplete>
                 </v-row>
                 <v-row no-gutters dense class="adjustRow">
-                    <v-autocomplete :items="filterCounty" item-title="name" item-value="value" return-object multiple label="County" chips closable-chips variant="underlined" density="compact" v-model="store.CNTY_NM"></v-autocomplete>
+                    <v-autocomplete :items="filterCounty" item-title="name" item-value="value" return-object multiple label="County" chips closable-chips variant="underlined" density="compact" v-model="store.CNTY_NM" @update:modelValue="countySearch = ''" :search="countySearch" @update:search="countySearch = $event" @update:menu="countySearch = ''"></v-autocomplete>
                 </v-row>
                 <v-row no-gutters dense class="adjustRow"> 
-                    <v-autocomplete :items="filterUser" item-title="name" item-value="value" return-object label="Users" multiple chips closable-chips variant="underlined" density="compact" v-model="store.USER" :disabled="store.isAssignedTo"></v-autocomplete>
+                    <v-autocomplete :items="filterUser" item-title="name" item-value="value" return-object label="Users" multiple chips closable-chips variant="underlined" density="compact" v-model="store.USER" :disabled="store.isAssignedTo" @update:modelValue="userSearch = ''" :search="userSearch" @update:search="userSearch = $event" @update:menu="userSearch = ''"></v-autocomplete>
                 </v-row>
                 <div style="position: relative; float: left; margin-left: 10px; font-size: 11px; display: flex; flex-wrap: wrap; bottom: 1rem;">
                     <v-checkbox label="RETS Assigned to Me" density="compact" class="checkbox-size" v-model="store.isAssignedTo"></v-checkbox>
@@ -56,17 +56,16 @@
                     </v-expansion-panel>
                 </v-expansion-panels>
             </div>
-                    <div>
-                        <hr class="popup-title-border" style="position: relative; bottom: 0px; margin-right: 20px;"></hr>
-                        <div style="float: right; margin: 10px; position: relative;" >
-                            
-                            <v-btn @click="cancelFilter()" class="secondary-button" variant="plain">Cancel</v-btn>
-                            <v-btn @click="setFilterNumber()" class="main-button-style" variant="outlined">Save</v-btn>
-                        </div>
-                        <div style="float: left; margin-left: 15px; position: relative; top: 9px;">
-                            <v-btn id="restoreDefault" variant="plain" @click="restoreDefault()">Restore Default</v-btn>
-                        </div>
-                    </div>
+            <div>
+                <hr class="popup-title-border" style="position: relative; bottom: 0px; margin-right: 20px;"></hr>
+                <div style="float: right; margin: 10px; position: relative;" >     
+                    <v-btn @click="cancelFilter()" class="secondary-button" variant="plain">Cancel</v-btn>
+                    <v-btn @click="setFilterNumber()" class="main-button-style" variant="outlined">Save</v-btn>
+                </div>
+                <div style="float: left; margin-left: 15px; position: relative; top: 9px;">
+                    <v-btn id="restoreDefault" variant="plain" @click="restoreDefault()">Restore Default</v-btn>
+                </div>
+            </div>
         </v-card>
     </div>
     <div style="position: absolute; left: calc(50vh + 47vh + 74px); top: 21.5%;" v-if="isDate">
@@ -109,7 +108,10 @@
                 selectDate: null,
                 currentYear: null,
                 store,
-
+                userSearch: "",
+                countySearch: "",
+                districtSearch: "",
+                actvSearch: "",
             }
         },
         mounted(){
@@ -133,10 +135,9 @@
                     user: store.USER,
                     isAssignedTo: store.isAssignedTo
                 })
-            return 
+                return 
             },
             cancelFilter(){
-                this.calcFilterDiff()
                 const filterParse = JSON.parse(store.archiveFilter)
                 store.CREATE_DT = filterParse.createDt
                 store.JOB_TYPE = filterParse.jobType
@@ -149,6 +150,7 @@
                 store.isAssignedTo = filterParse.isAssignedTo
 
                 store.isfilter = false
+                this.calcFilterDiff()
                 return
             },
             setFilterNumber(){
@@ -221,6 +223,7 @@
                 // this.filter.filterTotal = this.defaultFilter.filterTotal
                 
                 filterMapActivityFeed(store.filter)
+                this.setFilterNumber()
                 //this.$emit('filter-set', this.filterPros)
                 return
             },

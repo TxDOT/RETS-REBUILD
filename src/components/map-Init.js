@@ -19,9 +19,9 @@ import TileInfo from "@arcgis/core/layers/support/TileInfo.js";
 import Legend from "@arcgis/core/widgets/Legend";
 import LegendViewModel from "@arcgis/core/widgets/Legend/LegendViewModel";
 import Graphic from "@arcgis/core/Graphic";
-import { outlineFeedCards, removeOutline, removeHighlight, home, scrollToTopOfFeed} from "./utility.js";
+import { outlineFeedCards, removeOutline, home, scrollToTopOfFeed} from "./utility.js";
 import Extent from "@arcgis/core/geometry/Extent.js";
-
+import {store} from './store.js'
 
 
 export const texasExtent = new Extent({
@@ -218,15 +218,12 @@ export let retsPointRenderer = new UniqueValueRenderer({
 
 export let roadwaysRenderer = {
   type: "simple",
-    symbol: {
-      type: "simple-line",
-      width: .2,
-      color: "rgba(65, 66, 66, .1)"
-    }
+  symbol: {
+    type: "simple-line",
+    width: .2,
+    color: "rgba(65, 66, 66, .1)"
+  }
 }
-
-
-
 
 export const polygonsymbol = {
   type: "simple-fill",  // autocasts as new SimpleFillSymbol()
@@ -234,11 +231,8 @@ export const polygonsymbol = {
   outline: {  // autocasts as new SimpleLineSymbol()
     color: "#636363",
     width: 2
-  }
- 
- 
+  } 
 }
-
 
 //Highlight graphics layer construction
 export const highlightLayer = new GraphicsLayer();
@@ -252,34 +246,10 @@ const highlightSymbolroadways = {
   }
 };
 
-
-
-
-//Rets Layer construction
-export const retsLayer = new FeatureLayer({
-  url: "https://testportal.txdot.gov/createags/rest/services/RETS/FeatureServer/0",
-  visible: true,
-  outFields: ["*"],
-  renderer: retsPointRenderer,
-  editingEnabled: true,
-})
-
-//DFO Producer in GRID
-export const DFOProducer = new FeatureLayer({
-  url: "https://testportal.txdot.gov/createags/rest/services/RETS_PNT_HELPER/FeatureServer/0",
-  outFields:["*"],
-  returnM: true,
-  returnZ: true,
-  hasM: true,
-  hasZ: true,
-  visible: true,
-})
 //County Layer construction
 export const texasCounties = new FeatureLayer({
   url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/Texas_County_Boundaries/FeatureServer/0",
   visible: false,
-  
-  
 })
 
 export const txdotDistricts = new FeatureLayer({
@@ -294,12 +264,6 @@ export const texasCities = new FeatureLayer({
   visible: false,
 })
 
-// export const minuteOrders = new FeatureLayer({
-//   url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Highway_Designations/FeatureServer",
-//   visble: false, 
-// })
-
-
 //TxDotRoaways Layer construction
 export const TxDotRoaways = new FeatureLayer ({
   url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Roadways/FeatureServer/0",
@@ -311,19 +275,28 @@ export const TxDotRoaways = new FeatureLayer ({
   definitionExpression: `RTE_PRFX = 'IH'`
 })
 
+//Rets Layer construction
+export const retsLayer = new FeatureLayer({
+  url: store.devStatus === "dev" ? appConstants.retsPtDev : appConstants.retsPtProd,
+  visible: true,
+  outFields: ["*"],
+  renderer: retsPointRenderer,
+  editingEnabled: true,
+})
+
 //RETS History
 export const retsHistory = new FeatureLayer({
-  url: "https://testportal.txdot.gov/createags/rest/services/RETS_CMNT/FeatureServer/0",
+  url: store.devStatus === "dev" ? appConstants.retsCMNTDev : appConstants.retsCMNTProd,
   outFields: ["*"]
 })
 
 //Rets User Roles
 export const retsUserRole = new FeatureLayer({
-  url: "https://testportal.txdot.gov/createags/rest/services/RETS_SUPPORT/FeatureServer/1"
+  url: store.devStatus === "dev" ? appConstants.retsUserRoleDev : appConstants.retsUserRoleProd,
 })
 
 export const flagRetsColor = new FeatureLayer({
-  url: "https://testportal.txdot.gov/createags/rest/services/RETS_SUPPORT/FeatureServer/3"
+  url: store.devStatus === "dev" ? appConstants.retsFlagColorDev : appConstants.retsFlagColorProd,
 })
 
 //Creates label class for RETS points

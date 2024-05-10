@@ -155,7 +155,7 @@
                 this.updateOID = findItem.OBJECTID
                 this.updateOID = -1
                 // const oidFlag = `${oid}`
-                // document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
+                document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
             },
             closeNotes(n, notes){
                 notes.CMNT = this.ogNote

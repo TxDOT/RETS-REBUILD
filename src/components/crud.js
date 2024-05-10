@@ -1,6 +1,5 @@
-import { retsLayer, DFOProducer, retsHistory, flagRetsColor } from "./map-Init";
+import { retsLayer, retsHistory, flagRetsColor } from "./map-Init";
 import Graphic from "@arcgis/core/Graphic.js";
-import Query from "@arcgis/core/rest/support/Query";
 import { appConstants } from "../common/constant";
 
 export async function addRETSPT(retsObj){
@@ -11,16 +10,13 @@ export async function addRETSPT(retsObj){
 }
 
 export async function updateRETSPT(retsObj){
-    if(retsObj.attributes.RELATED_RETS){
-        retsObj.attributes.RELATED_RETS = retsObj.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID).toString()
-    }
-
+    
     const createGeo = {
         type: "point",
         x: retsObj.geometry.x ? retsObj.geometry.x : retsObj.geometry[0],
         y: retsObj.geometry.y ? retsObj.geometry.y : retsObj.geometry[1]
     }
-
+    
     const copyRetsObj = JSON.stringify(retsObj)
     const enable = JSON.parse(copyRetsObj)
     enable.attributes.CREATE_DT = new Date(retsObj.attributes.CREATE_DT).getTime()
@@ -28,6 +24,12 @@ export async function updateRETSPT(retsObj){
     enable.attributes.EDIT_NM = appConstants.userRoles.find(usr => usr.name === retsObj.attributes.EDIT_NM)?.value ?? retsObj.attributes.EDIT_NM
     enable.attributes.CREATE_NM = appConstants.userRoles.find(usr => usr.name === retsObj.attributes.CREATE_NM)?.value ?? retsObj.attributes.CREATE_NM
     enable.attributes.NO_RTE = enable.attributes.NO_RTE === true ? 1 : 0
+
+    if(enable.attributes.RELATED_RETS){
+        enable.attributes.RELATED_RETS = enable.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID).toString()
+    }
+    //enable.attributes.DFO = Number(DFO)
+    retsObj.attributes.flagColor.FLAG === "" ? null : postFlagColor(retsObj)
     delete enable.attributes?.retsPt
     delete enable.attributes?.STATUS
     delete enable.attributes?.index
@@ -41,10 +43,10 @@ export async function updateRETSPT(retsObj){
     delete enable.attributes?.mditimersand
     delete enable.attributes?.mdiaccountmultiplecheck
     delete enable.attributes?.mdiexclamation
-    
-    postFlagColor(retsObj)
+
     let esriUpdateGraphic = createGraphic(enable)
     esriUpdateGraphic.geometry = createGeo
+
     await retsLayer.applyEdits({
         updateFeatures: [esriUpdateGraphic]
     })
@@ -81,24 +83,6 @@ function createGraphic(retsObj){
     
     
     return creatGraph
-}
-
-export function getDFOFromGRID(gid, dfo){
-    let returnGraphic =  createGraphic({attributes: {OBJECTID: 1, GID: gid, DFO: dfo}})
-    DFOProducer.applyEdits({
-        updateFeatures: [returnGraphic]
-    })
-        .then((x) => {
-            const query = new Query()
-            query.where = `1=1`
-            query.outFields = ["*"]
-            query.returnGeometry = true
-            query.returnM = true
-        
-            DFOProducer.queryFeatures(query)
-                .then(y => console.log(y))
-        })
-        .catch(err => console.log(err))
 }
 
 export async function sendChatHistory(chat, type){

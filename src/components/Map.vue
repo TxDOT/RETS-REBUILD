@@ -1,8 +1,8 @@
 <template>
     <div id="viewDiv">
         <detailsAlert v-if="store.isAlert" id="showAlert"/>
-        <v-banner lines="one" class="" style="position: absolute; width: fit-content; top: 0px; left: 25em; justify-content: center; display: flex;" bg-color="warning">
-            <p>You are in the TEST enviornment. But with live data (for the time being).</p>
+        <v-banner v-if="store.devStatus === 'dev'" lines="one" class="" style="position: absolute; width: fit-content; top: 0px; left: 25em; justify-content: center; display: flex;" bg-color="warning">
+            <p>You are in the TEST enviornment. Using UAT data.</p>
         </v-banner>
     </div>
 

@@ -18,7 +18,7 @@
                 <v-text-field :disabled="store.retsObj.attributes.NO_RTE === false" label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required] : []" id="route" @update:model-value="completeDataSearch()"></v-text-field>
             </v-col>
             <v-col cols="4" offset="4">
-                <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" v-model="store.retsObj.attributes.DFO" :rules="!store.retsObj.attributes.NO_RTE ? [onlyNumbers.required, onlyNumbers.numbers]: []" @update:model-value="completeDataSearch()">
+                <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" :error-messages="(!store.retsObj.attributes.DFO || !store.retsObj.attributes.DFO.length) && !store.retsObj.attributes.NO_RTE ? 'But where am I? Don\'t leave me blank!' : null" v-model="store.retsObj.attributes.DFO" :rules="!store.retsObj.attributes.NO_RTE ? [onlyNumbers.required, onlyNumbers.numbers]: []" @update:model-value="manuallyUpdateDFO(store.retsObj.attributes.DFO); completeDataSearch(); ">
                         <template v-slot:append-inner>
                             <v-tooltip :text="store.zoomInText" location="top">
                                 <template v-slot:activator="{props}">
@@ -28,7 +28,6 @@
                                 </template>
                             </v-tooltip>
                         </template>
-                    
                 </v-text-field>
             </v-col>
         </v-row>
@@ -66,7 +65,7 @@
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom: 6.1rem; height: 0px;">
             <v-col cols="12" offset="0">
-                <v-textarea label="Description" no-resize variant="underlined" class="rets-description" rows="3" v-model="store.retsObj.attributes.DESC_" :rules="[descRequired.required]" @update:modelValue="completeDataSearch()"></v-textarea>
+                <v-textarea :error-messages="(!store.retsObj.attributes.DESC_ || !store.retsObj.attributes.DESC_.length) ? 'Fill out description' : null" label="Description" no-resize variant="underlined" class="rets-description" rows="3" v-model="store.retsObj.attributes.DESC_" @update:modelValue="descCheck()"></v-textarea>
             </v-col>
         </v-row>
         <v-row align="center" style="position: relative; bottom: 2.1rem; height: 25px;">
@@ -217,17 +216,23 @@ import {store} from './store.js'
             completeDataSearch(){
                 store.checkDetailsForComplete()
             },
+            descCheck(){
+                if(!store.retsObj.attributes.DESC_.length){
+                    store.isSaveBtnDisable = true
+                    return
+                }
+                this.completeDataSearch()
+                return
+            },
             noRTECheck(){
-                console.log(store.retsObj.attributes.NO_RTE)
-                if(store.retsObj.attributes.NO_RTE){
+                if(!store.retsObj.attributes.DESC_) return
+                if(store.retsObj.attributes.NO_RTE && store.retsObj.attributes.DESC_.length){
                     store.isDisableValidations = true
                     store.isSaveBtnDisable = false
                     store.isAlert = false
                     return
                 }
-
                 this.completeDataSearch()
-                store.isSaveBtnDisable = false
                 return
             },
             isDFOValid(){
@@ -252,11 +257,13 @@ import {store} from './store.js'
             crossHairFunc(){
                 try{
                     store.isMoveRetsPt = !store.isMoveRetsPt
-                    if(store.isMoveRetsPt){this.valueRequired
+                    if(store.isMoveRetsPt){
                         store.cancelEvent = hitTestMoveRETS()
                         getRoadInformation()
                         return
                     }
+                    const ogRteNm = JSON.parse(store.archiveRetsDataString).attributes.RTE_NM
+                    store.retsObj.attributes.RTE_NM = ogRteNm
                     store.isMoveRetsPt = false
                     store.cancelEvent.remove()
                     cancelSketchPt()
@@ -342,8 +349,20 @@ import {store} from './store.js'
                 if(txt){
                         const regex = new RegExp(/[^\d]/)
                         store.retsObj.attributes.ACTV_NBR = regex.test(store.retsObj.attributes.ACTV_NBR) ? store.retsObj.attributes.ACTV_NBR.slice(0,-1) : store.retsObj.attributes.ACTV_NBR.slice()
+                        this.completeDataSearch()
                         return
                     }
+            },
+            manuallyUpdateDFO(a){
+                    if(!a.length || !Number(a)) return
+                    const ogDFO = this.retsRouteArchive
+                    clearTimeout(this.typeTimeout)
+                    if(Number(a) !== ogDFO && !store.retsObj.attributes.NO_RTE && !store.isMoveRetsPt){
+                        this.typeTimeout = setTimeout(()=>{
+                            createRoadGraphic(store.retsObj, false)
+                        },900)
+                    }
+                    return
             }
         },
         watch:{
@@ -368,21 +387,7 @@ import {store} from './store.js'
             },
             'store.retsObj.attributes.DFO':{
                 handler: function(a,b){
-                    if(a === null){
-                        //this.initDataCheck()
-                        a = ""
-                    }
-                    if(!a.length || !Number(a)) return
-                    if(Number(a) === b) return
-                    const ogDFO = this.retsRouteArchive
-                    clearTimeout(this.typeTimeout)
-                    console.log(store.isMoveRetsPt)
-                    if(Number(a) !== ogDFO && !store.retsObj.attributes.NO_RTE && !store.isMoveRetsPt){
-                        this.typeTimeout = setTimeout(()=>{
-                            createRoadGraphic(store.retsObj, false)
-                        },900)
-                    }
-                    return
+
 
                 }
             },
@@ -402,6 +407,15 @@ import {store} from './store.js'
 
 #route{
     width: 50px;
+}
+:deep(#route-messages){
+    position: absolute !important;
+    bottom: 20px !important;
+    left: 123px !important;
+    width: 55px !important;
+    color: rgb(207,102,121);
+    z-index: 9999 !important;
+    opacity: 1 !important;
 }
 #details-page{
     position: relative;

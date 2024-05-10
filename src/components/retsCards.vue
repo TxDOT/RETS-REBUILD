@@ -104,7 +104,7 @@
 
 <script>
 import {postFlagColor} from '../components/crud.js'
-import {zoomTo, highlightRETSPoint, toggleRelatedRets,returnHistory, removeAllCardHighlight, removeHighlight, removeOutline} from './utility.js'
+import {zoomTo, highlightRETSPoint, toggleRelatedRets,returnHistory, removeHighlight, removeOutline} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {store} from './store.js'
 
@@ -177,7 +177,7 @@ export default{
         },
         assignColorToFlag(clr){
             document.getElementById(`${this.flagClickedId}Icon`).style.color = clr
-            const rets = store.roadObj.find(rd => rd.attributes.RETS_ID === this.flagClickedId)
+            const rets = store.updateRetsSearch.find(rd => rd.attributes.RETS_ID === this.flagClickedId)
             rets.attributes.flagColor.FLAG = clr
             postFlagColor(rets)
             this.isColorPicked = false;
@@ -186,7 +186,6 @@ export default{
         zoomToRetsPt(rets){
             removeOutline()
             removeHighlight("a", true)
-            removeAllCardHighlight()
             document.getElementById(String(rets.attributes.RETS_ID).concat('-', rets.attributes.OBJECTID)).classList.toggle('highlight-card')
             clearTimeout(this.timer)
             this.timer = ""
@@ -197,7 +196,6 @@ export default{
             },250)
         },
         double(road, index){
-            console.log(road)
             store.isSaving = false
             store.isSaveBtnDisable = true
             store.archiveRetsDataString = JSON.stringify(road)
@@ -225,17 +223,9 @@ export default{
 
     },
     watch:{
-        'store.isShowSelected':{
-            handler: function(){
-
-            },
-            immediate: true
-        },
         'store.roadObj.length':{
             handler: function(a,b){
-                // console.log(a,b)
                 this.retsToGet
-                // console.log("firing")
             },
             immediate: true
         }

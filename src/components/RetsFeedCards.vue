@@ -19,7 +19,7 @@
                     <p>{{store.activityBanner}}</p>
                     <div class="retsSubtitle">
                         <div id="retSubText">
-                            <v-text-field variant="plain" v-if="store.isDetailsPage" :disabled="isSubtitle" placeholder="Enter a subtitle" style="position:relative; top: 1px; right: 3px; max-width: 34ch" class="rets-subtitle-text" v-model="store.retsObj.attributes.RETS_NM">
+                            <v-text-field variant="plain" v-if="store.isDetailsPage" :disabled="isSubtitle" placeholder="Enter a subtitle" style="position:relative; top: 1px; right: 3px; max-width: 34ch" class="rets-subtitle-text" v-model="store.retsObj.attributes.RETS_NM" @update:modelValue="store.checkDetailsForComplete()">
                             </v-text-field>
                         </div>
                     </div>
@@ -118,7 +118,6 @@ export default{
             currRoad: {},
             isColorPicked: false,
             pickColor: "blue",
-            
             
             flagColor: "",
             timer: "",
@@ -226,7 +225,7 @@ export default{
             const afterAtt = JSON.parse(JSON.stringify(store.retsObj))
             let issue = 0
             for(const [key, value] of Object.entries(beforeAtt.attributes)){
-                if(key==='RELATED_RETS' || key==='flagColor' || key==='mdialarm'){
+                if(key==='RELATED_RETS' || key==='flagColor' || key==='mdialarm' || key === 'mditimersand'){
                     continue
                 }
                 if(value !== afterAtt.attributes[key]){
@@ -266,29 +265,6 @@ export default{
                 zoomTo(zoomToRETS)
             },250)
         },
-        // processBanner(i){
-        //     console.log(i)
-        // },
-        // async enableFeed(e){
-        //     turnAllVisibleGraphicsOff() 
-        //     console.log(store.roadHighlightObj)
-        //     if(e[0].attributes.isDelete){
-        //         e[0].attributes.index ? store.roadObj.splice(e[0].attributes.index, 1) : this.removeUndefinedIndex(e[0].attributes)
-        //         this.activityBanner = "Activity Feed"
-        //         this.isDetailsPage = e[1]
-        //         await this.setActivityFeed
-        //         return
-        //     }
-        //     console.log(store.archiveRetsData)
-        //     this.isDetailsPage = e[1]
-        //     this.activityBanner = "Activity Feed"
-        //     return
-        // },
-
-        // highlightToggleAndProcess(){
-        //     console.log('not done')
-        //     return
-        // },
         removeUndefinedIndex(delRd){
             const findRoad = store.roadObj.findIndex(road => road.attributes.OBJECTID === delRd.OBJECTID)
             store.roadObj.splice(findRoad, 1)
@@ -313,13 +289,13 @@ export default{
                             feat.attributes.CREATE_DT = store.returnDateFormat(feat.attributes.CREATE_DT)
                             feat.attributes.EDIT_DT = store.returnDateFormat(feat.attributes.EDIT_DT)
                             feat.attributes.RTE_NM = store.retsObj.attributes.RTE_NM
-                            console.log(store.retsObj.attributes.DFO)
                             feat.attributes.DFO = store.retsObj.attributes.DFO ? store.retsObj.attributes.DFO : null
                             const addNewRetsPt = {attributes:feat.attributes, geometry:[feat.geometry.x,feat.geometry.y]}
                             store.addRetsID(addNewRetsPt)
                             this.double(addNewRetsPt)
                         }
                     )
+                    store.isCancelBtnDisable = true
                 }
 
             }
@@ -338,9 +314,6 @@ export default{
         },
         dragLeave(){
             document.getElementById("dragndrop").style.color = "white"
-        },
-        dropAttachment(event){
-            console.log(event)
         },
         changeNumFilter(filter){
             if(filter === 'cancel'){
@@ -364,9 +337,7 @@ export default{
                 this.addbtntext = "Cancel"
                 this.buttonIcon = null
                 this.isCreateEnabled = !this.isCreateEnabled;
-                //console.log("true")
                 const newPointGraphic = await createtool(sketchWidgetcreate, createretssym);
-                console.log(newPointGraphic)
                 // Process the newPointGraphic as needed
                 this.isCreateEnabled = !this.isCreateEnabled;
                 this.addbtntext = "New"  
@@ -382,8 +353,7 @@ export default{
                 this.isCreateEnabled = !this.isCreateEnabled;
                 this.addbtntext = "New"
                 this.buttonIcon = "mdi-plus"
-                //console.log("false")
-                }
+            }
         },
 
         updateSelection(e){
@@ -402,10 +372,6 @@ export default{
                     this.noSearch = false
                     if(!a.length || !a){
                         store.updateRetsSearch = !store.isShowSelected ? store.roadObj.slice().sort((a,b) => b.EDIT_DT - a.EDIT_DT) : store.roadHighlightObj
-                        // if(!this.histNotes.length){
-                        //     return this.emptyHist = true
-                        // }
-                        console.log("no value")
                         return
                     }
                     const searchString = a.toLowerCase()

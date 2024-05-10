@@ -1,7 +1,7 @@
 <template>
     <div style="font-size: 0px !important; margin-right: 10px; margin-left: 10px;"> 
         <v-row >
-            <v-autocomplete :items="userRole" item-title="name" item-value="value" label="Assigned To" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.ASSIGNED_TO"></v-autocomplete>
+            <v-autocomplete :items="userRole" item-title="name" item-value="value" label="Assigned To" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.ASSIGNED_TO" @update:modelValue="onDropDownChange()"></v-autocomplete>
         </v-row>
         <v-row>
             <v-autocomplete :items="userRole" item-title="name" item-value="value" label="GIS Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.GIS_ANALYST" @update:modelValue="onDropDownChange()" :rules="[emptyRow.required]"></v-autocomplete>
@@ -40,7 +40,7 @@
             }
         },
         mounted(){
-            this.onDropDownChange()
+
         },
         methods:{
             onDropDownChange(){
@@ -49,13 +49,17 @@
                 return 
             },
             checkMetadatFields(){
-                const isLength = [store.retsObj.attributes.GIS_ANALYST, store.retsObj.attributes.GRID_ANALYST, 
-                                  store.retsObj.attributes.DIST_ANALYST, store.retsObj.attributes.DIST_NM, 
-                                  store.retsObj.attributes.CNTY_NM, store.retsObj.attributes.RTE_NM,
-                                  store.retsObj.attributes.DFO, store.retsObj.attributes.STAT,
-                                  store.retsObj.attributes.STAT, store.retsObj.attributes.DESC_]
-                                    .some((x) => !x)
-                console.log(isLength)
+                const fieldsToCheck = [
+                    store.retsObj.attributes.GIS_ANALYST, store.retsObj.attributes.GRID_ANALYST, 
+                    store.retsObj.attributes.DIST_ANALYST, store.retsObj.attributes.DIST_NM, 
+                    store.retsObj.attributes.CNTY_NM
+                ]
+
+                if(!store.retsObj.attributes.NO_RTE){
+                   const pushItemsToCheckArr = [store.retsObj.attributes.DFO, store.retsObj.attributes.RTE_NM, store.retsObj.attributes.STAT, store.retsObj.attributes.DESC_]
+                   fieldsToCheck.push(...pushItemsToCheckArr)
+                }
+                const isLength = fieldsToCheck.some((x) => !x)
                 return isLength
             }
 

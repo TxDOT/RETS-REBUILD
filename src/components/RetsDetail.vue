@@ -51,9 +51,9 @@
             </div>
             <historyView/>
             <div class="marginSetting" style="padding-top: 10px; position: absolute; width: 98%; bottom: 2rem;">
-                <v-text-field label="Type a message" density="compact" tile v-model="addHistoryChat" style="margin-left: 0px; margin-right: 5px;"></v-text-field>
+                <v-text-field label="Type a message" density="compact" tile v-model="addHistoryChat" style="margin-left: 0px; margin-right: 5px;" :error-messages= "initRules ? 'Write a note. Submit your thought to History!' : null" @update:modelValue="historyValue"></v-text-field>
                 <div style="float: left; bottom: 1rem; position: relative;">
-                    <v-btn prepend-icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px !important;" @click="displayAttachments()">Add an Attachment</v-btn>
+                    <v-btn prepend-icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px !important; top: 10px;" @click="displayAttachments()">Add an Attachment</v-btn>
                 </div>
                 <div> 
                     <div style="position:relative; float: left; width:100%;">
@@ -71,7 +71,7 @@
                 <div style="position: relative; float: right; padding-top: .5rem; left: 20px;">
                     <!-- <v-btn variant="plain" @click="deleteNote" class="secondary-button">Delete</v-btn>
                     <v-btn variant="plain" @click="closeNote" class="secondary-button">Cancel</v-btn> -->
-                    <v-btn variant="outlined" class="main-button" density="compact" @click="saveNote" style="margin-right: 15px;">Save & Close</v-btn>
+                    <v-btn variant="outlined" class="main-button" density="compact" @click="saveNote" style="margin-right: 15px;" :disabled="!this.addHistoryChat.length">Save & Close</v-btn>
                 </div>
             </div>
         </v-card>
@@ -107,7 +107,7 @@
 
 <script>
     import { appConstants } from '../common/constant.js'
-    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt} from './utility.js'
+    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView} from './utility.js'
 
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
@@ -161,6 +161,10 @@
                 toSortBottom: "DESC",
                 retsInfo: [],
                 isAsset: false,
+                histNoteRequired: {
+                    required: value => !!value || "Write a note. Submit your thought to History!"
+                },
+                initRules: false
             }
         },
         mounted(){
@@ -175,6 +179,9 @@
             this.isAsset = store.retsObj.attributes.JOB_TYPE === 2 ?  true : false
         },
         methods:{
+            historyValue(){
+                this.initRules = false
+            },
             updatePRIO(){
                 store.checkDetailsForComplete()
             },
@@ -238,7 +245,6 @@
                 store.isCard = true
                 store.historyChat.length = 0
                 store.isSaveBtnDisable = true
-                console.log(store.activityBanner)
                 removeHighlight("a", true)
                 return
             },
@@ -257,18 +263,17 @@
                     store.closeIsRoadExist = true
                     return
                 }
+
                 store.isSaving = true
-                
                 store.retsObj.attributes.ACTV = !store.retsObj.attributes.ACTV ? null : store.retsObj.attributes.ACTV.value ?? store.retsObj.attributes.ACTV
-                // this.retsInfo.ASSIGNED_TO = this.retsInfo.ASSIGNED_TO.value
                 store.retsObj.attributes.PRIO = store.retsObj.attributes.PRIO ?? 1
                 store.retsObj.attributes.JOB_TYPE = this.isAsset === true ? 2 : 1
                 
                 await updateRETSPT(store.retsObj)
-                store.getRetsLayer(store.loggedInUser)
+                store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
                 this.returnToFeed()
                 deleteRetsGraphic()
-                
+                retsLayerView.layer.definitionExpression = store.savedFilter
                 //store.updateRetsID()
                 //retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
                 return
@@ -277,13 +282,14 @@
                 this.returnToFeed()
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
                 this.replaceArchiveContent(archiveRets)
-    
+                retsLayerView.layer.definitionExpression = store.savedFilter
+                
                 //store.preserveHighlightCards()
                 // retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
                 return
             },
             replaceArchiveContent(old){
-                const filter = !store.isShowSelected ? store.roadObj : [...store.roadHighlightObj]
+                const filter = !store.isShowSelected ? store.updateRetsSearch : [...store.roadHighlightObj]
                 const rd = filter.findIndex(x => x.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
                 filter.splice(rd, 1, old)
                 return
@@ -329,7 +335,10 @@
                 this.sendHistory = ""
             },
             async addHistoryNote(){
-                if(!this.addHistoryChat.length) return
+                if(!this.addHistoryChat.length){
+                    this.initRules = true
+                    return
+                }
                 const attach = store.attachment.length ? true : false 
                 await store.addNote(this.addHistoryChat, attach, store.attachment, true)
                 this.clearMessage()
@@ -401,6 +410,7 @@
 </script>
 
 <style scoped>
+
 #archivepopup{
     position: absolute;
     border-radius: 5px;

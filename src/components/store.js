@@ -1,10 +1,10 @@
 import { reactive } from 'vue';
 import { appConstants } from '../common/constant';
 import {sendChatHistory} from './crud.js'
-import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapActivityFeed, returnTopHistory} from './utility.js'
-import { retsLayer } from './map-Init.js';
+import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapActivityFeed} from './utility.js'
 
 export const store = reactive({
+        devStatus: "prod",
         count: 0,
         isCloseDetail: false,
         taskGem: 0,
@@ -38,7 +38,7 @@ export const store = reactive({
                     RTE_NM: "",
                     DFO: 0
                 }
-            },
+        },
         updateRetsSearch:[],
         updatedRetsPtName: "",
         loggedInUser:"",
@@ -84,7 +84,6 @@ export const store = reactive({
                 // this.STAT = appConstants.defaultStatValues
                 // this.USER.push(appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value))
                 store.filterTotal = 2
-
                 this.filter.createDt = this.CREATE_DT
                 this.filter.jobType = this.JOB_TYPE
                 this.filter.editDt = this.EDIT_DT
@@ -120,7 +119,7 @@ export const store = reactive({
 
         },
         async addNote(cmnt, isAttach, isExpand){
-                const date = new Date()
+                const date = new Date().getTime()
                 const newHistory = {RETS_ID: this.historyRetsId, CMNT: cmnt, CMNT_NM: `${appConstants.defaultUserValue[0].value}`, SYS_GEN: 0, CREATE_DT: date, EDIT_DT: date }
                 try{
                         await sendChatHistory(newHistory, "add")
@@ -144,7 +143,7 @@ export const store = reactive({
                 
         },
         modifyNote(cmt, oid){
-                const modDate = new Date()
+                const modDate = new Date().getTime()
                 const findItem = this.historyChat.find(note => note.OBJECTID === oid)
                 findItem.EDIT_DT = modDate
                 findItem.CMNT = cmt
@@ -161,7 +160,7 @@ export const store = reactive({
                 return
         },
         async replyNote(note){
-                const updateDate = new Date()
+                const updateDate = new Date().getTime()
                 const chatObj = {RETS_ID: this.historyRetsId, CMNT: null, CMNT_NM: `${appConstants.defaultUserValue[0].value}`, PARENT_ID: note.OBJECTID, SYS_GEN: 0, CREATE_DT: updateDate, EDIT_DT: updateDate}
                 const oidReturn = await this.sendHistoryToFeatLayer(chatObj)
 
@@ -198,15 +197,15 @@ export const store = reactive({
         //         }
         //         return
         // },
-        async getRetsLayer(userid){
+        async getRetsLayer(userid, where, layer, orderFields){
                 this.loggedInUser = userid
-                const queryString = {"whereString": this.savedFilter, "queryLayer": "retsLayer"}
-                const orderField = "EDIT_DT DESC, PRIO"
+                const queryString = {"whereString": where, "queryLayer": layer}
+                //const orderField = "EDIT_DT DESC, PRIO"
 
                 try{
                         this.roadObj.length = 0
                         this.updateRetsSearch = 0
-                        const obj = await getQueryLayer(queryString, orderField)
+                        const obj = await getQueryLayer(queryString, orderFields)
                         if(obj.features.length){
                                 obj.features.forEach((x) => {
                                         x.attributes.flagColor = this.setFlagColor(x.attributes)
@@ -227,6 +226,11 @@ export const store = reactive({
                                         store.archiveRetsData.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                                 })
                                 this.updateRetsSearch = this.roadObj
+                                return
+                        }
+                        if(!obj.features.length){
+                                this.RetsCardStatus = "Bummer or lucky?? No Rets for you!"
+                                return 
                         }
 
 
@@ -247,46 +251,11 @@ export const store = reactive({
                                 const query = {"whereString": `${resp}`, "queryLayer": "retsLayerLayerView"}
                                 const orderField = `${this.filter.createDt.filter} ${this.filter.createDt.sortType}`
                                  
-                                getQueryLayer(query, orderField)
-                                    .then(obj => {
-                                        // if(obj.features.length > 300){
-                                        //         return console.log("tooo many")
-                                        // }
-                                        if(!obj.features.length){
-                                                this.RetsCardStatus = "Bummer or lucky?? No Rets for you!"
-                                                return 
-                                        }
-                                        if(obj.features.length){
-                                            
-                                            obj.features.forEach((x) => {
-                                                x.attributes.flagColor = this.setFlagColor(x.attributes)
-                                                x.attributes.CREATE_NM = this.returnUserName(x.attributes.CREATE_NM)
-                                                x.attributes.EDIT_NM = this.returnUserName(x.attributes.EDIT_NM)
-                                                x.attributes.CREATE_DT = this.returnDateFormat(x.attributes.CREATE_DT)
-                                                x.attributes.EDIT_DT = this.returnDateFormat(x.attributes.EDIT_DT)
-                                                x.attributes.mdiaccountmultiplecheck = this.isAssigned(x.attributes.ASSIGNED_TO)
-                                                x.attributes.mdiaccountgroup = this.isMOTxDOTConnct(x.attributes.ACTV)
-                                                x.attributes.mdipencilboxoutline = this.isRequest(x.attributes.ACTV)
-                                                x.attributes.mdialarm = this.isDeadline(x.attributes.DEADLINE)
-                                                x.attributes.mdicheckdecagramoutline = this.isComplete(x.attributes.STAT)
-                                                x.attributes.mditimersand = this.isNoActivity(x.attributes.STAT, x.attributes.EDIT_DT)
-                                                x.attributes.mdiexclamation = this.isPrio(x.attributes.PRIO)
-                                                if(this.roadObj.length < 1000){
-                                                        this.roadObj.push({attributes:x.attributes, geometry: [x.geometry.x, x.geometry.y]})
-                                                }
-                                                this.roadObjOverflow.push({attributes:x.attributes, geometry: [x.geometry.x, x.geometry.y]})
-                                            })
-                                            this.updateRetsSearch = this.roadObj
-                                            this.isNoRets = false
-                                            return
-                                        }
-                                        this.isDetailsPage = false
-                                        this.isNoRets = true
-                                        return
-                                    })
-                                    .catch((err)=> {
-                                        console.log(err)
-                                    })
+                                this.getRetsLayer(store.loggedInUser, query.whereString, query.queryLayer, orderField)
+                                
+                                this.isDetailsPage = false
+                                this.isNoRets = true
+                                return
                         })
                         .catch(err => console.log(err))
                         
@@ -327,7 +296,7 @@ export const store = reactive({
                                         
                                         //sort by no activity setting (no activity sand thingy)
                                 this.roadObj.sort((a,b) => new Date(b.attributes.EDIT_DT) - new Date(a.attributes.EDIT_DT))
-                                        
+                                this.updateRetsSearch = this.roadObj
                                 const cloneRets = [...this.roadObj]
                                 this.archiveRetsData = cloneRets
 
@@ -341,7 +310,7 @@ export const store = reactive({
         },
         deleteRetsID(){
                 const findIndex = this.roadObj.findIndex(ret => ret.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
-                this.roadObj.splice(findIndex, 1)
+                this.updateRetsSearch.splice(findIndex, 1)
 
                 const cloneRets = [...this.roadObj]
                 this.archiveRetsData = cloneRets
