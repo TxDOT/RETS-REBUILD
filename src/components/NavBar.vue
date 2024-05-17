@@ -133,8 +133,8 @@
 
 <script>
 
-    import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass} from '../components/map-Init.js';
-    import { createtool, selecttool, togglemenu, logoutUser  } from '../components/utility.js';
+    import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass, roadwaysRenderer} from '../components/map-Init.js';
+    import { createtool, selecttool, togglemenu, logoutUser, roadLayerView } from '../components/utility.js';
     import { vuetify } from '../main.js';
 
     export default{
@@ -431,14 +431,12 @@
                         map.basemap = googleVTBasemap;
                         retsLabelclass.symbol.color = "black"
                         retsLabelclass.symbol.haloSize = 0
-
                         this.basemapcard = false;
                     },
                     toggleosm(){
                         map.basemap = OSMVTBasemap;
                         retsLabelclass.symbol.color = "black"
                         retsLabelclass.symbol.haloSize = 0
-
                         this.basemapcard = false;
                     },
 

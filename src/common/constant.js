@@ -1,5 +1,13 @@
-
 export const appConstants = {
+    retsPtDev: "https://testportal.txdot.gov/createags/rest/services/TPP_RETS/FeatureServer/0",
+    retsPtProd: "https://testportal.txdot.gov/createags/rest/services/RETS/FeatureServer/0",
+    retsCMNTDev: "https://testportal.txdot.gov/createags/rest/services/TPP_RETS_CMNT/FeatureServer/0",
+    retsCMNTProd: "https://testportal.txdot.gov/createags/rest/services/RETS_CMNT/FeatureServer/0",
+    retsUserRoleDev: "https://testportal.txdot.gov/createags/rest/services/RETS_SUPPORT_UAT/FeatureServer/1https://testportal.txdot.gov/createags/rest/services/RETS_SUPPORT_UAT/FeatureServer/1",
+    retsUserRoleProd: "https://testportal.txdot.gov/createags/rest/services/RETS_SUPPORT/FeatureServer/1",
+    retsFlagColorDev: "https://testportal.txdot.gov/createags/rest/services/RETS_SUPPORT_UAT/FeatureServer/3",
+    retsFlagColorProd: "https://testportal.txdot.gov/createags/rest/services/RETS_SUPPORT/FeatureServer/3",
+    
     RetsStatus: ['Not Started', 'On Hold', 'In Progress'],
     CardColorMap:{
         '1': '#FF00C5',

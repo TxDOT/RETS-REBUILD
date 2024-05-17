@@ -80,7 +80,7 @@
 
 <script>
     import {store} from './store.js'
-    import {addAttachments, deleteAttachment, searchCards} from './utility.js'
+    import {addAttachments, deleteAttachment} from './utility.js'
     import { appConstants } from '../common/constant'
 
     export default{
@@ -223,7 +223,6 @@
                             if(!this.histNotes.length){
                                 return this.emptyHist = true
                             }
-                            console.log("no value")
                             return
                         }
                         const searchString = a.toLowerCase()

@@ -1,7 +1,9 @@
 <template>
     <div id="viewDiv">
         <detailsAlert v-if="store.isAlert" id="showAlert"/>
-        <!-- <ShowChanges style="position: absolute; left: 50%; top: 50%;" /> -->
+        <v-banner v-if="store.devStatus === 'dev'" lines="one" class="" style="position: absolute; width: fit-content; top: 0px; left: 25em; justify-content: center; display: flex;" bg-color="warning">
+            <p>You are in the TEST enviornment. Using UAT data.</p>
+        </v-banner>
     </div>
 
     
@@ -63,7 +65,4 @@ export default{
         left: 37%;
         border-radius: 0% !important;
     }
-
-
-
 </style>

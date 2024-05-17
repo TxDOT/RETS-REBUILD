@@ -19,7 +19,7 @@
                     <p>{{store.activityBanner}}</p>
                     <div class="retsSubtitle">
                         <div id="retSubText">
-                            <v-text-field variant="plain" v-if="store.isDetailsPage" :disabled="isSubtitle" placeholder="Enter a subtitle" style="position:relative; top: 1px; right: 3px; max-width: 34ch" class="rets-subtitle-text" v-model="store.retsObj.attributes.RETS_NM">
+                            <v-text-field variant="plain" v-if="store.isDetailsPage" :disabled="isSubtitle" placeholder="Enter a subtitle" style="position:relative; top: 1px; right: 3px; max-width: 34ch" class="rets-subtitle-text" v-model="store.retsObj.attributes.RETS_NM" @update:modelValue="store.checkDetailsForComplete()">
                             </v-text-field>
                         </div>
                     </div>
@@ -90,7 +90,7 @@
 </template>
 
 <script>
-import {clickRetsPoint, getQueryLayer, returnHistory, getHighlightGraphic, removeHighlight, createtool, highlightRETSPoint, toggleRelatedRets, zoomTo, changeCursor, removeOutline} from './utility.js'
+import {clickRetsPoint, getQueryLayer, returnHistory, getHighlightGraphic, removeHighlight, createtool, highlightRETSPoint, toggleRelatedRets, zoomTo, changeCursor} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import {store} from './store.js'
@@ -118,7 +118,6 @@ export default{
             currRoad: {},
             isColorPicked: false,
             pickColor: "blue",
-            
             
             flagColor: "",
             timer: "",
@@ -226,7 +225,7 @@ export default{
             const afterAtt = JSON.parse(JSON.stringify(store.retsObj))
             let issue = 0
             for(const [key, value] of Object.entries(beforeAtt.attributes)){
-                if(key==='RELATED_RETS' || key==='flagColor' || key==='mdialarm'){
+                if(key==='RELATED_RETS' || key==='flagColor' || key==='mdialarm' || key === 'mditimersand'){
                     continue
                 }
                 if(value !== afterAtt.attributes[key]){
@@ -238,14 +237,14 @@ export default{
 
             issue === 0 ? this.double({attributes: this.stageData.attributes, geometry: [this.stageData.geometry.x, this.stageData.geometry.y]}, 1) : null
         },
-        double(road, index){
-            store.loading = false
+        double(road){
+            store.isSaving = false
+            store.isSaveBtnDisable = true
             store.archiveRetsDataString = JSON.stringify(road)
-            store.historyRetsId = road.attributes.RETS_ID
-            returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
-            road.attributes.logInUser = this.loggedInUser 
-            road.attributes.index = index
             store.retsObj = road
+            store.historyRetsId = road.attributes.RETS_ID
+           
+            returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
             clearTimeout(this.timer)
             this.timer=""
             store.isCard = false
@@ -254,7 +253,6 @@ export default{
             highlightRETSPoint(road.attributes)
             //outlineFeedCards()
             this.zoomToRetsPt(road)
-            
             toggleRelatedRets(JSON.stringify(road))
             return
         },
@@ -267,29 +265,6 @@ export default{
                 zoomTo(zoomToRETS)
             },250)
         },
-        // processBanner(i){
-        //     console.log(i)
-        // },
-        // async enableFeed(e){
-        //     turnAllVisibleGraphicsOff() 
-        //     console.log(store.roadHighlightObj)
-        //     if(e[0].attributes.isDelete){
-        //         e[0].attributes.index ? store.roadObj.splice(e[0].attributes.index, 1) : this.removeUndefinedIndex(e[0].attributes)
-        //         this.activityBanner = "Activity Feed"
-        //         this.isDetailsPage = e[1]
-        //         await this.setActivityFeed
-        //         return
-        //     }
-        //     console.log(store.archiveRetsData)
-        //     this.isDetailsPage = e[1]
-        //     this.activityBanner = "Activity Feed"
-        //     return
-        // },
-
-        // highlightToggleAndProcess(){
-        //     console.log('not done')
-        //     return
-        // },
         removeUndefinedIndex(delRd){
             const findRoad = store.roadObj.findIndex(road => road.attributes.OBJECTID === delRd.OBJECTID)
             store.roadObj.splice(findRoad, 1)
@@ -314,14 +289,13 @@ export default{
                             feat.attributes.CREATE_DT = store.returnDateFormat(feat.attributes.CREATE_DT)
                             feat.attributes.EDIT_DT = store.returnDateFormat(feat.attributes.EDIT_DT)
                             feat.attributes.RTE_NM = store.retsObj.attributes.RTE_NM
-                            console.log(store.retsObj.attributes.DFO)
                             feat.attributes.DFO = store.retsObj.attributes.DFO ? store.retsObj.attributes.DFO : null
                             const addNewRetsPt = {attributes:feat.attributes, geometry:[feat.geometry.x,feat.geometry.y]}
-                            store.isCancelBtnDisable = true
                             store.addRetsID(addNewRetsPt)
                             this.double(addNewRetsPt)
                         }
                     )
+                    store.isCancelBtnDisable = true
                 }
 
             }
@@ -341,19 +315,6 @@ export default{
         dragLeave(){
             document.getElementById("dragndrop").style.color = "white"
         },
-        dropAttachment(event){
-            console.log(event)
-        },
-        changeNumFilter(filter){
-            if(filter === 'cancel'){
-                this.isfilter = false;
-                return
-            }
-            store.retsFilters = filter
-            this.isfilter = false
-            store.setFilterFeed()
-        },
-
         changeNumFilter(filter){
             if(filter === 'cancel'){
                 this.isfilter = false;
@@ -370,13 +331,13 @@ export default{
             return 'mdi-flag'
         },
         async handlecreate(){
+            // const abortPromise = new AbortController()
+            // const signal = abortPromise.signal
             if (this.isCreateEnabled === true) {
                 this.addbtntext = "Cancel"
                 this.buttonIcon = null
                 this.isCreateEnabled = !this.isCreateEnabled;
-                //console.log("true")
                 const newPointGraphic = await createtool(sketchWidgetcreate, createretssym);
-                console.log(newPointGraphic)
                 // Process the newPointGraphic as needed
                 this.isCreateEnabled = !this.isCreateEnabled;
                 this.addbtntext = "New"  
@@ -385,7 +346,6 @@ export default{
                             
                 } 
             else {
-                
                 changeCursor("default")
                 store.isMoveRetsPt = false
                 sketchWidgetcreate.cancel();
@@ -393,12 +353,15 @@ export default{
                 this.isCreateEnabled = !this.isCreateEnabled;
                 this.addbtntext = "New"
                 this.buttonIcon = "mdi-plus"
-                //console.log("false")
-                }
+            }
         },
 
         updateSelection(e){
-            console.log(e)
+            if(!e){
+                    store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+                    return
+                }
+                store.updateRetsSearch = store.roadHighlightObj
         },
 
     },
@@ -409,10 +372,6 @@ export default{
                     this.noSearch = false
                     if(!a.length || !a){
                         store.updateRetsSearch = !store.isShowSelected ? store.roadObj.slice().sort((a,b) => b.EDIT_DT - a.EDIT_DT) : store.roadHighlightObj
-                        // if(!this.histNotes.length){
-                        //     return this.emptyHist = true
-                        // }
-                        console.log("no value")
                         return
                     }
                     const searchString = a.toLowerCase()

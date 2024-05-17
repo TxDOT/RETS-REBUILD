@@ -56,7 +56,7 @@
                             </template>
                         </v-tooltip>
 
-                        <v-tooltip text="Deadline set (with date)" location="top">
+                        <v-tooltip :text="`Deadline set ${rd.attributes['mdialarm'].date}`" location="top">
                             <template v-slot:activator="{props}">
                                 <v-icon icon="mdi-alarm" :color="rd.attributes['mdialarm'].color" v-if="rd.attributes['mdialarm'].bool" class="cardPRIO" v-bind="props"></v-icon>
                             </template>
@@ -104,7 +104,7 @@
 
 <script>
 import {postFlagColor} from '../components/crud.js'
-import {zoomTo, highlightRETSPoint, toggleRelatedRets,returnHistory, removeAllCardHighlight, removeHighlight, removeOutline} from './utility.js'
+import {zoomTo, highlightRETSPoint, toggleRelatedRets,returnHistory, removeHighlight, removeOutline} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {store} from './store.js'
 
@@ -137,7 +137,7 @@ export default{
     mounted(){
         //this.roadsNext
         this.loadData()
-        this.retsToGet
+        //this.retsToGet
         // setTimeout(()=>{
         //     let rd;
         //     for(rd=0; rd < store.roadObj.length; rd++){
@@ -177,7 +177,7 @@ export default{
         },
         assignColorToFlag(clr){
             document.getElementById(`${this.flagClickedId}Icon`).style.color = clr
-            const rets = store.roadObj.find(rd => rd.attributes.RETS_ID === this.flagClickedId)
+            const rets = store.updateRetsSearch.find(rd => rd.attributes.RETS_ID === this.flagClickedId)
             rets.attributes.flagColor.FLAG = clr
             postFlagColor(rets)
             this.isColorPicked = false;
@@ -196,13 +196,13 @@ export default{
             },250)
         },
         double(road, index){
-            store.loading = false
+            store.isSaving = false
+            store.isSaveBtnDisable = true
             store.archiveRetsDataString = JSON.stringify(road)
-            store.historyRetsId = road.attributes.RETS_ID
-            returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
-            road.attributes.logInUser = this.loggedInUser 
-            road.attributes.index = index
             store.retsObj = road
+            store.historyRetsId = road.attributes.RETS_ID
+           
+            returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
             clearTimeout(this.timer)
             this.timer=""
             store.isCard = false
@@ -211,81 +211,8 @@ export default{
             highlightRETSPoint(road.attributes)
             //outlineFeedCards()
             this.zoomToRetsPt(road)
-            
             toggleRelatedRets(JSON.stringify(road))
             return
-        },
-        returnSand(icon, atts){
-            const notiIcons = {
-                'mdi-account-multiple-check' : () => {
-                    if(atts.ASSIGNED_TO === store.loggedInUser){
-                        return true
-                    }
-                    return false
-                },
-                'mdi-account-group': () => {
-                    if(atts.ACTV === "TxDOTConnect" || atts.ACTV === 'Minute Order'){
-                        return true
-                    }
-                    return false
-                },
-                'mdi-pencil-box-outline': () =>{
-                    if(atts.ACTV === "Request"){
-                        return true
-                    }
-                    return false
-                },
-                'mdi-alarm' :()=>{
-                    
-                    
-                    if(atts.DEADLINE){
-                        return true
-                    }
-                    return false
-                },
-                'mdi-check-decagram-outline' : ()=>{
-                    if(atts.STAT === 3){
-                        return true
-                    }
-                    return false
-                },
-                'mdi-timer-sand': ()=>{
-                    const editDt = new Date(atts.EDIT_DT)
-                    const todayDate = new Date()
-                    const oneDay = 24*60*60*1000;
-                    const calcTime = todayDate.getTime() - editDt.getTime()
-                    const calcDate = Math.round(calcTime/oneDay)
-                    if(atts.STAT === 2 && calcDate > 25){
-                        return true
-                    }
-                    return false
-                },
-                'mdi-exclamation': () =>{
-                    if(atts.PRIO === 0){
-                        return true
-                    }
-                    return false
-                }
-            }
-            return notiIcons[icon]()
-            //return true
-        },
-        checkColor(icon, atts){
-            if(icon === 'mdi-alarm' || icon === 'mdi-exclamation' || icon === 'mdi-check-decagram-outline'){
-                const deadlineDate = new Date(atts.DEADLINE)
-                const todaysDate = new Date()
-                const oneDay = 24*60*60*1000;
-                const calcTime = deadlineDate.getTime() - todaysDate.getTime()
-                const pastDeadline = Math.round(calcTime/oneDay)
-                if(atts.DEADLINE && pastDeadline < 0 || icon === 'mdi-exclamation'){
-                    return "red"
-                }
-                if(icon === 'mdi-check-decagram-outline'){
-                    return 'green'
-                }
-                return "white"
-            }
-            return "white"
         },
 
         changeColor(id){
@@ -296,14 +223,8 @@ export default{
 
     },
     watch:{
-        'store.isShowSelected':{
-            handler: function(){
-                this.retsToGet
-            },
-            immediate: true
-        },
         'store.roadObj.length':{
-            handler: function(){
+            handler: function(a,b){
                 this.retsToGet
             },
             immediate: true
@@ -311,7 +232,7 @@ export default{
     },
     computed:{
         retsToGet: function(){
-            return store.updateRetsSearch = !store.isShowSelected ? store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT)) : store.roadHighlightObj
+            return store.updateRetsSearch
         }
     }
 
