@@ -154,6 +154,7 @@ export function removeHighlight(feature, removeAll){
             }
 
             if(lyrView._highlightIds.has(feature?.attributes.OBJECTID)){
+                console.log("GOOD")
                 //console.log("before: " + feature?.attributes.OBJECTID )
                 lyrView._highlightIds.delete(feature?.attributes.OBJECTID)
                 //console.log("after: " + feature?.attributes.OBJECTID )
@@ -812,10 +813,14 @@ export function createtool(sketchWidgetcreate, createretssym) {
         return
       }
 export function scrollToTopOfFeed(setsize){
+
     const feedElement = document.querySelector('.card-feed-div')
-    if(setsize === 0){
-        feedElement.scrollTop = 0; //Scroll the feed dive to the top
+    if (feedElement){
+        if(setsize === 0){
+            feedElement.scrollTop = 0; //Scroll the feed dive to the top
+        }
     }
+    
 }
 
 export async function handleaddrets(newPointGraphic, addrets){

@@ -26,11 +26,6 @@ import Extent from "@arcgis/core/geometry/Extent.js";
 
 
 export const texasExtent = new Extent({
-  // xmin:-106.645646,
-  // ymin:25.837163,
-  // xmax:-93.507217,
-  // ymax:36.500695,
-
   xmin: -106.649513,
   ymin: 25.837163,
   xmax: -93.507217,
@@ -38,14 +33,6 @@ export const texasExtent = new Extent({
   spatialReference: {
     wkid: 4326 // WGS84 coordinate system
   }
-
-
-  // xmin:25.7364986,
-  // ymin:-109.1882887,
-  // xmax:36.6130878,
-  // ymax:-90.9737028,
-
-
 })
 
 
@@ -417,6 +404,7 @@ export const view = new MapView({
 //create search widget
 export const searchWidget = new Search({
   
+  /////////////////////////////////
   view: view,
   includeDefaultSources: false,
   allPlaceholder: "City, County, District, Route",
@@ -432,9 +420,9 @@ export const searchWidget = new Search({
       zoomScale: 5000,
       searchFields: ["RETS_ID"],
       displayField: "RETS_ID",
-      exactMatch: false,
+      exactMatch: true,
       outFields: ["*"],
-      maxSuggestions: 3,
+      maxSuggestions: 1,
       
       
     },
@@ -448,6 +436,7 @@ export const searchWidget = new Search({
       exactMatch: false,
       outFields: ["*"],
       maxSuggestions: 3,
+      exactMatch: true,
       minSuggestCharacters: 3,
       
     },
@@ -460,7 +449,7 @@ export const searchWidget = new Search({
       exactMatch: false,
       outFields: ["*"],
       maxSuggestions: 3,
-      minSuggestCharacters: 2,
+      minSuggestCharacters: 3,
     },
     {
       name: "Roadways",
@@ -472,6 +461,7 @@ export const searchWidget = new Search({
       outFields: ["*"],
       minSuggestCharacters: 2,
       maxSuggestions: 3,
+      //suggestionTemplate: "NAME: {RTE_NM} (GID: {GID})"
     },
     {
       name: "City",
@@ -490,8 +480,8 @@ export const searchWidget = new Search({
       placeholder: "Minute Order",
       zoomScale: 5000,
       searchFields: [ "ACTV_NBR"],
-      displayField: "RETS_ID",
-      exactMatch: false,
+      displayField: "ACTV_NBR",
+      exactMatch: true,
       outFields: ["*"],
       minSuggestCharacters: 3,
       maxSuggestions: 3,
@@ -676,6 +666,7 @@ document.addEventListener('click', function(event) {
 searchWidget.on("suggest-complete", function(event) {
   const suggestions = event.results; 
   const searchTerm = event.searchTerm;
+
   const hasLetters = /[a-zA-Z]/.test(searchTerm);
 
   if ((hasLetters) && (suggestions[0]?.results[0]?.text || suggestions[6]?.results[0]?.text )) {
@@ -686,6 +677,7 @@ searchWidget.on("suggest-complete", function(event) {
   suggestions[5].results[0].text = suggestions[5].results[0].text.replace(/,/g, '')
   suggestions[5].results[1].text = suggestions[5].results[1].text.replace(/,/g, '')
   suggestions[5].results[2].text = suggestions[5].results[2].text.replace(/,/g, '')
+
 });
 
 

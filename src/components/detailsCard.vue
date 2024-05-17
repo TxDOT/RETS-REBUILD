@@ -92,7 +92,7 @@
                 </div>
                 
             <!-- </v-col> -->
-                <div style="position:relative; bottom: 4.3rem; cursor: pointer !important; height: 32px; width: 119px; float: right" @click="isDatePicker = true">
+                <div class="datepickeractivate" style="position:relative; bottom: 4.3rem; cursor: pointer !important; height: 32px; width: 119px; float: right" @click="toggleVisibility()">
                     <v-text-field prepend-icon="mdi-timer-outline" disabled density="compact" variant="plain" class="date-select" style="z-index: 9999; "> {{ datePicker }}</v-text-field>
                     <!-- <v-col offset="0" style="z-index: 999; cursor: pointer; max-width: 6rem; height:2rem; padding: 0px; " @click="isDatePicker = true">
                         
@@ -101,7 +101,7 @@
             </div>
             
             <!-- <v-text-field prepend-icon="mdi-timer-outline" disabled density="compact" variant="plain" class="date-select" style="z-index: 9999; cursor: pointer !important;" @click="isDatePicker = true"> {{ datePicker }}</v-text-field> -->
-            <div class="date-picker" v-if="isDatePicker">
+            <div class="date-picker" v-if="isDatePicker" ref="datepickerelement" >
                 <v-date-picker v-model="datePicked" class="date" hide-header @update:modelValue="selectDates()"></v-date-picker>
             </div>
         </v-row>
@@ -124,6 +124,7 @@ import {store} from './store.js'
         },
         data(){
             return{
+                counter: 0,
                 activityList: appConstants.activityList,
                 gemTasks: [],
                 isDatePicker: false,
@@ -154,6 +155,10 @@ import {store} from './store.js'
         },
         beforeMount(){
             this.splitAndAddRelatedRets(store.retsObj.attributes.RELATED_RETS)
+            document.addEventListener('click',this.handleClickOutside)
+            
+           
+            
         },
         mounted(){
             this.ogValues = store.retsObj
@@ -170,8 +175,24 @@ import {store} from './store.js'
             //this.initDataCheck()
             this.retsRouteArchive = JSON.parse(store.archiveRetsDataString)
             //createRoadGraphic(store.retsObj, true)
+           
+
+            
+
+
         },
         methods:{
+            handleClickOutside(event) {
+                const targetElement = event.target
+                const datepickerelement = this.$refs.datepickerelement
+                if (datepickerelement && (!datepickerelement.contains(targetElement)) && targetElement.className != "datepickeractivate"){
+                    this.toggleVisibility()
+                }
+
+            },
+            toggleVisibility(){
+                this.isDatePicker =! this.isDatePicker
+            },
             convertNoRTE(noRte){
                 if(noRte === 0 || noRte === -1){
                     return false

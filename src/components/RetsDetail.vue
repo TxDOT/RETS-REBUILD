@@ -393,13 +393,17 @@
 
 <style scoped>
 #archivepopup{
-    position: absolute;
+    position: fixed;
     border-radius: 5px;
-    left: 200%;
     width: 25rem;
-    top:40%;
     height:25%; 
     border-radius: 0;
+    left: 567px;
+    right:0;
+    top:0;
+    bottom: 0;
+    margin: auto;
+
 }
 
 #archiveheader{
