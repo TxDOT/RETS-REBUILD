@@ -122,15 +122,30 @@ export function hoverRetsPoint(){
     return
 }
 
+let highlightedFeatures = []
+
 export function highlightRETSPoint(feature){
     //checks and waits for retsLayer featureLayerView
     view.whenLayerView(retsLayer)
         .then((lyrView) => {
             //highlights Point by giving OBJECTID
-            lyrView.highlight(feature.OBJECTID)
+            const highlight = lyrView.highlight(feature.OBJECTID)
+            highlightedFeatures.push(highlight)
             
         })
     return
+}
+
+export  function includes(feature){
+    return view.whenLayerView(retsLayer)
+    .then((lyrView) => {
+        if (lyrView._highlightIds.has(feature.OBJECTID)) {
+            return true;
+        } else {
+            return false;
+
+        }
+    });
 }
 
 function highlightGraphicPt(feature){
@@ -155,13 +170,16 @@ export function removeHighlight(feature, removeAll){
             }
 
             if(lyrView._highlightIds.has(feature?.attributes.OBJECTID)){
-                lyrView._highlightIds.delete(feature?.attributes.OBJECTID)
+                lyrView._highlightIds.delete(feature.attributes.OBJECTID)
+                lyrView._updateHighlight();
+               
                 return
             }
             
             
         })
     return
+   
 }
 
 export function outlineFeedCards(cards){
@@ -672,10 +690,9 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                 {
                                     graphics.removeAll();
                                     var selectedFeatures = result.features;
-                                    if(!selectedFeatures.length && store.isShowSelected){
+                                    if(!selectedFeatures.length && store.isShowSelected && pressedkey != "Control"){
                                         store.isShowSelected = false
-                                        
-                                        return
+                                        store.roadHighlightObj.clear()
                                     }
     
                                     if (pressedkey === false){
@@ -683,30 +700,19 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                         removeHighlight("a", removeAll); 
                                         removeOutline()
                                         store.roadHighlightObj.clear()
-                                        // for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                        
-                                        //clearRoadHighlightObj()
-
-                                                // }
                                         for (let i = 0; i < selectedFeatures.length; i++ ) {
                                             const b = store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[i].attributes.OBJECTID)
 
                                             store.roadHighlightObj.add(b)
-                                            highlightRETSPoint(selectedFeatures[i].attributes);
-                                            //outlineFeedCards(b);
+                                            highlightRETSPoint(selectedFeatures[i].attributes, true);
                                                     
                                                     
                                         }
                                         outlineFeedCards(store.roadHighlightObj); 
                                         scrollToTopOfFeed(store.roadHighlightObj.size)             
-                                        //clearRoadHighlightObj()
                                         return
                                         
                                     }
-    
-                                    
-                                     
-                                    
                                     if(pressedkey === "Shift"){
                                         for (let i = 0; i < selectedFeatures.length; i++ ) {
                                             const b = store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[i].attributes.OBJECTID)
@@ -717,38 +723,20 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                         return
                                     }
                                     
-                                    if(pressedkey === "Control"){    
-                                            var rectangleGeometry2 = event.graphic.geometry;
-                                            var query2 = retsLayer.createQuery();
-                                            query2.geometry = rectangleGeometry2;
-                                            retsLayer.queryFeatures(query2)
-                                            .then(function (result) 
-                                                    {
-                                                        graphics.removeAll();
-                                                        var selectedFeaturesnew = result.features;
-                                                        for (let i = 0; i < selectedFeaturesnew.length; i++ ) {
-                                                            const b = store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeaturesnew[i].attributes.OBJECTID)
-                                                            store.roadHighlightObj.delete(b)
-                                                            removeOutline()
-
-                                                            outlineFeedCards(store.roadHighlightObj);
-                                                            removeHighlight("a", removeAll)
-                                                            scrollToTopOfFeed(store.roadHighlightObj.size)
-                                                            let arr = Array.from(store.roadHighlightObj)
-
-                                                            arr  = arr.filter(obj => {
-                                                                return !selectedFeaturesnew.some(feature => feature.attributes.OBJECTID === obj.attributes.OBJECTID)
-                                                            })
-                                                            for (let n = 0; n < arr.length; n++){
-                                                                if (n >= 0){
-                                                                    highlightRETSPoint(arr[n].attributes);
-                                                                    
-                                                                }
-                                                            }      
-                                                            
-                                                        }
-
-                                                    })
+                                    if(pressedkey === "Control"){   
+                                        graphics.removeAll();   
+                                        if (selectedFeatures.length > 0){
+                                            for (let n = 0; n < selectedFeatures.length; n++){
+                                            
+                                                removeHighlight(selectedFeatures[n]);
+                                                const b = store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[n].attributes.OBJECTID)
+                                                store.roadHighlightObj.delete(b)
+                                                removeOutline()
+                                                outlineFeedCards(store.roadHighlightObj);
+                                                scrollToTopOfFeed(store.roadHighlightObj.size) 
+                                            }   
+                                        }
+                                           
 
                                     }
     

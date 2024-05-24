@@ -87,9 +87,8 @@ export let retsPointRenderer = new UniqueValueRenderer({
      label: "On Hold"
    },
  
-   // Add more unique value info objects as needed...
-   ]
- });
+  ]
+   });
  
  export let retsPointRendererout = new UniqueValueRenderer({
    field: "STAT", // Field based on which the symbology will be categorized
@@ -142,8 +141,6 @@ export let retsPointRenderer = new UniqueValueRenderer({
       }),
       label: "On Hold"
     },
-  
-    // Add more unique value info objects as needed...
     ]
   });
  
@@ -381,6 +378,7 @@ export const searchWidget = new Search({
   allPlaceholder: "City, County, District, Route",
   popupEnabled: false,
   popupTemplate: false,
+  minSuggestCharacters: 3,
   maxSuggestions: 3,
   sources:
   [
@@ -391,9 +389,11 @@ export const searchWidget = new Search({
       zoomScale: 5000,
       searchFields: ["RETS_ID"],
       displayField: "RETS_ID",
-      exactMatch: true,
+      exactMatch: false,
       outFields: ["*"],
       maxSuggestions: 3,
+      //minSuggestCharacters: 2,
+     
     },
     
     {
@@ -406,7 +406,7 @@ export const searchWidget = new Search({
       outFields: ["*"],
       maxSuggestions: 3,
       exactMatch: true,
-      minSuggestCharacters: 3,
+      //minSuggestCharacters: 3,
       
     },
     {
@@ -418,7 +418,7 @@ export const searchWidget = new Search({
       exactMatch: false,
       outFields: ["*"],
       maxSuggestions: 3,
-      minSuggestCharacters: 3,
+      //minSuggestCharacters: 3,
     },
     {
       name: "Roadways",
@@ -428,7 +428,7 @@ export const searchWidget = new Search({
       displayField: "RTE_NM", 
       exactMatch: false,
       outFields: ["*"],
-      minSuggestCharacters: 2,
+      //minSuggestCharacters: 2,
       maxSuggestions: 3,
       //suggestionTemplate: "NAME: {RTE_NM} (GID: {GID})"
     },
@@ -441,20 +441,22 @@ export const searchWidget = new Search({
       exactMatch: false,
       outFields: ["*"],
       maxSuggestions: 3,
-      minSuggestCharacters: 3,
+      //minSuggestCharacters: 3,
     },
     {
       name: "Minute Order",
       layer: retsLayer, 
       placeholder: "Minute Order",
       zoomScale: 5000,
-      searchFields: [ "ACTV_NBR"],
+      searchFields: [ "ACTV_NBR" ],
       displayField: "ACTV_NBR",
-      exactMatch: true,
+      exactMatch: false,
       outFields: ["*"],
       minSuggestCharacters: 3,
       maxSuggestions: 3,
       suggestionTemplate: "RETS: {RETS_ID} (MO: {ACTV_NBR})"
+      
+      
       
     },
     
@@ -495,19 +497,17 @@ export const legendWidget = new Legend({
   visible: false,
 });
  export const sketchWidgetselect = new Sketch({
-  layer: graphics, // Replace with your actual feature layer
+  layer: graphics,
   view: view,
-  creationMode: "continuous", // Replace with your actual map view
-  // defaultUpdateOptions: {
-  //     tool: "transform"
-  // }
+  creationMode: "continuous",
+
 
 });
 
 export const sketchWidgetcreate = new Sketch({
-  layer: graphics, // Replace with your actual feature layer
+  layer: graphics,
   view: view,
-  creationMode: "single", // Replace with your actual map view
+  creationMode: "single", 
   snappingOptions: {
       enabled: true,
       featureSources: [{layer: TxDotRoaways, enabled: true}]
@@ -526,6 +526,7 @@ view.ui.add(ZoomWidget, {
   index: 3
 });
 
+//adds home widget to map 
 view.ui.add(homeWidget, {
   position: "top-right",
   index: 3
@@ -601,9 +602,7 @@ searchWidget.on("select-result", function(event) {
     }));
   } else if (selectedFeature.geometry.type === "point") {
     const tempArray = [selectedFeature];
-    // Run the highlightRestPoints function on the selected point feature
     removeOutline();
-    //removeHighlight(selectedFeature, true)
     outlineFeedCards(tempArray);
   }
   
@@ -614,7 +613,6 @@ searchWidget.on("search-clear", function(event) {
   // Clear the highlight when the search is cleared
     highlightLayer.removeAll();
     scrollToTopOfFeed(0)
-  
     removeOutline();
 
 
@@ -632,13 +630,12 @@ document.addEventListener('click', function(event) {
       }
 });
 
-searchWidget.on("suggest-complete", function(event) {
+ searchWidget.on("suggest-complete", function(event) {
   const suggestions = event.results; 
   const searchTerm = event.searchTerm;
 
   const hasLetters = /[a-zA-Z]/.test(searchTerm);
-
-  if ((hasLetters) && (suggestions[0]?.results[0]?.text || suggestions[6]?.results[0]?.text )) {
+  if ((hasLetters) && (event.activeSourceIndex === -1) && (suggestions[0]?.results[0]?.text)) {
     suggestions[0] = []
     suggestions[5] = []
 
@@ -647,16 +644,17 @@ searchWidget.on("suggest-complete", function(event) {
   suggestions[5].results[1].text = suggestions[5].results[1].text.replace(/,/g, '')
   suggestions[5].results[2].text = suggestions[5].results[2].text.replace(/,/g, '')
 
-});
+ 
+
+ });
 
 
 homeWidget.on("go", function() {
-  // Run your function here
   home();
 });
 
 view.watch("scale", function(newValue) {
-  if (newValue < 1000000 ) { // Adjust this scale threshold as needed
+  if (newValue < 1000000 ) { 
     retsLayer.renderer = retsPointRenderer;
   } 
   else if(newValue > 1000000 && newValue < 2000000){
@@ -667,12 +665,6 @@ view.watch("scale", function(newValue) {
   }
 });
 
-//TxDotRoaways
 //remove attribution and zoom information
 view.ui.remove("attribution")
 // </></>
-
-// view.constraints = {
-//   geometry: texasExtent,
-//   rotationEnabled: false // Disables map rotation
-// };

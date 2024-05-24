@@ -107,7 +107,7 @@
 
 <script>
     import { appConstants } from '../common/constant.js'
-    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView} from './utility.js'
+    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, outlineFeedCards, removeOutline} from './utility.js'
 
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
@@ -245,7 +245,14 @@
                 store.isCard = true
                 store.historyChat.length = 0
                 store.isSaveBtnDisable = true
-                removeHighlight("a", true)
+                //removeHighlight("a", true)
+                // removeHighlight(store.retsObj.attributes.OBJECTID)
+                removeHighlight(store.retsObj)
+                const b = store.roadObj.find(rd => rd.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
+                store.roadHighlightObj.delete(b)
+                //removeOutline()
+                //outlineFeedCards(store.roadHighlightObj);
+
                 return
             },
             deleteRets(){
