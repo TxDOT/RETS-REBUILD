@@ -261,6 +261,14 @@
                     shiftDiv(){
                         const viewSurface = document.querySelector('.esri-view');
                         viewSurface.classList.toggle('translateX-500px');
+                        const settingspopup = document.querySelector('#containersettings')
+                        if(settingspopup){
+                            settingspopup.classList.toggle('translatesettings')
+
+                        }
+                        else{
+                            console.log("not found")
+                        }
 
                     },
                     newSwitchTurnedOn() {
@@ -447,9 +455,9 @@
   
    #iconcontent  {
     position: absolute;
-    width: 1000px !important;
+    width: 30px !important;
     top: 9px;
-    left: 27%;
+    left: 29%;
    }
     #icons-bottom{
         position: relative;
@@ -457,8 +465,8 @@
         left: 10%;
     }
     #icons-top{
-        left: 7%;
-        top: -3px;
+        left: 10%;
+        top: -7px;
     }
     .v-navigation-drawer{
         overflow-y: hidden !important;
@@ -476,9 +484,12 @@
         overflow-y: hidden;
     }
 
-    .btn-left-brder{
-        border-left: 10px solid #4472C4 !important;
-        
+    .btn-left-brder .v-list-item__overlay{
+        opacity: 1 !important;
+        position: absolute;
+        /* border-left: 10px solid #4472C4 !important; */
+        width: 10px !important;
+        color:   #4472C4 !important;
     }
     .nav-bar-btn{
         height: 2rem;
@@ -522,9 +533,13 @@
     }
     #containersettings{
         position: absolute;
+        margin:auto;
+        top: 0;
+        bottom: 0;
+        left: 0;;
+        right: 0;
         width: 400px;
-        top: 13%;
-        left: 118vh;
+        left: 509px; 
         z-index: 9999;
         border-radius: 0px;
         
@@ -663,6 +678,9 @@
         left: 0px !important;
         width: 100% !important;
         transform: translate(0px) 
+    }
+    .translatesettings{
+        transform: translate(-200px) 
     }
 
 

@@ -46,7 +46,6 @@ export default{
 <style>
     #viewDiv{
         position: absolute;
-
         /* overflow-y: hidden; */
     }
 

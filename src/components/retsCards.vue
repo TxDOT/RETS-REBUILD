@@ -110,9 +110,10 @@
 
 <script>
 import {postFlagColor} from '../components/crud.js'
-import {zoomTo, highlightRETSPoint, toggleRelatedRets,returnHistory, removeHighlight, removeOutline, turnAllVisibleGraphicsOff} from './utility.js'
+import {zoomTo, highlightRETSPoint, toggleRelatedRets,returnHistory, removeHighlight, removeOutline, includes} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {store} from './store.js'
+import { outlineFeedCards } from './utility.js';
 
 export default{
     name: "RetsCards",
@@ -178,15 +179,23 @@ export default{
             this.closeFlagDiv()
         },
         zoomToRetsPt(rets){
-            removeOutline()
-            removeHighlight("a", true)
-            document.getElementById(String(rets.attributes.RETS_ID).concat('-', rets.attributes.OBJECTID)).classList.toggle('highlight-card')
+            includes(rets.attributes).then(result => {
+                 var isIncluded = result
+                 if (isIncluded === false){
+                    removeHighlight("a", true)
+                    removeOutline()
+                    document.getElementById(String(rets.attributes.RETS_ID).concat('-', rets.attributes.OBJECTID)).classList.toggle('highlight-card')
+                    return
+                }
+            });
+
             clearTimeout(this.timer)
             this.timer = ""
             this.timer = setTimeout(()=>{
                 const zoomToRETS = rets.geometry
                 highlightRETSPoint(rets.attributes)
                 zoomTo(zoomToRETS)
+
             },250)
         },
         double(road, index){
@@ -202,7 +211,7 @@ export default{
             store.isCard = false
             store.isDetailsPage = true
             store.activityBanner = `${road.attributes.RETS_ID}`
-            highlightRETSPoint(road.attributes)
+            //highlightRETSPoint(road.attributes)
             //outlineFeedCards()
             this.zoomToRetsPt(road)
             toggleRelatedRets(JSON.stringify(road))

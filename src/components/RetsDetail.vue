@@ -107,7 +107,7 @@
 
 <script>
     import { appConstants } from '../common/constant.js'
-    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView} from './utility.js'
+    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, outlineFeedCards, removeOutline} from './utility.js'
 
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
@@ -245,7 +245,14 @@
                 store.isCard = true
                 store.historyChat.length = 0
                 store.isSaveBtnDisable = true
-                removeHighlight("a", true)
+                //removeHighlight("a", true)
+                // removeHighlight(store.retsObj.attributes.OBJECTID)
+                removeHighlight(store.retsObj)
+                const b = store.roadObj.find(rd => rd.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
+                store.roadHighlightObj.delete(b)
+                //removeOutline()
+                //outlineFeedCards(store.roadHighlightObj);
+
                 return
             },
             deleteRets(){
@@ -380,13 +387,17 @@
 <style scoped>
 
 #archivepopup{
-    position: absolute;
+    position: fixed;
     border-radius: 5px;
-    left: 200%;
     width: 25rem;
-    top:40%;
     height:25%; 
     border-radius: 0;
+    left: 567px;
+    right:0;
+    top:0;
+    bottom: 0;
+    margin: auto;
+
 }
 
 #archiveheader{
