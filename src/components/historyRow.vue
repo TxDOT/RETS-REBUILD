@@ -21,7 +21,6 @@
                 </div>
             </div>
         <div id="displayHistory">
-            <v-progress-circular indeterminate v-if="isHistNotesEmpty"></v-progress-circular>
                 <div v-for="(note, i) in histNotes" :key="note.OBJECTID" track-by="OBJECTID" v-if="!isHistNotesEmpty">
                     <v-banner :id="`${note.OBJECTID}Expand`" v-model="note[i]" density="compact" style="padding: 0px; padding-left: 5px; border-left: 3px solid #4472C4 !important;">
                         <v-banner-text class="mx-auto">

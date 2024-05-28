@@ -357,7 +357,9 @@ export default{
         },
 
         updateSelection(e){
+            console.log(e)
             if(!e){
+                    console.log(store.roadObj)
                     store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                     return
                 }

@@ -259,13 +259,6 @@
                 
                 methods: {
                     shiftDiv(){
-                        // console.log(this.isActOpen)
-                        // this.shiftmap = this.isActOpen
-                        //const elements = document.getElementsByClassName('esri-view-root');
-                        
-
-
-                        //elements[0].classList.toggle('esri-view-surface');
                         const viewSurface = document.querySelector('.esri-view');
                         viewSurface.classList.toggle('translateX-500px');
 

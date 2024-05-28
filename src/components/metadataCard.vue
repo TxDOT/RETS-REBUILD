@@ -1,22 +1,22 @@
 <template>
     <div style="font-size: 0px !important; margin-right: 10px; margin-left: 10px;"> 
         <v-row >
-            <v-autocomplete :items="userRole" item-title="name" item-value="value" label="Assigned To" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.ASSIGNED_TO" @update:modelValue="onDropDownChange()"></v-autocomplete>
+            <v-autocomplete :items="userRole" item-title="name" item-value="value" label="Assigned To" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.ASSIGNED_TO" @update:modelValue="onDropDownChange(store.retsObj.attributes.ASSIGNED_TO)" @update:search="isEmptyRow($event)"></v-autocomplete>
         </v-row>
         <v-row>
-            <v-autocomplete :items="userRole" item-title="name" item-value="value" label="GIS Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.GIS_ANALYST" @update:modelValue="onDropDownChange()" :rules="[emptyRow.required]"></v-autocomplete>
+            <v-autocomplete :items="userRole" item-title="name" item-value="value" label="GIS Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.GIS_ANALYST" @update:modelValue="onDropDownChange()" :rules="[emptyRow.required]" @update:search="isEmptyRow($event)"></v-autocomplete>
         </v-row>
         <v-row>
-            <v-autocomplete :items="userRole" item-title="name" item-value="value" label="Asset Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.GRID_ANALYST" @update:modelValue="onDropDownChange()" :rules="[emptyRow.required]"> </v-autocomplete>
+            <v-autocomplete :items="userRole" item-title="name" item-value="value" label="Asset Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.GRID_ANALYST" @update:modelValue="onDropDownChange(store.retsObj.attributes.GRID_ANALYST)" :rules="[emptyRow.required]" @update:search="isEmptyRow($event)"> </v-autocomplete>
         </v-row>
         <v-row>
-            <v-autocomplete :items="userRole" item-title="name" item-value="value" label="District Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.DIST_ANALYST" @update:modelValue="onDropDownChange()" :rules="[emptyRow.required]"></v-autocomplete>
+            <v-autocomplete :items="userRole" item-title="name" item-value="value" label="District Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.DIST_ANALYST" @update:modelValue="onDropDownChange(store.retsObj.attributes.DIST_ANALYST)" :rules="[emptyRow.required]" @update:search="isEmptyRow($event)"></v-autocomplete>
         </v-row>
         <v-row>
-            <v-autocomplete :items="districtMetadata" item-title="name" item-value="value" label="District" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.DIST_NM" @update:modelValue="onDropDownChange()" :rules="[emptyRow.required]"></v-autocomplete>
+            <v-autocomplete :items="districtMetadata" item-title="name" item-value="value" label="District" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.DIST_NM" @update:modelValue="onDropDownChange(store.retsObj.attributes.DIST_NM)" :rules="[emptyRow.required]" @update:search="isEmptyRow($event)"></v-autocomplete>
         </v-row>
         <v-row>
-            <v-autocomplete :items="countyMetadata" item-title="name" item-value="value" label="County" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.CNTY_NM" @update:modelValue="onDropDownChange()" :rules="[emptyRow.required]"></v-autocomplete>
+            <v-autocomplete :items="countyMetadata" item-title="name" item-value="value" label="County" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.CNTY_NM" @update:modelValue="onDropDownChange(store.retsObj.attributes.CNTY_NM)" :rules="[emptyRow.required]" @update:search="isEmptyRow($event)"></v-autocomplete>
         </v-row>
 
     </div>
@@ -46,6 +46,12 @@
             onDropDownChange(){
                 const metadataFieldPass = this.checkMetadatFields()
                 store.isSaveBtnDisable = metadataFieldPass
+                return 
+            },
+            isEmptyRow(a){
+                if(!a.length){
+                    store.isSaveBtnDisable = true
+                }
                 return 
             },
             checkMetadatFields(){

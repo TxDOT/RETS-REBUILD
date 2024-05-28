@@ -33,7 +33,7 @@ async function signIn(){
   const userId = await getUserId()
   await queryFlags(userId)
   setDefExpRets(userId)
-  await store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+  store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
   appConstants.userQueryField = appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]
   store.USER = [appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value)]
   //needs to be worked on//
@@ -59,7 +59,7 @@ async function signIn(){
   return
 }
 
-function alreadySignedIn(userId){
+function alreadySignedIn(){
   signIn()
 }
 
@@ -71,7 +71,7 @@ const setDefExpRets = (userId) => {
 }
 
 export async function getUserId(){
-  console.warn(`VERSION: 2.0.5 -- dev status: ${store.devStatus}`)
+  console.warn(`VERSION: 2.0.6 -- dev status: ${store.devStatus}`)
   const user = await esriId.getCredential(`${authen.portalUrl}/sharing/rest`,{
     oAuthPopupConfirmation: false,
   })

@@ -31,7 +31,7 @@
                                         </span>
                                     
                                 </div>
-                                        <v-textarea class="history-note mx-2" rows="1" auto-grow density="compact" variant="plain" :disabled="note.OBJECTID !== updateOID" v-model="note.CMNT"  placeholder="Enter Comment"></v-textarea>
+                                        <v-textarea class="history-note mx-2" rows="1" auto-grow density="compact" variant="plain" :disabled="note.OBJECTID !== updateOID" v-model="note.CMNT"  placeholder="Enter Comment" autofocus></v-textarea>
                                     
                                     <div style="position: relative; bottom: 1px;">
                                         <span style="font-size: 10px; color: grey; padding-left: 2px;">{{ returnUserName(note.CMNT_NM) }} {{ returnDateFormat(note.CREATE_DT) }} <b v-if="note.CREATE_DT !== note.EDIT_DT && note.SYS_GEN === 0" class="main-color">{{ `Edited ${returnDateFormat(note.EDIT_DT)}` }}</b></span>
@@ -132,6 +132,7 @@
                 this.emptyHist = false
                 this.orderList
                 this.openNote(null, store.addNoteOid)
+                document.getElementById(`${store.addNoteOid}`).scrollIntoView({block: "end", inline: "nearest"})
             },
             openNote(n, oid){
                 this.editContent = true
@@ -154,7 +155,7 @@
                 this.editContent = false
                 this.updateOID = findItem.OBJECTID
                 this.updateOID = -1
-                // const oidFlag = `${oid}`
+                const oidFlag = `${oid}`
                 document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
             },
             closeNotes(n, notes){

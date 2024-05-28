@@ -75,15 +75,15 @@ export function clickRetsPoint(){
     try{
         view.on("click", (event)=>{
             view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt) =>{
+                console.log(evt)
                 if(!evt.results.length){
                     removeOutline()
                     removeHighlight("a", true)
                     clearRoadHighlightObj()
                     //scrollToTopOfFeed(0)
-                    if(store.isSelectEnabled){
-                        store.isShowSelected = false
-                        return
-                    }
+                    console.log("test")
+                    store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+                    store.isShowSelected = false
                     return
                 }
                 //clearRoadHighlightObj()
@@ -370,12 +370,15 @@ export function getQueryLayer(newQuery, orderFields, count){
     query.orderByFields = [`${orderFields}`]
     query.outFields = newQuery.out ??= ["*"]
     query.returnGeometry = true
-    query.num = count ??= 20000
+    query.num = 20000
+    query.maxRecordCountFactor = 5
 
     if(newQuery.queryLayer === 'retsLayer'){
+        retsLayer.capabilities.query.maxRecordCount = 10000
         return retsLayer.queryFeatures(query)
     }
     if(newQuery.queryLayer === 'retsLayerLayerView'){
+        retsLayerView.layer.capabilities.query.maxRecordCount = 10000
         return retsLayerView.layer.queryFeatures(query)
     }
     return retsHistory.queryFeatures(query)
@@ -612,8 +615,15 @@ export function createtool(sketchWidgetcreate, createretssym) {
                 view.hitTest(graphicToScreenPt, {include: roadLayerView.layer})
                     .then((hit) =>{
                         if(!hit.results.length){
-                            store.retsObj.attributes.RTE_NM = ""
-                            store.retsObj.attributes.DFO = ""
+                            store.retsObj.attributes.NO_RTE = true
+                            store.retsObj.attributes.DFO = null
+                            store.retsObj.attributes.RTE_NM = null
+                            store.isAlert = true
+                            store.alertTextInfo = {"text": `No Route has been detected`, "color": "yellow", "type":"info", "toggle": true}
+                            store.isMoveRetsPt = false
+                            completeMovePtSketch()
+                            store.cancelEvent.remove()
+                            store.checkDetailsForComplete()
                             return
                         }
                         const convertMapPts = webMercatorUtils.webMercatorToGeographic(event.graphic.geometry)
@@ -672,9 +682,10 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                 {
                                     graphics.removeAll();
                                     var selectedFeatures = result.features;
-                                    if(!selectedFeatures.length && store.isShowSelected){
+                                    if((!selectedFeatures.length && store.isShowSelected)){
+
+                                        store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                                         store.isShowSelected = false
-                                        
                                         return
                                     }
     
@@ -895,7 +906,7 @@ export async function createRoadGraphic(retsObj, onStartUp){
     let endM;
     //query for road
     const returnRds = await queryRoads("RTE_NM", `'${routeName}'`)
-    if(!returnRds.features.length){
+    if(!returnRds.features.length && !store.retsObj.attributes.NO_RTE){
         store.isAlert = true
         store.alertTextInfo = {"text": `Route and/or DFO are not valid`, "color": "red", "type":"error", "toggle": true}
         store.dfoIndex = "not in range"
@@ -913,7 +924,7 @@ export async function createRoadGraphic(retsObj, onStartUp){
 
     //if not on a road segment range
 
-    if(!rdSegment){
+    if(!rdSegment && !store.retsObj.attributes.NO_RTE){
         store.isAlert = true
         store.alertTextInfo = {"text": `DFO is out of Range. Begin DFO: ${startM.toFixed(3)} End DFO: ${endM.toFixed(3)}`, "color": "red", "type":"error", "toggle": true}
         store.dfoIndex = "not in range"
@@ -1001,6 +1012,7 @@ async function UpdatePt(pt, onStartUp, removeLisener){
         const newRETSDefinitionExpress = retsLayerView.layer.definitionExpression.concat(' AND RETS_ID NOT IN ( ', store.retsObj.attributes.RETS_ID, ')')
         retsLayerView.layer.definitionExpression = newRETSDefinitionExpress
     }
+    view.goTo(pt)
     return
 }
 
@@ -1104,16 +1116,6 @@ export function buildDFOLines(rd, retsPt, dist){
             paths:[
                 rd.at(retsPt.vertexIndex),
                 rd.at(retsPt.vertexIndex+1)
-            ]
-        }
-    })
-
-    const constructLineB = new Graphic({
-        geometry: {
-            type: "polyline",
-            paths: [
-                rd.at(retsPt.vertexIndex),
-                rd.at(retsPt.vertexIndex-1)
             ]
         }
     })
