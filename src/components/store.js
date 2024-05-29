@@ -4,7 +4,7 @@ import {sendChatHistory} from './crud.js'
 import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapActivityFeed} from './utility.js'
 
 export const store = reactive({
-        devStatus: "dev",
+        devStatus: "prod",
         count: 0,
         isCloseDetail: false,
         taskGem: 0,
@@ -195,7 +195,9 @@ export const store = reactive({
         },
         // preserveHighlightCards(){
         //         if(this.isShowSelected){
-        //                 this.roadObj = this.roadObj.filter(rd => this.roadHighlightObj.has(String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)))
+        //                 console.log(this.roadHighlightObj)
+        //                 this.updateRetsSearch = [...this.roadHighlightObj]
+        //                 console.log(this.updateRetsSearch)
         //                 return
         //         }
         //         return

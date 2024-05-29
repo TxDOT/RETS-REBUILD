@@ -145,7 +145,7 @@ export default{
     },
     mounted(){
         this.loadData()
-
+        //outlineFeedCards()
         store.isSaving = false
     },
 
@@ -228,7 +228,7 @@ export default{
     watch:{
         'store.roadObj.length':{
             handler: function(a,b){
-                this.retsToGet
+                //this.retsToGet
             },
             immediate: true
         }

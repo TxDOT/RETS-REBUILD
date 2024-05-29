@@ -65,7 +65,7 @@
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom: 6.1rem; height: 0px;">
             <v-col cols="12" offset="0">
-                <v-textarea :error-messages="(!store.retsObj.attributes.DESC_ || !store.retsObj.attributes.DESC_.length) ? 'Fill out description' : null" label="Description" no-resize variant="underlined" class="rets-description" rows="3" v-model="store.retsObj.attributes.DESC_" @update:modelValue="descCheck()"></v-textarea>
+                <v-textarea :error-messages="(!store.retsObj.attributes.DESC_ || !store.retsObj.attributes.DESC_.length) ? 'Fill out description' : null" label="Description" no-resize variant="underlined" class="rets-description" rows="3" v-model="store.retsObj.attributes.DESC_"  @update:model-value="descCheck(store.retsObj.attributes.DESC_)" @keydown.space="preventSpace"></v-textarea>
             </v-col>
         </v-row>
         <v-row align="center" style="position: relative; bottom: 2.1rem; height: 25px;">
@@ -156,8 +156,6 @@ import {store} from './store.js'
             this.splitAndAddRelatedRets(store.retsObj.attributes.RELATED_RETS)
             document.addEventListener('click',this.handleClickOutside)
             
-           
-            
         },
         mounted(){
             this.ogValues = store.retsObj
@@ -174,20 +172,16 @@ import {store} from './store.js'
             //this.initDataCheck()
             this.retsRouteArchive = JSON.parse(store.archiveRetsDataString)
             //createRoadGraphic(store.retsObj, true)
-           
-
-            
-
 
         },
         methods:{
             handleClickOutside(event) {
+                console.log(event)
                 const targetElement = event.target
                 const datepickerelement = this.$refs.datepickerelement
                 if (datepickerelement && (!datepickerelement.contains(targetElement)) && targetElement.className != "datepickeractivate"){
                     this.toggleVisibility()
                 }
-
             },
             toggleVisibility(){
                 this.isDatePicker =! this.isDatePicker
@@ -238,14 +232,18 @@ import {store} from './store.js'
                 store.checkDetailsForComplete()
             },
             descCheck(){
-                store.retsObj.attributes.DESC_ = store.retsObj.attributes.DESC_.trim()
                 const isLettersOrNum = /\S/g
-                
                 if(!store.retsObj.attributes.DESC_.length || !isLettersOrNum.test(store.retsObj.attributes.DESC_)){
+                    console.log(store.retsObj.attributes.DESC_)
                     store.isSaveBtnDisable = true
                     return
                 }
                 this.completeDataSearch()
+                return
+            },
+            preventSpace(e){
+                if (!e.target.value) return e.preventDefault();
+                e.target.value = e.target.value.trim()
                 return
             },
             noRTECheck(){
@@ -377,6 +375,8 @@ import {store} from './store.js'
                 const check = validNumCheck.test(Number(a))
                 if(!a.length || isNaN(a) || !check){
                     console.log(a)
+                    a.replace(/[a-zA-Z]/g, '')
+                    store.retsObj.attributes.DFO = a.replace(/[a-zA-Z]/g, '')
                     store.isSaveBtnDisable = true
                     return
                 }
@@ -407,25 +407,6 @@ import {store} from './store.js'
                 },
                 immediate: true
             },
-            'store.retsObj.attributes.NO_RTE':{
-                handler: function(){
-                    
-                },
-                immediate: true
-            },
-            'store.retsObj.attributes.DFO':{
-                handler: function(a,b){
-
-
-                }
-            },
-            'store.retsObj.attributes.ACTV_NBR':{
-                handler: function(txt){
-
-
-                },
-                immediate: true
-            }
         },
 
     }

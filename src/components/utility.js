@@ -172,7 +172,6 @@ export function removeHighlight(feature, removeAll){
             if(lyrView._highlightIds.has(feature?.attributes.OBJECTID)){
                 lyrView._highlightIds.delete(feature.attributes.OBJECTID)
                 lyrView._updateHighlight();
-               
                 return
             }
             
@@ -186,6 +185,7 @@ export function outlineFeedCards(cards){
     //return new Promise((res, rej)=>{
         cards.forEach((x) => {
             //set card outline
+            console.log(x)
             var objectcomparison = x.attributes ? String(x.attributes.RETS_ID).concat('-',x.attributes.OBJECTID) : String(x.graphic.attributes.RETS_ID).concat('-',x.graphic.attributes.OBJECTID)
             if(!document.getElementById(objectcomparison)) return
             document.getElementById(objectcomparison).classList.add('highlight-card')
@@ -640,7 +640,6 @@ export function createtool(sketchWidgetcreate, createretssym) {
                             store.alertTextInfo = {"text": `No Route has been detected`, "color": "yellow", "type":"info", "toggle": true}
                             store.isMoveRetsPt = false
                             completeMovePtSketch()
-                            store.cancelEvent.remove()
                             store.checkDetailsForComplete()
                             return
                         }
@@ -707,7 +706,6 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                     }
     
                                     if (pressedkey === false){
-                                        
                                         removeHighlight("a", removeAll); 
                                         removeOutline()
                                         store.roadHighlightObj.clear()

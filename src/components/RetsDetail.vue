@@ -247,12 +247,11 @@
                 store.isSaveBtnDisable = true
                 //removeHighlight("a", true)
                 // removeHighlight(store.retsObj.attributes.OBJECTID)
-                removeHighlight(store.retsObj)
-                const b = store.roadObj.find(rd => rd.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
-                store.roadHighlightObj.delete(b)
+                //removeHighlight(store.retsObj)
+                //const b = store.roadObj.find(rd => rd.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
+                //store.roadHighlightObj.delete(b)
                 //removeOutline()
                 //outlineFeedCards(store.roadHighlightObj);
-
                 return
             },
             deleteRets(){
@@ -332,7 +331,7 @@
                 this.sendGemTaskNum = gemId
             },
             isAssetJob(){
-                store.isSaveBtnDisable = false
+                store.checkDetailsForComplete()
             },
             closeGEMTask(){
                 document.querySelectorAll(".gem-search")[0].style.display = "none"
