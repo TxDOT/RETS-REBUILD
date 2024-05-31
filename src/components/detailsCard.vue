@@ -100,7 +100,7 @@
             </div>
             
             <!-- <v-text-field prepend-icon="mdi-timer-outline" disabled density="compact" variant="plain" class="date-select" style="z-index: 9999; cursor: pointer !important;" @click="isDatePicker = true"> {{ datePicker }}</v-text-field> -->
-            <div class="date-picker" v-if="isDatePicker" ref="datepickerelement" >
+            <div class="date-picker" v-if="isDatePicker" ref="datepickerelement" v-click-outside="toggleVisibility" >
                 <v-date-picker v-model="datePicked" class="date" hide-header @update:modelValue="selectDates()"></v-date-picker>
             </div>
         </v-row>
@@ -154,7 +154,6 @@ import {store} from './store.js'
         },
         beforeMount(){
             this.splitAndAddRelatedRets(store.retsObj.attributes.RELATED_RETS)
-            document.addEventListener('click',this.handleClickOutside)
             
            
             
@@ -181,14 +180,6 @@ import {store} from './store.js'
 
         },
         methods:{
-            handleClickOutside(event) {
-                const targetElement = event.target
-                const datepickerelement = this.$refs.datepickerelement
-                if (datepickerelement && (!datepickerelement.contains(targetElement)) && targetElement.className != "datepickeractivate"){
-                    this.toggleVisibility()
-                }
-
-            },
             toggleVisibility(){
                 this.isDatePicker =! this.isDatePicker
             },

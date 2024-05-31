@@ -136,7 +136,7 @@ export function highlightRETSPoint(feature){
     return
 }
 
-export  function includes(feature){
+export async function includes(feature){
     return view.whenLayerView(retsLayer)
     .then((lyrView) => {
         if (lyrView._highlightIds.has(feature.OBJECTID)) {
@@ -693,6 +693,7 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                     if(!selectedFeatures.length && store.isShowSelected && pressedkey != "Control"){
                                         store.isShowSelected = false
                                         store.roadHighlightObj.clear()
+                                        store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                                     }
     
                                     if (pressedkey === false){
@@ -705,9 +706,12 @@ export function createtool(sketchWidgetcreate, createretssym) {
 
                                             store.roadHighlightObj.add(b)
                                             highlightRETSPoint(selectedFeatures[i].attributes, true);
+                                            //document.getElementById('selectedFeatures[i].attributes.OBJECTID-selectedFeatures[i].attributes.GID').classList.add('highlight-card')
+
                                                     
                                                     
                                         }
+                                        
                                         outlineFeedCards(store.roadHighlightObj); 
                                         scrollToTopOfFeed(store.roadHighlightObj.size)             
                                         return
@@ -726,7 +730,8 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                     if(pressedkey === "Control"){   
                                         graphics.removeAll();   
                                         if (selectedFeatures.length > 0){
-                                            for (let n = 0; n < selectedFeatures.length; n++){
+                                            let n
+                                            for (n = 0; n < selectedFeatures.length; n++){
                                             
                                                 removeHighlight(selectedFeatures[n]);
                                                 const b = store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[n].attributes.OBJECTID)

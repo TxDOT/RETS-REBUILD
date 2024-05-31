@@ -90,7 +90,7 @@
 </template>
 
 <script>
-import {clickRetsPoint, getQueryLayer, returnHistory, getHighlightGraphic, removeHighlight, createtool, highlightRETSPoint, toggleRelatedRets, zoomTo, changeCursor} from './utility.js'
+import {clickRetsPoint, getQueryLayer, returnHistory, getHighlightGraphic, removeHighlight, createtool, highlightRETSPoint, toggleRelatedRets, zoomTo, changeCursor, outlineFeedCards} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import {store} from './store.js'
@@ -359,9 +359,15 @@ export default{
         updateSelection(e){
             if(!e){
                     store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+                    
                     return
                 }
                 store.updateRetsSearch = store.roadHighlightObj
+
+
+                 
+                                 
+
         },
 
     },
