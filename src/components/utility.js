@@ -178,14 +178,12 @@ export function removeHighlight(feature, removeAll){
             
         })
     return
-   
 }
 
 export function outlineFeedCards(cards){
     //return new Promise((res, rej)=>{
         cards.forEach((x) => {
             //set card outline
-            console.log(x)
             var objectcomparison = x.attributes ? String(x.attributes.RETS_ID).concat('-',x.attributes.OBJECTID) : String(x.graphic.attributes.RETS_ID).concat('-',x.graphic.attributes.OBJECTID)
             if(!document.getElementById(objectcomparison)) return
             document.getElementById(objectcomparison).classList.add('highlight-card')
@@ -703,7 +701,6 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                         store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                                         store.isShowSelected = false
                                         store.roadHighlightObj.clear()
-                                        store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                                     }
     
                                     if (pressedkey === false){
@@ -717,7 +714,7 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                             highlightRETSPoint(selectedFeatures[i].attributes, true);
                                             //document.getElementById('selectedFeatures[i].attributes.OBJECTID-selectedFeatures[i].attributes.GID').classList.add('highlight-card')
 
-                                                    
+                                            console.log(store.roadHighlightObj)
                                                     
                                         }
                                         
