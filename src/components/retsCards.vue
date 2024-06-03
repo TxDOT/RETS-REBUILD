@@ -15,7 +15,7 @@
             </div>
   
             <v-lazy :options="{'threshold':0.5}" transition="fade-transition">
-                <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `5px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="!store.isShowSelected ? 'card-rets' : 'card-rets highlight-card'" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road);">
+                <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `5px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="checkhighlight(String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID))" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road);">
                     <!-- <div class="boundary-rets-card"> -->
 
                     <div style="position: relative; top: 0px;">
@@ -147,9 +147,37 @@ export default{
         this.loadData()
         //outlineFeedCards()
         store.isSaving = false
+        outlineFeedCards(store.roadHighlightObj)
+
     },
 
     methods:{
+        checkhighlight(retsid){
+            // const elementId = retsid;
+            // const element = document.getElementById(elementId);
+            // console.log(element )
+
+            // if (element) {
+            //     //element.classList.toggle('highlight-card');
+            //     return "card-rets highlight-card"
+
+            // } 
+            // return "card-rets"
+            const elementId = retsid;
+            const element = document.getElementById(elementId);
+
+            if (store.isShowSelected === true) {
+                return "card-rets highlight-card"
+
+            } 
+            if (element){
+                return "card-rets highlight-card"
+
+            }
+             
+            
+            return "card-rets"
+        },
         loadData(){
             const cards = document.querySelectorAll('.rets-card-row') 
             const observer = new IntersectionObserver((entries) => {
@@ -178,22 +206,28 @@ export default{
             this.isColorPicked = false;
             this.closeFlagDiv()
         },
-        zoomToRetsPt(rets){
-            includes(rets.attributes).then(result => {
+        async zoomToRetsPt(rets){
+            await includes(rets.attributes).then(result => {
                  var isIncluded = result
                  if (isIncluded === false){
                     removeHighlight("a", true)
                     removeOutline()
-                    document.getElementById(String(rets.attributes.RETS_ID).concat('-', rets.attributes.OBJECTID)).classList.toggle('highlight-card')
+                    store.roadHighlightObj.clear()
+                    const elementId = String(rets.attributes.RETS_ID).concat('-', rets.attributes.OBJECTID);
+                    const element = document.getElementById(elementId);
+
+                    if (element) {
+                    element.classList.toggle('highlight-card');
+                    } 
                     return
                 }
             });
-
             clearTimeout(this.timer)
             this.timer = ""
             this.timer = setTimeout(()=>{
                 const zoomToRETS = rets.geometry
                 highlightRETSPoint(rets.attributes)
+
                 zoomTo(zoomToRETS)
 
             },250)

@@ -245,13 +245,13 @@
                 store.isCard = true
                 store.historyChat.length = 0
                 store.isSaveBtnDisable = true
-                //removeHighlight("a", true)
-                // removeHighlight(store.retsObj.attributes.OBJECTID)
-                //removeHighlight(store.retsObj)
-                //const b = store.roadObj.find(rd => rd.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
-                //store.roadHighlightObj.delete(b)
-                //removeOutline()
-                //outlineFeedCards(store.roadHighlightObj);
+                if (store.roadHighlightObj.size <= 1){
+                    removeHighlight(store.retsObj)
+                    const b = store.roadObj.find(rd => rd.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
+                    store.roadHighlightObj.delete(b)
+                    return
+                }
+
                 return
             },
             deleteRets(){
