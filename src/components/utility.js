@@ -814,17 +814,18 @@ export function addAttachments(oid, files, flag){
     const arr = Array.from(files)
     const formData = new FormData()
     formData.append("attachment", arr[0], arr[0].name)
-    esriRequest(`${retsHistory.url}/${oid}/addAttachment`, {
+
+    esriRequest(`${retsHistory.url}/0/${oid}/addAttachment`, {
         body: formData,
         method: "post",
         responseType: "html",
     })
-        .then((x) => {
-            store.numAttachments += 1
-            flag ? null : store.attachToNote(oid, arr)
-        })
-        .then(() => console.log(`${store.loggedInUser} added an attachment!`))
-        .catch(err => console.log(err))
+    .then(() => {
+        store.numAttachments += 1
+        flag ? null : store.attachToNote(oid, arr)
+    })
+    .then(() => console.log(`${store.loggedInUser} added an attachment!`))
+    .catch(err => console.log(err))
 }
 
 export function deleteAttachment(oid, attachName){

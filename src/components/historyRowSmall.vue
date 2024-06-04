@@ -184,8 +184,8 @@
                 input.click()
 
                 input.addEventListener("change", (event)=>{
+                    console.log(oid, event.target.files)
                     addAttachments(oid, event.target.files)
-                    
                 })
 
                 input.remove()

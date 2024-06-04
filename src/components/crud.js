@@ -91,7 +91,7 @@ export async function sendChatHistory(chat, type){
     //if new ; add to feature layer
     //if update ; update feature in history feature layer
     //if delete ; delete feature in history feature layer
-
+    console.log(chat, type)
     let newGraphic;
     const chatType = {
         add: () => {
@@ -113,8 +113,9 @@ export async function sendChatHistory(chat, type){
             })
         }
     }
-
+    
     const returnStatus = await chatType[type]()
+    console.log(returnStatus)
     return returnStatus
     // return addRETSPT(newGraphic, "hist")
 }
@@ -130,7 +131,6 @@ export function postFlagColor(rets){
             //do nothing
             const findFlag = store.userRetsFlag.find(ret => ret.RETS_ID === flagGraphic.attributes.RETS_ID)
             findFlag ? findFlag.FLAG = flagGraphic.attributes.FLAG : store.userRetsFlag.push({FLAG: flagGraphic.attributes.FLAG, OBJECTID: flagGraphic.attributes.OBJECTID, RETS_ID: flagGraphic.attributes.RETS_ID, USERNAME: flagGraphic.attributes.USERNAME})
-            
         })
         .catch(err => console.log(err)) 
         return
