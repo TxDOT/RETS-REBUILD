@@ -15,7 +15,7 @@
             </div>
   
             <v-lazy :options="{'threshold':0.5}" transition="fade-transition">
-                <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `5px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="checkhighlight(String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID))" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road);">
+                <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `5px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="checkhighlight(String(rd.attributes.RETS_ID))" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road);">
                     <!-- <div class="boundary-rets-card"> -->
 
                     <div style="position: relative; top: 0px;">
@@ -114,6 +114,7 @@ import {zoomTo, highlightRETSPoint, toggleRelatedRets,returnHistory, removeHighl
 import {appConstants} from '../common/constant.js'
 import {store} from './store.js'
 import { outlineFeedCards } from './utility.js';
+import { toRaw } from 'vue';
 
 export default{
     name: "RetsCards",
@@ -154,29 +155,27 @@ export default{
     methods:{
         checkhighlight(retsid){
             // const elementId = retsid;
-            // const element = document.getElementById(elementId);
-            // console.log(element )
+            //const element = document.getElementById(retsid);
 
-            // if (element) {
-            //     //element.classList.toggle('highlight-card');
+            // if (store.isShowSelected === true) {
             //     return "card-rets highlight-card"
 
             // } 
+            // if (element){
+            //     return "card-rets highlight-card"
+
+            // }
+                         
             // return "card-rets"
-            const elementId = retsid;
-            const element = document.getElementById(elementId);
-
-            if (store.isShowSelected === true) {
-                return "card-rets highlight-card"
-
-            } 
-            if (element){
-                return "card-rets highlight-card"
-
-            }
-             
+            // const elementId = retsid;
+            // const element = document.getElementById(elementId);
+            // console.log(element)
+            const objarray = Array.from(toRaw(store.roadHighlightObj))
+            const found = objarray.some(feature => feature.attributes.RETS_ID.toString() === retsid);
+            return found ? "card-rets highlight-card" : "card-rets";
             
-            return "card-rets"
+
+            
         },
         loadData(){
             const cards = document.querySelectorAll('.rets-card-row') 
