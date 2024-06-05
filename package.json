@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "vite build --base=/apps/statewide_mapping/rets_rebuild/",
+    "build": "vite build",
     "preview": "vite preview --port 5173"
   },
   "dependencies": {

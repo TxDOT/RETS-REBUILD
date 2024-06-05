@@ -814,7 +814,7 @@ export function addAttachments(oid, files, flag){
     const arr = Array.from(files)
     const formData = new FormData()
     formData.append("attachment", arr[0], arr[0].name)
-
+    console.log(retsHistory.url)
     esriRequest(`${retsHistory.url}/0/${oid}/addAttachment`, {
         body: formData,
         method: "post",

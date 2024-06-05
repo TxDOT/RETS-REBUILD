@@ -18,7 +18,7 @@
                 <v-text-field :disabled="store.retsObj.attributes.NO_RTE === false" label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required] : []" id="route" @update:model-value="completeDataSearch()"></v-text-field>
             </v-col>
             <v-col cols="4" offset="4">
-                <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" :error-messages="(!store.retsObj.attributes.DFO || !store.retsObj.attributes.DFO.length) && !store.retsObj.attributes.NO_RTE ? 'But where am I? Don\'t leave me blank!' : null" v-model="store.retsObj.attributes.DFO" :rules="!store.retsObj.attributes.NO_RTE ? [onlyNumbers.required, onlyNumbers.numbers]: []" @update:model-value="manuallyUpdateDFO(store.retsObj.attributes.DFO);">
+                <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" :error-messages="(!store.retsObj.attributes.DFO || !store.retsObj.attributes.DFO.length) && !store.retsObj.attributes.NO_RTE ? 'But where am I? Don\'t leave me blank!' : null" v-model="store.retsObj.attributes.DFO" :rules="!store.retsObj.attributes.NO_RTE ? [onlyNumbers.required, onlyNumbers.numbers]: []" @update:model-value="manuallyUpdateDFO(store.retsObj.attributes.DFO)">
                         <template v-slot:append-inner>
                             <v-tooltip :text="store.zoomInText" location="top">
                                 <template v-slot:activator="{props}">
@@ -228,7 +228,6 @@ import {store} from './store.js'
             descCheck(){
                 const isLettersOrNum = /\S/g
                 if(!store.retsObj.attributes.DESC_.length || !isLettersOrNum.test(store.retsObj.attributes.DESC_)){
-                    console.log(store.retsObj.attributes.DESC_)
                     store.isSaveBtnDisable = true
                     return
                 }
@@ -237,7 +236,6 @@ import {store} from './store.js'
             },
             preventSpace(e){
                 if (!e.target.value) return e.preventDefault();
-                e.target.value = e.target.value.trim()
                 return
             },
             noRTECheck(){
@@ -367,6 +365,12 @@ import {store} from './store.js'
             manuallyUpdateDFO(a){
                 const validNumCheck = new RegExp('^[0-9]*[.]?[0-9]+$')
                 const check = validNumCheck.test(Number(a))
+                const b = a.split(".")
+
+                if(b[1] && b[1].length > 3){
+                    store.retsObj.attributes.DFO = b.length > 1 ? b[0].concat(".", b[1].slice(0,3)): b[0]
+                    return
+                }
                 if(!a.length || isNaN(a) || !check){
                     console.log(a)
                     a.replace(/[a-zA-Z]/g, '')
@@ -375,14 +379,16 @@ import {store} from './store.js'
                     return
                 }
                 const ogDFO = this.retsRouteArchive
+                
                 clearTimeout(this.typeTimeout)
                 if(Number(a) !== ogDFO && !store.isMoveRetsPt){
                     this.typeTimeout = setTimeout(()=>{
                         createRoadGraphic(store.retsObj, false)
                     },900)
                 }
-                const b = a.split(".")
-                store.retsObj.attributes.DFO = b.length > 1 ? b[0].concat(".", b[1].slice(0,3)): b[0]
+                
+                
+                
                 this.completeDataSearch();
                 return
             }
