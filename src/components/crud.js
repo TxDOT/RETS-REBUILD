@@ -91,7 +91,6 @@ export async function sendChatHistory(chat, type){
     //if new ; add to feature layer
     //if update ; update feature in history feature layer
     //if delete ; delete feature in history feature layer
-    console.log(chat, type)
     let newGraphic;
     const chatType = {
         add: () => {
@@ -115,7 +114,6 @@ export async function sendChatHistory(chat, type){
     }
     
     const returnStatus = await chatType[type]()
-    console.log(returnStatus)
     return returnStatus
     // return addRETSPT(newGraphic, "hist")
 }

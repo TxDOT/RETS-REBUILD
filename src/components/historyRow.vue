@@ -64,16 +64,10 @@
                         </div>
                     </span>
                 </div>
-                <div v-if="emptyHist">
-                    <v-text-field disabled variant="plain">No History for this RETS</v-text-field>
-                </div>
                 <div v-if="noSearch">
                     <v-text-field disabled variant="plain">No Search Results</v-text-field>
                 </div>
         </div>
-
-        
-        <v-text-field v-if="isHistNotesEmpty" disabled variant="plain">{{noHistResp}}</v-text-field>
     </div>
 </template>
 
@@ -118,7 +112,6 @@
                 this.emptyHist = false
                 this.orderList
                 this.openNote(null, `${store.addNoteOid}`)
-                
             },
             openNote(n, oid){
                 this.editContent = true

@@ -42,6 +42,7 @@ export async function getRetsLayerView (){
 }
 
 export async function getTxDotRdWayLayerView(){
+    store.isAddBtn = true
     const rdLayerView = await view.whenLayerView(TxDotRoaways)
     rdLayerView.highlightOptions = {
         color: "#FF00FF", //bright fuchsia
@@ -61,6 +62,7 @@ export async function getTxDotRdWayLayerView(){
                     rdLayerView.layer.definitionExpression = "RTE_PRFX = 'IH'"
                 }
                 roadLayerView = rdLayerView
+                store.isAddBtn = false
                 sketchWidgetcreate.snappingOptions.featureSources.push({layer: roadLayerView.layer, enable: true})
             }
             catch(err){
@@ -75,13 +77,11 @@ export function clickRetsPoint(){
     try{
         view.on("click", (event)=>{
             view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt) =>{
-                console.log(evt)
                 if(!evt.results.length){
                     removeOutline()
                     removeHighlight("a", true)
                     clearRoadHighlightObj()
                     //scrollToTopOfFeed(0)
-                    console.log("test")
                     store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                     store.isShowSelected = false
                     return
@@ -93,10 +93,6 @@ export function clickRetsPoint(){
                 removeOutline()
                 outlineFeedCards(evt.results)
                 removeHighlight("a", true)
-                if(store.isMoveRetsPt){
-                    //getPointRoadInteraction(evt.results)
-                    //modifyRETSPt(evt.results)
-                }
                 evt.results.forEach(rest => rest.graphic.layer.title ? highlightRETSPoint(rest.graphic.attributes) : highlightGraphicPt(rest.graphic.attributes))
                 return evt.results[0].graphic.attributes.RETS_ID;
             })
@@ -184,12 +180,16 @@ export function outlineFeedCards(cards){
     //return new Promise((res, rej)=>{
         cards.forEach((x) => {
             //set card outline
-            var objectcomparison = x.attributes ? String(x.attributes.RETS_ID).concat('-',x.attributes.OBJECTID) : String(x.graphic.attributes.RETS_ID).concat('-',x.graphic.attributes.OBJECTID)
-            if(!document.getElementById(objectcomparison)) return
-            document.getElementById(objectcomparison).classList.add('highlight-card')
+            var objectcomparison = x.attributes ? String(x.attributes.RETS_ID): String(x.graphic.attributes.RETS_ID)
+            const cardsList = [...document.getElementsByClassName('rets-card-row')]
+            const findCard = cardsList.find(z => z.id === objectcomparison)
+
+            if(!findCard) return
+            //findCard.classList.add('highlight-card')
             //store.roadHighlightObj.add(objectcomparison)
             //zoom to card in feed
-            document.getElementById(objectcomparison).scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'end' })
+            
+            findCard.scrollIntoView()
             // const zoomToCard = document.createElement('a')
             // zoomToCard.href = `#${objectcomparison}`
             // zoomToCard.click(preventHashUrl())
@@ -620,8 +620,6 @@ export function highlightpoints(event){
 }
 
 export function createtool(sketchWidgetcreate, createretssym) {
-    
-
     return new Promise((resolve, reject) => {
         sketchWidgetcreate.create("point");
         sketchWidgetcreate.on("create", (event) => {
@@ -713,8 +711,6 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                             store.roadHighlightObj.add(b)
                                             highlightRETSPoint(selectedFeatures[i].attributes, true);
                                             //document.getElementById('selectedFeatures[i].attributes.OBJECTID-selectedFeatures[i].attributes.GID').classList.add('highlight-card')
-
-                                            console.log(store.roadHighlightObj)
                                                     
                                         }
                                         
@@ -814,7 +810,6 @@ export function addAttachments(oid, files, flag){
     const arr = Array.from(files)
     const formData = new FormData()
     formData.append("attachment", arr[0], arr[0].name)
-    console.log(retsHistory.url)
     esriRequest(`${retsHistory.url}/0/${oid}/addAttachment`, {
         body: formData,
         method: "post",

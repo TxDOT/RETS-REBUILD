@@ -372,7 +372,6 @@ import {store} from './store.js'
                     return
                 }
                 if(!a.length || isNaN(a) || !check){
-                    console.log(a)
                     a.replace(/[a-zA-Z]/g, '')
                     store.retsObj.attributes.DFO = a.replace(/[a-zA-Z]/g, '')
                     store.isSaveBtnDisable = true

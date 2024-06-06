@@ -78,6 +78,7 @@ export const store = reactive({
         addPtRd: "",
         DFO: null,
         isAdd: false,
+        isAddBtn: false,
         cancelEvent: null,
         highlight: null,
         isSaving: false,

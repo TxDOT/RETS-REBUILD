@@ -14,7 +14,7 @@
                 <v-icon style="font-size: 13.5px;" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" ></v-icon>
             </div>
   
-            <v-lazy :options="{'threshold':0.5}" transition="fade-transition">
+            <v-lazy :options="{'threshold':1.0}" transition="fade-transition">
                 <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `5px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="checkhighlight(String(rd.attributes.RETS_ID))" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road);">
                     <!-- <div class="boundary-rets-card"> -->
 
@@ -290,6 +290,7 @@ export default{
     width: 100% !important;
     padding: 0% 5% 5% 0%;
     height: 120px;
+    min-height: 120px;
     opacity: 1;
     /* transform: translateX(30px);
     transition: 150ms; */
@@ -299,6 +300,7 @@ export default{
     /* transform: translateX(0); */
     padding: 0px;
     width: 96% !important;
+    height: 120px;
 }
 .flag-btn{
     font-size: 10px;
