@@ -156,6 +156,7 @@
                 isCreateEnabled: true,
                 settingsstatus: false,
                 shiftKey: false,
+                removeSelectionEvent: {},
                 switches: [
                             { label: "RETS I Create", value: false, fontColor: "#D9D9D9" },
                             { label: "RETS I'm tagged in", value: false, fontColor: "#D9D9D9" },
@@ -350,10 +351,11 @@
                     },
                     handleSelectTool() { 
                         if (this.isSelectEnabled === true ){
-                            selecttool(this.isSelectEnabled, sketchWidgetselect, graphics);
+                            this.removeSelectionEvent = selecttool(this.isSelectEnabled, sketchWidgetselect, graphics);
                             this.isSelectEnabled =! this.isSelectEnabled
                         }
                         else{
+                            this.removeSelectionEvent.remove()
                             sketchWidgetselect.cancel()
                             this.isSelectEnabled =! this.isSelectEnabled
                         }

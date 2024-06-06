@@ -178,28 +178,29 @@ export function removeHighlight(feature, removeAll){
 
 export function outlineFeedCards(cards){
     //return new Promise((res, rej)=>{
-        cards.forEach((x) => {
-            //set card outline
-            var objectcomparison = x.attributes ? String(x.attributes.RETS_ID): String(x.graphic.attributes.RETS_ID)
-            const cardsList = [...document.getElementsByClassName('rets-card-row')]
-            const findCard = cardsList.find(z => z.id === objectcomparison)
+    const convertToList = [...cards]
+    const zoomToLast = convertToList.at(-1)
+    //set card outline
+    var objectcomparison = zoomToLast.attributes ? String(zoomToLast.attributes.RETS_ID): String(zoomToLast.graphic.attributes.RETS_ID)
+    const cardsList = [...document.getElementsByClassName('rets-card-row')]
+    const findCard = cardsList.find(z => z.id === objectcomparison)
 
-            if(!findCard) return
-            //findCard.classList.add('highlight-card')
-            //store.roadHighlightObj.add(objectcomparison)
-            //zoom to card in feed
+    if(!findCard) return
+    //findCard.classList.add('highlight-card')
+    //store.roadHighlightObj.add(objectcomparison)
+    //zoom to card in feed
             
-            findCard.scrollIntoView()
-            // const zoomToCard = document.createElement('a')
-            // zoomToCard.href = `#${objectcomparison}`
-            // zoomToCard.click(preventHashUrl())
-            //remove card outline
-            // setTimeout(()=>{
-            //     document.getElementById(objectcomparison).classList.remove('highlight-card')
-            // },5000)
-        })
-        //res("done too")
-        //Sstore.isShowSelected ? toggleHighlightCards(bool) : null
+    findCard.scrollIntoView({behavior: "smooth", block: "nearest", inline: "start"})
+    // const zoomToCard = document.createElement('a')
+    // zoomToCard.href = `#${objectcomparison}`
+    // zoomToCard.click(preventHashUrl())
+    //remove card outline
+    // setTimeout(()=>{
+    //     document.getElementById(objectcomparison).classList.remove('highlight-card')
+    // },5000)
+
+    //res("done too")
+    //Sstore.isShowSelected ? toggleHighlightCards(bool) : null
     //})
 }
 
@@ -676,11 +677,14 @@ export function createtool(sketchWidgetcreate, createretssym) {
         pressedkey = false
     });
 
+
+
     export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
+        console.log(isSelectEnabled)
         if(isSelectEnabled === true){ 
             sketchWidgetselect.create("rectangle");
             var removeAll = true
-            sketchWidgetselect
+            const addsketchRect = sketchWidgetselect
             .on("create", function (event) 
                 {
                 if(event.state === "complete")
@@ -699,6 +703,13 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                         store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                                         store.isShowSelected = false
                                         store.roadHighlightObj.clear()
+                                        return
+                                    }
+                                    if(!selectedFeatures.length){
+                                        store.roadHighlightObj.clear()
+                                        removeHighlight("a", removeAll); 
+                                        scrollToTopOfFeed(store.roadHighlightObj.size)
+                                        return
                                     }
     
                                     if (pressedkey === false){
@@ -711,11 +722,11 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                             store.roadHighlightObj.add(b)
                                             highlightRETSPoint(selectedFeatures[i].attributes, true);
                                             //document.getElementById('selectedFeatures[i].attributes.OBJECTID-selectedFeatures[i].attributes.GID').classList.add('highlight-card')
-                                                    
+                                            
                                         }
                                         
                                         outlineFeedCards(store.roadHighlightObj); 
-                                        scrollToTopOfFeed(store.roadHighlightObj.size)             
+                                        scrollToTopOfFeed(store.roadHighlightObj.size)           
                                         return
                                         
                                     }
@@ -744,20 +755,18 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                             }   
                                         }
                                            
-
+                                        return
                                     }
     
                                     
                                    
                                 });
-    
-                                
-                                
+                       
                     }
     
             });
-    
-            isSelectEnabled = !isSelectEnabled; 
+            isSelectEnabled = !isSelectEnabled;
+            return addsketchRect
         }
         else{
             isSelectEnabled = !isSelectEnabled;

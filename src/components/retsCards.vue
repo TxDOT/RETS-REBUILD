@@ -14,7 +14,7 @@
                 <v-icon style="font-size: 13.5px;" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" ></v-icon>
             </div>
   
-            <v-lazy :options="{'threshold':1.0}" transition="fade-transition">
+            <v-lazy :options="{'threshold':0.5}" transition="fade-transition">
                 <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `5px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="checkhighlight(String(rd.attributes.RETS_ID))" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road);">
                     <!-- <div class="boundary-rets-card"> -->
 
@@ -113,7 +113,6 @@ import {postFlagColor} from '../components/crud.js'
 import {zoomTo, highlightRETSPoint, toggleRelatedRets,returnHistory, removeHighlight, removeOutline, includes} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {store} from './store.js'
-import { outlineFeedCards } from './utility.js';
 
 export default{
     name: "RetsCards",
@@ -147,7 +146,7 @@ export default{
         this.loadData()
         //outlineFeedCards()
         store.isSaving = false
-        outlineFeedCards(store.roadHighlightObj)
+        //outlineFeedCards(store.roadHighlightObj)
 
     },
 
