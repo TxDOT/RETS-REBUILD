@@ -176,7 +176,7 @@ export default{
             // const elementId = retsid;
             // const element = document.getElementById(elementId);
             // console.log(element)
-            const objarray = Array.from(toRaw(store.roadHighlightObj))
+            const objarray = Array.from(store.roadHighlightObj)
             const found = objarray.some(feature => feature.attributes.RETS_ID.toString() === retsid);
             return found ? "card-rets highlight-card" : "card-rets";
             

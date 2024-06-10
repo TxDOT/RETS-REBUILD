@@ -359,10 +359,10 @@ export default{
         updateSelection(e){
             if(!e){
                     store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
-                    
                     return
                 }
                 store.updateRetsSearch = store.roadHighlightObj
+
 
 
                  
@@ -430,7 +430,23 @@ export default{
                     return
                 }
             }
-        }
+        },
+        // 'store.roadHighlightObj.size':{
+        //     handler: function(a){
+        //         console.log(a)
+        //         console.log(store.isSelectEnabled)
+            
+        //     },
+        //     immediate: true
+        // },
+        'store.isSelectEnabled':{
+            handler: function(a){
+                //console.log(a)
+                console.log(store.isSelectEnabled)
+            
+            },
+            immediate: true
+        },
     },
     computed:{
 

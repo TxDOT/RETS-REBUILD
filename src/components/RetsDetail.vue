@@ -245,10 +245,12 @@
                 store.isCard = true
                 store.historyChat.length = 0
                 store.isSaveBtnDisable = true
-                if (store.roadHighlightObj.size <= 1){
+                if (store.roadHighlightObj.size <= 1 && store.isSelectEnabled === false){
                     removeHighlight(store.retsObj)
                     const b = store.roadObj.find(rd => rd.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
                     store.roadHighlightObj.delete(b)
+                    store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+                    store.isShowSelected = false
                     return
                 }
 
