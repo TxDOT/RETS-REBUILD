@@ -6,7 +6,7 @@
             </div>
             <div class="add-new-btn">
                 <div style="float:right;">
-                    <v-btn v-for="(tool, i) in addbutton" :key="i" :value="tool" @click="tool.action()" :prepend-icon="buttonIcon" color="#4472C4" rounded="0" id="add-new-btn"  class="main-button" v-if="!store.isDetailsPage" >
+                    <v-btn v-for="(tool, i) in addbutton" :key="i" :value="tool" @click="tool.action()" :prepend-icon="buttonIcon" color="#4472C4" rounded="0" id="add-new-btn"  class="main-button" v-if="!store.isDetailsPage" :disabled="store.isAddBtn">
                         <p class="text-btn" id = "addbtn">{{addbtntext}}</p>
                     </v-btn>
                 </div>

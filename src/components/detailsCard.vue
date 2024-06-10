@@ -18,7 +18,7 @@
                 <v-text-field :disabled="store.retsObj.attributes.NO_RTE === false" label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required] : []" id="route" @update:model-value="completeDataSearch()"></v-text-field>
             </v-col>
             <v-col cols="4" offset="4">
-                <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" :error-messages="(!store.retsObj.attributes.DFO || !store.retsObj.attributes.DFO.length) && !store.retsObj.attributes.NO_RTE ? 'But where am I? Don\'t leave me blank!' : null" v-model="store.retsObj.attributes.DFO" :rules="!store.retsObj.attributes.NO_RTE ? [onlyNumbers.required, onlyNumbers.numbers]: []" @update:model-value="manuallyUpdateDFO(store.retsObj.attributes.DFO); completeDataSearch(); ">
+                <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" :error-messages="(!store.retsObj.attributes.DFO || !store.retsObj.attributes.DFO.length) && !store.retsObj.attributes.NO_RTE ? 'But where am I? Don\'t leave me blank!' : null" v-model="store.retsObj.attributes.DFO" :rules="!store.retsObj.attributes.NO_RTE ? [onlyNumbers.required, onlyNumbers.numbers]: []" @update:model-value="manuallyUpdateDFO(store.retsObj.attributes.DFO)">
                         <template v-slot:append-inner>
                             <v-tooltip :text="store.zoomInText" location="top">
                                 <template v-slot:activator="{props}">
@@ -65,7 +65,7 @@
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom: 6.1rem; height: 0px;">
             <v-col cols="12" offset="0">
-                <v-textarea :error-messages="(!store.retsObj.attributes.DESC_ || !store.retsObj.attributes.DESC_.length) ? 'Fill out description' : null" label="Description" no-resize variant="underlined" class="rets-description" rows="3" v-model="store.retsObj.attributes.DESC_" @update:modelValue="descCheck()"></v-textarea>
+                <v-textarea :error-messages="(!store.retsObj.attributes.DESC_ || !store.retsObj.attributes.DESC_.length) ? 'Fill out description' : null" label="Description" no-resize variant="underlined" class="rets-description" rows="3" v-model="store.retsObj.attributes.DESC_"  @update:model-value="descCheck(store.retsObj.attributes.DESC_)" @keydown.space="preventSpace"></v-textarea>
             </v-col>
         </v-row>
         <v-row align="center" style="position: relative; bottom: 2.1rem; height: 25px;">
@@ -154,6 +154,7 @@ import {store} from './store.js'
         },
         beforeMount(){
             this.splitAndAddRelatedRets(store.retsObj.attributes.RELATED_RETS)
+            document.addEventListener('click',this.handleClickOutside)
             
            
             
@@ -173,10 +174,6 @@ import {store} from './store.js'
             //this.initDataCheck()
             this.retsRouteArchive = JSON.parse(store.archiveRetsDataString)
             //createRoadGraphic(store.retsObj, true)
-           
-
-            
-
 
         },
         methods:{
@@ -229,21 +226,21 @@ import {store} from './store.js'
                 store.checkDetailsForComplete()
             },
             descCheck(){
-                if(!store.retsObj.attributes.DESC_.length){
+                const isLettersOrNum = /\S/g
+                if(!store.retsObj.attributes.DESC_.length || !isLettersOrNum.test(store.retsObj.attributes.DESC_)){
                     store.isSaveBtnDisable = true
                     return
                 }
                 this.completeDataSearch()
                 return
             },
+            preventSpace(e){
+                if (!e.target.value) return e.preventDefault();
+                return
+            },
             noRTECheck(){
                 if(!store.retsObj.attributes.DESC_) return
-                if(store.retsObj.attributes.NO_RTE && store.retsObj.attributes.DESC_.length){
-                    store.isDisableValidations = true
-                    store.isSaveBtnDisable = false
-                    store.isAlert = false
-                    return
-                }
+
                 this.completeDataSearch()
                 return
             },
@@ -366,15 +363,33 @@ import {store} from './store.js'
                     }
             },
             manuallyUpdateDFO(a){
-                    if(!a.length || !Number(a)) return
-                    const ogDFO = this.retsRouteArchive
-                    clearTimeout(this.typeTimeout)
-                    if(Number(a) !== ogDFO && !store.retsObj.attributes.NO_RTE && !store.isMoveRetsPt){
-                        this.typeTimeout = setTimeout(()=>{
-                            createRoadGraphic(store.retsObj, false)
-                        },900)
-                    }
+                const validNumCheck = new RegExp('^[0-9]*[.]?[0-9]+$')
+                const check = validNumCheck.test(Number(a))
+                const b = a.split(".")
+
+                if(b[1] && b[1].length > 3){
+                    store.retsObj.attributes.DFO = b.length > 1 ? b[0].concat(".", b[1].slice(0,3)): b[0]
                     return
+                }
+                if(!a.length || isNaN(a) || !check){
+                    a.replace(/[a-zA-Z]/g, '')
+                    store.retsObj.attributes.DFO = a.replace(/[a-zA-Z]/g, '')
+                    store.isSaveBtnDisable = true
+                    return
+                }
+                const ogDFO = this.retsRouteArchive
+                
+                clearTimeout(this.typeTimeout)
+                if(Number(a) !== ogDFO && !store.isMoveRetsPt){
+                    this.typeTimeout = setTimeout(()=>{
+                        createRoadGraphic(store.retsObj, false)
+                    },900)
+                }
+                
+                
+                
+                this.completeDataSearch();
+                return
             }
         },
         watch:{
@@ -391,25 +406,6 @@ import {store} from './store.js'
                 },
                 immediate: true
             },
-            'store.retsObj.attributes.NO_RTE':{
-                handler: function(){
-                    
-                },
-                immediate: true
-            },
-            'store.retsObj.attributes.DFO':{
-                handler: function(a,b){
-
-
-                }
-            },
-            'store.retsObj.attributes.ACTV_NBR':{
-                handler: function(txt){
-
-
-                },
-                immediate: true
-            }
         },
 
     }

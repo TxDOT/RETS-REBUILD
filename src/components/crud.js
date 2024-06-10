@@ -1,7 +1,7 @@
 import { retsLayer, retsHistory, flagRetsColor } from "./map-Init";
 import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant";
-
+import {store} from './store.js'
 export async function addRETSPT(retsObj){
     //retsObj.attributes.ACTV = retsObj.attributes.ACTV.value
     return retsLayer.applyEdits({
@@ -91,7 +91,6 @@ export async function sendChatHistory(chat, type){
     //if new ; add to feature layer
     //if update ; update feature in history feature layer
     //if delete ; delete feature in history feature layer
-
     let newGraphic;
     const chatType = {
         add: () => {
@@ -113,7 +112,7 @@ export async function sendChatHistory(chat, type){
             })
         }
     }
-
+    
     const returnStatus = await chatType[type]()
     return returnStatus
     // return addRETSPT(newGraphic, "hist")
@@ -128,16 +127,20 @@ export function postFlagColor(rets){
         })
         .then(() => {
             //do nothing
+            const findFlag = store.userRetsFlag.find(ret => ret.RETS_ID === flagGraphic.attributes.RETS_ID)
+            findFlag ? findFlag.FLAG = flagGraphic.attributes.FLAG : store.userRetsFlag.push({FLAG: flagGraphic.attributes.FLAG, OBJECTID: flagGraphic.attributes.OBJECTID, RETS_ID: flagGraphic.attributes.RETS_ID, USERNAME: flagGraphic.attributes.USERNAME})
         })
         .catch(err => console.log(err)) 
         return
     }
-    //if OBJECTID is filled, would mean its a update flag insert    
+    //if OBJECTID is filled, would mean its a update flag insert
     flagRetsColor.applyEdits({
         updateFeatures: [flagGraphic]
     })
     .then(() => {
         //do nothing
+        const findFlag = store.userRetsFlag.find(ret => ret.RETS_ID === flagGraphic.attributes.RETS_ID)
+        findFlag.FLAG = flagGraphic.attributes.FLAG
     })
     .catch(err => console.log(err)) 
     return

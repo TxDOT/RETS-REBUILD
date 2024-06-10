@@ -70,17 +70,20 @@
     </div>
     <div style="position: absolute; left: calc(50vh + 47vh + 74px); top: 21.5%;" v-if="isDate">
 
-            <v-date-picker class="date" multiple hide-header v-model="selectDate" @update:modelValue="selectDates()" tile width="300"></v-date-picker>
+            <v-date-picker class="date" multiple hide-header v-model="selectDate" @update:modelValue="selectDates()" tile width="300" :disabled="selectDate.length === 2"></v-date-picker>
                 
         
         <div style="position: relative; bottom: 3.3rem; ">
             <v-checkbox label="Current Year" style="position: relative; z-index: 9999; float: right; margin-bottom: 15px; margin-right: 15px" v-model="currentYear"></v-checkbox>
         </div>
+        <div style="position: relative; bottom: 3.3rem; height: 50px; width: 98px;">
+            <v-btn style="float: left; margin-left: 10px; top: 12px;" @click="isDate = false" flat>CLOSE</v-btn>
+        </div>
     </div>
 </template>
 
 <script>
-    import {filterMapActivityFeed, home} from './utility.js'
+    import {filterMapActivityFeed} from './utility.js'
     import {appConstants} from '../common/constant.js'
     import { store } from './store'
 
@@ -105,7 +108,7 @@
                          "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, 
                          "filterTotal": 2},
                 isDate: false,
-                selectDate: null,
+                selectDate: [],
                 currentYear: null,
                 store,
                 userSearch: "",
@@ -116,11 +119,6 @@
         },
         mounted(){
             this.archiveFilter()
-            //console.log(appConstants.userRoles.find(y => y.value === console.log(y.value)))
-            // this.filter = JSON.parse(this.filterPros)
-            // console.log(this.filterPros[appConstants.userQueryField])
-            // console.log(this.filterPros)
-            // this.filterPros[appConstants.queryField[appConstants.userRoles.find(x => x.value === store.loggedInUser).type]] = appConstants.userRoles.filter(y => y.value === this.filterPros[appConstants.queryField[appConstants.userRoles.find(x => x.value === store.loggedInUser).type]][0].value)
         },
         methods:{
             archiveFilter(){
@@ -165,17 +163,8 @@
                     user: store.USER,
                     isAssignedTo: store.isAssignedTo
                 }
-                // console.log(this.userQuery)
-                // const filterField = appConstants.queryField[appConstants.userRoles.find(x => x.value === this.userQuery[0].value).type]
-                // console.log(filterField)
-                // console.log(this.userQuery)
-                // this.filterPros[filterField] = this.userQuery[0].value
-                //const filters = this.calcFilterDiff()
-                //console.log(filters)
-                //this.$emit('filter-set', this.filter)
                 this.calcFilterDiff()
                 store.setFilterFeed()
-                // filterMapActivityFeed(store.filter)
 
                 store.isfilter = false
                 return
@@ -187,16 +176,6 @@
             calcFilterDiff(){
                 const typeField = [store.JOB_TYPE.length, store.STAT.length, store.ACTV.length, store.DIST_NM.length, store.CNTY_NM.length, store.USER.length, store.isAssignedTo]
                 store.filterTotal = typeField.filter(x => x).length
-                // for(const [key, value] of Object.entries(this.filterPros)){
-                //     if(ignoreField.includes(key) || !value) continue
-                //     if(value.length){
-                //         this.addNumFilter()
-                //     }
-                //}
-
-                // this.filterPros.filterTotal = this.numFilters
-                // this.numFilters = 0
-                // return keyFields
                 return
             },
             restoreDefault(){
@@ -239,7 +218,7 @@
                 return
             },
             closeDateChip(){
-                this.selectDate = null
+                this.selectDate = []
                 store.EDIT_DT = null
                 return
             }

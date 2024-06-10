@@ -107,7 +107,7 @@
 
 <script>
     import { appConstants } from '../common/constant.js'
-    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, outlineFeedCards, removeOutline} from './utility.js'
+    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView} from './utility.js'
 
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
@@ -291,7 +291,6 @@
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
                 this.replaceArchiveContent(archiveRets)
                 retsLayerView.layer.definitionExpression = store.savedFilter
-               
                 
                 //store.preserveHighlightCards()
                 // retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
@@ -334,7 +333,7 @@
                 this.sendGemTaskNum = gemId
             },
             isAssetJob(){
-                store.isSaveBtnDisable = false
+                store.checkDetailsForComplete()
             },
             closeGEMTask(){
                 document.querySelectorAll(".gem-search")[0].style.display = "none"
@@ -352,6 +351,7 @@
                 await store.addNote(this.addHistoryChat, attach, store.attachment, true)
                 this.clearMessage()
                 this.addAttach.length = 0
+                document.getElementById(`${store.addNoteOid}Expand`).scrollIntoView({block: "end", inline: "nearest"})
                 return
             },
             clearMessage(){
@@ -382,39 +382,6 @@
 
 
         },
-        watch:{
-            // 'store.history':{
-            //     handler: function(){
-            //      if(!store.history.length) return
-            //      store.getHistoryChatRet()
-            //     },
-            //     once: true
-            // }
-        },
-        computed:{
-            getHistoryStore:{
-                get (){
-                    //store.getHistoryChatRet()
-                    //    .then((x) =>console.log(x))
-                    // if(!store.history.length){
-                    //     this.noHistResp = 'Error Retrieving History'
-                    //     this.isHistNotesEmpty = true
-                    //     return
-                    // }
-                    // const unpackHistory = JSON.parse(store.history)
- 
-                    // const getRelatedHist = unpackHistory.filter(hist => hist.RETS_ID === store.retsObj.attributes.RETS_ID)//4430)
-                    // if(!getRelatedHist.length){
-                    //     this.isHistNotesEmpty = true
-                    //     return
-                    // }
-
-                    // this.histNotes = getRelatedHist
-                    // this.isHistNotesEmpty = false
-                    // return
-                }
-            }
-        }
     }
 </script>
 
