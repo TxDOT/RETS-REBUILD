@@ -71,7 +71,7 @@ const setDefExpRets = (userId) => {
 }
 
 export async function getUserId(){
-  console.warn(`VERSION: 2.0.10 -- dev status: ${store.devStatus}`)
+  console.warn(`VERSION: 2.0.11 -- dev status: ${store.devStatus}`)
   const user = await esriId.getCredential(`${authen.portalUrl}/sharing/rest`,{
     oAuthPopupConfirmation: false,
   })
