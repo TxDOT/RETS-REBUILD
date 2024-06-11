@@ -564,12 +564,7 @@ export function returnHistory(query){
                         }
                         store.historyChat.push(x.attributes)
                     })
-                // x.attributes.attachments = []
-                // x.attributes.attachments.push()
-                //arrHist.push(x.attributes)
             })
-            
-            //query ? store.historyChat = arrHist : store.history = JSON.stringify(arrHist)
         })
         .catch(err => console.log(err))
     return
@@ -713,9 +708,6 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                                 store.roadHighlightObj.add(b)
                                                 highlightRETSPoint(selectedFeatures[i].attributes, true);
                                                 //document.getElementById('selectedFeatures[i].attributes.OBJECTID-selectedFeatures[i].attributes.GID').classList.add('highlight-card')
-
-                                                        
-                                                        
                                             }
                                             if (store.roadHighlightObj.size){
                                                 outlineFeedCards(store.roadHighlightObj); 
@@ -747,7 +739,6 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                                 } 
                                                 if (store.roadHighlightObj.size){
                                                     outlineFeedCards(store.roadHighlightObj); 
-    
                                                 }  
                                             }
                                             

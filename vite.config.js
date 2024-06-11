@@ -5,7 +5,7 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig({
   plugins: [vue()],
   assetsInclude:['**/*.svg'],
-  base: '/apps/statewide_mapping/rets_rebuild_test/',
+  base: '/apps/statewide_mapping/rets_rebuild/',
   server:{
     host: ""
   }
