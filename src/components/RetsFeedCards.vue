@@ -439,12 +439,12 @@ export default{
         //     },
         //     immediate: true
         // },
-        'store.isSelectEnabled':{
-            handler: function(a){
+        // 'store.isSelectEnabled':{
+        //     handler: function(a){
                             
-            },
-            immediate: true
-        },
+        //     },
+        //     immediate: true
+        // },
     },
     computed:{
 

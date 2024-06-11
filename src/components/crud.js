@@ -75,13 +75,6 @@ function createGraphic(retsObj){
         attributes: retsObj.attributes ?? retsObj
     })
     
-    // retsObj.geometry ? creatGraph.geometry = {
-    //                         type: "point",
-    //                         x: retsObj?.geometry[0],
-    //                         y: retsObj?.geometry[1]
-    //                     } : null
-    
-    
     return creatGraph
 }
 

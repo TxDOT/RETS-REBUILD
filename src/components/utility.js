@@ -185,7 +185,6 @@ export function outlineFeedCards(cards){
     var objectcomparison = zoomToLast.attributes ? String(zoomToLast.attributes.RETS_ID): String(zoomToLast.graphic.attributes.RETS_ID)
     const cardsList = [...document.getElementsByClassName('rets-card-row')]
     const findCard = cardsList.find(z => z.id === objectcomparison)
-    console.log()
     if(!findCard) return
     //findCard.classList.add('highlight-card')
     //store.roadHighlightObj.add(objectcomparison)
@@ -697,7 +696,6 @@ export function createtool(sketchWidgetcreate, createretssym) {
                             retsLayer.queryFeatures(query)
                             .then(function (result) 
                                     {
-                                        console.log(result)
                                         graphics.removeAll();
                                         var selectedFeatures = result.features;
                                         if(!selectedFeatures.length && store.isShowSelected && pressedkey != "Control"){
