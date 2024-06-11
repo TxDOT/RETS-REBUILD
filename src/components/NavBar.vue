@@ -134,7 +134,7 @@
 <script>
 
     import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass, roadwaysRenderer} from '../components/map-Init.js';
-    import { createtool, selecttool, togglemenu, logoutUser, roadLayerView } from '../components/utility.js';
+    import { createtool, selecttool, togglemenu, logoutUser } from '../components/utility.js';
     import { vuetify } from '../main.js';
     import { store } from './store';
 
@@ -358,16 +358,14 @@
                        
                     },
                     handleSelectTool() { 
-                        
-                        if (store.isSelectEnabled === false ){
-                            store.isSelectEnabled =! store.isSelectEnabled
+                        if (store.isSelectEnabled === true ){
                             this.selectfunction = selecttool(store.isSelectEnabled, sketchWidgetselect, graphics);
-                            //store.isSelectEnabled =! store.isSelectEnabled
+                            store.isSelectEnabled = !store.isSelectEnabled
                         }
                         else{
                             sketchWidgetselect.cancel()
                             this.selectfunction.remove()
-                            store.isSelectEnabled =! store.isSelectEnabled
+                            store.isSelectEnabled = !store.isSelectEnabled
                         }
 
                         

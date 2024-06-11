@@ -25,6 +25,7 @@ export const store = reactive({
         sort: "ASC",
         roadHighlightObj: new Set(),
         isShowSelected: false,
+        isSelectEnabled: true,
         showSelected:[],
         userRetsFlag: [],
         isColorPicked: false,
