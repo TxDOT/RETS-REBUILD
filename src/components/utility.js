@@ -699,7 +699,6 @@ export function createtool(sketchWidgetcreate, createretssym) {
                             retsLayer.queryFeatures(query)
                             .then(function (result) 
                                     {
-                                        console.log(result)
                                         graphics.removeAll();
                                         var selectedFeatures = result.features;
                                         if(!selectedFeatures.length && store.isShowSelected && pressedkey != "Control"){
@@ -750,10 +749,13 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                                     removeHighlight(selectedFeatures[n]);
                                                     const b = store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[n].attributes.OBJECTID)
                                                     store.roadHighlightObj.delete(b)
-                                                    removeOutline()
-                                                    outlineFeedCards(store.roadHighlightObj);
+                                                    //removeOutline()
                                                     scrollToTopOfFeed(store.roadHighlightObj.size) 
-                                                }   
+                                                } 
+                                                if (store.roadHighlightObj.size){
+                                                    outlineFeedCards(store.roadHighlightObj); 
+    
+                                                }  
                                             }
                                             
 
