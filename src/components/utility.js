@@ -723,8 +723,10 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                                         
                                                         
                                             }
-                                            
-                                            outlineFeedCards(store.roadHighlightObj); 
+                                            if (store.roadHighlightObj.size){
+                                                outlineFeedCards(store.roadHighlightObj); 
+
+                                            }
                                             scrollToTopOfFeed(store.roadHighlightObj.size)             
                                             return
                                             
@@ -1198,4 +1200,10 @@ export async function isRoadExist(){
         return true
     }
     return false
+}
+
+export function checkhighlightfunction(retsid){
+    const objarray = Array.from(store.roadHighlightObj)
+    const found = objarray.some(feature => feature.attributes.RETS_ID.toString() === retsid);
+    return found ? "card-rets highlight-card" : "card-rets";
 }

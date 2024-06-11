@@ -110,7 +110,7 @@
 
 <script>
 import {postFlagColor} from '../components/crud.js'
-import {zoomTo, highlightRETSPoint, toggleRelatedRets,returnHistory, removeHighlight, removeOutline, includes} from './utility.js'
+import {zoomTo, highlightRETSPoint, toggleRelatedRets,returnHistory, removeHighlight, removeOutline, includes, checkhighlightfunction} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {store} from './store.js'
 
@@ -152,26 +152,7 @@ export default{
 
     methods:{
         checkhighlight(retsid){
-            // const elementId = retsid;
-            //const element = document.getElementById(retsid);
-
-            // if (store.isShowSelected === true) {
-            //     return "card-rets highlight-card"
-
-            // } 
-            // if (element){
-            //     return "card-rets highlight-card"
-
-            // }
-                         
-            // return "card-rets"
-            // const elementId = retsid;
-            // const element = document.getElementById(elementId);
-            // console.log(element)
-            const objarray = Array.from(store.roadHighlightObj)
-            const found = objarray.some(feature => feature.attributes.RETS_ID.toString() === retsid);
-            return found ? "card-rets highlight-card" : "card-rets";
-            
+            return checkhighlightfunction(retsid)
 
             
         },

@@ -158,7 +158,6 @@
                 isCreateEnabled: true,
                 settingsstatus: false,
                 shiftKey: false,
-                removeSelectionEvent: {},
                 switches: [
                             { label: "RETS I Create", value: false, fontColor: "#D9D9D9" },
                             { label: "RETS I'm tagged in", value: false, fontColor: "#D9D9D9" },
@@ -262,6 +261,13 @@
                 
                 methods: {
                     shiftDiv(){
+                        // console.log(this.isActOpen)
+                        // this.shiftmap = this.isActOpen
+                        //const elements = document.getElementsByClassName('esri-view-root');
+                        
+
+
+                        //elements[0].classList.toggle('esri-view-surface');
                         const viewSurface = document.querySelector('.esri-view');
                         viewSurface.classList.toggle('translateX-500px');
                         const settingspopup = document.querySelector('#containersettings')
@@ -359,7 +365,6 @@
                             //store.isSelectEnabled =! store.isSelectEnabled
                         }
                         else{
-                            this.removeSelectionEvent.remove()
                             sketchWidgetselect.cancel()
                             this.selectfunction.remove()
                             store.isSelectEnabled =! store.isSelectEnabled

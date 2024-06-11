@@ -441,9 +441,7 @@ export default{
         // },
         'store.isSelectEnabled':{
             handler: function(a){
-                //console.log(a)
-                console.log(store.isSelectEnabled)
-            
+                            
             },
             immediate: true
         },
