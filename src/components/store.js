@@ -4,7 +4,7 @@ import {sendChatHistory} from './crud.js'
 import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapActivityFeed} from './utility.js'
 
 export const store = reactive({
-        devStatus: "prod",
+        devStatus: "dev",
         count: 0,
         isCloseDetail: false,
         taskGem: 0,
@@ -78,7 +78,6 @@ export const store = reactive({
         addPtRd: "",
         DFO: null,
         isAdd: false,
-        isAddBtn: false,
         cancelEvent: null,
         highlight: null,
         isSaving: false,
