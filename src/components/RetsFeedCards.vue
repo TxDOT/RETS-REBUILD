@@ -359,7 +359,6 @@ export default{
         updateSelection(e){
             if(!e){
                 store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
-                console.log(store.roadHighlightObj)
                 outlineFeedCards(store.roadHighlightObj)
                 return
             }
@@ -376,7 +375,6 @@ export default{
                     this.noSearch = false
                     if(!a.length || !a){
                         store.updateRetsSearch = !store.isShowSelected ? store.roadObj.slice().sort((a,b) => b.EDIT_DT - a.EDIT_DT) : store.roadHighlightObj
-                        console.log(store.roadHighlightObj)
                         outlineFeedCards(store.roadHighlightObj)
                         return
                     }
@@ -431,14 +429,18 @@ export default{
                 }
             }
         },
-        // 'store.roadHighlightObj.size':{
-        //     handler: function(a){
-        //         console.log(a)
-        //         console.log(store.isSelectEnabled)
-            
-        //     },
-        //     immediate: true
-        // },
+        'store.roadHighlightObj.size':{
+            handler: function(a){
+                if(a === 0){
+                    store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+                    store.isShowSelected = false
+                    return
+                }
+                
+                return
+            },
+            immediate: true
+        },
         // 'store.isSelectEnabled':{
         //     handler: function(){
         //         store.roadHighlightObj.clear()

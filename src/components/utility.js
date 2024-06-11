@@ -182,14 +182,12 @@ export function outlineFeedCards(cards){
     var objectcomparison = zoomToLast.attributes ? String(zoomToLast.attributes.RETS_ID): String(zoomToLast.graphic.attributes.RETS_ID)
     const cardsList = [...document.getElementsByClassName('rets-card-row')]
     const findCard = cardsList.find(z => z.id === objectcomparison)
-    console.log(findCard)
     if(!findCard) return
     //findCard.classList.add('highlight-card')
     //store.roadHighlightObj.add(objectcomparison)
     //zoom to card in feed
             
     findCard.scrollIntoView({behavior: "smooth", block: "nearest", inline: "start"})
-    console.log('zoom')
     // const zoomToCard = document.createElement('a')
     // zoomToCard.href = `#${objectcomparison}`
     // zoomToCard.click(preventHashUrl())

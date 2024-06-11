@@ -265,7 +265,6 @@
             },
             'store.historyChat.length':{
                 handler: function(a,b){
-                    console.log(a,b)
                     if(a === 0){
                         this.emptyHist = true
                         return

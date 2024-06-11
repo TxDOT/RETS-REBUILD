@@ -64,7 +64,7 @@
                         </div>
                     </span>
                 </div>
-                
+
                 <div v-if="emptyHist">
                     <v-text-field disabled variant="plain">No History for this RETS</v-text-field>
                 </div>
@@ -251,7 +251,6 @@
             },
             'store.historyChat.length':{
                 handler: function(a,b){
-                    console.log(a,b)
                     if(a === 0){
                         this.emptyHist = true
                         return
