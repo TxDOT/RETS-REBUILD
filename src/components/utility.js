@@ -5,7 +5,7 @@ import { appConstants } from "../common/constant.js";
 import {store} from './store.js'
 //import {getDFOFromGRID} from './crud.js'
 import esriId from "@arcgis/core/identity/IdentityManager.js";
-import { addRETSPT, updateRETSPT } from './crud.js';
+import { addRETSPT } from './crud.js';
 import esriRequest from "@arcgis/core/request.js";
 import * as geodesicUtils from "@arcgis/core/geometry/support/geodesicUtils.js";
 import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils.js";
@@ -62,7 +62,6 @@ export async function getTxDotRdWayLayerView(){
                     rdLayerView.layer.definitionExpression = "RTE_PRFX = 'IH'"
                 }
                 roadLayerView = rdLayerView
-                store.isAddBtn = false
                 sketchWidgetcreate.snappingOptions.featureSources.push({layer: roadLayerView.layer, enable: true})
             }
             catch(err){
@@ -186,7 +185,6 @@ export function outlineFeedCards(cards){
     var objectcomparison = zoomToLast.attributes ? String(zoomToLast.attributes.RETS_ID): String(zoomToLast.graphic.attributes.RETS_ID)
     const cardsList = [...document.getElementsByClassName('rets-card-row')]
     const findCard = cardsList.find(z => z.id === objectcomparison)
-
     if(!findCard) return
     //findCard.classList.add('highlight-card')
     //store.roadHighlightObj.add(objectcomparison)
@@ -682,7 +680,6 @@ export function createtool(sketchWidgetcreate, createretssym) {
 
 
     export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
-        console.log(isSelectEnabled)
         if(isSelectEnabled === true){ 
             sketchWidgetselect.create("rectangle");
             var removeAll = true

@@ -6,7 +6,7 @@
             </div>
             <div class="add-new-btn">
                 <div style="float:right;">
-                    <v-btn v-for="(tool, i) in addbutton" :key="i" :value="tool" @click="tool.action()" :prepend-icon="buttonIcon" color="#4472C4" rounded="0" id="add-new-btn"  class="main-button" v-if="!store.isDetailsPage" :disabled="store.isAddBtn">
+                    <v-btn v-for="(tool, i) in addbutton" :key="i" :value="tool" @click="tool.action()" :prepend-icon="buttonIcon" color="#4472C4" rounded="0" id="add-new-btn"  class="main-button" v-if="!store.isDetailsPage">
                         <p class="text-btn" id = "addbtn">{{addbtntext}}</p>
                     </v-btn>
                 </div>
@@ -439,12 +439,12 @@ export default{
         //     },
         //     immediate: true
         // },
-        'store.isSelectEnabled':{
-            handler: function(a){
+        // 'store.isSelectEnabled':{
+        //     handler: function(a){
                             
-            },
-            immediate: true
-        },
+        //     },
+        //     immediate: true
+        // },
     },
     computed:{
 
@@ -572,13 +572,12 @@ export default{
     }
     .banner-txt{
         position: relative;
-        bottom: 2px;
+        bottom: calc(6% - -3px);
         font-weight: bold;
         font-size: 23px;
         left: 5px;
         display: flex;
         flex-direction: row;
-        justify-items: end;
     }
     .retsSubtitleTxt{
         position: relative;
