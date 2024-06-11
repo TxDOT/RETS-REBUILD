@@ -64,6 +64,10 @@
                         </div>
                     </span>
                 </div>
+                
+                <div v-if="emptyHist">
+                    <v-text-field disabled variant="plain">No History for this RETS</v-text-field>
+                </div>
                 <div v-if="noSearch">
                     <v-text-field disabled variant="plain">No Search Results</v-text-field>
                 </div>
@@ -247,9 +251,14 @@
             },
             'store.historyChat.length':{
                 handler: function(a,b){
-                    // if(store.historyChat.length) return this.emptyHist = false
-                    // if(!store.historyChat.length) return this.emptyHist = true
-                   this.orderList
+                    console.log(a,b)
+                    if(a === 0){
+                        this.emptyHist = true
+                        return
+                    }
+                    this.orderList
+                    this.emptyHist = false
+                    return
                 },
                 immediate: true
             }

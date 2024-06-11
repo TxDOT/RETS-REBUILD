@@ -119,6 +119,7 @@
         mounted(){
             //store.historyChat.sort((a,b) => a.CREATE_DT - b.CREATE_DT)
             this.orderList
+            
             // if(!this.histNotes.length){
             //     return this.emptyHist = true
             // }
@@ -232,9 +233,6 @@
                         this.noSearch = false
                         if(!a.length || !a){
                             this.histNotes = store.historyChat.slice().sort((a,b) => b.CREATE_DT - a.CREATE_DT)
-                            // if(!this.histNotes.length){
-                            //     return this.emptyHist = true
-                            // }
                             return
                         }
                         const searchString = a.toLowerCase()
@@ -267,7 +265,14 @@
             },
             'store.historyChat.length':{
                 handler: function(a,b){
-                   this.orderList
+                    console.log(a,b)
+                    if(a === 0){
+                        this.emptyHist = true
+                        return
+                    }
+                    this.orderList
+                    this.emptyHist = false
+                    return
                 },
                 immediate: true
             }

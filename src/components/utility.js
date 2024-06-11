@@ -80,14 +80,10 @@ export function clickRetsPoint(){
                     removeOutline()
                     removeHighlight("a", true)
                     clearRoadHighlightObj()
-                    //scrollToTopOfFeed(0)
-                    // if(store.isSelectEnabled){
-                    //     store.isShowSelected = false
-                    //     return
-                    // }
+                    store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+                    store.isShowSelected = false
                     return
                 }
-                //clearRoadHighlightObj()
                 store.roadHighlightObj.clear()
                 const retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
                 store.roadHighlightObj.add(retsPt)
@@ -181,16 +177,19 @@ export function outlineFeedCards(cards){
     //return new Promise((res, rej)=>{
     const convertToList = [...cards]
     const zoomToLast = convertToList.at(-1)
+    if(!zoomToLast) return
     //set card outline
     var objectcomparison = zoomToLast.attributes ? String(zoomToLast.attributes.RETS_ID): String(zoomToLast.graphic.attributes.RETS_ID)
     const cardsList = [...document.getElementsByClassName('rets-card-row')]
     const findCard = cardsList.find(z => z.id === objectcomparison)
+    console.log(findCard)
     if(!findCard) return
     //findCard.classList.add('highlight-card')
     //store.roadHighlightObj.add(objectcomparison)
     //zoom to card in feed
             
     findCard.scrollIntoView({behavior: "smooth", block: "nearest", inline: "start"})
+    console.log('zoom')
     // const zoomToCard = document.createElement('a')
     // zoomToCard.href = `#${objectcomparison}`
     // zoomToCard.click(preventHashUrl())
@@ -703,9 +702,10 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                             store.roadHighlightObj.clear()
                                             store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                                         }
+
+  
         
                                         if (pressedkey === false){
-                                            
                                             removeHighlight("a", removeAll); 
                                             removeOutline()
                                             store.roadHighlightObj.clear()
@@ -721,7 +721,6 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                             }
                                             if (store.roadHighlightObj.size){
                                                 outlineFeedCards(store.roadHighlightObj); 
-
                                             }
                                             scrollToTopOfFeed(store.roadHighlightObj.size)             
                                             return
@@ -740,9 +739,8 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                         if(pressedkey === "Control"){   
                                             graphics.removeAll();   
                                             if (selectedFeatures.length > 0){
-                                                let n
+                                                let n;
                                                 for (n = 0; n < selectedFeatures.length; n++){
-                                                
                                                     removeHighlight(selectedFeatures[n]);
                                                     const b = store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[n].attributes.OBJECTID)
                                                     store.roadHighlightObj.delete(b)
@@ -750,13 +748,9 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                                     outlineFeedCards(store.roadHighlightObj);
                                                     scrollToTopOfFeed(store.roadHighlightObj.size) 
                                                 }   
-                                            }
-                                            
+                                            }                                            
 
                                         }
-        
-                                        
-                                    
                                     });
         
                                     

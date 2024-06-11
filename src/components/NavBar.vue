@@ -363,6 +363,10 @@
                             store.isSelectEnabled = !store.isSelectEnabled
                         }
                         else{
+                            if(store.roadHighlightObj.size === 0 && store.isShowSelected){
+                                store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+                                store.isShowSelected = false
+                            }
                             sketchWidgetselect.cancel()
                             this.selectfunction.remove()
                             store.isSelectEnabled = !store.isSelectEnabled

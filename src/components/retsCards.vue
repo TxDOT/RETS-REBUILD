@@ -110,7 +110,7 @@
 
 <script>
 import {postFlagColor} from '../components/crud.js'
-import {zoomTo, highlightRETSPoint, toggleRelatedRets,returnHistory, removeHighlight, removeOutline, includes, checkhighlightfunction} from './utility.js'
+import {zoomTo, highlightRETSPoint, toggleRelatedRets,returnHistory, removeHighlight, removeOutline, includes, checkhighlightfunction, outlineFeedCards} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {store} from './store.js'
 
@@ -238,16 +238,16 @@ export default{
 
     },
     watch:{
-        'store.roadObj.length':{
-            handler: function(a,b){
-                //this.retsToGet
-            },
-            immediate: true
-        }
+        // 'store.roadObj.length':{
+        //     handler: function(a,b){
+        //         //this.retsToGet
+        //     },
+        //     immediate: true
+        // }
     },
     computed:{
         retsToGet(){
-            store.updateRetsSearch = store.roadObj
+            outlineFeedCards(store.roadHighlightObj)
             return
         }
     }
