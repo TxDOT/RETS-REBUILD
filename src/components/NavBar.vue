@@ -136,11 +136,14 @@
     import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass, roadwaysRenderer} from '../components/map-Init.js';
     import { createtool, selecttool, togglemenu, logoutUser, roadLayerView } from '../components/utility.js';
     import { vuetify } from '../main.js';
+    import { store } from './store';
 
     export default{
         name: "NavBar",
         data(){
             return{
+                selectfunction : {},
+                store,
                 shiftmap: false,
                 fontColor: '#D9D9D9',
                 switchValueDark: true,
@@ -151,12 +154,10 @@
                 jumptocard:false,
                 tester: false,
                 isLegendVisible: false,
-                isSelectEnabled: true,
                 clearSelection: false,
                 isCreateEnabled: true,
                 settingsstatus: false,
                 shiftKey: false,
-                removeSelectionEvent: {},
                 switches: [
                             { label: "RETS I Create", value: false, fontColor: "#D9D9D9" },
                             { label: "RETS I'm tagged in", value: false, fontColor: "#D9D9D9" },
@@ -260,6 +261,13 @@
                 
                 methods: {
                     shiftDiv(){
+                        // console.log(this.isActOpen)
+                        // this.shiftmap = this.isActOpen
+                        //const elements = document.getElementsByClassName('esri-view-root');
+                        
+
+
+                        //elements[0].classList.toggle('esri-view-surface');
                         const viewSurface = document.querySelector('.esri-view');
                         viewSurface.classList.toggle('translateX-500px');
                         const settingspopup = document.querySelector('#containersettings')
@@ -350,15 +358,18 @@
                        
                     },
                     handleSelectTool() { 
-                        if (this.isSelectEnabled === true ){
-                            this.removeSelectionEvent = selecttool(this.isSelectEnabled, sketchWidgetselect, graphics);
-                            this.isSelectEnabled =! this.isSelectEnabled
+                        
+                        if (store.isSelectEnabled === false ){
+                            store.isSelectEnabled =! store.isSelectEnabled
+                            this.selectfunction = selecttool(store.isSelectEnabled, sketchWidgetselect, graphics);
+                            //store.isSelectEnabled =! store.isSelectEnabled
                         }
                         else{
-                            this.removeSelectionEvent.remove()
                             sketchWidgetselect.cancel()
-                            this.isSelectEnabled =! this.isSelectEnabled
+                            this.selectfunction.remove()
+                            store.isSelectEnabled =! store.isSelectEnabled
                         }
+
                         
                     },
 

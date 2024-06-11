@@ -604,6 +604,9 @@ searchWidget.on("select-result", function(event) {
     const tempArray = [selectedFeature];
     removeOutline();
     outlineFeedCards(tempArray);
+    const retsidnum = String(selectedFeature.attributes.OBJECTID).concat('-',selectedFeature.attributes.RETS_ID)
+    document.getElementById(retsidnum).classList.add("highlight-card")
+    return
   }
   
 
