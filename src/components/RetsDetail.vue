@@ -1,6 +1,7 @@
 <template>
     <!-- details section -->
-    <div id="detailsHeaderDiv" >
+
+    <div id="detailsHeaderDiv">
         <div id="detailsHeaderIcon">
             <v-btn density="compact" flat @click="changeColor(store.retsObj.attributes.RETS_ID);" id="flagBtnDetails">
                 <template v-slot:prepend>
@@ -98,33 +99,49 @@
             <v-checkbox label="Asset Only Job" density="compact" class="checkbox-size" v-model="isAsset" @update:model-value="isAssetJob"></v-checkbox>
         </div>
             <v-btn-toggle id="trigger-buttons" density="compact">
-                <v-btn @click="handlearchive" variant="plain" flat size="small" class="secondary-button">Delete</v-btn>
-                <v-btn @click="cancelDetailsMetadata" class="secondary-button" variant="plain" flat size="small" :disabled="store.isCancelBtnDisable">Cancel</v-btn>
+                <v-btn @click="handlearchive" flat size="small" class="secondary-button" style="background-color: transparent;">Delete</v-btn>
+                <!-- <v-btn @click="handlearchive" variant="plain" flat size="small" class="secondary-button">Delete</v-btn> -->
+                <v-btn @click="cancelPopupFunction" class="secondary-button" flat size="small" style="background-color: transparent;" :disabled="store.isCancelBtnDisable">Cancel</v-btn>
                 <v-btn @click="sendToParent" variant="outlined" class="main-button-style" size="small" :disabled="store.isSaveBtnDisable" :loading="store.isSaving">Save</v-btn>
             </v-btn-toggle>
     </div>
 
     <v-card id="archivepopup" v-if="isarchiveopen" >
-        <v-card-title id="archiveheader" >
+        <v-card-title class="popupheader" >
             Delete RETS {{deletedRETSID}}
             <hr id="separator2" />
         </v-card-title>
-        <v-card-subtitle id="archivetext">
+        <v-card-subtitle class="popuptext">
             Deleting this RETS will move it to the archive table.
         </v-card-subtitle>
             
-        <v-btn-group id="archivebuttons" density="compact">
+        <v-btn-group class="buttonpositioning" density="compact">
             <v-btn class="secondary-button"  @click="handlearchive">CANCEL</v-btn>
             <v-btn class="main-button-style" @click="deleteRets">DELETE</v-btn>
         </v-btn-group>
     </v-card>   
+    <v-card id="cancelpopup" v-if="cancelpopup">
+        <v-card-title class="popupheader" >
+            Discard unsaved changes?
+            <hr id="separator2" />
+        </v-card-title>
+        <v-card-subtitle class="popuptext">
+            If you proceed, your changes will be discarded.
+        </v-card-subtitle>
+        <v-btn-group class="buttonpositioning" density="compact">
+            <v-btn class="secondary-button"  @click="this.cancelpopup = false">GO BACK</v-btn>
+            <v-btn class="main-button-style" @click="cancelDetailsMetadata">DISCARD</v-btn>
+        </v-btn-group>
+
+    </v-card>
+    
 
 </template>
 
 <script>
     import { appConstants } from '../common/constant.js'
     import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, removeOutline, outlineFeedCards} from './utility.js'
-
+    import { view } from './map-Init'
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
 
@@ -145,6 +162,8 @@
         emits:['close-detail'],
         data(){
             return{
+                isFocused: false,
+                cancelpopup: false,
                 deletedRETSID: null,
                 isarchiveopen: false,
                 isDetails: true,
@@ -193,6 +212,7 @@
             })
             //this.getHistoryStore
             this.isAsset = store.retsObj.attributes.JOB_TYPE === 2 ?  true : false
+            
         },
         methods:{
             historyValue(){
@@ -312,7 +332,18 @@
                 
                 //store.preserveHighlightCards()
                 // retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
+                
                 return
+            },
+            cancelPopupFunction(){
+                if (store.isSaveBtnDisable === true){
+                    this.cancelDetailsMetadata()
+                }
+                else{
+                    this.cancelpopup = true
+
+                }
+
             },
             replaceArchiveContent(old){
                 const filter = !store.isShowSelected ? store.updateRetsSearch : [...store.roadHighlightObj]
@@ -418,8 +449,19 @@
     margin: auto;
 
 }
-
-#archiveheader{
+#cancelpopup{
+    position: fixed;
+    border-radius: 5px;
+    width: 25rem;
+    height:25%; 
+    border-radius: 0;
+    left: 567px;
+    right:0;
+    top:0;
+    bottom: 0;
+    margin: auto;
+}
+.popupheader{
     position: absolute;
     top: 2%;
     left: 2%;
@@ -434,13 +476,13 @@
     padding-top: 1px;
 }
 
-#archivetext{
+.popuptext{
     position: absolute;
     top: 25%;
     left: 2%;
 }
 
-#archivebuttons{
+.buttonpositioning{
     position: absolute;
     bottom: 14px;
     width: 20rem;

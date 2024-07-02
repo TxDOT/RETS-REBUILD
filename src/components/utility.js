@@ -76,16 +76,7 @@ export function clickRetsPoint(){
     try{
         view.on("click", (event)=>{
             view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt) =>{
-                if(event.button === 2){
-                    let lat = Math.round(event.mapPoint.latitude * 1000) / 1000;
-                    let lon = Math.round(event.mapPoint.longitude * 1000) / 1000;
-                    let coordinate = lon + ", " + lat
-                    if(!navigator.clipboard) return
-                    navigator.clipboard.writeText(coordinate);
-                    console.log(coordinate)
-                    return
-                }
-                if(!evt.results.length){
+                if(!evt.results.length && event.button != 2){
                     removeOutline()
                     removeHighlight("a", true)
                     clearRoadHighlightObj()
@@ -683,81 +674,64 @@ export function createtool(sketchWidgetcreate, createretssym) {
     export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
         if(isSelectEnabled === true){ 
             sketchWidgetselect.create("rectangle");
-            var removeAll = true
             const selectretspoints = sketchWidgetselect
-                .on("create", function (event) 
+                .on("create", function (event)
                     {
-                    if(event.state === "complete")
-                        {
-                            // Get the rectangle geometry
-                            var rectangleGeometry = event.graphic.geometry;
-                            // Query for points within the rectangle
-                            var query = retsLayer.createQuery();
-                            query.geometry = rectangleGeometry;
-                            retsLayer.queryFeatures(query)
-                            .then(function (result) 
-                                    {
-                                        graphics.removeAll();
-                                        var selectedFeatures = result.features;
-                                        if(!selectedFeatures.length && store.isShowSelected && pressedkey != "Control"){
-                                            store.isShowSelected = false
-                                            store.roadHighlightObj.clear()
-                                            store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
-                                        }
-
-  
-        
-                                        if (pressedkey === false){
-                                            removeHighlight("a", removeAll); 
-                                            removeOutline()
-                                            store.roadHighlightObj.clear()
-                                            for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                                const b = store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[i].attributes.OBJECTID)
-
-                                                store.roadHighlightObj.add(b)
-                                                highlightRETSPoint(selectedFeatures[i].attributes, true);
-                                                //document.getElementById('selectedFeatures[i].attributes.OBJECTID-selectedFeatures[i].attributes.GID').classList.add('highlight-card')
-                                            }
-                                            if (store.roadHighlightObj.size){
-                                                outlineFeedCards(store.roadHighlightObj); 
-                                            }
-                                            scrollToTopOfFeed(store.roadHighlightObj.size)             
-                                            return
-                                            
-                                        }
-                                        if(pressedkey === "Shift"){
-                                            for (let i = 0; i < selectedFeatures.length; i++ ) {
-                                                const b = store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[i].attributes.OBJECTID)
-                                                store.roadHighlightObj.add(b)
-                                                highlightRETSPoint(selectedFeatures[i].attributes);
-                                            }
-                                            outlineFeedCards(store.roadHighlightObj);  
-                                            return
-                                        }
-                                        
-                                        if(pressedkey === "Control"){   
-                                            graphics.removeAll();   
-                                            if (selectedFeatures.length > 0){
-                                                let n;
-                                                for (n = 0; n < selectedFeatures.length; n++){
-                                                    removeHighlight(selectedFeatures[n]);
-                                                    const b = store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[n].attributes.OBJECTID)
-                                                    store.roadHighlightObj.delete(b)
-                                                    //removeOutline()
-                                                    scrollToTopOfFeed(store.roadHighlightObj.size) 
-                                                } 
+                        if(event.state === "complete")
+                            {
+                                // Get the rectangle geometry
+                                var rectangleGeometry = event.graphic.geometry;
+                                // Query for points within the rectangle
+                                var query = retsLayer.createQuery();
+                                query.geometry = rectangleGeometry;
+                                retsLayer.queryFeatures(query)
+                                .then(function (result) 
+                                        {
+                                            graphics.removeAll();
+                                            var selectedFeatures = result.features;
+                                            if (pressedkey === false){
+                                                
+                                                removeHighlight("a", true); 
+                                                store.roadHighlightObj.clear()
+                                                let i
+                                                for (i = 0; i < selectedFeatures.length; i++ ) {
+                                                    store.roadHighlightObj.add(store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[i].attributes.OBJECTID))
+                                                    highlightRETSPoint(selectedFeatures[i].attributes, true); 
+                                                            
+                                                }
                                                 if (store.roadHighlightObj.size){
                                                     outlineFeedCards(store.roadHighlightObj); 
-                                                }  
+
+                                                }
+                                                scrollToTopOfFeed(store.roadHighlightObj.size)             
+                                                
+                                            }
+                                            if (pressedkey === "Shift"){
+                                                let i
+                                                for (i = 0; i < selectedFeatures.length; i++ ) {
+                                                    store.roadHighlightObj.add(store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[i].attributes.OBJECTID))
+                                                    highlightRETSPoint(selectedFeatures[i].attributes);
+                                                }
+                                                outlineFeedCards(store.roadHighlightObj);  
                                             }
                                             
-
-                                        }
-                                    });
+                                            if (pressedkey === "Control"){   
+                                                graphics.removeAll();   
+                                                if (selectedFeatures.length > 0){
+                                                    let n
+                                                    for (n = 0; n < selectedFeatures.length; n++){
+                                                        removeHighlight(selectedFeatures[n]);
+                                                        store.roadHighlightObj.delete(store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[n].attributes.OBJECTID))
+                                                        scrollToTopOfFeed(store.roadHighlightObj.size) 
+                                                    } 
+                                                    if (store.roadHighlightObj.size){
+                                                        outlineFeedCards(store.roadHighlightObj); 
         
-                                    
-                                    
-                        }
+                                                    }  
+                                                }
+                                            }
+                                        });          
+                            }
                 });
 
             isSelectEnabled = !isSelectEnabled; 

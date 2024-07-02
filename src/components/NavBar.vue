@@ -1,5 +1,4 @@
 <template style="overflow-y:hidden;">
-
     <v-navigation-drawer width="200" height="100" permanent color="black">
         <v-list height="100%" id="icons-top" class="iconList">
             <v-list-item class="iconList-item"  id="popoutitems" v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" active-class="btn-left-brder" :active="store.toggleFeed === tool.value" :disabled="tool.disabled">    
@@ -105,12 +104,14 @@
             <hr id = "separator" />
         <v-card-item id="bottomitems">
             <v-btn-group density="compact">
-                <v-btn class="secondary-button"  prepend-icon="mdi-power" @click="logoutMethod()" >LOGOUT</v-btn>
+                <v-btn size="small" class="secondary-button"  prepend-icon="mdi-power" @click="logoutMethod()" >LOGOUT</v-btn>
             </v-btn-group>
             <v-btn-group id = "savebutton" density="compact">
-                <v-btn class="secondary-button"  @click="handleSettingsTool();handleactiveclass()">CANCEL</v-btn>
+                <v-btn size="small" class="secondary-button"  @click="handleSettingsTool();handleactiveclass()">CANCEL</v-btn>
                
-                    <v-btn class="main-button-style" @click="handleSettingsTool();handleactiveclass()">SAVE</v-btn>    
+                <v-btn size="small" class="main-button-style" @click="handleSettingsTool();handleactiveclass()">SAVE</v-btn>
+            
+                
             </v-btn-group>
             
 
@@ -320,9 +321,7 @@
                             settingspopup.classList.toggle('translatesettings')
 
                         }
-                        else{
-                            console.log("not found")
-                        }
+                        
 
                     },
                     newSwitchTurnedOn() {

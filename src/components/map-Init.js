@@ -391,11 +391,8 @@ export const searchWidget = new Search({
       displayField: "RETS_ID",
       exactMatch: false,
       outFields: ["*"],
-      maxSuggestions: 3,
-      //minSuggestCharacters: 2,
      
     },
-    
     {
       name: "County",
       layer: texasCounties, 
@@ -404,9 +401,6 @@ export const searchWidget = new Search({
       displayField: "CNTY_NM", 
       exactMatch: false,
       outFields: ["*"],
-      maxSuggestions: 3,
-      exactMatch: true,
-      //minSuggestCharacters: 3,
       
     },
     {
@@ -417,8 +411,6 @@ export const searchWidget = new Search({
       displayField: "TXDOT_DIST_NM", 
       exactMatch: false,
       outFields: ["*"],
-      maxSuggestions: 3,
-      //minSuggestCharacters: 3,
     },
 
     {
@@ -429,8 +421,6 @@ export const searchWidget = new Search({
       displayField: "RTE_NM", 
       exactMatch: false,
       outFields: ["*"],
-      //minSuggestCharacters: 2,
-      maxSuggestions: 3,
       //suggestionTemplate: "NAME: {RTE_NM} (GID: {GID})"
     },
     {
@@ -441,8 +431,6 @@ export const searchWidget = new Search({
       displayField: "CITY_NM", 
       exactMatch: false,
       outFields: ["*"],
-      maxSuggestions: 3,
-      //minSuggestCharacters: 3,
     },
     {
       name: "Minute Order",
@@ -453,9 +441,7 @@ export const searchWidget = new Search({
       displayField: "ACTV_NBR",
       exactMatch: false,
       outFields: ["*"],
-      minSuggestCharacters: 3,
-      maxSuggestions: 3,
-      suggestionTemplate: "RETS: {RETS_ID} (MO: {ACTV_NBR})"
+      suggestionTemplate: "RETS: {RETS_ID} (MO: {ACTV_NBR})", 
     },
     
     
@@ -631,7 +617,7 @@ document.addEventListener('click', function(event) {
       }
 });
 
- searchWidget.on("suggest-complete", function(event) {
+searchWidget.on("suggest-complete", function(event){
   const suggestions = event.results; 
   const searchTerm = event.searchTerm;
   const hasLetters = /[a-zA-Z]/.test(searchTerm);
@@ -646,13 +632,33 @@ document.addEventListener('click', function(event) {
 
  
 
- });
+
+  
+})
 
 
 homeWidget.on("go", function() {
   home();
 });
 
+view.on("click", function(event){
+if (event.button === 2){
+  // Get the coordinates of the click on the view
+  // let lat = Math.round(event.mapPoint.latitude * 1000) / 1000;
+  // let lon = Math.round(event.mapPoint.longitude * 1000) / 1000;
+  let lat = Math.round(event.mapPoint.latitude * 100000000) / 100000000;
+  let lon = Math.round(event.mapPoint.longitude * 100000000) / 100000000;
+  let coordinate = lon + ", " + lat
+  
+  //navigator.clipboard.writeText(coordinate);
+  store.coordinatenotification = true
+  store.latlonstring = coordinate
+  setTimeout(() => {
+    store.coordinatenotification = false
+  }, 3000);
+
+}
+})
 view.watch("scale", function(newValue) {
   if (newValue < 1000000 ) { 
     retsLayer.renderer = retsPointRenderer;
