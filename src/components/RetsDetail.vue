@@ -1,6 +1,6 @@
 <template>
     <!-- details section -->
-    <div id="detailsHeaderDiv">
+    <div id="detailsHeaderDiv" >
         <div id="detailsHeaderIcon">
             <v-btn density="compact" flat @click="changeColor(store.retsObj.attributes.RETS_ID);" id="flagBtnDetails">
                 <template v-slot:prepend>
@@ -33,13 +33,29 @@
             </span>
         </div>
         <!-- history section -->
-        <div>
+        <div style="position: relative; ">
             <v-card class="history-card">
                 <div style="float: right; font-size: 10px; position: relative; top: .5rem;" >
                     <v-btn icon="mdi-arrow-expand" variant="plain" density="compact" @click="expandChatHistory" style="font-size: .8rem;"></v-btn>
                 </div>
                 <v-card-title style="padding-bottom: 30px;">History</v-card-title>
                 <historyViewSmall/>
+                <div class="marginSetting" style="padding-top: 10px; position: absolute; width: 98%; bottom: -14px;">
+                    <v-text-field label="Type a message" density="compact" tile v-model="addHistoryChat" style="margin-left: 0px; margin-right: 5px;" :error-messages= "initRules ? 'Write a note. Submit your thought to History!' : null" @update:modelValue="historyValue"></v-text-field>
+                    <div style="float: left; bottom: 1rem; position: relative;">
+                        <v-btn prepend-icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px !important; top: 10px;" @click="displayAttachments()">Add an Attachment</v-btn>
+                    </div>
+                    <div> 
+                        <div style="position:relative; float: left; width:100%;">
+                            <v-chip v-for="(attach, index) in addAttach" color="#4472C4" closable density="compact" rounded="0" variant="flat" :text="attach.name" @click:close="removeAttachment(index)"></v-chip>
+                        </div>
+                    </div>
+                    
+                    <div style="float:right; bottom: 2.7rem; position: relative; left: 7px;">
+                        <v-btn icon="mdi-close" variant="plain" density="compact" style="font-size: 15px !important;" @click="clearMessage"></v-btn>
+                        <v-btn icon="mdi-check" variant="plain" density="compact" style="font-size: 15px !important;" @click="addHistoryNote"></v-btn>
+                    </div>
+                 </div>
             </v-card>
         </div>
     </div>
@@ -236,6 +252,7 @@
                     store.cancelEvent.remove()
                     cancelSketchPt()
                 }
+                store.toggleFeed = 1
                 store.isAlert = false
                 clearGraphicsLayer()
                 store.isDetailsPage = false
@@ -478,11 +495,12 @@ div .cardDiv{
     position: relative;
     top: 1.5rem;
     min-height: 0% !important;
-    max-height: calc(100% - 14rem) !important;
+    max-height: calc(100% - 8rem) !important;
     overflow-x: hidden;
+    overflow-y: hidden;
     scroll-behavior: smooth;
     scrollbar-width: thin;
-    padding-bottom: 50px !important;
+    padding-bottom: 78px !important;
     width:100%;
 }
 
@@ -554,7 +572,7 @@ div .cardDiv{
 }
 .history-card{
     position:relative; 
-    height: 30rem; 
+    height: 23rem; 
     bottom: 0.2rem; 
     border-radius: 0%; 
     margin-right: 10px;

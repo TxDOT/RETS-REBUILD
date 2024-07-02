@@ -2,10 +2,10 @@
 
     <v-navigation-drawer width="200" height="100" permanent color="black">
         <v-list height="100%" id="icons-top" class="iconList">
-            <v-list-item class="iconList-item"  id="popoutitems" v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" >    
+            <v-list-item class="iconList-item"  id="popoutitems" v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" active-class="btn-left-brder" :active="store.toggleFeed === tool.value" :disabled="tool.disabled">    
                 <v-tooltip location="right bottom" :text=tool.name >
                     <template v-slot:activator="{ props}">
-                        <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
+                        <v-icon id="topIcon" size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
                     </template>
                 </v-tooltip>
                 
@@ -16,9 +16,7 @@
                 <template v-if="tool.name != 'Basemaps' && tool.name != 'Jump To'">
                     <v-tooltip location="right" :text="tool.name">
                             <template v-slot:activator="{ props }">
-                                <div id="iconcontent">
-                                    <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
-                                </div>
+                                <v-icon id="topIcon" size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
                             </template>
                         
                     </v-tooltip>
@@ -62,10 +60,6 @@
                 <v-card-title id="basemapfont"> OSM </v-card-title>
             </v-btn>
         </v-card-item>
-        
-
-
-
     </v-card>
     <v-card id="jumptotoggle" max-width="400" hover @mouseleave="mouseleavejumpto" v-if = "jumptocard" >
        
@@ -116,9 +110,7 @@
             <v-btn-group id = "savebutton" density="compact">
                 <v-btn class="secondary-button"  @click="handleSettingsTool();handleactiveclass()">CANCEL</v-btn>
                
-                    <v-btn class="main-button-style" @click="handleSettingsTool();handleactiveclass()">SAVE</v-btn>
-            
-                
+                    <v-btn class="main-button-style" @click="handleSettingsTool();handleactiveclass()">SAVE</v-btn>    
             </v-btn-group>
             
 
@@ -137,11 +129,16 @@
     import { createtool, selecttool, togglemenu, logoutUser } from '../components/utility.js';
     import { vuetify } from '../main.js';
     import { store } from './store';
+    import { defineAsyncComponent } from 'vue'
 
     export default{
         name: "NavBar",
+        components:{
+            RetsDetailPage: defineAsyncComponent(()=>import('./RetsDetail.vue')),
+        },
         data(){
             return{
+                toggle: store.toggleFeed,
                 selectfunction : {},
                 store,
                 shiftmap: false,
@@ -176,14 +173,46 @@
                                 title:"Toggle",
                                 icon: 'mdi-menu', 
                                 color: "#D9D9D9", 
-                                name: "Menu", 
+                                name: "Menu",
+                                value: 0,
                                 action: () =>{
                                     document.getElementById("card-container").style.display = document.getElementById("card-container").style.display === "none" ? "flex" : "none",
                                     //this.resizemap();
                                     this.shiftDiv();
                                 }, 
                                 isActive: this.tester,
-                               },  
+                                disabled: false
+                               },
+                               {
+                                title: "Activity Pane",
+                                icon: "mdi-map-marker-outline",
+                                name: "Activity Feed",
+                                value: 1,
+                                action: ()=>{
+                                    //open feed
+                                    store.isCard = true
+                                    store.isDetailsPage = false
+                                    this.toggle = 1
+                                    store.toggleFeed = 1
+                                },
+                                disabled: false
+                               },
+                               {
+                                title: "Details Pane",
+                                icon: "mdi-clipboard-text-outline",
+                                color: "#D9D9D9",
+                                name: "Details",
+                                value: 2,
+                                props:{},
+                                action: ()=>{
+                                    //open details pane
+                                    store.isDetailsPage = true
+                                    store.isCard = false
+                                    this.toggle = 2
+                                    store.toggleFeed = 2
+                                },
+                                disabled: true
+                               }
                             ],
  
                 retsToolsBottom: [
@@ -251,10 +280,26 @@
 
                 },
                 watch: {
-                   
+                   'store.toggleFeed':{
+                        handler: function(){
+                            this.retsToolsTop[store.toggleFeed].action()
+                        },
+                        immediate: true
+                   },
+                   'store.activityBanner':{
+                    handler: function(){
+                        if(store.activityBanner !== "Activity Feed" ){
+                            this.retsToolsTop[2].disabled = false
+                            return
+                        }
+                        this.retsToolsTop[2].disabled = true
+                        return
+                    },
+                    immediate: true
+                   }
                 },
                 mounted() {
-                
+                console.log(store.retsObj.attributes)
                     
 
                 },
@@ -455,34 +500,55 @@
 </script>
 
 <style>
+     .btn-left-brder{
+        border-left: 8px solid #4472C4 !important;
+    }
+    .btn-left-brder i {
+        position: absolute;
+        top: 35%;
+        left: 24% !important;
+        transform: translate(-25%, -25%);
+    }
+
+    #topIcon{
+        position: absolute;
+        top: 35%;
+        left: 35%;
+        transform: translate(-25%, -25%);
+        width: fit-content;
+    }
+    
     .v-list-item:hover{
         cursor: pointer;
         background-color: rgba(128,128,128,.3);
     }
-
-    #popoutitems .v-list-item__overlay {
-        color: transparent;
+    #popoutitems{
+       height: 56px;
+       width: 56px;
+       bottom: 6px;
     }
-  
-   #iconcontent  {
-    position: absolute;
-    width: 30px !important;
-    top: 9px;
-    left: 29%;
-   }
+    #iconcontent  {
+        position: absolute;
+        width: 30px !important;
+        top: 9px;
+        left: 29%;
+    }
+    #iconcontent i {
+        right: 5px;
+    }
     #icons-bottom{
         position: relative;
-        bottom: 15.5rem;
+        bottom: 18rem;
         left: 10%;
     }
     #icons-top{
-        left: 10%;
-        top: -7px;
+        right: 10%;
+        top: -8px;
     }
     .v-navigation-drawer{
         overflow-y: hidden !important;
         height: 100% !important;
-        width: 58px !important;
+        width: 56px !important;
         color: black;
         border: 0;
     }
@@ -491,21 +557,6 @@
         overflow-y: hidden !important;
     }
 
-    template{
-        overflow-y: hidden;
-    }
-
-    .btn-left-brder .v-list-item__overlay{
-        opacity: 1 !important;
-        position: absolute;
-        /* border-left: 10px solid #4472C4 !important; */
-        width: 10px !important;
-        color:   #4472C4 !important;
-    }
-    .nav-bar-btn{
-        height: 2rem;
-        width: 100%;
-    }
     .v-color-picker-swatches{
         overflow-y: hidden !important;
     }
@@ -562,7 +613,6 @@
         font-size: 20px;
     }
     #headerfont{
-
         left: 10px;
         /* font-size: 18px; */
         
@@ -673,10 +723,11 @@
         width: 58px ;
         left:0px !important;
     }
-    .iconList-item{
+    /* .iconList-item{
         position: relative;
-        left: -5%;
-    }
+        right: 5%;
+        width: 100%;
+    } */
 
     .esri-view {
         width: calc(100% - 555px) !important;

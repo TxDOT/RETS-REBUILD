@@ -76,6 +76,15 @@ export function clickRetsPoint(){
     try{
         view.on("click", (event)=>{
             view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt) =>{
+                if(event.button === 2){
+                    let lat = Math.round(event.mapPoint.latitude * 1000) / 1000;
+                    let lon = Math.round(event.mapPoint.longitude * 1000) / 1000;
+                    let coordinate = lon + ", " + lat
+                    if(!navigator.clipboard) return
+                    navigator.clipboard.writeText(coordinate);
+                    console.log(coordinate)
+                    return
+                }
                 if(!evt.results.length){
                     removeOutline()
                     removeHighlight("a", true)

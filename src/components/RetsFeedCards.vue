@@ -53,7 +53,7 @@
                 </template>
             </v-text-field>
         </div>
-        <div class="card-feed-div" v-if="store.isCard">
+        <div class="card-feed-div" v-show="store.isCard">
             <RetsCards/>
         </div>
         <div id="Spinner" v-if="isSpinner">
@@ -243,7 +243,8 @@ export default{
             store.archiveRetsDataString = JSON.stringify(road)
             store.retsObj = road
             store.historyRetsId = road.attributes.RETS_ID
-           
+            
+            
             returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
             clearTimeout(this.timer)
             this.timer=""
@@ -517,7 +518,7 @@ export default{
 
     #feed-banner{
         font-size: 20px;
-        height: 6%;
+        height: 56px;
         position: absolute;
         top: 50px;
         width:100%;

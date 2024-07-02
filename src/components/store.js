@@ -4,7 +4,7 @@ import {sendChatHistory} from './crud.js'
 import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapActivityFeed} from './utility.js'
 
 export const store = reactive({
-        devStatus: "prod",
+        devStatus: "dev",
         count: 0,
         isCloseDetail: false,
         taskGem: 0,
@@ -38,10 +38,6 @@ export const store = reactive({
         roadObj: [],
         roadObjOverflow: [],
         retsObj: {
-                attributes:{
-                    RTE_NM: "",
-                    DFO: 0
-                }
         },
         updateRetsSearch:[],
         updatedRetsPtName: "",
@@ -77,6 +73,7 @@ export const store = reactive({
         filter: {},
         editText: false,
         addPtRd: "",
+        toggleFeed: 1, 
         DFO: null,
         isAdd: false,
         cancelEvent: null,
@@ -207,7 +204,6 @@ export const store = reactive({
                 this.loggedInUser = userid
                 const queryString = {"whereString": where, "queryLayer": layer}
                 //const orderField = "EDIT_DT DESC, PRIO"
-
                 try{
                         this.roadObj.length = 0
                         this.updateRetsSearch.length = 0
@@ -220,7 +216,7 @@ export const store = reactive({
                                                         x.attributes.EDIT_NM = this.returnUserName(x.attributes.EDIT_NM)
                                                         x.attributes.CREATE_DT = this.returnDateFormat(x.attributes.CREATE_DT)
                                                         x.attributes.EDIT_DT = this.returnDateFormat(x.attributes.EDIT_DT)
-                                                        x.attributes.mdiaccountmultiplecheck = this.isAssigned(x.attributes)
+                                                        x.attributes.mdiaccountmultiplecheck = this.isAssigned(x.attributes.ASSIGNED_TO)
                                                         x.attributes.mdiaccountgroup = this.isMOTxDOTConnct(x.attributes.ACTV)
                                                         x.attributes.mdipencilboxoutline = this.isRequest(x.attributes.ACTV)
                                                         x.attributes.mdialarm = this.isDeadline(x.attributes.DEADLINE)
@@ -395,6 +391,9 @@ export const store = reactive({
                         return true
                 }
                 return false
+        },
+        getLatestHistory(){
+
         },
         checkDetailsForComplete(){
                 let item = [this.retsObj.attributes.RTE_NM, this.retsObj.attributes.DFO, this.retsObj.attributes.STAT, this.retsObj.attributes.DESC_].filter(x => !x)

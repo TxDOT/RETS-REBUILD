@@ -20,6 +20,5 @@
         beforeRouteLeave(){
             return false
         },
-        
     }
 </script>

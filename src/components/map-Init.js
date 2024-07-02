@@ -375,11 +375,11 @@ export const searchWidget = new Search({
   /////////////////////////////////
   view: view,
   includeDefaultSources: false,
-  allPlaceholder: "City, County, District, Route",
+  allPlaceholder: "City, County, District, Route, Minute Order, RETS ID",
   popupEnabled: false,
   popupTemplate: false,
-  minSuggestCharacters: 3,
-  maxSuggestions: 3,
+  //minSuggestCharacters: 3,
+  //maxSuggestions: 3,
   sources:
   [
     {
@@ -420,6 +420,7 @@ export const searchWidget = new Search({
       maxSuggestions: 3,
       //minSuggestCharacters: 3,
     },
+
     {
       name: "Roadways",
       layer: TxDotRoaways, 
@@ -447,7 +448,7 @@ export const searchWidget = new Search({
       name: "Minute Order",
       layer: retsLayer, 
       placeholder: "Minute Order",
-      zoomScale: 5000,
+      //zoomScale: 5000,
       searchFields: [ "ACTV_NBR" ],
       displayField: "ACTV_NBR",
       exactMatch: false,
@@ -455,9 +456,6 @@ export const searchWidget = new Search({
       minSuggestCharacters: 3,
       maxSuggestions: 3,
       suggestionTemplate: "RETS: {RETS_ID} (MO: {ACTV_NBR})"
-      
-      
-      
     },
     
     
@@ -636,7 +634,6 @@ document.addEventListener('click', function(event) {
  searchWidget.on("suggest-complete", function(event) {
   const suggestions = event.results; 
   const searchTerm = event.searchTerm;
-
   const hasLetters = /[a-zA-Z]/.test(searchTerm);
   if ((hasLetters) && (event.activeSourceIndex === -1) && (suggestions[0]?.results[0]?.text)) {
     suggestions[0] = []

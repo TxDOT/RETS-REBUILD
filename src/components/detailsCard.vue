@@ -1,11 +1,11 @@
 <template>
     <div>
     <v-container>
-        <v-row align="start" no-gutters dense style="position: relative; bottom: .5rem; height: 50px;">
-            <v-col cols="4" offset="0">
+        <v-row align="start" no-gutters dense style="position: relative; bottom: 1rem; height: 50px;">
+            <v-col cols="8" offset="0">
                 <v-autocomplete :items="activityList" label="Activity" variant="underlined" density="compact" item-title="value" item-value="name" return-object flat v-model="store.retsObj.attributes.ACTV" @update:model-value="completeDataSearch()"></v-autocomplete>
             </v-col>
-            <v-col cols="4" offset="3">
+            <v-col cols="4" offset="0">
                 <v-text-field label="Number" density="compact" class="number-field" variant="underlined" :disabled="disableACTVNum(store.retsObj.attributes.ACTV)" v-model="store.retsObj.attributes.ACTV_NBR" @update:model-value="actvNbrUpdate(store.retsObj.attributes.ACTV_NBR)">
                     <template v-slot:append-inner >
                         <v-icon icon="mdi-link" small class="number-field-icon" @click="paperClipFunc" ></v-icon>
@@ -14,10 +14,10 @@
             </v-col>
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom: 1.3rem; height: 70px; padding-bottom: 0% !important;" >
-            <v-col cols="3" offset="0" style="position: relative; bottom: 5px !important;">
+            <v-col cols="8" offset="0" style="position: relative; bottom: 5px !important;">
                 <v-text-field :disabled="store.retsObj.attributes.NO_RTE === false" label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required] : []" id="route" @update:model-value="completeDataSearch()"></v-text-field>
             </v-col>
-            <v-col cols="4" offset="4">
+            <v-col cols="4" offset="0">
                 <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" :error-messages="(!store.retsObj.attributes.DFO || !store.retsObj.attributes.DFO.length) && !store.retsObj.attributes.NO_RTE ? 'But where am I? Don\'t leave me blank!' : null" v-model="store.retsObj.attributes.DFO" :rules="!store.retsObj.attributes.NO_RTE ? [onlyNumbers.required, onlyNumbers.numbers]: []" @update:model-value="manuallyUpdateDFO(store.retsObj.attributes.DFO)">
                         <template v-slot:append-inner>
                             <v-tooltip :text="store.zoomInText" location="top">
@@ -441,9 +441,10 @@ import {store} from './store.js'
 .number-field{
     position: relative;
     padding-left: 2.5rem;
-    width: 16vh;
-    left: 24%;
+    width: 142px;
+    right: 0%;
     font-size: 20vh;
+    top: 3px;
 }
 
 .number-field-icon{

@@ -211,6 +211,8 @@ export default{
             },250)
         },
         double(road, index){
+            store.toggleFeed = 2
+            console.log(store.toggleFeed)
             store.isSaving = false
             store.isSaveBtnDisable = true
             store.archiveRetsDataString = JSON.stringify(road)

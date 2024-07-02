@@ -18,13 +18,15 @@
         <v-row>
             <v-autocomplete :items="countyMetadata" item-title="name" item-value="value" label="County" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.CNTY_NM" @update:modelValue="onDropDownChange(store.retsObj.attributes.CNTY_NM)" :rules="[emptyRow.required]"></v-autocomplete>
         </v-row>
-
+        <div>
+            <v-text-field variant="plain" disabled density="compact">Created {{ createDate }} by {{createName}}</v-text-field>
+        </div>
     </div>
 </template>
 
 <script>
- 
-    import {appConstants} from '../common/constant.js'
+
+import {appConstants} from '../common/constant.js'
     import {store} from './store.js'
     export default{
         name: "MetadataCard",
@@ -36,11 +38,14 @@
                 store,
                 emptyRow:{
                     required: value => !!value || "Empty value is not allowed",
-                }
+                },
+                createName: "",
+                createDate: "",
             }
         },
         mounted(){
-
+            this.createName = store.retsObj.attributes.CREATE_NM
+            this.createDate = store.retsObj.attributes.CREATE_DT.split(",")[0]
         },
         methods:{
             onDropDownChange(){
