@@ -4,6 +4,10 @@
         <v-banner v-if="store.devStatus === 'dev'" lines="one" class="" style="position: absolute; width: fit-content; top: 0px; left: 25em; justify-content: center; display: flex;" bg-color="warning">
             <p>You are in the TEST enviornment. Using UAT data.</p>
         </v-banner>
+        <v-alert v-if="store.coordinatenotification" tile variant="elevated" color="blue-grey-darken-3" density="compact" style="position: absolute; width: fit-content; top: 10px; left: 25em; justify-content: center; display: flex;">
+            {{store.latlonstring}} copied to clipboard
+        </v-alert>
+        
     </div>
 
     

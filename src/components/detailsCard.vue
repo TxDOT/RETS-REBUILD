@@ -101,7 +101,24 @@
             
             <!-- <v-text-field prepend-icon="mdi-timer-outline" disabled density="compact" variant="plain" class="date-select" style="z-index: 9999; cursor: pointer !important;" @click="isDatePicker = true"> {{ datePicker }}</v-text-field> -->
             <div class="date-picker" v-if="isDatePicker" ref="datepickerelement" v-click-outside="toggleVisibility" >
-                <v-date-picker v-model="datePicked" class="date" hide-header @update:modelValue="selectDates()"></v-date-picker>
+                <v-date-picker v-model="datePicked" class="date" hide-header @update:modelValue="selectDates()">
+                </v-date-picker>
+                <div class="cleardate">
+                    <v-tooltip location="bottom" text="Close Calendar Pane">
+                        <template v-slot:activator="{ props }">
+                            <v-btn v-bind="props" @click="toggleVisibility">CLOSE</v-btn>
+                        </template>
+                    </v-tooltip>
+                    <v-tooltip location="bottom" text="Clear Due Date" >
+                        <template v-slot:activator="{ props }">
+                            <v-btn v-bind="props"  @click="handleCleardate" style="right: -150px;">CLEAR</v-btn>
+                        </template>
+                    </v-tooltip>
+                   
+                        
+                       
+                </div>
+
             </div>
         </v-row>
     </v-container>
@@ -113,7 +130,6 @@
 import { appConstants } from '../common/constant'
 import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets, zoomTo, 
         createRoadGraphic, getRoadInformation, cancelSketchPt, hitTestMoveRETS} from './utility.js'
-
 import {store} from './store.js'
 
     export default{
@@ -177,6 +193,14 @@ import {store} from './store.js'
 
         },
         methods:{
+            handleCleardate(){
+                if (this.datePicked != store.retsObj.attributes.DEADLINE){
+                    store.retsObj.attributes.DEADLINE = null 
+                    store.isSaveBtnDisable = false
+                }
+                this.isDatePicker =! this.isDatePicker
+
+            },
             toggleVisibility(){
                 this.isDatePicker =! this.isDatePicker
             },
@@ -412,7 +436,11 @@ import {store} from './store.js'
 </script>
 
 <style scoped>
-
+.cleardate{
+    position: absolute;
+    bottom:10px;
+    right: 150px;
+}
 #route{
     width: 50px;
 }
