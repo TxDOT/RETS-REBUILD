@@ -76,7 +76,21 @@ export function clickRetsPoint(){
     try{
         view.on("click", (event)=>{
             view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt) =>{
-                if(!evt.results.length && event.button != 2){
+                if (event.button === 2){
+                    // Get the coordinates of the click on the view
+                    let lat = Math.round(event.mapPoint.latitude * 100000000) / 100000000;
+                    let lon = Math.round(event.mapPoint.longitude * 100000000) / 100000000;
+                    let coordinate = lon + ", " + lat
+                    
+                    navigator.clipboard.writeText(coordinate);
+                    store.coordinatenotification = true
+                    store.latlonstring = coordinate
+                    setTimeout(() => {
+                      store.coordinatenotification = false
+                    }, 3000);
+                    return
+                }
+                if(!evt.results.length){
                     removeOutline()
                     removeHighlight("a", true)
                     clearRoadHighlightObj()

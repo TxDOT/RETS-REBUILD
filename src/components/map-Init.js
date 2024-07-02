@@ -629,11 +629,6 @@ searchWidget.on("suggest-complete", function(event){
   suggestions[5].results[0].text = suggestions[5].results[0].text.replace(/,/g, '')
   suggestions[5].results[1].text = suggestions[5].results[1].text.replace(/,/g, '')
   suggestions[5].results[2].text = suggestions[5].results[2].text.replace(/,/g, '')
-
- 
-
-
-  
 })
 
 
@@ -641,24 +636,7 @@ homeWidget.on("go", function() {
   home();
 });
 
-view.on("click", function(event){
-if (event.button === 2){
-  // Get the coordinates of the click on the view
-  // let lat = Math.round(event.mapPoint.latitude * 1000) / 1000;
-  // let lon = Math.round(event.mapPoint.longitude * 1000) / 1000;
-  let lat = Math.round(event.mapPoint.latitude * 100000000) / 100000000;
-  let lon = Math.round(event.mapPoint.longitude * 100000000) / 100000000;
-  let coordinate = lon + ", " + lat
-  
-  //navigator.clipboard.writeText(coordinate);
-  store.coordinatenotification = true
-  store.latlonstring = coordinate
-  setTimeout(() => {
-    store.coordinatenotification = false
-  }, 3000);
 
-}
-})
 view.watch("scale", function(newValue) {
   if (newValue < 1000000 ) { 
     retsLayer.renderer = retsPointRenderer;
