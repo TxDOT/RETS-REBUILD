@@ -42,5 +42,25 @@ export const appConstants = {
     defaultQuery : (userId) => {
         return `(${appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]} = '${userId}' OR ASSIGNED_TO = '${userId}') AND (STAT = 1 OR STAT = 2 or STAT = 4)`
     },
-    userQueryField: []
+    userQueryField: [],
+    defineCMNT: {
+        0 : (uName, date) => {
+            return `Comment added by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
+        },
+        1 : (uName, date) => {
+            return `Created by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
+        },
+        2 : (uName, date) => {
+            return `Status changed by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
+        },
+        3 : (uName, date) => {
+            return `Activity changed by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
+        },
+        4 : (uName, date) => {
+            return `Assigned to changed by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
+        },
+        5 : (uName, date) => {
+            return `Point moved by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
+        }
+    }
 }

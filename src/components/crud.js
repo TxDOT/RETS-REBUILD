@@ -2,6 +2,7 @@ import { retsLayer, retsHistory, flagRetsColor } from "./map-Init";
 import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant";
 import {store} from './store.js'
+
 export async function addRETSPT(retsObj){
     //retsObj.attributes.ACTV = retsObj.attributes.ACTV.value
     return retsLayer.applyEdits({
@@ -93,6 +94,16 @@ export async function sendChatHistory(chat, type){
             })
         },
         modify:() => {
+            let setRetsEditDate = new Date().getTime()
+            // console.log(setRetsEditDate)
+            // console.log(store.roadObj.find(ret => ret.attributes.RETS_ID === chat.RETS_ID))
+            // let findStoreRetsObj = store.roadObj.find(ret => ret.attributes.RETS_ID === chat.RETS_ID)
+            // findStoreRetsObj.attributes.EDIT_DT = setRetsEditDate
+
+            let a = createGraphic({"OBJECTID": chat.RETS_ID, "EDIT_DT": setRetsEditDate})
+            retsLayer.applyEdits({
+                updateFeatures: [a]
+            })
             newGraphic = createGraphic(chat)
             return retsHistory.applyEdits({
                 updateFeatures: [newGraphic]

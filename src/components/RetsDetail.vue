@@ -1,6 +1,5 @@
 <template>
     <!-- details section -->
-
     <div id="detailsHeaderDiv">
         <div id="detailsHeaderIcon">
             <v-btn density="compact" flat @click="changeColor(store.retsObj.attributes.RETS_ID);" id="flagBtnDetails">
@@ -34,29 +33,13 @@
             </span>
         </div>
         <!-- history section -->
-        <div style="position: relative; ">
+        <div>
             <v-card class="history-card">
                 <div style="float: right; font-size: 10px; position: relative; top: .5rem;" >
                     <v-btn icon="mdi-arrow-expand" variant="plain" density="compact" @click="expandChatHistory" style="font-size: .8rem;"></v-btn>
                 </div>
                 <v-card-title style="padding-bottom: 30px;">History</v-card-title>
                 <historyViewSmall/>
-                <div class="marginSetting" style="padding-top: 10px; position: absolute; width: 98%; bottom: -14px;">
-                    <v-text-field label="Type a message" density="compact" tile v-model="addHistoryChat" style="margin-left: 0px; margin-right: 5px;" :error-messages= "initRules ? 'Write a note. Submit your thought to History!' : null" @update:modelValue="historyValue"></v-text-field>
-                    <div style="float: left; bottom: 1rem; position: relative;">
-                        <v-btn prepend-icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px !important; top: 10px;" @click="displayAttachments()">Add an Attachment</v-btn>
-                    </div>
-                    <div> 
-                        <div style="position:relative; float: left; width:100%;">
-                            <v-chip v-for="(attach, index) in addAttach" color="#4472C4" closable density="compact" rounded="0" variant="flat" :text="attach.name" @click:close="removeAttachment(index)"></v-chip>
-                        </div>
-                    </div>
-                    
-                    <div style="float:right; bottom: 2.7rem; position: relative; left: 7px;">
-                        <v-btn icon="mdi-close" variant="plain" density="compact" style="font-size: 15px !important;" @click="clearMessage"></v-btn>
-                        <v-btn icon="mdi-check" variant="plain" density="compact" style="font-size: 15px !important;" @click="addHistoryNote"></v-btn>
-                    </div>
-                 </div>
             </v-card>
         </div>
     </div>
@@ -99,49 +82,33 @@
             <v-checkbox label="Asset Only Job" density="compact" class="checkbox-size" v-model="isAsset" @update:model-value="isAssetJob"></v-checkbox>
         </div>
             <v-btn-toggle id="trigger-buttons" density="compact">
-                <v-btn @click="handlearchive" flat size="small" class="secondary-button" style="background-color: transparent;">Delete</v-btn>
-                <!-- <v-btn @click="handlearchive" variant="plain" flat size="small" class="secondary-button">Delete</v-btn> -->
-                <v-btn @click="cancelPopupFunction" class="secondary-button" flat size="small" style="background-color: transparent;" :disabled="store.isCancelBtnDisable">Cancel</v-btn>
+                <v-btn @click="handlearchive" variant="plain" flat size="small" class="secondary-button">Delete</v-btn>
+                <v-btn @click="cancelDetailsMetadata" class="secondary-button" variant="plain" flat size="small" :disabled="store.isCancelBtnDisable">Cancel</v-btn>
                 <v-btn @click="sendToParent" variant="outlined" class="main-button-style" size="small" :disabled="store.isSaveBtnDisable" :loading="store.isSaving">Save</v-btn>
             </v-btn-toggle>
     </div>
 
     <v-card id="archivepopup" v-if="isarchiveopen" >
-        <v-card-title class="popupheader" >
+        <v-card-title id="archiveheader" >
             Delete RETS {{deletedRETSID}}
             <hr id="separator2" />
         </v-card-title>
-        <v-card-subtitle class="popuptext">
+        <v-card-subtitle id="archivetext">
             Deleting this RETS will move it to the archive table.
         </v-card-subtitle>
             
-        <v-btn-group class="buttonpositioning" density="compact">
+        <v-btn-group id="archivebuttons" density="compact">
             <v-btn class="secondary-button"  @click="handlearchive">CANCEL</v-btn>
             <v-btn class="main-button-style" @click="deleteRets">DELETE</v-btn>
         </v-btn-group>
     </v-card>   
-    <v-card id="cancelpopup" v-if="cancelpopup">
-        <v-card-title class="popupheader" >
-            Discard unsaved changes?
-            <hr id="separator2" />
-        </v-card-title>
-        <v-card-subtitle class="popuptext">
-            If you proceed, your changes will be discarded.
-        </v-card-subtitle>
-        <v-btn-group class="buttonpositioning" density="compact">
-            <v-btn class="secondary-button"  @click="this.cancelpopup = false">GO BACK</v-btn>
-            <v-btn class="main-button-style" @click="cancelDetailsMetadata">DISCARD</v-btn>
-        </v-btn-group>
-
-    </v-card>
-    
 
 </template>
 
 <script>
     import { appConstants } from '../common/constant.js'
     import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, removeOutline, outlineFeedCards} from './utility.js'
-    import { view } from './map-Init'
+
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
 
@@ -162,8 +129,6 @@
         emits:['close-detail'],
         data(){
             return{
-                isFocused: false,
-                cancelpopup: false,
                 deletedRETSID: null,
                 isarchiveopen: false,
                 isDetails: true,
@@ -212,7 +177,6 @@
             })
             //this.getHistoryStore
             this.isAsset = store.retsObj.attributes.JOB_TYPE === 2 ?  true : false
-            
         },
         methods:{
             historyValue(){
@@ -272,7 +236,6 @@
                     store.cancelEvent.remove()
                     cancelSketchPt()
                 }
-                store.toggleFeed = 1
                 store.isAlert = false
                 clearGraphicsLayer()
                 store.isDetailsPage = false
@@ -284,10 +247,11 @@
                 store.isSaveBtnDisable = true
                 if (store.roadHighlightObj.size <= 1 && store.isSelectEnabled === false){
                     removeHighlight(store.retsObj)
-                    const b = store.roadObj.find(rd => rd.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
-                    store.roadHighlightObj.delete(b)
+                    //const b = store.roadObj.find(rd => rd.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
+                    //store.roadHighlightObj.delete(b)
                     store.roadHighlightObj.clear()
                     store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+                    console.log(store.updateRetsSearch)
                     store.isShowSelected = false
                     return
                 }
@@ -325,32 +289,27 @@
                 return
             },
             cancelDetailsMetadata(){
+                store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                //const archiveRets = JSON.parse(store.archiveRetsDataString)
+                //this.replaceArchiveContent(archiveRets)
                 this.returnToFeed()
-                const archiveRets = JSON.parse(store.archiveRetsDataString)
-                this.replaceArchiveContent(archiveRets)
                 retsLayerView.layer.definitionExpression = store.savedFilter
-                
+                store.toggleFeed = 1
                 //store.preserveHighlightCards()
                 // retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
-                
                 return
             },
-            cancelPopupFunction(){
-                if (store.isSaveBtnDisable === true){
-                    this.cancelDetailsMetadata()
-                }
-                else{
-                    this.cancelpopup = true
-
-                }
-
-            },
-            replaceArchiveContent(old){
-                const filter = !store.isShowSelected ? store.updateRetsSearch : [...store.roadHighlightObj]
-                const rd = filter.findIndex(x => x.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
-                filter.splice(rd, 1, old)
-                return
-            },
+            // replaceArchiveContent(old){
+            //     const filter = !store.isShowSelected ? store.updateRetsSearch : [...store.roadHighlightObj]
+            //     const currDate = filter.find(x => x.attributes.RETS_ID === old.attributes.RETS_ID).attributes.EDIT_DT
+            //     const rd = filter.findIndex(x => x.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
+            //     if(currDate !== old.attributes.EDIT_DT){
+            //         old.attributes.EDIT_DT === currDate
+            //     }
+            //     console.log(filter.find(x => x.attributes.RETS_ID === old.attributes.RETS_ID).attributes.EDIT_DT, old.attributes.EDIT_DT)
+            //     filter.splice(rd, 1, old)
+            //     return
+            // },
             openNote(note, index){
                 this.editText = true
                 this.editNotes = note
@@ -449,19 +408,8 @@
     margin: auto;
 
 }
-#cancelpopup{
-    position: fixed;
-    border-radius: 5px;
-    width: 25rem;
-    height:25%; 
-    border-radius: 0;
-    left: 567px;
-    right:0;
-    top:0;
-    bottom: 0;
-    margin: auto;
-}
-.popupheader{
+
+#archiveheader{
     position: absolute;
     top: 2%;
     left: 2%;
@@ -476,13 +424,13 @@
     padding-top: 1px;
 }
 
-.popuptext{
+#archivetext{
     position: absolute;
     top: 25%;
     left: 2%;
 }
 
-.buttonpositioning{
+#archivebuttons{
     position: absolute;
     bottom: 14px;
     width: 20rem;
@@ -537,12 +485,11 @@ div .cardDiv{
     position: relative;
     top: 1.5rem;
     min-height: 0% !important;
-    max-height: calc(100% - 8rem) !important;
+    max-height: calc(100% - 14rem) !important;
     overflow-x: hidden;
-    overflow-y: hidden;
     scroll-behavior: smooth;
     scrollbar-width: thin;
-    padding-bottom: 78px !important;
+    padding-bottom: 50px !important;
     width:100%;
 }
 
@@ -614,7 +561,7 @@ div .cardDiv{
 }
 .history-card{
     position:relative; 
-    height: 23rem; 
+    height: 30rem; 
     bottom: 0.2rem; 
     border-radius: 0%; 
     margin-right: 10px;

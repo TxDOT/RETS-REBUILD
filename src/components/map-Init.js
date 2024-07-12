@@ -271,7 +271,8 @@ export const retsLayer = new FeatureLayer({
 //RETS History
 export const retsHistory = new FeatureLayer({
   url: store.devStatus === "dev" ? appConstants.retsCMNTDev : appConstants.retsCMNTProd,
-  outFields: ["*"]
+  outFields: ["*"],
+  visible: true
 })
 
 //Rets User Roles
@@ -563,8 +564,8 @@ export const OSMVTBasemap = new Basemap({
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-map.addMany([TxDotRoaways,retsLayer, graphics, retsGraphicLayer, texasCounties, texasCities,  highlightLayer, txdotDistricts])
-
+map.addMany([TxDotRoaways,retsLayer, graphics, retsGraphicLayer, texasCounties, texasCities,  highlightLayer, txdotDistricts, retsHistory])
+console.log("stuff added")
 
 searchWidget.on("select-result", function(event) {
   const selectedFeature = event.result.feature;

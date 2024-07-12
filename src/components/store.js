@@ -1,7 +1,7 @@
 import { reactive } from 'vue';
 import { appConstants } from '../common/constant';
 import {sendChatHistory} from './crud.js'
-import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapActivityFeed} from './utility.js'
+import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapActivityFeed, getHistoryView} from './utility.js'
 
 export const store = reactive({
         devStatus: "dev",
@@ -19,6 +19,7 @@ export const store = reactive({
         updateChatHistory: {},
         historyRetsId: 0,
         historyChat: [],
+        allHistoryChat: [],
         chatAttachments: [],
         attachment: [],
         addNoteOid: 0,
@@ -38,6 +39,10 @@ export const store = reactive({
         roadObj: [],
         roadObjOverflow: [],
         retsObj: {
+                attributes:{
+                        RTE_NM: "",
+                        DFO: 0
+                }
         },
         updateRetsSearch:[],
         updatedRetsPtName: "",
@@ -123,7 +128,7 @@ export const store = reactive({
         },
         async addNote(cmnt, isAttach, isExpand){
                 const date = new Date().getTime()
-                const newHistory = {RETS_ID: this.historyRetsId, CMNT: cmnt, CMNT_NM: `${appConstants.defaultUserValue[0].value}`, SYS_GEN: 0, CREATE_DT: date, EDIT_DT: date }
+                const newHistory = {RETS_ID: this.historyRetsId, CMNT: cmnt, CMNT_NM: `${appConstants.defaultUserValue[0].value}`, SYS_GEN: 0, CREATE_DT: date, EDIT_DT: date, CMNT_TYPE_ID: 0}
                 try{
                         await sendChatHistory(newHistory, "add")
                        
@@ -150,6 +155,7 @@ export const store = reactive({
                 const findItem = this.historyChat.find(note => note.OBJECTID === oid)
                 findItem.EDIT_DT = modDate
                 findItem.CMNT = cmt
+                findItem.CMNT_TYPE_ID = 0
                 sendChatHistory(findItem, "modify")
                 return findItem
         },
@@ -202,7 +208,7 @@ export const store = reactive({
         //         }
         //         return
         // },
-        getRetsLayer(userid, where, layer, orderFields){
+        async getRetsLayer(userid, where, layer, orderFields){
                 this.loggedInUser = userid
                 const queryString = {"whereString": where, "queryLayer": layer}
                 //const orderField = "EDIT_DT DESC, PRIO"
@@ -226,7 +232,7 @@ export const store = reactive({
                                                         x.attributes.mditimersand = this.isNoActivity(x.attributes.STAT, x.attributes.EDIT_DT)
                                                         x.attributes.mdiexclamation = this.isPrio(x.attributes.PRIO)
                                                         x.attributes.DFO = x.attributes.DFO ? x.attributes.DFO.toFixed(3) : x.attributes.DFO
-
+                                                        x.attributes.historyUpdate = "Loading"
                                                         this.roadObj.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                                                         //store.archiveRetsData.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                                                 })
@@ -280,6 +286,7 @@ export const store = reactive({
                 const orderField = `${this.CREATE_DT.filter} ${this.CREATE_DT.sortType}`
                 const obj = await getQueryLayer(query, orderField)
                         if(obj.features.length){
+                                
                                 const updateItem = {attributes: obj.features[0].attributes, geometry: [obj.features[0].geometry.x, obj.features[0].geometry.y]}
                                 updateItem.attributes.flagColor = this.setFlagColor(obj.features[0].attributes)
                                 updateItem.attributes.CREATE_NM = this.returnUserName(obj.features[0].attributes.CREATE_NM)
@@ -293,6 +300,7 @@ export const store = reactive({
                                 updateItem.attributes.mdicheckdecagramoutline = this.isComplete(obj.features[0].attributes.STAT)
                                 updateItem.attributes.mditimersand = this.isNoActivity(obj.features[0].attributes.STAT, obj.features[0].attributes.EDIT_DT)
                                 updateItem.attributes.mdiexclamation = this.isPrio(obj.features[0].attributes.PRIO)
+                                updateItem.attributes.historyUpdate = "Loading"
                                 //this.retsObj = updateItem
                                 //const retsIndex = this.roadObj.findIndex(x => x.attributes.RETS_ID === obj.features[0].attributes.RETS_ID)
                                 // if(retsIndex === -1){
@@ -394,8 +402,29 @@ export const store = reactive({
                 }
                 return false
         },
-        getLatestHistory(){
-
+        async getLatestHistory(retsid){
+                await retsid.queryFeatures({
+                        where: `CMNT_NM = 'DPROSACK'`
+                })
+                .then((x) => console.log(x))
+                // const query = {"whereString": `RETS_ID = ${retsid}`}
+                // const orderField = `EDIT_DT DESC`
+                // let newCMNT = null
+                // getQueryLayer(query, orderField)
+                //         .then((hist) =>{
+                //                 let rets = this.roadObj.find(ret => ret.attributes.RETS_ID === retsid)
+                //                 if(hist.features.length){
+                                        
+                //                         newCMNT = `CMNT Says: ${hist.features[0].attributes.CMNT}`
+                //                         //rets.attributes.historyUpdate = newCMNT
+                //                         console.log(newCMNT)
+                //                         return  'hi'
+                //                 }
+                //                 return "IM missing"
+                //         })
+                
+                // return "hello"
+        
         },
         checkDetailsForComplete(){
                 let item = [this.retsObj.attributes.RTE_NM, this.retsObj.attributes.DFO, this.retsObj.attributes.STAT, this.retsObj.attributes.DESC_].filter(x => !x)

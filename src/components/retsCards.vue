@@ -92,7 +92,7 @@
 
                         <div style="height:17px; position: relative; bottom: 0px; width:fit-content;">
                             <v-card-subtitle class="subtitle-text">
-                                Created by {{ rd.attributes.CREATE_NM }} {{ rd.attributes.CREATE_DT }}
+                                {{ rd.attributes.historyUpdate }}
                             </v-card-subtitle>
                         </div>
                             
@@ -110,7 +110,7 @@
 
 <script>
 import {postFlagColor} from '../components/crud.js'
-import {zoomTo, highlightRETSPoint, toggleRelatedRets,returnHistory, removeHighlight, removeOutline, includes, checkhighlightfunction, outlineFeedCards} from './utility.js'
+import {zoomTo, highlightRETSPoint, toggleRelatedRets,returnHistory, removeHighlight, removeOutline, includes, checkhighlightfunction, loadData} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {store} from './store.js'
 
@@ -139,34 +139,26 @@ export default{
         }
     },
 
-    beforeMount(){
-        //
-    },
     mounted(){
-        this.loadData()
         //outlineFeedCards()
         store.isSaving = false
+        loadData()
         //outlineFeedCards(store.roadHighlightObj)
 
     },
 
+    updated(){
+        console.log("updated")
+        loadData()
+    },
+
     methods:{
+
         checkhighlight(retsid){
             return checkhighlightfunction(retsid)
-
             
         },
-        loadData(){
-            const cards = document.querySelectorAll('.rets-card-row') 
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    entry.target.classList.toggle("show", entry.isIntersecting)
-                })
-            })
 
-            cards.forEach(card => observer.observe(card))
-            
-        },
         changeFlagIcon(color){
             if(color === '#FFFFFF'){
                 return 'mdi-flag-outline'
@@ -240,18 +232,17 @@ export default{
 
     },
     watch:{
-        // 'store.roadObj.length':{
-        //     handler: function(a,b){
-        //         //this.retsToGet
-        //     },
-        //     immediate: true
-        // }
+        'store.updateRetsSearch.length':{
+            handler: function(a,b){
+
+            },
+            immediate: true
+        }
     },
     computed:{
-        retsToGet(){
-            outlineFeedCards(store.roadHighlightObj)
-            return
-        }
+        getHistoryMeow(rets_id){
+            store.getLatestHistory(rets_id)
+        },
     }
 
 }

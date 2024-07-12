@@ -14,6 +14,7 @@ import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 
 export let retsLayerView; 
 export let roadLayerView;
+export let retsHistoryView;
 
 export async function getRetsLayerView (){
         const retLayerView = await view.whenLayerView(retsLayer)
@@ -22,7 +23,13 @@ export async function getRetsLayerView (){
             async () => {
                 try{
                     retsLayerView = retLayerView
-
+                    //let ret = await retsLayerView.queryFeatures()
+                
+                    //ret.features.forEach(id => retsid.push(id.attributes.RETS_ID))
+                    //console.log(retsid)
+                    //let concatRetsId = retsid.join(",")
+                    //getHistoryView(concatRetsId)
+                    
                     if(retsLayerView.view.zoom < 12){
                         store.zoomInText = "Zoom in to enable"
                         store.zoomInToEnable = true
@@ -556,9 +563,27 @@ export const toggleRelatedRets = (retsid) =>  {
     return
 }
 
-// export function openDetailsFromGraphic(){
-    
-//}
+export function getHistoryView(retsid){
+    retsHistory.queryFeatures({
+        groupByFieldsForStatistics: ["RETS_ID"],
+        orderByFields: ["CREATE_DT DESC"],
+        outFields: ["RETS_ID", "CMNT_NM", "EDIT_DT", "CMNT_TYPE_ID"],
+        where: `RETS_ID = ${retsid}`
+    })
+    .then((res) => {
+        let retCard = store.roadObj.find(ret => ret.attributes.RETS_ID === Number(retsid))
+        if(!res.features[0]){
+            retCard.attributes.historyUpdate = "Heyyyyy Champ! When was the last time we chatted?"
+            return
+        }
+        let {CMNT_NM, EDIT_DT, CMNT_TYPE_ID} = res.features[0].attributes      
+        
+        let latestHistoryText = appConstants.defineCMNT[CMNT_TYPE_ID ? CMNT_TYPE_ID : 0](CMNT_NM, EDIT_DT)
+        retCard.attributes.historyUpdate = latestHistoryText
+
+    })
+    return
+}
 
 export function returnHistory(query){
     store.numAttachments = 0
@@ -874,6 +899,7 @@ export async function queryFlags(userid){
         where: `USERNAME = '${userid}'`,
         outFields: ["*"]
     }) 
+    console.log(returnRetsFlagUser)
     returnRetsFlagUser.features.forEach(flag => store.userRetsFlag.push({FLAG: flag.attributes.FLAG, OBJECTID: flag.attributes.OBJECTID, RETS_ID: flag.attributes.RETS_ID, USERNAME: flag.attributes.USERNAME}))
     return
 }
@@ -1186,4 +1212,18 @@ export function checkhighlightfunction(retsid){
     const objarray = Array.from(store.roadHighlightObj)
     const found = objarray.some(feature => feature.attributes.RETS_ID.toString() === retsid);
     return found ? "card-rets highlight-card" : "card-rets";
+}
+
+export function loadData(){
+    const cards = document.querySelectorAll('.rets-card-row') 
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if(entry.isIntersecting){
+                getHistoryView(entry.target.id)
+            }
+            entry.target.classList.toggle("show", entry.isIntersecting)
+        })
+    })
+
+    cards.forEach(card => observer.observe(card))   
 }

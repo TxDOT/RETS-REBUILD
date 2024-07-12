@@ -1,7 +1,7 @@
 <template>
     <div>
-    <v-container>
-        <v-row align="start" no-gutters dense style="position: relative; bottom: 1rem; height: 50px;">
+    <v-container >
+        <v-row align="start" no-gutters dense style="position: relative; bottom: 1rem; height: 50px; ">
             <v-col cols="8" offset="0">
                 <v-autocomplete :items="activityList" label="Activity" variant="underlined" density="compact" item-title="value" item-value="name" return-object flat v-model="store.retsObj.attributes.ACTV" @update:model-value="completeDataSearch()"></v-autocomplete>
             </v-col>

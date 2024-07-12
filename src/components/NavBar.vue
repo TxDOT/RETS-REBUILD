@@ -21,7 +21,7 @@
                     </v-tooltip>
                 </template>
                 <template v-else>
-                        <v-icon size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
+                        <v-icon id="topIcon" size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
                 </template>
             </v-list-item>
         </v-list>
@@ -722,11 +722,11 @@
         width: 58px ;
         left:0px !important;
     }
-    /* .iconList-item{
+    .iconList-item{
         position: relative;
         right: 5%;
         width: 100%;
-    } */
+    }
 
     .esri-view {
         width: calc(100% - 555px) !important;

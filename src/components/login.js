@@ -1,7 +1,7 @@
 import OAuthInfo from "@arcgis/core/identity/OAuthInfo.js";
 import esriId from "@arcgis/core/identity/IdentityManager.js";
 import { retsLayer, view, retsUserRole} from './map-Init.js'
-import {getDomainValues, getDistinctAttributeValues, getUniqueQueryValues, queryFlags, getRetsLayerView, getTxDotRdWayLayerView, home} from './utility.js'
+import {getDomainValues, getDistinctAttributeValues, getUniqueQueryValues, queryFlags, getRetsLayerView, getHistoryView, getTxDotRdWayLayerView, home} from './utility.js'
 import { appConstants } from "../common/constant.js";
 import router from '../router/index.js'
 import {store} from './store.js'
@@ -29,6 +29,7 @@ function generateLogin(){
 }
 
 async function signIn(){
+  
   await getUniqueQueryValues(retsUserRole, appConstants.userRoles)
   const userId = await getUserId()
   await queryFlags(userId)
@@ -40,6 +41,7 @@ async function signIn(){
   router.push({name: "Map"})
   
   view.when(() => {
+
     [{name: 'JOB_TYPE', prop: "jobTypeDomainValues"},{name: 'STAT', prop: "statDomainValues"}, {name: 'DIST_NM', prop: "districtDomainValues"}, {name: 'CNTY_NM', prop: "countyDomainValues"}].forEach((layer) => {
       getDomainValues(layer.name).codedValues.forEach((x) => {
          appConstants[layer.prop].push({"name" : x.name, "value": x.code})
@@ -51,7 +53,7 @@ async function signIn(){
     getDistinctAttributeValues('ACTV')
     getRetsLayerView()
     getTxDotRdWayLayerView()
-
+    //getHistoryView()
     home(true)
 
   })
