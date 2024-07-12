@@ -86,37 +86,47 @@ export function clickRetsPoint(){
                     //navigator.clipboard.writeText(coordinate);
                     store.coordinatenotification = true
                     store.latlonstring = coordinate
+                    setTimeout(() => {
+                        store.coordinatenotification = false
+                      }, 3000);
                 }
                 else{
                     if(!evt.results.length){
                         removeOutline()
                         removeHighlight("a", true)
                         clearRoadHighlightObj()
-                        returnToFeedFunction()
-                        
-
+                        canceldetailsfunction()
+                       
                         return
                     }
                     const retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
                     if (store.isDetailsPage && store.isSaveBtnDisable){
+                        canceldetailsfunction()
                         openDetails(retsPt)
+                        
                     }
-                    if (store.isDetailsPage && !store.isSaveBtnDisable){
+                    if (store.isDetailsPage && !store.isSaveBtnDisable ){
                         store.cancelpopup = true  
                     }
-                   if (store.isSaveBtnDisable === true){
+
+                    
+                   
                     store.roadHighlightObj.clear()
                     store.roadHighlightObj.add(retsPt)
-                    removeOutline()
-                    removeHighlight("a", true)
-                    //evt.results.forEach(rest => rest.graphic.layer.title ? highlightRETSPoint(rest.graphic.attributes) : highlightGraphicPt(rest.graphic.attributes))
-                    const firstResult = Array.isArray(evt.results) ? evt.results[0] : null;
-                    firstResult.graphic.layer.title ? highlightRETSPoint(firstResult.graphic.attributes) : highlightGraphicPt(firstResult.graphic.attributes)
-                    outlineFeedCards(evt.results.splice(0,1))
-                    //return evt.results[0].graphic.attributes.RETS_ID;
+                    if (store.isSaveBtnDisable){
+                        removeOutline()
+                        removeHighlight("a", true)
+                        //evt.results.forEach(rest => rest.graphic.layer.title ? highlightRETSPoint(rest.graphic.attributes) : highlightGraphicPt(rest.graphic.attributes))
+                        const firstResult = Array.isArray(evt.results) ? evt.results[0] : null;
+                        firstResult.graphic.layer.title ? highlightRETSPoint(firstResult.graphic.attributes) : highlightGraphicPt(firstResult.graphic.attributes)
+                        outlineFeedCards(evt.results.splice(0,1))
+                 
+                        //return evt.results[0].graphic.attributes.RETS_ID;
+                    }
                     
-                   }
+                    
                 }
+                
             })
         })
     }
@@ -765,6 +775,8 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
                                     }
                                     if (store.isDetailsPage && store.roadHighlightObj.size === 1 ){
                                         store.roadHighlightObj.forEach(entry => {
+                                            canceldetailsfunction()
+
                                             if (store.retsObj.attributes.RETS_ID != entry.attributes.RETS_ID){
                                                 openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === entry.attributes.RETS_ID))
                                             }
@@ -1254,5 +1266,25 @@ export function returnToFeedFunction(){
         return
     }
 
+    return
+}
+
+
+export function replaceArchive(old){
+        const filter = !store.isShowSelected ? store.updateRetsSearch : [...store.roadHighlightObj]
+        const rd = filter.findIndex(x => x.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
+        filter.splice(rd, 1, old)
+        return
+}
+
+export function canceldetailsfunction(){
+    returnToFeedFunction()
+    const archiveRets = JSON.parse(store.archiveRetsDataString)
+    replaceArchive(archiveRets)
+    retsLayerView.layer.definitionExpression = store.savedFilter
+    store.cancelpopup = false
+
+
+    
     return
 }

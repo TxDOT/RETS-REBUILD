@@ -124,7 +124,7 @@
 
 <script>
     import { appConstants } from '../common/constant.js'
-    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, removeOutline, outlineFeedCards, returnToFeedFunction} from './utility.js'
+    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, removeOutline, outlineFeedCards, returnToFeedFunction, openDetails, highlightRETSPoint} from './utility.js'
     import { view } from './map-Init'
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
@@ -309,19 +309,40 @@
                 return
             },
             cancelDetailsMetadata(){
-                this.returnToFeed()
-                const archiveRets = JSON.parse(store.archiveRetsDataString)
-                this.replaceArchiveContent(archiveRets)
-                retsLayerView.layer.definitionExpression = store.savedFilter
-                store.cancelpopup = false
+                if (store.clickStatus === false){
+                    this.returnToFeed()
+                    const archiveRets = JSON.parse(store.archiveRetsDataString)
+                    this.replaceArchiveContent(archiveRets)
+                    retsLayerView.layer.definitionExpression = store.savedFilter
+                    store.cancelpopup = false
+                    //store.clickStatus = true
+                    return
+                }
+                else{
+                    
+                    store.roadHighlightObj.forEach(entry => {
+                        this.returnToFeed()
+                        openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === entry.attributes.RETS_ID))
+                        });
+                        console.log(store.retsObj)
+                        highlightRETSPoint(store.retsObj.attributes)
+
+                        
+
+                    store.clickStatus = false
+                    store.cancelpopup = false
+                    
+                }
+
                 //store.preserveHighlightCards()
                 // retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
                 
-                return
+                //return
             },
             cancelPopupFunction(){
                 if (store.isSaveBtnDisable === true){
                     this.cancelDetailsMetadata()
+                    
                 }
                 else{
                     store.cancelpopup = true
