@@ -248,8 +248,8 @@ export const texasCities = new FeatureLayer({
   visible: false,
 })
 
-//TxDotRoaways Layer construction
-export const TxDotRoaways = new FeatureLayer ({
+//TxDOTRoadways Layer construction
+export const TxDOTRoadways = new FeatureLayer ({
   url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Roadways/FeatureServer/0",
   visible: true,
   renderer: roadwaysRenderer,
@@ -257,6 +257,17 @@ export const TxDotRoaways = new FeatureLayer ({
   returnM: true,
   hasM: true,
   definitionExpression: `RTE_PRFX = 'IH'`
+})
+
+export const TxDOTRoadwayscopy = new FeatureLayer ({
+  url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Roadways/FeatureServer/0",
+  visible: true,
+  renderer: roadwaysRenderer,
+  outFields: ["*"],
+  returnM: true,
+  hasM: true,
+  definitionExpression: "",
+  visible:false
 })
 
 //Rets Layer construction
@@ -414,7 +425,7 @@ export const searchWidget = new Search({
     },
     {
       name: "Roadways",
-      layer: TxDotRoaways, 
+      layer: TxDOTRoadwayscopy, 
       placeholder: "Roadways",
       searchFields: ["RTE_NM", "GID"],
       displayField: "RTE_NM", 
@@ -493,7 +504,7 @@ export const sketchWidgetcreate = new Sketch({
   creationMode: "single", 
   snappingOptions: {
       enabled: true,
-      featureSources: [{layer: TxDotRoaways, enabled: true}]
+      featureSources: [{layer: TxDOTRoadways, enabled: true}]
   },
 });
 
@@ -562,7 +573,7 @@ export const OSMVTBasemap = new Basemap({
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-map.addMany([TxDotRoaways,retsLayer, graphics, retsGraphicLayer, texasCounties, texasCities,  highlightLayer, txdotDistricts])
+map.addMany([TxDOTRoadways, retsLayer, graphics, retsGraphicLayer, texasCounties, texasCities,  highlightLayer, txdotDistricts])
 
 
 searchWidget.on("select-result", function(event) {
@@ -641,24 +652,6 @@ homeWidget.on("go", function() {
   home();
 });
 
-view.on("click", function(event){
-if (event.button === 2){
-  // Get the coordinates of the click on the view
-  // let lat = Math.round(event.mapPoint.latitude * 1000) / 1000;
-  // let lon = Math.round(event.mapPoint.longitude * 1000) / 1000;
-  let lat = Math.round(event.mapPoint.latitude * 100000000) / 100000000;
-  let lon = Math.round(event.mapPoint.longitude * 100000000) / 100000000;
-  let coordinate = lon + ", " + lat
-  
-  //navigator.clipboard.writeText(coordinate);
-  store.coordinatenotification = true
-  store.latlonstring = coordinate
-  setTimeout(() => {
-    store.coordinatenotification = false
-  }, 3000);
-
-}
-})
 view.watch("scale", function(newValue) {
   if (newValue < 1000000 ) { 
     retsLayer.renderer = retsPointRenderer;

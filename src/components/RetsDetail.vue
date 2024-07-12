@@ -83,10 +83,10 @@
             <v-checkbox label="Asset Only Job" density="compact" class="checkbox-size" v-model="isAsset" @update:model-value="isAssetJob"></v-checkbox>
         </div>
             <v-btn-toggle id="trigger-buttons" density="compact">
-                <v-btn @click="handlearchive" flat size="small" class="secondary-button" style="background-color: transparent;">Delete</v-btn>
+                <v-btn @click="handlearchive" flat size="small" id = "djpbuttons" class="secondary-button" style="background-color: transparent;">Delete</v-btn>
                 <!-- <v-btn @click="handlearchive" variant="plain" flat size="small" class="secondary-button">Delete</v-btn> -->
-                <v-btn @click="cancelPopupFunction" class="secondary-button" flat size="small" style="background-color: transparent;" :disabled="store.isCancelBtnDisable">Cancel</v-btn>
-                <v-btn @click="sendToParent" variant="outlined" class="main-button-style" size="small" :disabled="store.isSaveBtnDisable" :loading="store.isSaving">Save</v-btn>
+                <v-btn @click="cancelPopupFunction" id = "djpbuttons" class="secondary-button"  size="small"  style="background-color: transparent;" :disabled="store.isCancelBtnDisable">Cancel</v-btn>
+                <v-btn @click="sendToParent" variant="outlined" id = "djpbuttons" class="main-button-style" size="small" style="background-color: transparent;" :disabled="store.isSaveBtnDisable" :loading="store.isSaving">Save</v-btn>
             </v-btn-toggle>
     </div>
 
@@ -104,7 +104,7 @@
             <v-btn class="main-button-style" @click="deleteRets">DELETE</v-btn>
         </v-btn-group>
     </v-card>   
-    <v-card id="cancelpopup" v-if="cancelpopup">
+    <v-card id="cancelpopup" v-if="store.cancelpopup">
         <v-card-title class="popupheader" >
             Discard unsaved changes?
             <hr id="separator2" />
@@ -113,7 +113,7 @@
             If you proceed, your changes will be discarded.
         </v-card-subtitle>
         <v-btn-group class="buttonpositioning" density="compact">
-            <v-btn class="secondary-button"  @click="this.cancelpopup = false">GO BACK</v-btn>
+            <v-btn class="secondary-button"  @click="store.cancelpopup = false">GO BACK</v-btn>
             <v-btn class="main-button-style" @click="cancelDetailsMetadata">DISCARD</v-btn>
         </v-btn-group>
 
@@ -124,7 +124,7 @@
 
 <script>
     import { appConstants } from '../common/constant.js'
-    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, removeOutline, outlineFeedCards} from './utility.js'
+    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, removeOutline, outlineFeedCards, returnToFeedFunction} from './utility.js'
     import { view } from './map-Init'
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
@@ -252,30 +252,31 @@
                 this.saveDisable = bool
             },
             returnToFeed(){
-                if(store.cancelEvent){
-                    store.cancelEvent.remove()
-                    cancelSketchPt()
-                }
-                store.isAlert = false
-                clearGraphicsLayer()
-                store.isDetailsPage = false
-                store.isCancelBtnDisable = false
-                store.activityBanner = "Activity Feed"
-                store.isMoveRetsPt = false
-                store.isCard = true
-                store.historyChat.length = 0
-                store.isSaveBtnDisable = true
-                if (store.roadHighlightObj.size <= 1 && store.isSelectEnabled === false){
-                    removeHighlight(store.retsObj)
-                    const b = store.roadObj.find(rd => rd.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
-                    store.roadHighlightObj.delete(b)
-                    store.roadHighlightObj.clear()
-                    store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
-                    store.isShowSelected = false
-                    return
-                }
+                // if(store.cancelEvent){
+                //     store.cancelEvent.remove()
+                //     cancelSketchPt()
+                // }
+                // store.isAlert = false
+                // clearGraphicsLayer()
+                // store.isDetailsPage = false
+                // store.isCancelBtnDisable = false
+                // store.activityBanner = "Activity Feed"
+                // store.isMoveRetsPt = false
+                // store.isCard = true
+                // store.historyChat.length = 0
+                // store.isSaveBtnDisable = true
+                // if (store.roadHighlightObj.size <= 1 && store.isSelectEnabled === false){
+                //     removeHighlight(store.retsObj)
+                //     const b = store.roadObj.find(rd => rd.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
+                //     store.roadHighlightObj.delete(b)
+                //     store.roadHighlightObj.clear()
+                //     store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+                //     store.isShowSelected = false
+                //     return
+                // }
 
-                return
+                // return
+                returnToFeedFunction()
             },
             deleteRets(){
                 this.returnToFeed()
@@ -312,7 +313,7 @@
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
                 this.replaceArchiveContent(archiveRets)
                 retsLayerView.layer.definitionExpression = store.savedFilter
-                
+                store.cancelpopup = false
                 //store.preserveHighlightCards()
                 // retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
                 
@@ -323,7 +324,7 @@
                     this.cancelDetailsMetadata()
                 }
                 else{
-                    this.cancelpopup = true
+                    store.cancelpopup = true
 
                 }
 
@@ -687,5 +688,8 @@ div .cardDiv{
     opacity: 1 !important;
     padding: 0px;
     margin-right: 19px;
+}
+#djpbuttons:hover{
+    background: rgba(220, 220, 220, .1) !important;
 }
 </style>

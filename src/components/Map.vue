@@ -1,12 +1,12 @@
 <template>
     <div id="viewDiv">
         <detailsAlert v-if="store.isAlert" id="showAlert"/>
-        <v-banner v-if="store.devStatus === 'dev'" lines="one" class="" style="position: absolute; width: fit-content; top: 0px; left: 25em; justify-content: center; display: flex;" bg-color="warning">
+        <v-banner v-if="store.devStatus === 'dev'" lines="one" class="" style="position: absolute; width: fit-content; top: 0px; left: 0; right:0; margin: auto; justify-content: center; display: flex;" bg-color="warning">
             <p>You are in the TEST enviornment. Using UAT data.</p>
         </v-banner>
-        <v-alert v-if="store.coordinatenotification" tile variant="elevated" color="blue-grey-darken-3" density="compact" style="position: absolute; width: fit-content; top: 10px; left: 25em; justify-content: center; display: flex;">
-            {{store.latlonstring}} copied to clipboard
-        </v-alert>
+        <v-banner v-if="store.coordinatenotification" lines="one"  style="position: absolute; width: fit-content; left: 0; right: 0; margin: auto; justify-content: center; display: flex;" bg-color="success">
+            ({{store.latlonstring}}) has been copied to clipboard.
+        </v-banner>
         
     </div>
 

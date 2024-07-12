@@ -36,7 +36,7 @@
                 <div class="new-proposed-route">
                     <v-checkbox density="compact" class="checkbox-size" v-model="store.retsObj.attributes.NO_RTE" @update:model-value="noRTECheck(store.retsObj.attributes.RTE_NM)">
                         <template v-slot:label>
-                            <v-label class="main-color subtitle-text" text="Check for new or proposed routes"></v-label>
+                            <v-label class="main-color subtitle-text" text="New, Proposed, or Unspecified"></v-label>
                         </template>
                     </v-checkbox>
                 </div>
@@ -106,12 +106,12 @@
                 <div class="cleardate">
                     <v-tooltip location="bottom" text="Close Calendar Pane">
                         <template v-slot:activator="{ props }">
-                            <v-btn v-bind="props" @click="toggleVisibility">CLOSE</v-btn>
+                            <v-btn flat v-bind="props" @click="toggleVisibility">CLOSE</v-btn>
                         </template>
                     </v-tooltip>
                     <v-tooltip location="bottom" text="Clear Due Date" >
                         <template v-slot:activator="{ props }">
-                            <v-btn v-bind="props"  @click="handleCleardate" style="right: -150px;">CLEAR</v-btn>
+                            <v-btn flat v-bind="props"  @click="handleCleardate" style="right: -150px;">CLEAR</v-btn>
                         </template>
                     </v-tooltip>
                    
@@ -195,6 +195,7 @@ import {store} from './store.js'
         methods:{
             handleCleardate(){
                 if (this.datePicked != store.retsObj.attributes.DEADLINE){
+                    this.datePicker = "Pick a date"
                     store.retsObj.attributes.DEADLINE = null 
                     store.isSaveBtnDisable = false
                 }
