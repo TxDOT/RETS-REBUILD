@@ -1,4 +1,4 @@
-import {view, retsLayer, homeWidget, retsGraphicLayer, TxDotRoaways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate, retsPointRenderer, texasExtent, retsPointRendererout} from './map-Init'
+import {view, retsLayer, homeWidget, retsGraphicLayer, TxDOTRoadways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate, retsPointRenderer, texasExtent, retsPointRendererout} from './map-Init'
 import Query from "@arcgis/core/rest/support/Query.js";
 import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant.js";
@@ -11,6 +11,7 @@ import * as geodesicUtils from "@arcgis/core/geometry/support/geodesicUtils.js";
 import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils.js";
 import * as geometryEngine from "@arcgis/core/geometry/geometryEngine.js";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
+import { ssrDynamicImportKey } from 'vite/runtime';
 
 export let retsLayerView; 
 export let roadLayerView;
@@ -50,7 +51,7 @@ export async function getRetsLayerView (){
 
 export async function getTxDotRdWayLayerView(){
     store.isAddBtn = true
-    const rdLayerView = await view.whenLayerView(TxDotRoaways)
+    const rdLayerView = await view.whenLayerView(TxDOTRoadways)
     rdLayerView.highlightOptions = {
         color: "#FF00FF", //bright fuchsia
         haloOpacity: 0.8,
@@ -61,11 +62,11 @@ export async function getTxDotRdWayLayerView(){
         async () => {
             try{
                 if( rdLayerView.view.zoom > 9 ){
-                    if(TxDotRoaways.definitionExpression === "") return
+                    if(TxDOTRoadways.definitionExpression === "") return
                     rdLayerView.layer.definitionExpression = ""
                 }
                 if(rdLayerView.view.zoom < 10 ){
-                    if(TxDotRoaways.definitionExpression === "RTE_PRFX = 'IH'") return
+                    if(TxDOTRoadways.definitionExpression === "RTE_PRFX = 'IH'") return
                     rdLayerView.layer.definitionExpression = "RTE_PRFX = 'IH'"
                 }
                 roadLayerView = rdLayerView
@@ -710,82 +711,94 @@ export function createtool(sketchWidgetcreate, createretssym) {
 
 
 
-    export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
-        if(isSelectEnabled === true){ 
-            sketchWidgetselect.create("rectangle");
-            const selectretspoints = sketchWidgetselect
-                .on("create", function (event)
-                    {
-                        if(event.state === "complete")
-                            {
-                                // Get the rectangle geometry
-                                var rectangleGeometry = event.graphic.geometry;
-                                // Query for points within the rectangle
-                                var query = retsLayer.createQuery();
-                                query.geometry = rectangleGeometry;
-                                retsLayer.queryFeatures(query)
-                                .then(function (result) 
-                                        {
-                                            graphics.removeAll();
-                                            var selectedFeatures = result.features;
-                                            if (pressedkey === false){
-                                                
-                                                removeHighlight("a", true); 
-                                                store.roadHighlightObj.clear()
-                                                let i
-                                                for (i = 0; i < selectedFeatures.length; i++ ) {
-                                                    store.roadHighlightObj.add(store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[i].attributes.OBJECTID))
-                                                    highlightRETSPoint(selectedFeatures[i].attributes, true); 
-                                                            
-                                                }
-                                                if (store.roadHighlightObj.size){
-                                                    outlineFeedCards(store.roadHighlightObj); 
+export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
+    if(isSelectEnabled === true){ 
+        sketchWidgetselect.create("rectangle");
+        const selectretspoints = sketchWidgetselect
+            .on("create", function (event)
+                {
+                    if(event.state === "complete")
+                        {
+                            // Get the rectangle geometry
+                            var rectangleGeometry = event.graphic.geometry;
+                            // Query for points within the rectangle
+                            var query = retsLayer.createQuery();
+                            query.geometry = rectangleGeometry;
+                            retsLayer.queryFeatures(query)
+                            .then(function (result)
+                                {
+                                    graphics.removeAll();
+                                    var selectedFeatures = result.features;
+                                    if (pressedkey === false){
+                                        
+                                        removeHighlight("a", true); 
+                                        store.roadHighlightObj.clear()
+                                        let i
+                                        for (i = 0; i < selectedFeatures.length; i++ ) {
+                                            store.roadHighlightObj.add(store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[i].attributes.OBJECTID))
+                                            highlightRETSPoint(selectedFeatures[i].attributes, true); 
+                                                    
+                                        }
+                                        if (store.roadHighlightObj.size){
+                                            outlineFeedCards(store.roadHighlightObj); 
 
-                                                }
-                                                scrollToTopOfFeed(store.roadHighlightObj.size)             
-                                                
+                                        }
+                                        scrollToTopOfFeed(store.roadHighlightObj.size)             
+                                        
+                                    }
+                                    if (pressedkey === "Shift"){
+                                        let i
+                                        for (i = 0; i < selectedFeatures.length; i++ ) {
+                                            store.roadHighlightObj.add(store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[i].attributes.OBJECTID))
+                                            highlightRETSPoint(selectedFeatures[i].attributes);
+                                        }
+                                        outlineFeedCards(store.roadHighlightObj);  
+                                    }
+                                    
+                                    if (pressedkey === "Control"){   
+                                        graphics.removeAll();   
+                                        if (selectedFeatures.length > 0){
+                                            let n
+                                            for (n = 0; n < selectedFeatures.length; n++){
+                                                removeHighlight(selectedFeatures[n]);
+                                                store.roadHighlightObj.delete(store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[n].attributes.OBJECTID))
+                                                scrollToTopOfFeed(store.roadHighlightObj.size) 
+                                            } 
+                                            if (store.roadHighlightObj.size){
+                                                outlineFeedCards(store.roadHighlightObj); 
+
+                                            }  
+                                        }
+                                    }
+                                    if (store.isDetailsPage && (store.roadHighlightObj.size != 1)){
+
+                                        returnToFeedFunction()
+                                    }
+                                    if (store.isDetailsPage && store.roadHighlightObj.size === 1 ){
+                                        store.roadHighlightObj.forEach(entry => {
+                                            canceldetailsfunction()
+
+                                            if (store.retsObj.attributes.RETS_ID != entry.attributes.RETS_ID){
+                                                openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === entry.attributes.RETS_ID))
                                             }
-                                            if (pressedkey === "Shift"){
-                                                let i
-                                                for (i = 0; i < selectedFeatures.length; i++ ) {
-                                                    store.roadHighlightObj.add(store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[i].attributes.OBJECTID))
-                                                    highlightRETSPoint(selectedFeatures[i].attributes);
-                                                }
-                                                outlineFeedCards(store.roadHighlightObj);  
-                                            }
-                                            
-                                            if (pressedkey === "Control"){   
-                                                graphics.removeAll();   
-                                                if (selectedFeatures.length > 0){
-                                                    let n
-                                                    for (n = 0; n < selectedFeatures.length; n++){
-                                                        removeHighlight(selectedFeatures[n]);
-                                                        store.roadHighlightObj.delete(store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[n].attributes.OBJECTID))
-                                                        scrollToTopOfFeed(store.roadHighlightObj.size) 
-                                                    } 
-                                                    if (store.roadHighlightObj.size){
-                                                        outlineFeedCards(store.roadHighlightObj); 
-        
-                                                    }  
-                                                }
-                                            }
-                                        });          
-                            }
+                                          });
+
+
+                                    }
+                                });          
+                        }
                 });
 
-            isSelectEnabled = !isSelectEnabled; 
-            return selectretspoints
+        isSelectEnabled = !isSelectEnabled; 
+        return selectretspoints
 
-        }
-        else{
-            isSelectEnabled = !isSelectEnabled;
-            sketchWidgetselect.cancel()
-                
-        }
-        
-        
-        return
-      }
+    }
+    else{
+        isSelectEnabled = !isSelectEnabled;
+        sketchWidgetselect.cancel()
+            
+    }
+}
 export function scrollToTopOfFeed(setsize){
 
     const feedElement = document.querySelector('.card-feed-div')

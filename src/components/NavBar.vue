@@ -564,7 +564,7 @@
         width: 165px;
         height: 330px;
         bottom: 5%;
-        left: 51px;
+        left: 58px;
         z-index: 9999;
         border-radius: 0px;
 
@@ -577,7 +577,7 @@
         width: 165px;
         height: 120px;
         bottom: 15.5%;
-        left: 51px;
+        left: 58px;
         z-index: 9999;
         border-radius: 0px;
 

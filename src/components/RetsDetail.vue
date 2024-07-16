@@ -82,9 +82,10 @@
             <v-checkbox label="Asset Only Job" density="compact" class="checkbox-size" v-model="isAsset" @update:model-value="isAssetJob"></v-checkbox>
         </div>
             <v-btn-toggle id="trigger-buttons" density="compact">
-                <v-btn @click="handlearchive" variant="plain" flat size="small" class="secondary-button">Delete</v-btn>
-                <v-btn @click="cancelDetailsMetadata" class="secondary-button" variant="plain" flat size="small" :disabled="store.isCancelBtnDisable">Cancel</v-btn>
-                <v-btn @click="sendToParent" variant="outlined" class="main-button-style" size="small" :disabled="store.isSaveBtnDisable" :loading="store.isSaving">Save</v-btn>
+                <v-btn @click="handlearchive" flat size="small" id = "djpbuttons" class="secondary-button" style="background-color: transparent;">Delete</v-btn>
+                <!-- <v-btn @click="handlearchive" variant="plain" flat size="small" class="secondary-button">Delete</v-btn> -->
+                <v-btn @click="cancelPopupFunction" id = "djpbuttons" class="secondary-button"  size="small"  style="background-color: transparent;" :disabled="store.isCancelBtnDisable">Cancel</v-btn>
+                <v-btn @click="sendToParent" variant="outlined" id = "djpbuttons" class="main-button-style" size="small" style="background-color: transparent;" :disabled="store.isSaveBtnDisable" :loading="store.isSaving">Save</v-btn>
             </v-btn-toggle>
     </div>
 
@@ -102,6 +103,21 @@
             <v-btn class="main-button-style" @click="deleteRets">DELETE</v-btn>
         </v-btn-group>
     </v-card>   
+    <v-card id="cancelpopup" v-if="store.cancelpopup">
+        <v-card-title class="popupheader" >
+            Discard unsaved changes?
+            <hr id="separator2" />
+        </v-card-title>
+        <v-card-subtitle class="popuptext">
+            If you proceed, your changes will be discarded.
+        </v-card-subtitle>
+        <v-btn-group class="buttonpositioning" density="compact">
+            <v-btn class="secondary-button"  @click="store.cancelpopup = false">GO BACK</v-btn>
+            <v-btn class="main-button-style" @click="cancelDetailsMetadata">DISCARD</v-btn>
+        </v-btn-group>
+
+    </v-card>
+    
 
 </template>
 
@@ -256,7 +272,8 @@
                     return
                 }
 
-                return
+                // return
+                returnToFeedFunction()
             },
             deleteRets(){
                 this.returnToFeed()
@@ -652,5 +669,8 @@ div .cardDiv{
     opacity: 1 !important;
     padding: 0px;
     margin-right: 19px;
+}
+#djpbuttons:hover{
+    background: rgba(220, 220, 220, .1) !important;
 }
 </style>

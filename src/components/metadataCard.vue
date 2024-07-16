@@ -10,7 +10,9 @@
             <v-autocomplete :items="userRole" item-title="name" item-value="value" label="Asset Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.GRID_ANALYST" @update:modelValue="onDropDownChange(store.retsObj.attributes.GRID_ANALYST)" :rules="[emptyRow.required]"> </v-autocomplete>
         </v-row>
         <v-row>
-            <v-autocomplete :items="userRole" item-title="name" item-value="value" label="District Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.DIST_ANALYST" @update:modelValue="onDropDownChange(store.retsObj.attributes.DIST_ANALYST)" :rules="[emptyRow.required]"></v-autocomplete>
+            <v-autocomplete multiple ref="dropdown" :items="[null, ...userRole]" item-title="name" item-value="value" label="District Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.DIST_ANALYST" @update:modelValue="onDropDownChange(store.retsObj.attributes.DIST_ANALYST)" ></v-autocomplete>
+            <!-- <v-autocomplete multiple clearable :items="[null, ...userRole]" item-title="name" item-value="value" label="District Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.DIST_ANALYST" @update:modelValue="onDropDownChange(store.retsObj.attributes.DIST_ANALYST)" :rules="[emptyRow.required]"></v-autocomplete> -->
+
         </v-row>
         <v-row>
             <v-autocomplete :items="districtMetadata" item-title="name" item-value="value" label="District" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.DIST_NM" @update:modelValue="onDropDownChange(store.retsObj.attributes.DIST_NM)" :rules="[emptyRow.required]"></v-autocomplete>
@@ -50,6 +52,15 @@ import {appConstants} from '../common/constant.js'
         methods:{
             onDropDownChange(){
                 const metadataFieldPass = this.checkMetadatFields()
+                for (var item in store.retsObj.attributes.DIST_ANALYST){
+                    if (store.retsObj.attributes.DIST_ANALYST[item] === null){
+                        //store.retsObj.attributes.DIST_ANALYST = null
+                        this.$refs.dropdown.reset()
+                        this.$refs.dropdown.blur()
+
+                    }
+                    
+                }
                 store.isSaveBtnDisable = metadataFieldPass
                 return 
             },

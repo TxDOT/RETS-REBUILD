@@ -248,8 +248,8 @@ export const texasCities = new FeatureLayer({
   visible: false,
 })
 
-//TxDotRoaways Layer construction
-export const TxDotRoaways = new FeatureLayer ({
+//TxDOTRoadways Layer construction
+export const TxDOTRoadways = new FeatureLayer ({
   url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Roadways/FeatureServer/0",
   visible: true,
   renderer: roadwaysRenderer,
@@ -257,6 +257,17 @@ export const TxDotRoaways = new FeatureLayer ({
   returnM: true,
   hasM: true,
   definitionExpression: `RTE_PRFX = 'IH'`
+})
+
+export const TxDOTRoadwayscopy = new FeatureLayer ({
+  url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Roadways/FeatureServer/0",
+  visible: true,
+  renderer: roadwaysRenderer,
+  outFields: ["*"],
+  returnM: true,
+  hasM: true,
+  definitionExpression: "",
+  visible:false
 })
 
 //Rets Layer construction
@@ -416,7 +427,7 @@ export const searchWidget = new Search({
 
     {
       name: "Roadways",
-      layer: TxDotRoaways, 
+      layer: TxDOTRoadwayscopy, 
       placeholder: "Roadways",
       searchFields: ["RTE_NM", "GID"],
       displayField: "RTE_NM", 
@@ -495,7 +506,7 @@ export const sketchWidgetcreate = new Sketch({
   creationMode: "single", 
   snappingOptions: {
       enabled: true,
-      featureSources: [{layer: TxDotRoaways, enabled: true}]
+      featureSources: [{layer: TxDOTRoadways, enabled: true}]
   },
 });
 
