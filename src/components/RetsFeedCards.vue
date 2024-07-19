@@ -90,7 +90,7 @@
 </template>
 
 <script>
-import {clickRetsPoint, getQueryLayer, returnHistory, getHighlightGraphic, removeHighlight, createtool, highlightRETSPoint, toggleRelatedRets, zoomTo, changeCursor, outlineFeedCards} from './utility.js'
+import {clickRetsPoint, getQueryLayer, returnHistory, getHighlightGraphic, removeHighlight, createtool, highlightRETSPoint, toggleRelatedRets, zoomTo, changeCursor, outlineFeedCards, openDetails} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import {store} from './store.js'
@@ -170,6 +170,8 @@ export default{
                     removeHighlight("a", true)
                     await getHighlightGraphic()
                     const graphicOid = store.clickedGraphic
+                    console.log(graphicOid)
+                    console.log(retsGraphicLayer)
                     const returnGraphic = retsGraphicLayer.graphics.items.find(ret => ret.attributes.OBJECTID === graphicOid)
                     returnGraphic.attributes.flagColor = store.setFlagColor(returnGraphic.attributes)
                     returnGraphic.attributes.mdiaccountmultiplecheck = store.isAssigned(returnGraphic.attributes)
@@ -235,7 +237,7 @@ export default{
                 }
             }
 
-            issue === 0 ? this.double({attributes: this.stageData.attributes, geometry: [this.stageData.geometry.x, this.stageData.geometry.y]}, 1) : null
+            issue === 0 ? openDetails({attributes: this.stageData.attributes, geometry: [this.stageData.geometry.x, this.stageData.geometry.y]}, 1) : null
         },
         double(road){
             store.isSaving = false
@@ -359,6 +361,7 @@ export default{
 
         updateSelection(e){
             if(!e){
+                store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
                 store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                 outlineFeedCards(store.roadHighlightObj)
                 return
@@ -472,7 +475,7 @@ export default{
         position: absolute;
         left: 52px;
         padding: 0px;
-        font-size: 10px;
+        font-size: 7px;
     }
 
     .card.show{

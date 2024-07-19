@@ -38,6 +38,7 @@ export const store = reactive({
         zoomInToEnable: true,
         zoomInText: "Move RETS Point",
         archiveRetsDataString: "",
+        nextRoad: [],
         roadObj: [],
         roadObjOverflow: [],
         retsObj: {
@@ -133,7 +134,17 @@ export const store = reactive({
                 const newHistory = {RETS_ID: this.historyRetsId, CMNT: cmnt, CMNT_NM: `${appConstants.defaultUserValue[0].value}`, SYS_GEN: 0, CREATE_DT: date, EDIT_DT: date, CMNT_TYPE_ID: 0}
                 try{
                         await sendChatHistory(newHistory, "add")
-                       
+                        let newDate = new Date().getTime()
+                        if(this.isShowSelected){
+                                this.roadHighlightObj.forEach((x) => {
+                                        if(x.attributes.RETS_ID === this.historyRetsId){
+                                                x.attributes.EDIT_DT = newDate
+                                        }
+                                        
+                                })
+                        }
+
+                        
                         const returnComments = await getCmntOID(newHistory.RETS_ID)
                         store.addNoteOid = returnComments.features[0].attributes.OBJECTID
                         newHistory.OBJECTID = isExpand ? `${returnComments.features[0].attributes.OBJECTID}` : returnComments.features[0].attributes.OBJECTID
@@ -154,6 +165,16 @@ export const store = reactive({
         },
         modifyNote(cmt, oid){
                 const modDate = new Date().getTime()
+                if(this.isShowSelected){
+                        this.roadHighlightObj.forEach((x) => {
+                                if(x.attributes.RETS_ID === this.historyRetsId){
+                                        x.attributes.EDIT_DT = new Date(modDate).toLocaleString('en-US')
+                                }
+                                
+                        })
+                        let test = new Set([...this.roadHighlightObj].sort((a,b) => new Date(a.attributes.EDIT_DT) - new Date(b.attributes.EDIT_DT)))
+                        console.log(test)
+                }
                 const findItem = this.historyChat.find(note => note.OBJECTID === oid)
                 findItem.EDIT_DT = modDate
                 findItem.CMNT = cmt
@@ -172,7 +193,7 @@ export const store = reactive({
         },
         async replyNote(note){
                 const updateDate = new Date().getTime()
-                const chatObj = {RETS_ID: this.historyRetsId, CMNT: null, CMNT_NM: `${appConstants.defaultUserValue[0].value}`, PARENT_ID: note.OBJECTID, SYS_GEN: 0, CREATE_DT: updateDate, EDIT_DT: updateDate}
+                const chatObj = {RETS_ID: this.historyRetsId, CMNT: null, CMNT_NM: `${appConstants.defaultUserValue[0].value}`, PARENT_ID: note.OBJECTID, SYS_GEN: 0, CREATE_DT: updateDate, EDIT_DT: updateDate, CMNT_TYPE_ID: 0}
                 const oidReturn = await this.sendHistoryToFeatLayer(chatObj)
 
                 return oidReturn
@@ -404,30 +425,7 @@ export const store = reactive({
                 }
                 return false
         },
-        async getLatestHistory(retsid){
-                await retsid.queryFeatures({
-                        where: `CMNT_NM = 'DPROSACK'`
-                })
-                .then((x) => console.log(x))
-                // const query = {"whereString": `RETS_ID = ${retsid}`}
-                // const orderField = `EDIT_DT DESC`
-                // let newCMNT = null
-                // getQueryLayer(query, orderField)
-                //         .then((hist) =>{
-                //                 let rets = this.roadObj.find(ret => ret.attributes.RETS_ID === retsid)
-                //                 if(hist.features.length){
-                                        
-                //                         newCMNT = `CMNT Says: ${hist.features[0].attributes.CMNT}`
-                //                         //rets.attributes.historyUpdate = newCMNT
-                //                         console.log(newCMNT)
-                //                         return  'hi'
-                //                 }
-                //                 return "IM missing"
-                //         })
-                
-                // return "hello"
-        
-        },
+
         checkDetailsForComplete(){
                 let item = [this.retsObj.attributes.RTE_NM, this.retsObj.attributes.DFO, this.retsObj.attributes.STAT, this.retsObj.attributes.DESC_].filter(x => !x)
                 

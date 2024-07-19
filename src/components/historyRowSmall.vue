@@ -19,7 +19,6 @@
                 </div>
             </div>
         <div id="displayHistory">
-            <v-progress-circular indeterminate v-if="isHistNotesEmpty"></v-progress-circular>
                 <div v-for="(note, i) in histNotes" :key="note.OBJECTID" track-by="OBJECTID" v-if="!isHistNotesEmpty" class="chatDiv">
                     <v-banner :id="note.OBJECTID" density="compact" min-height="" style="padding: 0px; padding-left: 5px; border-left: 3px solid #4472C4 !important;">
                         <v-banner-text class="mx-auto">
@@ -67,8 +66,6 @@
                 </div>
         </div>
 
-        
-        <v-text-field v-if="isHistNotesEmpty" disabled variant="plain">{{noHistResp}}</v-text-field>
     </div>
     <div style="position: absolute; bottom: 0px; width:100%;">
             <div>
@@ -260,11 +257,14 @@
             },
             'store.historyChat.length':{
                 handler: function(a,b){
+                    console
                     if(a === 0){
+                        this.isHistNotesEmpty = true
                         this.emptyHist = true
                         return
                     }
                     this.orderList
+                    this.isHistNotesEmpty = false
                     this.emptyHist = false
                     return
                 },

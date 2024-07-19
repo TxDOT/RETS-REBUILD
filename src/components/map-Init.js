@@ -575,7 +575,7 @@ export const OSMVTBasemap = new Basemap({
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-map.addMany([TxDotRoaways,retsLayer, graphics, retsGraphicLayer, texasCounties, texasCities,  highlightLayer, txdotDistricts, retsHistory])
+map.addMany([TxDOTRoadways, retsLayer, graphics, retsGraphicLayer, texasCounties, texasCities,  highlightLayer, txdotDistricts, retsHistory])
 console.log("stuff added")
 
 searchWidget.on("select-result", function(event) {

@@ -11,7 +11,6 @@ import * as geodesicUtils from "@arcgis/core/geometry/support/geodesicUtils.js";
 import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils.js";
 import * as geometryEngine from "@arcgis/core/geometry/geometryEngine.js";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
-import { ssrDynamicImportKey } from 'vite/runtime';
 
 export let retsLayerView; 
 export let roadLayerView;
@@ -84,13 +83,14 @@ export function clickRetsPoint(){
     try{
         view.on("click", (event)=>{
             view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt) =>{
+                
                 if (event.button === 2){
                     // Get the coordinates of the click on the view
                     let lat = Math.round(event.mapPoint.latitude * 100000000) / 100000000;
                     let lon = Math.round(event.mapPoint.longitude * 100000000) / 100000000;
                     let coordinate = lon + ", " + lat
                     
-                    navigator.clipboard.writeText(coordinate);
+                    //navigator.clipboard.writeText(coordinate);
                     store.coordinatenotification = true
                     store.latlonstring = coordinate
                     setTimeout(() => {
@@ -99,6 +99,7 @@ export function clickRetsPoint(){
                     return
                 }
                 if(!evt.results.length){
+
                     removeOutline()
                     removeHighlight("a", true)
                     clearRoadHighlightObj()
@@ -106,9 +107,31 @@ export function clickRetsPoint(){
                     store.isShowSelected = false
                     return
                 }
+
                 store.roadHighlightObj.clear()
                 const retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
                 store.roadHighlightObj.add(retsPt)
+
+                if(store.isDetailsPage){
+                    store.nextRoad = retsPt
+                    if(!store.isSaveBtnDisable){
+                        //open disgard popup 
+                        store.clickStatus = true
+                        store.cancelpopup = true
+                        return
+                    }
+                    //continue to next rets clicked
+                    if(!evt.results[0].layer.title){
+                        highlightGraphicPt(evt.results[0].graphic.attributes)
+                        return 
+                    }
+                    openDetails(retsPt)
+                    highlightRETSPoint(evt.results[0].graphic.attributes)
+                    removeOutline()
+                    console.log(evt.results)
+                    outlineFeedCards(evt.results)
+                    return
+                }
                 removeOutline()
                 outlineFeedCards(evt.results)
                 removeHighlight("a", true)
@@ -122,6 +145,7 @@ export function clickRetsPoint(){
     }
 
 }
+
 
 export function hoverRetsPoint(){
     view.on("pointer-move", (event)=>{
@@ -478,7 +502,7 @@ export function home(onrender){
 }
 
 export function addRelatedRetsToMap(rets){ 
-    const graphicInArr = retsGraphicLayer.graphics.items.find(ret => ret.attributes.OBJECTID === rets.oid)
+    const graphicInArr = retsGraphicLayer.graphics.items.find(ret => ret.attributes.OBJECTID === rets.OBJECTID)
     if(graphicInArr){
         return
     }    
@@ -491,7 +515,7 @@ export function addRelatedRetsToMap(rets){
     
     const graphicSymb = {
         type: "simple-marker",
-        color: appConstants.CardColorMap[`${rets.jobType}`],
+        color: appConstants.CardColorMap[`${rets.JOB_TYPE}`],
         size: 8,
         outline:{
             width:1.5,
@@ -504,7 +528,7 @@ export function addRelatedRetsToMap(rets){
         symbol: graphicSymb,
         attributes: {
             ...rets.fullData,
-            retsId: rets.name
+            retsId: rets.RETS_ID
         },
         popupTemplate:{
             title: `${rets.fullData.RTE_NM}`,
@@ -520,13 +544,13 @@ export function addRelatedRetsToMap(rets){
             color: "white",
             haloColor: "black",
             haloSize: "1px",
-            text: rets.name,
+            text: rets.RETS_ID,
             xoffset: 3,
             yoffset: 3
         },
         attributes: {
-            OBJECTID: rets.oid,
-            retsId: rets.name
+            OBJECTID: rets.OBJECTID,
+            retsId: rets.RETS_ID
         },
 
     })
@@ -554,9 +578,12 @@ export function zoomToRelatedRets(relatedRets){
 
 export const toggleRelatedRets = (retsid) =>  {
     const parseRets = JSON.parse(retsid)
+    console.log(retsid)
     if(!parseRets.attributes.RELATED_RETS) return
-    const newRetsId = typeof retsid === "object" ? parseRets.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID) : parseRets.attributes.RELATED_RETS.split(",")
+    const newRetsId = parseRets.attributes.RELATED_RETS.includes(",") ? parseRets.attributes.RELATED_RETS.split(",") : parseRets.attributes.RELATED_RETS
+    store.retsObj.attributes.RELATED_RETS = newRetsId
     turnAllVisibleGraphicsOff()
+    
     newRetsId.forEach((ret) =>{
         let a = retsGraphicLayer.graphics.items.filter(item => item.attributes.retsId === Number(ret))
         a.forEach(x => x.visible = true)
@@ -564,10 +591,25 @@ export const toggleRelatedRets = (retsid) =>  {
     return
 }
 
+export function splitAndAddRelatedRets(relatedRets){
+    // console.log(relatedRets)
+    // if(typeof relatedRets === "object" || !relatedRets.length){
+    //     // relatedRets.map((ret)=>{
+    //     //     this.gimmeRETS(ret, `RETS_ID = ${ret}`)
+    //     // })
+    //     return
+    // }
+    
+    // const splitString = relatedRets.split(",")
+    // //store.retsObj.attributes.RELATED_RETS = []
+
+    // return splitString
+}
+
 export function getHistoryView(retsid){
     retsHistory.queryFeatures({
         groupByFieldsForStatistics: ["RETS_ID"],
-        orderByFields: ["CREATE_DT DESC"],
+        orderByFields: ["EDIT_DT DESC"],
         outFields: ["RETS_ID", "CMNT_NM", "EDIT_DT", "CMNT_TYPE_ID"],
         where: `RETS_ID = ${retsid}`
     })
@@ -578,10 +620,12 @@ export function getHistoryView(retsid){
             return
         }
         let {CMNT_NM, EDIT_DT, CMNT_TYPE_ID} = res.features[0].attributes      
-        
         let latestHistoryText = appConstants.defineCMNT[CMNT_TYPE_ID ? CMNT_TYPE_ID : 0](CMNT_NM, EDIT_DT)
         retCard.attributes.historyUpdate = latestHistoryText
 
+    })
+    .catch(() => {
+        //
     })
     return
 }
@@ -592,6 +636,10 @@ export function returnHistory(query){
     getQueryLayer(queryString, "create_dt desc")
         .then((hist) => {
             //const arrHist = []
+            if(!hist.features.length){
+                return store.historyChat = []
+            }
+            store.historyChat.length = 0
             hist.features.forEach((x) => {
                 getAttachmentInfo(x.attributes.OBJECTID)
                     .then((att) => {
@@ -729,7 +777,39 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
                                 {
                                     graphics.removeAll();
                                     var selectedFeatures = result.features;
+   
                                     if (pressedkey === false){
+                                        if (store.isDetailsPage && (selectedFeatures.length > 1)){
+                                            console.log(selectedFeatures.length, store.isSaveBtnDisable)
+                                            if(!store.isSaveBtnDisable){
+                                                console.log(store.cancelpopup)
+                                                store.cancelpopup = true
+                                                console.log(store.cancelpopup)
+                                                return
+                                            }
+                                            outlineFeedCards(store.roadHighlightObj)
+                                            selectedFeatures.forEach((ret) => highlightRETSPoint(ret.attributes, true))
+                                            store.isDetailsPage = false
+                                            if(!store.isShowSelected){
+                                                store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                                                return
+                                            }
+                                            
+                                            //returnToFeedFunction()
+                                            return
+                                        }
+                                        if (store.isDetailsPage && selectedFeatures.length === 1 ){
+                                            let ogItem = store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[0].attributes.RETS_ID)
+                                            if(!store.isSaveBtnDisable){
+                                                store.clickStatus = true
+                                                store.nextRoad = ogItem
+                                                store.cancelpopup = true
+                                                return
+                                            }
+    
+                                            openDetails(ogItem)
+                                            return
+                                        }
                                         
                                         removeHighlight("a", true); 
                                         store.roadHighlightObj.clear()
@@ -739,6 +819,7 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
                                             highlightRETSPoint(selectedFeatures[i].attributes, true); 
                                                     
                                         }
+
                                         if (store.roadHighlightObj.size){
                                             outlineFeedCards(store.roadHighlightObj); 
 
@@ -770,21 +851,7 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
                                             }  
                                         }
                                     }
-                                    if (store.isDetailsPage && (store.roadHighlightObj.size != 1)){
 
-                                        returnToFeedFunction()
-                                    }
-                                    if (store.isDetailsPage && store.roadHighlightObj.size === 1 ){
-                                        store.roadHighlightObj.forEach(entry => {
-                                            canceldetailsfunction()
-
-                                            if (store.retsObj.attributes.RETS_ID != entry.attributes.RETS_ID){
-                                                openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === entry.attributes.RETS_ID))
-                                            }
-                                          });
-
-
-                                    }
                                 });          
                         }
                 });
@@ -912,7 +979,6 @@ export async function queryFlags(userid){
         where: `USERNAME = '${userid}'`,
         outFields: ["*"]
     }) 
-    console.log(returnRetsFlagUser)
     returnRetsFlagUser.features.forEach(flag => store.userRetsFlag.push({FLAG: flag.attributes.FLAG, OBJECTID: flag.attributes.OBJECTID, RETS_ID: flag.attributes.RETS_ID, USERNAME: flag.attributes.USERNAME}))
     return
 }
@@ -1222,9 +1288,38 @@ export async function isRoadExist(){
 }
 
 export function checkhighlightfunction(retsid){
-    const objarray = Array.from(store.roadHighlightObj)
-    const found = objarray.some(feature => feature.attributes.RETS_ID.toString() === retsid);
-    return found ? "card-rets highlight-card" : "card-rets";
+    try{
+        const objarray = Array.from(store.roadHighlightObj)
+        const found = objarray.some(feature => feature.attributes.RETS_ID.toString() === retsid);
+        return found ? "card-rets highlight-card" : "card-rets";
+    }
+    catch{
+        //nada
+    }
+
+}
+
+export function openDetails(road){
+    clearGraphicsLayer()
+    store.toggleFeed = 2
+    store.isSaving = false
+    store.isSaveBtnDisable = true
+    store.archiveRetsDataString = JSON.stringify(road)
+    store.retsObj = road
+    store.historyRetsId = road.attributes.RETS_ID
+    returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
+    //clearTimeout(this.timer)
+    //this.timer=""
+    store.isCard = false
+    store.isDetailsPage = true
+    store.activityBanner = `${road.attributes.RETS_ID}`
+    //highlightRETSPoint(road.attributes)
+    //outlineFeedCards()
+    //this.zoomToRetsPt(road)
+    removeHighlight("a", true)
+    highlightRETSPoint(road.attributes)
+    toggleRelatedRets(JSON.stringify(road))
+    return
 }
 
 export function loadData(){
@@ -1239,4 +1334,26 @@ export function loadData(){
     })
 
     cards.forEach(card => observer.observe(card))   
+}
+
+export function updateRetsObj(old, updated){
+    old.attributes.ACTV = updated.attributes.ACTV
+    old.attributes.ACTV_NBR = updated.attributes.ACTV_NBR
+    old.attributes.ASSIGNED_TO = updated.attributes.ASSIGNED_TO
+    old.attributes.CMNT = updated.attributes.CMNT
+    old.attributes.DEADLINE = updated.attributes.DEADLINE
+    old.attributes.DESC_ = updated.attributes.DESC_
+    old.attributes.DFO = updated.attributes.DFO
+    old.attributes.DIST_ANALYST = updated.attributes.DIST_ANALYST
+    old.attributes.GEM_TASK_ID = updated.attributes.GEM_TASK_ID
+    old.attributes.GIS_ANALYST = updated.attributes.GIS_ANALYST
+    old.attributes.GRID_ANALYST = updated.attributes.GRID_ANALYST
+    old.attributes.JOB_TYPE = updated.attributes.JOB_TYPE
+    old.attributes.NO_RTE = updated.attributes.NO_RTE
+    old.attributes.PRIO = updated.attributes.PRIO
+    old.attributes.RELATED_RETS = updated.attributes.RELATED_RETS
+    old.attributes.RETS_NM = updated.attributes.RETS_NM
+    old.attributes.RTE_NM = updated.attributes.RTE_NM
+    old.attributes.STAT = updated.attributes.STAT
+    return 
 }

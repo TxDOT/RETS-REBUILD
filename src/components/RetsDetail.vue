@@ -84,21 +84,21 @@
             <v-btn-toggle id="trigger-buttons" density="compact">
                 <v-btn @click="handlearchive" flat size="small" id = "djpbuttons" class="secondary-button" style="background-color: transparent;">Delete</v-btn>
                 <!-- <v-btn @click="handlearchive" variant="plain" flat size="small" class="secondary-button">Delete</v-btn> -->
-                <v-btn @click="cancelPopupFunction" id = "djpbuttons" class="secondary-button"  size="small"  style="background-color: transparent;" :disabled="store.isCancelBtnDisable">Cancel</v-btn>
+                <v-btn @click="cancelDetailsMetadata" id = "djpbuttons" class="secondary-button"  size="small"  style="background-color: transparent;" :disabled="store.isCancelBtnDisable">Cancel</v-btn>
                 <v-btn @click="sendToParent" variant="outlined" id = "djpbuttons" class="main-button-style" size="small" style="background-color: transparent;" :disabled="store.isSaveBtnDisable" :loading="store.isSaving">Save</v-btn>
             </v-btn-toggle>
     </div>
 
     <v-card id="archivepopup" v-if="isarchiveopen" >
-        <v-card-title id="archiveheader" >
+        <v-card-title class="popupheader" >
             Delete RETS {{deletedRETSID}}
             <hr id="separator2" />
         </v-card-title>
-        <v-card-subtitle id="archivetext">
+        <v-card-subtitle class="popuptext">
             Deleting this RETS will move it to the archive table.
         </v-card-subtitle>
             
-        <v-btn-group id="archivebuttons" density="compact">
+        <v-btn-group class="buttonpositioning" density="compact">
             <v-btn class="secondary-button"  @click="handlearchive">CANCEL</v-btn>
             <v-btn class="main-button-style" @click="deleteRets">DELETE</v-btn>
         </v-btn-group>
@@ -113,7 +113,7 @@
         </v-card-subtitle>
         <v-btn-group class="buttonpositioning" density="compact">
             <v-btn class="secondary-button"  @click="store.cancelpopup = false">GO BACK</v-btn>
-            <v-btn class="main-button-style" @click="cancelDetailsMetadata">DISCARD</v-btn>
+            <v-btn class="main-button-style" @click="disgardEdits">DISCARD</v-btn>
         </v-btn-group>
 
     </v-card>
@@ -123,7 +123,7 @@
 
 <script>
     import { appConstants } from '../common/constant.js'
-    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, removeOutline, outlineFeedCards} from './utility.js'
+    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, updateRetsObj, openDetails, outlineFeedCards} from './utility.js'
 
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
@@ -261,20 +261,23 @@
                 store.isCard = true
                 store.historyChat.length = 0
                 store.isSaveBtnDisable = true
-                if (store.roadHighlightObj.size <= 1 && store.isSelectEnabled === false){
+                // store.roadHighlightObj = new Set([...store.roadHighlightObj].sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT)))
+                // store.updateRetsSearch = store.roadHighlightObj
+                // console.log(store.roadHighlightObj)
+                if (store.roadHighlightObj.size === 0 && store.isSelectEnabled === false){
                     removeHighlight(store.retsObj)
                     //const b = store.roadObj.find(rd => rd.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
                     //store.roadHighlightObj.delete(b)
+                    store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
                     store.roadHighlightObj.clear()
                     store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                     console.log(store.updateRetsSearch)
-                    store.isShowSelected = false
                     return
                 }
 
-                // return
-                returnToFeedFunction()
+                return
             },
+
             deleteRets(){
                 this.returnToFeed()
                 store.retsObj.attributes.isDelete = true
@@ -284,6 +287,7 @@
                 deleteRetsGraphic()
                 return
             },
+
             async sendToParent(){
                 const roadExist = await isRoadExist()
                 if(roadExist && !store.retsObj.attributes.NO_RTE){
@@ -299,6 +303,7 @@
                 await updateRETSPT(store.retsObj)
                 store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
                 this.returnToFeed()
+                store.isShowSelected = false
                 deleteRetsGraphic()
                 retsLayerView.layer.definitionExpression = store.savedFilter
                 //store.updateRetsID()
@@ -306,27 +311,55 @@
                 return
             },
             cancelDetailsMetadata(){
-                store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
-                //const archiveRets = JSON.parse(store.archiveRetsDataString)
-                //this.replaceArchiveContent(archiveRets)
+                if(!store.isSaveBtnDisable){
+                    store.clickStatus = false
+                    store.cancelpopup = true
+                    return
+                }
+                //store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                const archiveRets = JSON.parse(store.archiveRetsDataString)
+                this.replaceArchiveContent(archiveRets)
                 this.returnToFeed()
                 retsLayerView.layer.definitionExpression = store.savedFilter
                 store.toggleFeed = 1
+                store.cancelpopup = false
+                
                 //store.preserveHighlightCards()
                 // retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
                 return
             },
-            // replaceArchiveContent(old){
-            //     const filter = !store.isShowSelected ? store.updateRetsSearch : [...store.roadHighlightObj]
-            //     const currDate = filter.find(x => x.attributes.RETS_ID === old.attributes.RETS_ID).attributes.EDIT_DT
-            //     const rd = filter.findIndex(x => x.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
-            //     if(currDate !== old.attributes.EDIT_DT){
-            //         old.attributes.EDIT_DT === currDate
-            //     }
-            //     console.log(filter.find(x => x.attributes.RETS_ID === old.attributes.RETS_ID).attributes.EDIT_DT, old.attributes.EDIT_DT)
-            //     filter.splice(rd, 1, old)
-            //     return
-            // },
+            disgardEdits(){
+                if(store.clickStatus){
+                    let nextRets = store.nextRoad
+                    const archiveRets = JSON.parse(store.archiveRetsDataString)
+                    let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
+                    updateRetsObj(findItem, archiveRets)
+                    openDetails(nextRets)
+                    store.clickStatus = false
+                    store.cancelpopup = false
+                    return
+                }
+                
+                const archiveRets = JSON.parse(store.archiveRetsDataString)
+                this.replaceArchiveContent(archiveRets)
+                this.returnToFeed()
+                retsLayerView.layer.definitionExpression = store.savedFilter
+                store.toggleFeed = 1
+                store.cancelpopup = false
+                outlineFeedCards(store.roadHighlightObj)
+                return
+            },
+            replaceArchiveContent(old){
+                const filter = !store.isShowSelected ? store.updateRetsSearch : [...store.roadHighlightObj]
+                const currDate = filter?.find(x => x.attributes.RETS_ID === old.attributes.RETS_ID)?.attributes?.EDIT_DT ?? this.returnToFeed()
+                const rd = filter.findIndex(x => x.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
+                if(currDate !== old.attributes.EDIT_DT){
+                    old.attributes.EDIT_DT === currDate
+                }
+                filter.splice(rd, 1, old)
+                !store.isShowSelected ? filter.splice(rd, 1, old) : store.roadHighlightObj = new Set(filter)
+                return
+            },
             openNote(note, index){
                 this.editText = true
                 this.editNotes = note
@@ -672,5 +705,26 @@ div .cardDiv{
 }
 #djpbuttons:hover{
     background: rgba(220, 220, 220, .1) !important;
+}
+
+#cancelpopup{
+    position: fixed;
+    border-radius: 5px;
+    width: 25rem;
+    height:25%; 
+    border-radius: 0;
+    left: 567px;
+    right:0;
+    top:0;
+    bottom: 0;
+    margin: auto;
+}
+
+.buttonpositioning{
+    position: absolute;
+    bottom: 14px;
+    width: 20rem;
+    right: 8px;
+    justify-content: end;
 }
 </style>

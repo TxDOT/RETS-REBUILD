@@ -15,7 +15,7 @@
             </div>
   
             <v-lazy :options="{'threshold':0.5}" transition="fade-transition">
-                <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `5px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="checkhighlight(String(rd.attributes.RETS_ID))" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road);">
+                <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `5px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="checkhighlight(String(rd.attributes.RETS_ID)) ?? 'card-rets'" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road);">
                     <!-- <div class="boundary-rets-card"> -->
 
                     <div style="position: relative; top: 0px;">
@@ -110,7 +110,7 @@
 
 <script>
 import {postFlagColor} from '../components/crud.js'
-import {zoomTo, highlightRETSPoint, toggleRelatedRets,returnHistory, removeHighlight, removeOutline, includes, checkhighlightfunction, loadData} from './utility.js'
+import {zoomTo, highlightRETSPoint, toggleRelatedRets,returnHistory, removeHighlight, removeOutline, includes, checkhighlightfunction, loadData, openDetails} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {store} from './store.js'
 
@@ -148,15 +148,14 @@ export default{
     },
 
     updated(){
-        console.log("updated")
         loadData()
+        store.toggleFeed = 1
+        store.activityBanner = "Activity Feed"
     },
 
     methods:{
-
         checkhighlight(retsid){
             return checkhighlightfunction(retsid)
-            
         },
 
         changeFlagIcon(color){
@@ -203,24 +202,7 @@ export default{
             },250)
         },
         double(road, index){
-            store.toggleFeed = 2
-            console.log(store.toggleFeed)
-            store.isSaving = false
-            store.isSaveBtnDisable = true
-            store.archiveRetsDataString = JSON.stringify(road)
-            store.retsObj = road
-            store.historyRetsId = road.attributes.RETS_ID
-           
-            returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
-            clearTimeout(this.timer)
-            this.timer=""
-            store.isCard = false
-            store.isDetailsPage = true
-            store.activityBanner = `${road.attributes.RETS_ID}`
-            //highlightRETSPoint(road.attributes)
-            //outlineFeedCards()
-            this.zoomToRetsPt(road)
-            toggleRelatedRets(JSON.stringify(road))
+            openDetails(road)
             return
         },
 
@@ -230,21 +212,7 @@ export default{
             this.isColorPicked = true;
         },
 
-    },
-    watch:{
-        'store.updateRetsSearch.length':{
-            handler: function(a,b){
-
-            },
-            immediate: true
-        }
-    },
-    computed:{
-        getHistoryMeow(rets_id){
-            store.getLatestHistory(rets_id)
-        },
     }
-
 }
 
 </script>

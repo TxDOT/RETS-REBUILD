@@ -15,7 +15,7 @@
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom: 1.3rem; height: 70px; padding-bottom: 0% !important;" >
             <v-col cols="8" offset="0" style="position: relative; bottom: 5px !important;">
-                <v-text-field :disabled="store.retsObj.attributes.NO_RTE === false" label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required] : []" id="route" @update:model-value="completeDataSearch()"></v-text-field>
+                <v-text-field :disabled="store.retsObj.attributes.NO_RTE === false" label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required, valueRequired.limitCharacter] : []" id="route" @update:model-value="completeDataSearch()" maxlength="30"></v-text-field>
             </v-col>
             <v-col cols="4" offset="0">
                 <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" :error-messages="(!store.retsObj.attributes.DFO || !store.retsObj.attributes.DFO.length) && !store.retsObj.attributes.NO_RTE ? 'But where am I? Don\'t leave me blank!' : null" v-model="store.retsObj.attributes.DFO" :rules="!store.retsObj.attributes.NO_RTE ? [onlyNumbers.required, onlyNumbers.numbers]: []" @update:model-value="manuallyUpdateDFO(store.retsObj.attributes.DFO)">
@@ -44,9 +44,9 @@
         </v-row>       
         <v-row align="center" no-gutters dense style="position: relative; bottom: 5.4rem;">
             <v-col cols="8" offset="0">
-                <v-autocomplete label="Related RETS" no-filter multiple variant="underlined" class="related-rets" v-model="store.retsObj.attributes.RELATED_RETS" :items="RETSData" item-title="name" item-value="name" return-object @update:search="gimmeRETS($event)" @update:modelValue="addGraphic($event)">
+                <v-autocomplete label="Related RETS" no-filter multiple variant="underlined" class="related-rets" v-model="store.retsObj.attributes.RELATED_RETS" :items="RETSData" item-title="RETS_ID" item-value="RETS_ID" return-object @update:search="gimmeRETS($event)" @update:modelValue="addGraphic($event)">
                     <template v-slot:chip="{props, item}">
-                        <v-chip v-bind="props" closable @click:close="closeRelatedRetsChip(item)" @click="zoomToRelateRet(item.raw.geometry)" style="z-index: 9999;">{{item.props.title}}</v-chip>
+                        <v-chip v-bind="props" closable @click:close="closeRelatedRetsChip(item)" @click="zoomToRelateRet(item)" style="z-index: 9999;">{{item.props.title}}</v-chip>
                     </template>
                 </v-autocomplete>
 
@@ -129,7 +129,7 @@
 <script>
 import { appConstants } from '../common/constant'
 import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets, zoomTo, 
-        createRoadGraphic, getRoadInformation, cancelSketchPt, hitTestMoveRETS} from './utility.js'
+        createRoadGraphic, getRoadInformation, cancelSketchPt, hitTestMoveRETS, splitAndAddRelatedRets} from './utility.js'
 import {store} from './store.js'
 
     export default{
@@ -161,7 +161,8 @@ import {store} from './store.js'
                     numbers: value => /[\d]/.test(Number(value)) || `Whoa! Numbers are more my vibe!`
                 },
                 valueRequired:{
-                    required: value => !!value || "Gimme a route a name!"
+                    required: value => !!value || "Gimme a route a name!",
+                    limitCharacter: value => value.length <= 10|| 'Max limit reached',
                 },
                 descRequired:{
                     required: value => !!value || "Description is empty."
@@ -169,11 +170,11 @@ import {store} from './store.js'
             }
         },
         beforeMount(){
-            this.splitAndAddRelatedRets(store.retsObj.attributes.RELATED_RETS)
-            document.addEventListener('click',this.handleClickOutside)
-            
-           
-            
+            // let splitString = splitAndAddRelatedRets(store.retsObj.attributes.RELATED_RETS)
+            // splitString.map((ret)=>{
+            //     this.gimmeRETS(ret, `RETS_ID = ${ret}`)
+            // })
+            // document.addEventListener('click',this.handleClickOutside)
         },
         mounted(){
             this.ogValues = store.retsObj
@@ -199,8 +200,8 @@ import {store} from './store.js'
                     store.retsObj.attributes.DEADLINE = null 
                     store.isSaveBtnDisable = false
                 }
-                this.isDatePicker =! this.isDatePicker
-
+                this.isDatePicker = !this.isDatePicker
+                return 
             },
             toggleVisibility(){
                 this.isDatePicker =! this.isDatePicker
@@ -229,24 +230,40 @@ import {store} from './store.js'
                 const month = date.getMonth()+1
                 return `${month}/${day}/${year}`
             },
-            zoomToRelateRet(geom, event){
-                zoomTo(geom)
-                
-            },
-            splitAndAddRelatedRets(relatedRets){
-                if(typeof relatedRets === "object" || !relatedRets.length){
-                    // relatedRets.map((ret)=>{
-                    //     this.gimmeRETS(ret, `RETS_ID = ${ret}`)
-                    // })
-                    return
-                }
-                const splitString = relatedRets.split(",")
-                store.retsObj.attributes.RELATED_RETS = []
-                splitString.map((ret)=>{
-                    this.gimmeRETS(ret, `RETS_ID = ${ret}`)
+            zoomToRelateRet(ret){
+                console.log(ret)
+                let query = {"whereString" : `RETS_ID = ${Number(ret.title)}`, "queryLayer": "retsLayer"}
+                getQueryLayer(query, 'RETS_ID', 5)
+                .then((ret) => {
+                    console.log(ret)
+                    let createRelatedRetsInfo = {RETS_ID: ret.features[0].attributes.RETS_ID, OBJECTID: ret.features[0].attributes.OBJECTID, JOB_TYPE: ret.features[0].attributes.JOB_TYPE, fullData: ret.features[0].attributes, geometry: [ret.features[0].geometry.x, ret.features[0].geometry.y]}
+                    zoomTo([ret.features[0].geometry.x, ret.features[0].geometry.y])
+                    this.addGraphic([createRelatedRetsInfo])
                 })
-                return this.RETSData
+                //this.gimmeRETS(ret.title, `RETS_ID = ${Number(ret.title)}`)
+
+                
+                //console.log(x)
+               
+                
+
             },
+            // splitAndAddRelatedRets(relatedRets){
+            //     console.log(relatedRets)
+            //     if(typeof relatedRets === "object" || !relatedRets.length){
+            //         // relatedRets.map((ret)=>{
+            //         //     this.gimmeRETS(ret, `RETS_ID = ${ret}`)
+            //         // })
+            //         return
+            //     }
+                
+            //     const splitString = relatedRets.split(",")
+            //     store.retsObj.attributes.RELATED_RETS = []
+            //     splitString.map((ret)=>{
+            //         this.gimmeRETS(ret, `RETS_ID = ${ret}`)
+            //     })
+            //     return this.RETSData
+            // },
             completeDataSearch(){
                 store.checkDetailsForComplete()
             },
@@ -334,14 +351,18 @@ import {store} from './store.js'
                     const queryString = string ?? `CAST(RETS_ID AS VARCHAR(12)) LIKE '%${a}%'`
                     const query = {"whereString" : queryString, "queryLayer": "retsLayer"}
                     try{
+                        console.log(query)
                         const retsid = await getQueryLayer(query, 'RETS_ID', 5)
                         this.RETSData.length = 0
                         retsid.features.forEach((x) => {
-                            this.RETSData.push({name: x.attributes.RETS_ID, oid: x.attributes.OBJECTID, retsid: store.retsObj.attributes.RETS_ID, jobType: x.attributes.JOB_TYPE, fullData: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
+                            this.RETSData.push({RETS_ID: x.attributes.RETS_ID, OBJECTID: x.attributes.OBJECTID, JOB_TYPE: x.attributes.JOB_TYPE, fullData: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                         })
                         if(string){
+                            console.log(string)
                             this.addGraphic(this.RETSData)
                             store.retsObj.attributes.RELATED_RETS.push(this.RETSData[0])
+                            console.log(this.RETSData)
+                            
                             return
                         }
                         return
@@ -355,8 +376,11 @@ import {store} from './store.js'
                 }
             },
             addGraphic(e){
-                e = typeof e === "object" ? e : this.splitAndAddRelatedRets(store.retsObj.attributes.RELATED_RETS)
+                console.log(e)
+                // e = typeof e === "object" ? e : splitAndAddRelatedRets(store.retsObj.attributes.RELATED_RETS)
                 addRelatedRetsToMap(e.at(-1))
+                store.isSaveBtnDisable = true
+                return
             },
             zoomToRETS(){
                 zoomToRelatedRets(store.retsObj.attributes.RELATED_RETS)
@@ -427,7 +451,6 @@ import {store} from './store.js'
             'store.attributes.RETS_ID':{
                 handler: function(){
                     store.currentInfo = JSON.stringify(store.retsObj)
-                    this.splitAndAddRelatedRets(store.retsObj.attributes.RELATED_RETS)
                 },
                 immediate: true
             },
@@ -437,6 +460,7 @@ import {store} from './store.js'
 </script>
 
 <style scoped>
+
 .cleardate{
     position: absolute;
     bottom:10px;
