@@ -261,30 +261,26 @@
                 store.isCard = true
                 store.historyChat.length = 0
                 store.isSaveBtnDisable = true
-                // store.roadHighlightObj = new Set([...store.roadHighlightObj].sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT)))
-                // store.updateRetsSearch = store.roadHighlightObj
-                // console.log(store.roadHighlightObj)
                 if (store.roadHighlightObj.size === 0 && store.isSelectEnabled === false){
                     removeHighlight(store.retsObj)
                     //const b = store.roadObj.find(rd => rd.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
                     //store.roadHighlightObj.delete(b)
+                    console.log("hey")
                     store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
                     store.roadHighlightObj.clear()
                     store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
-                    console.log(store.updateRetsSearch)
                     return
                 }
-
                 return
             },
 
-            deleteRets(){
-                this.returnToFeed()
+            async deleteRets(){
                 store.retsObj.attributes.isDelete = true
-                deleteRETSPT(store.retsObj)
+                await deleteRETSPT(store.retsObj)
                 removeRelatedRetsFromMap(store.retsObj.attributes.OBJECTID)
                 store.deleteRetsID()
                 deleteRetsGraphic()
+                this.returnToFeed()
                 return
             },
 
@@ -302,6 +298,7 @@
                 
                 await updateRETSPT(store.retsObj)
                 store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                 this.returnToFeed()
                 store.isShowSelected = false
                 deleteRetsGraphic()
@@ -323,7 +320,6 @@
                 retsLayerView.layer.definitionExpression = store.savedFilter
                 store.toggleFeed = 1
                 store.cancelpopup = false
-                
                 //store.preserveHighlightCards()
                 // retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
                 return

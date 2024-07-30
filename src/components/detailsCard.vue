@@ -231,11 +231,9 @@ import {store} from './store.js'
                 return `${month}/${day}/${year}`
             },
             zoomToRelateRet(ret){
-                console.log(ret)
                 let query = {"whereString" : `RETS_ID = ${Number(ret.title)}`, "queryLayer": "retsLayer"}
                 getQueryLayer(query, 'RETS_ID', 5)
                 .then((ret) => {
-                    console.log(ret)
                     let createRelatedRetsInfo = {RETS_ID: ret.features[0].attributes.RETS_ID, OBJECTID: ret.features[0].attributes.OBJECTID, JOB_TYPE: ret.features[0].attributes.JOB_TYPE, fullData: ret.features[0].attributes, geometry: [ret.features[0].geometry.x, ret.features[0].geometry.y]}
                     zoomTo([ret.features[0].geometry.x, ret.features[0].geometry.y])
                     this.addGraphic([createRelatedRetsInfo])
@@ -320,7 +318,6 @@ import {store} from './store.js'
                     cancelSketchPt()
                 }
                 catch(err){
-                    console.log(err)
                     if(store.cancelEvent){
                         store.isMoveRetsPt = false
                         store.cancelEvent.remove()
@@ -351,18 +348,14 @@ import {store} from './store.js'
                     const queryString = string ?? `CAST(RETS_ID AS VARCHAR(12)) LIKE '%${a}%'`
                     const query = {"whereString" : queryString, "queryLayer": "retsLayer"}
                     try{
-                        console.log(query)
                         const retsid = await getQueryLayer(query, 'RETS_ID', 5)
                         this.RETSData.length = 0
                         retsid.features.forEach((x) => {
                             this.RETSData.push({RETS_ID: x.attributes.RETS_ID, OBJECTID: x.attributes.OBJECTID, JOB_TYPE: x.attributes.JOB_TYPE, fullData: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                         })
                         if(string){
-                            console.log(string)
                             this.addGraphic(this.RETSData)
                             store.retsObj.attributes.RELATED_RETS.push(this.RETSData[0])
-                            console.log(this.RETSData)
-                            
                             return
                         }
                         return
@@ -376,7 +369,6 @@ import {store} from './store.js'
                 }
             },
             addGraphic(e){
-                console.log(e)
                 // e = typeof e === "object" ? e : splitAndAddRelatedRets(store.retsObj.attributes.RELATED_RETS)
                 addRelatedRetsToMap(e.at(-1))
                 store.isSaveBtnDisable = true

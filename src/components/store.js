@@ -349,6 +349,8 @@ export const store = reactive({
         },
         deleteRetsID(){
                 const findIndex = this.roadObj.findIndex(ret => ret.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
+                console.log(findIndex)
+                console.log(this.updateRetsSearch)
                 this.updateRetsSearch.splice(findIndex, 1)
 
                 const cloneRets = [...this.roadObj]

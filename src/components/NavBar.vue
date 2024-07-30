@@ -300,7 +300,6 @@
                    }
                 },
                 mounted() {
-                console.log(store.retsObj.attributes)
                     
 
                 },

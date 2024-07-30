@@ -204,8 +204,8 @@ export let roadwaysRenderer = {
   type: "simple",
   symbol: {
     type: "simple-line",
-    width: .2,
-    color: "rgba(65, 66, 66, .1)"
+    width: 0,
+    color: "rgba(65, 66, 66, 0)"
   }
 }
 
@@ -576,7 +576,6 @@ export const OSMVTBasemap = new Basemap({
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 map.addMany([TxDOTRoadways, retsLayer, graphics, retsGraphicLayer, texasCounties, texasCities,  highlightLayer, txdotDistricts, retsHistory])
-console.log("stuff added")
 
 searchWidget.on("select-result", function(event) {
   const selectedFeature = event.result.feature;

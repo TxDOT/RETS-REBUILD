@@ -90,7 +90,7 @@ export function clickRetsPoint(){
                     let lon = Math.round(event.mapPoint.longitude * 100000000) / 100000000;
                     let coordinate = lon + ", " + lat
                     
-                    //navigator.clipboard.writeText(coordinate);
+                    navigator.clipboard.writeText(coordinate);
                     store.coordinatenotification = true
                     store.latlonstring = coordinate
                     setTimeout(() => {
@@ -128,7 +128,6 @@ export function clickRetsPoint(){
                     openDetails(retsPt)
                     highlightRETSPoint(evt.results[0].graphic.attributes)
                     removeOutline()
-                    console.log(evt.results)
                     outlineFeedCards(evt.results)
                     return
                 }
@@ -578,7 +577,6 @@ export function zoomToRelatedRets(relatedRets){
 
 export const toggleRelatedRets = (retsid) =>  {
     const parseRets = JSON.parse(retsid)
-    console.log(retsid)
     if(!parseRets.attributes.RELATED_RETS) return
     const newRetsId = parseRets.attributes.RELATED_RETS.includes(",") ? parseRets.attributes.RELATED_RETS.split(",") : parseRets.attributes.RELATED_RETS
     store.retsObj.attributes.RELATED_RETS = newRetsId
@@ -780,11 +778,8 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
    
                                     if (pressedkey === false){
                                         if (store.isDetailsPage && (selectedFeatures.length > 1)){
-                                            console.log(selectedFeatures.length, store.isSaveBtnDisable)
                                             if(!store.isSaveBtnDisable){
-                                                console.log(store.cancelpopup)
                                                 store.cancelpopup = true
-                                                console.log(store.cancelpopup)
                                                 return
                                             }
                                             outlineFeedCards(store.roadHighlightObj)

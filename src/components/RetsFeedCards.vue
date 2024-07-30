@@ -123,7 +123,6 @@ export default{
             timer: "",
             currentValues: "",
             send: null,
-            activityBanner: "Activity Feed",
             isSubtitle: false,
             isRetsActivated: true,
             retsSubtitle:"",
@@ -170,8 +169,6 @@ export default{
                     removeHighlight("a", true)
                     await getHighlightGraphic()
                     const graphicOid = store.clickedGraphic
-                    console.log(graphicOid)
-                    console.log(retsGraphicLayer)
                     const returnGraphic = retsGraphicLayer.graphics.items.find(ret => ret.attributes.OBJECTID === graphicOid)
                     returnGraphic.attributes.flagColor = store.setFlagColor(returnGraphic.attributes)
                     returnGraphic.attributes.mdiaccountmultiplecheck = store.isAssigned(returnGraphic.attributes)
@@ -204,6 +201,7 @@ export default{
                 //this.addrets = objectid
                 this.isSpinner = false
                 this.Spinneractive = true
+                store.activityBanner = objectid
                 return
             }
             catch(err){
@@ -246,7 +244,6 @@ export default{
             store.retsObj = road
             store.historyRetsId = road.attributes.RETS_ID
             
-            
             returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
             clearTimeout(this.timer)
             this.timer=""
@@ -267,10 +264,6 @@ export default{
                 highlightRETSPoint(rets.attributes)
                 zoomTo(zoomToRETS)
             },250)
-        },
-        removeUndefinedIndex(delRd){
-            const findRoad = store.roadObj.findIndex(road => road.attributes.OBJECTID === delRd.OBJECTID)
-            store.roadObj.splice(findRoad, 1)
         },
 
         async addretss(objectid){

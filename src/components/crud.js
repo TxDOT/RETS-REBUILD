@@ -54,16 +54,17 @@ export async function updateRETSPT(retsObj){
     console.log(`${retsObj.attributes.OBJECTID} updated`)
 }
 
-export function deleteRETSPT(retsObj){
+export async function deleteRETSPT(retsObj){
     if(retsObj.attributes.RELATED_RETS){
         retsObj.attributes.RELATED_RETS = retsObj.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID).toString()
     }
     let esriDelGraphic = createGraphic(retsObj)
-    retsLayer.applyEdits({
+    await retsLayer.applyEdits({
         deleteFeatures: [esriDelGraphic]
     })
-    .then(() => console.log(`${retsObj.attributes.OBJECTID} deleted`))
-    .catch(err => console.log(err))
+
+    console.log(`${retsObj.attributes.OBJECTID} deleted`)
+
 }
 
 
