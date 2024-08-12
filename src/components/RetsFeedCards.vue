@@ -19,7 +19,7 @@
                     <p>{{store.activityBanner}}</p>
                     <div class="retsSubtitle">
                         <div id="retSubText">
-                            <v-text-field variant="plain" v-if="store.isDetailsPage" :disabled="isSubtitle" placeholder="Enter a subtitle" style="position:relative; top: 1px; right: 3px; max-width: 34ch" class="rets-subtitle-text" v-model="store.retsObj.attributes.RETS_NM" @update:modelValue="store.checkDetailsForComplete()">
+                            <v-text-field variant="plain" v-if="store.isDetailsPage" :disabled="isSubtitle" placeholder="Add a subtitle" style="position:relative; top: 1px; right: 3px; max-width: 34ch" class="rets-subtitle-text" v-model="store.retsObj.attributes.RETS_NM" @update:modelValue="store.checkDetailsForComplete()">
                             </v-text-field>
                         </div>
                     </div>
@@ -403,14 +403,6 @@ export default{
             },
             immediate: true
         },
-        retsSubtitle:{
-            handler:function(word){
-                if(word.length<0) return
-                setTimeout(()=>{
-                   // this.filterPros.attributes.RTE_NM = word
-                },1000)
-            }
-        },
         // addrets:{
         //     handler: async function(){
         //         await this.addretss()
@@ -419,11 +411,16 @@ export default{
         // },
         'store.retsObj.attributes.RETS_NM':{
             handler: function(a,b){
-                if(!b) return
+                if(!b){
+                    document.querySelector(".rets-subtitle-text-active")?.classList?.remove()
+                    return
+                }
                 if(b.length === 30){
                     store.retsObj.attributes.RETS_NM = a.slice(0, -1)
                     return
                 }
+                console.log(document.querySelector(".rets-subtitle-text"))
+                document.querySelector(".rets-subtitle-text").classList.add("rets-subtitle-text-active")
             }
         },
         'store.roadHighlightObj.size':{
@@ -484,9 +481,15 @@ export default{
         min-height: 90%;
     }
     .rets-subtitle-text :deep(input){
-        color: #4472C4 !important;
+        color: #7F7F7F !important;
         font-weight: bold;
         padding-left: 10px;
+        font-style: italic;
+    }
+    .rets-subtitle-text-active :deep(input){
+        color: #4472C4 !important;
+        font-size: .6rem !important;
+        font-style: normal !important;
     }
     #addbtn{
         position: relative;

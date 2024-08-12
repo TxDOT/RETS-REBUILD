@@ -20,7 +20,7 @@
 
                     <div style="position: relative; top: 0px;">
                         <v-card-text id="retsCard">
-                            RETS {{rd.attributes.RETS_ID  }}
+                            {{  rd.attributes.RETS_ID  }}
                         </v-card-text>
     
 
@@ -302,7 +302,7 @@ export default{
     white-space: nowrap;
     font-weight: bold;
     color: #4472C4;
-    bottom: 28px;
+    bottom: 26px;
     left:75px;
 }
 .route-name{
