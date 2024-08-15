@@ -92,8 +92,8 @@
     <v-card id="archivepopup" v-if="isarchiveopen" >
         <v-card-title class="popupheader" >
             Delete RETS {{deletedRETSID}}
-            <hr id="separator2" />
         </v-card-title>
+        <hr id="separator3" />
         <v-card-subtitle class="popuptext">
             Deleting this RETS will move it to the archive table.
         </v-card-subtitle>
@@ -106,8 +106,8 @@
     <v-card id="cancelpopup" v-if="store.cancelpopup">
         <v-card-title class="popupheader" >
             Discard unsaved changes?
-            <hr id="separator2" />
         </v-card-title>
+        <hr id="separator3" />
         <v-card-subtitle class="popuptext">
             If you proceed, your changes will be discarded.
         </v-card-subtitle>
@@ -123,7 +123,7 @@
 
 <script>
     import { appConstants } from '../common/constant.js'
-    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, updateRetsObj, openDetails, outlineFeedCards} from './utility.js'
+    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, updateRetsObj, openDetails, outlineFeedCards, removeOutline} from './utility.js'
 
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
@@ -265,7 +265,6 @@
                     removeHighlight(store.retsObj)
                     //const b = store.roadObj.find(rd => rd.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
                     //store.roadHighlightObj.delete(b)
-                    console.log("hey")
                     store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
                     store.roadHighlightObj.clear()
                     store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
@@ -303,6 +302,7 @@
                 store.isShowSelected = false
                 deleteRetsGraphic()
                 retsLayerView.layer.definitionExpression = store.savedFilter
+                store.isSaveBtnDisable = true
                 //store.updateRetsID()
                 //retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
                 return
@@ -330,16 +330,20 @@
                     const archiveRets = JSON.parse(store.archiveRetsDataString)
                     let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
                     updateRetsObj(findItem, archiveRets)
-                    openDetails(nextRets)
+                    store.roadHighlightObj.forEach(entry => {
+                        if (store.retsObj.attributes.RETS_ID != entry.attributes.RETS_ID){
+                            openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === entry.attributes.RETS_ID))
+                        }
+                        });                                           
                     store.clickStatus = false
                     store.cancelpopup = false
                     return
                 }
-                
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
                 this.replaceArchiveContent(archiveRets)
                 this.returnToFeed()
                 retsLayerView.layer.definitionExpression = store.savedFilter
+                store.isCard = true
                 store.toggleFeed = 1
                 store.cancelpopup = false
                 outlineFeedCards(store.roadHighlightObj)
@@ -445,7 +449,7 @@
     position: fixed;
     border-radius: 5px;
     width: 25rem;
-    height:25%; 
+    height:20%; 
     border-radius: 0;
     left: 567px;
     right:0;
@@ -468,6 +472,15 @@
     margin: 0 auto;
     width: 22.5rem;
     padding-top: 1px;
+}
+
+#separator3{
+    border: 0;
+    border-bottom: 1px solid ;
+    margin: 0 auto;
+    width: 22.5rem;
+    padding-top: 1px;
+    margin-bottom: 10px;
 }
 
 #archivetext{
@@ -702,12 +715,20 @@ div .cardDiv{
 #djpbuttons:hover{
     background: rgba(220, 220, 220, .1) !important;
 }
+.popuptext{
+    position: absolute;
+    left: 10px;
+}
+.popupheader{
+    position: relative;
+    left: 10px;
+}
 
 #cancelpopup{
     position: fixed;
     border-radius: 5px;
     width: 25rem;
-    height:25%; 
+    height:20%; 
     border-radius: 0;
     left: 567px;
     right:0;
