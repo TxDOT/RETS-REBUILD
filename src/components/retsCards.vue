@@ -20,7 +20,7 @@
 
                     <div style="position: relative; top: 0px;">
                         <v-card-text id="retsCard">
-                            {{  rd.attributes.RETS_ID  }}
+                            RETS {{  rd.attributes.RETS_ID  }}
                         </v-card-text>
     
 
@@ -293,11 +293,12 @@ export default{
     color: #D9D9D9;
     font-weight: bold;
 }
+
 #retsCMNT{
     position: relative;
     max-width: 34ch;
     overflow: hidden;
-    padding: 0px 0px 0px 10px;
+    padding: 0px 0px 0px 15px;
     text-overflow: ellipsis;
     white-space: nowrap;
     font-weight: bold;

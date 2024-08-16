@@ -7,7 +7,7 @@
             <div class="add-new-btn">
                 <div style="float:right;">
                     <v-btn v-for="(tool, i) in addbutton" :key="i" :value="tool" @click="tool.action()" :prepend-icon="buttonIcon" color="#4472C4" rounded="0" id="add-new-btn"  class="main-button" v-if="!store.isDetailsPage">
-                        <p class="text-btn" id = "addbtn">{{addbtntext}}</p>
+                        <p class="text-btn" id="addbtn">{{addbtntext}}</p>
                     </v-btn>
                 </div>
             </div>
@@ -19,8 +19,7 @@
                     <p>{{store.activityBanner}}</p>
                     <div class="retsSubtitle">
                         <div id="retSubText">
-                            <v-text-field variant="plain" v-if="store.isDetailsPage" :disabled="isSubtitle" placeholder="Add a subtitle" style="position:relative; top: 1px; right: 3px; max-width: 34ch" class="rets-subtitle-text" v-model="store.retsObj.attributes.RETS_NM" @update:modelValue="store.checkDetailsForComplete()">
-                            </v-text-field>
+                            <v-text-field variant="plain" v-if="store.isDetailsPage" :disabled="isSubtitle" placeholder="Add a subtitle" id="subtitleCard" :class="store.retsObj.attributes.RETS_NM?.length ? 'rets-subtitle-text-active' : 'rets-subtitle-text'" v-model="store.retsObj.attributes.RETS_NM" @update:modelValue="retsSubtitleUpdate($event)" maxlength="34"></v-text-field>
                         </div>
                     </div>
                 </div>
@@ -162,6 +161,8 @@ export default{
         clickRetsPoint()
     },
     mounted(){
+
+        console.log(document.querySelector(".rets-subtitle-text"))
         this.showChanges = true
         reactiveUtils.on(() => view.popup, "trigger-action",
             async (event) => {
@@ -187,6 +188,17 @@ export default{
         this.retsFilters[appConstants.queryField[appConstants.userRoles.find(x => x.value === store.loggedInUser).type]] = appConstants.defaultUserValue
     },
     methods:{
+        retsSubtitleUpdate(a){
+            console.log(a)
+            store.checkDetailsForComplete()
+            // if(a.length >= 30){
+            //     console.log(a)
+            //     store.retsObj.attributes.RETS_NM = a.slice(0, 10)
+                
+            //     return
+            // }
+            
+        },
         clearContent(){
             this.actvFeedSearch = ""
         },
@@ -415,12 +427,7 @@ export default{
                     document.querySelector(".rets-subtitle-text-active")?.classList?.remove()
                     return
                 }
-                if(b.length === 30){
-                    store.retsObj.attributes.RETS_NM = a.slice(0, -1)
-                    return
-                }
-                console.log(document.querySelector(".rets-subtitle-text"))
-                document.querySelector(".rets-subtitle-text").classList.add("rets-subtitle-text-active")
+
             }
         },
         'store.roadHighlightObj.size':{
@@ -488,8 +495,8 @@ export default{
     }
     .rets-subtitle-text-active :deep(input){
         color: #4472C4 !important;
-        font-size: .6rem !important;
         font-style: normal !important;
+        padding-left: 10px;
     }
     #addbtn{
         position: relative;
@@ -657,4 +664,10 @@ export default{
         width: 45px !important;
     }
 
+    #subtitleCard{
+        position:relative;
+        top: 1px;
+        right: 3px;
+        max-width: 34ch
+    }
 </style>

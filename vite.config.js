@@ -6,7 +6,4 @@ export default defineConfig({
   plugins: [vue()],
   assetsInclude:['**/*.svg'],
   base: '/apps/statewide_mapping/rets_rebuild_test/',
-  server:{
-    host: ""
-  }
 })
