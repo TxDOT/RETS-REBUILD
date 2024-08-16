@@ -123,7 +123,7 @@
 
 <script>
     import { appConstants } from '../common/constant.js'
-    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, updateRetsObj, openDetails, outlineFeedCards, removeOutline} from './utility.js'
+    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, updateRetsObj, openDetails, outlineFeedCards, removeOutline, highlightRETSPoint} from './utility.js'
 
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
@@ -333,6 +333,9 @@
                     store.roadHighlightObj.forEach(entry => {
                         if (store.retsObj.attributes.RETS_ID != entry.attributes.RETS_ID){
                             openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === entry.attributes.RETS_ID))
+                            removeHighlight("a", true)
+                            highlightRETSPoint(entry.attributes)
+                            outlineFeedCards(store.roadHighlightObj)
                         }
                         });                                           
                     store.clickStatus = false
