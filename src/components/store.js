@@ -439,7 +439,7 @@ export const store = reactive({
     
                 const metadataIsUpdate = fieldsToCheck.some(x => !x)
 
-                if(item.length && !store.retsObj.attributes.NO_RTE){
+                if(item.length && !store.retsObj.attributes.NO_RTE && store.isAlert){
                     this.isSaveBtnDisable = true
                     return
                 }

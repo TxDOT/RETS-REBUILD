@@ -129,7 +129,7 @@
 <script>
 import { appConstants } from '../common/constant'
 import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets, zoomTo, 
-        createRoadGraphic, getRoadInformation, cancelSketchPt, hitTestMoveRETS, splitAndAddRelatedRets} from './utility.js'
+        createRoadGraphic, getRoadInformation, cancelSketchPt, hitTestMoveRETS, queryRoads, isDFOInRange} from './utility.js'
 import {store} from './store.js'
 
     export default{
@@ -157,8 +157,8 @@ import {store} from './store.js'
                 retsRouteArchive: {},
                 removeListner: {},
                 onlyNumbers: {
-                    required: value => !!value || "But where am I? Don't leave me blank!",
-                    numbers: value => /[\d]/.test(Number(value)) || `Whoa! Numbers are more my vibe!`
+                    required: value => !value || "But where am I? Don't leaves me blank!",
+                    numbers: value => /[\d]/.test(Number(value)) || `Whoa! Numbers are more my vibe!`,
                 },
                 valueRequired:{
                     required: value => !!value || "Gimme a route a name!",
@@ -182,7 +182,6 @@ import {store} from './store.js'
             
             store.retsObj.attributes.NO_RTE = this.convertNoRTE(store.retsObj.attributes.NO_RTE)
             if(store.retsObj.attributes.NO_RTE === true){
-                store.isAlert = false
                 store.isDisableValidations = true
                 store.retsObj.attributes.NO_RTE = true
                 return
@@ -194,6 +193,10 @@ import {store} from './store.js'
 
         },
         methods:{
+            displayError(){
+                console.log("wrong")
+                return "wrong"
+            },
             handleCleardate(){
                 if (this.datePicked != store.retsObj.attributes.DEADLINE){
                     this.datePicker = "Pick a date"
@@ -278,8 +281,35 @@ import {store} from './store.js'
                 if (!e.target.value) return e.preventDefault();
                 return
             },
-            noRTECheck(){
-                if(!store.retsObj.attributes.DESC_) return
+            async noRTECheck(){
+                let roadDFO = store.retsObj.attributes.DFO
+                let routeName = store.retsObj.attributes.RTE_NM
+                if(store.retsObj.attributes.NO_RTE){
+                    store.isAlert = false
+                    store.isSaveBtnDisable = false
+                    return
+                }
+                if(!store.retsObj.attributes.DESC_ || !roadDFO){ 
+                    store.isSaveBtnDisable = true
+                    return
+                }
+                const findRoad = await queryRoads("RTE_NM", `'${routeName}'`)
+                if(!findRoad.features.length && !store.retsObj.attributes.NO_RTE){
+                    store.isAlert = true
+                    store.alertTextInfo = {"text": `Route and/or DFO are not valid`, "color": "red", "type":"error", "toggle": true}
+                    store.dfoIndex = "not in range"
+                    store.isSaveBtnDisable = true
+                    return
+                }
+                let isInRange = isDFOInRange(findRoad, roadDFO)
+
+                if(!isInRange[0]){
+                    store.isAlert = true
+                    store.alertTextInfo = {"text": `DFO is out of Range. Begin DFO: ${isInRange[1].toFixed(3)} End DFO: ${isInRange[2].toFixed(3)}`, "color": "red", "type":"error", "toggle": true}
+                    store.dfoIndex = "not in range"
+                    store.isSaveBtnDisable = true
+                    return
+                }
 
                 this.completeDataSearch()
                 return
@@ -404,10 +434,11 @@ import {store} from './store.js'
                     }
             },
             manuallyUpdateDFO(a){
+                store.isAlert = false
                 const validNumCheck = new RegExp('^[0-9]*[.]?[0-9]+$')
                 const check = validNumCheck.test(Number(a))
                 const b = a.split(".")
-
+                
                 if(b[1] && b[1].length > 3){
                     store.retsObj.attributes.DFO = b.length > 1 ? b[0].concat(".", b[1].slice(0,3)): b[0]
                     return
@@ -424,12 +455,13 @@ import {store} from './store.js'
                 if(Number(a) !== ogDFO && !store.isMoveRetsPt){
                     this.typeTimeout = setTimeout(()=>{
                         createRoadGraphic(store.retsObj, false)
+                        this.completeDataSearch();
                     },900)
                 }
                 
                 
                 
-                this.completeDataSearch();
+                
                 return
             }
         },

@@ -27,6 +27,7 @@
                         <v-card-text class="route-name">
                             {{ rd.attributes.RTE_NM ?? "Route name not provided" }}
                         </v-card-text>
+                        
                         <v-card-text id="retsCMNT">
                             {{ rd.attributes.RETS_NM}}
                         </v-card-text>
@@ -292,19 +293,20 @@ export default{
     font-size: 15px;
     color: #D9D9D9;
     font-weight: bold;
+    margin-right: 10px;;
 }
-
 #retsCMNT{
     position: relative;
     max-width: 34ch;
     overflow: hidden;
-    padding: 0px 0px 0px 15px;
+    padding: 0px 0px 0px 10px;
     text-overflow: ellipsis;
     white-space: nowrap;
     font-weight: bold;
     color: #4472C4;
     bottom: 26px;
     left:75px;
+    justify-content: space-between;
 }
 .route-name{
     position: relative;

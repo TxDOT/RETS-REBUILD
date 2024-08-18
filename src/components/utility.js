@@ -89,7 +89,7 @@ export function clickRetsPoint(){
                     let lon = Math.round(event.mapPoint.longitude * 100000000) / 100000000;
                     let coordinate = lon + ", " + lat
                     
-                    //navigator.clipboard.writeText(coordinate);
+                    navigator.clipboard.writeText(coordinate);
                     store.coordinatenotification = true
                     store.latlonstring = coordinate
                     setTimeout(() => {
@@ -793,6 +793,7 @@ export function createtool(sketchWidgetcreate, createretssym) {
     
                                             // }
                                             if (store.isSaveBtnDisable){
+                                                outlineFeedCards(store.roadHighlightObj)
                                                 scrollToTopOfFeed(store.roadHighlightObj.size)             
 
                                             }
@@ -985,15 +986,36 @@ export async function queryFlags(userid){
     return
 }
 
-export async function createRoadGraphic(retsObj, onStartUp){
-    clearGraphicsLayer()
-    //est routeName and DFO from Rets Fields
-    const routeName = retsObj.attributes.RTE_NM
-    const routeDFO = retsObj.attributes.DFO
+export function isDFOInRange(rdSegments, DFO){
     let startM;
     let endM;
+
+    const rdSegment = rdSegments.features.find((rd) => {
+        startM = rd.geometry.paths[0].at(0)[2]
+        endM = rd.geometry.paths[0].at(-1)[2]
+        //if on a road segment
+        if(DFO >= startM && DFO <= endM){
+            return rd
+        }
+    })
+
+    if(!rdSegment){
+        return [false, startM, endM]
+    }
+
+    return [true, rdSegment]
+}
+
+export async function createRoadGraphic(retsObj, onStartUp){
+    clearGraphicsLayer()
+    
+    //test routeName and DFO from Rets Fields
+    const routeName = retsObj.attributes.RTE_NM
+    const routeDFO = retsObj.attributes.DFO
+
     //query for road
     const returnRds = await queryRoads("RTE_NM", `'${routeName}'`)
+
     if(!returnRds.features.length && !store.retsObj.attributes.NO_RTE){
         store.isAlert = true
         store.alertTextInfo = {"text": `Route and/or DFO are not valid`, "color": "red", "type":"error", "toggle": true}
@@ -1001,31 +1023,26 @@ export async function createRoadGraphic(retsObj, onStartUp){
         return
     }
     //determine if dfo is on a roadSegment
-    const rdSegment = returnRds.features.find((rd) => {
-        startM = rd.geometry.paths[0].at(0)[2]
-        endM = rd.geometry.paths[0].at(-1)[2]
-        //if on a road segment
-        if(routeDFO >= startM && routeDFO <= endM){
-            return rd
-        }
-    })
+    let dfoIsInRange = isDFOInRange(returnRds, routeDFO)
 
     //if not on a road segment range
-
-    if(!rdSegment && !store.retsObj.attributes.NO_RTE){
+    console.log(dfoIsInRange)
+    if(!dfoIsInRange[0] && !store.retsObj.attributes.NO_RTE){
         store.isAlert = true
-        store.alertTextInfo = {"text": `DFO is out of Range. Begin DFO: ${startM.toFixed(3)} End DFO: ${endM.toFixed(3)}`, "color": "red", "type":"error", "toggle": true}
+        store.alertTextInfo = {"text": `DFO is out of Range. Begin DFO: ${dfoIsInRange[1].toFixed(3)} End DFO: ${dfoIsInRange[2].toFixed(3)}`, "color": "red", "type":"error", "toggle": true}
         store.dfoIndex = "not in range"
+        store.isSaveBtnDisable = true
         return
     }
 
-    drawFeaturedRoad(rdSegment)
-    plotRetsPointOnRoad(routeDFO, rdSegment, onStartUp)
+    drawFeaturedRoad(dfoIsInRange[1])
+    plotRetsPointOnRoad(routeDFO, dfoIsInRange[1], onStartUp)
     
     return
 }
 
-async function queryRoads(field, value){
+export async function queryRoads(field, value){
+    console.log(value)
     return await roadLayerView.layer.queryFeatures({
         where: `${field} = ${value}`,
         returnM: true,
@@ -1035,6 +1052,9 @@ async function queryRoads(field, value){
 }
 
 function drawFeaturedRoad(rd){
+    if(!rd){
+        return
+    }
     const rdGraphic = new Graphic({
         geometry: rd.geometry,
         attributes:{
@@ -1052,6 +1072,9 @@ function drawFeaturedRoad(rd){
 }
 
 function plotRetsPointOnRoad(dfo, rd, onStartUp){
+    if(!rd){
+        return
+    }
     //find nearestVertex >
     const nearestVertexFront = rd.geometry.paths[0].findIndex(vertex => vertex[2] > dfo)
     const nearestVertexBehindPoint =  {

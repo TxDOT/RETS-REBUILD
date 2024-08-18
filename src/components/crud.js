@@ -44,13 +44,21 @@ export async function updateRETSPT(retsObj){
     delete enable.attributes?.mditimersand
     delete enable.attributes?.mdiaccountmultiplecheck
     delete enable.attributes?.mdiexclamation
+    delete enable.attributes?.historyUpdate 
 
     let esriUpdateGraphic = createGraphic(enable)
     esriUpdateGraphic.geometry = createGeo
+    console.log(esriUpdateGraphic)
 
-    await retsLayer.applyEdits({
-        updateFeatures: [esriUpdateGraphic]
-    })
+    try{
+        await retsLayer.applyEdits({
+            updateFeatures: [esriUpdateGraphic]
+        })
+    }
+    catch(err){
+        console.log(err)
+    }
+
     console.log(`${retsObj.attributes.OBJECTID} updated`)
 }
 

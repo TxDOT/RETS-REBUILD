@@ -207,6 +207,7 @@ export default{
                 this.isSpinner = true
                 this.Spinneractive = false
                 store.isCard = false
+                
                 const obj = await addRETSPT(newPointGraphic, "rets")
                 const objectid = obj.addFeatureResults[0].objectId
                 await this.addretss(objectid)
