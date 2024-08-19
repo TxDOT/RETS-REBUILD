@@ -196,10 +196,10 @@ export default{
             this.timer = setTimeout(()=>{
                 const zoomToRETS = rets.geometry
                 highlightRETSPoint(rets.attributes)
-                if (store.roadHighlightObj.size === 0){
-                    store.roadHighlightObj.add(store.roadObj.find(rd => rd.attributes.OBJECTID === rets.attributes.OBJECTID))
+                // if (store.roadHighlightObj.size === 0){
+                //     store.roadHighlightObj.add(store.roadObj.find(rd => rd.attributes.OBJECTID === rets.attributes.OBJECTID))
 
-                }
+                // }
                 zoomTo(zoomToRETS)
 
             },250)
