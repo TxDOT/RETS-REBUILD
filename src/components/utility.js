@@ -101,8 +101,9 @@ export function clickRetsPoint(){
                         removeOutline()
                         removeHighlight("a", true)
                         clearRoadHighlightObj()
-                        canceldetailsfunction()
-                       
+                        if (store.isDetailsPage){
+                            canceldetailsfunction()
+                        }
                         return
                     }
                     const retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
@@ -113,7 +114,6 @@ export function clickRetsPoint(){
                     if (store.isDetailsPage && store.isSaveBtnDisable){
                         //canceldetailsfunction()
                         openDetails(retsPt)
-                        console.log("OPEJ DETAILS")
                         
                     }
                     
@@ -793,6 +793,7 @@ export function createtool(sketchWidgetcreate, createretssym) {
     
                                             // }
                                             if (store.isSaveBtnDisable){
+                                                outlineFeedCards(store.roadHighlightObj); 
                                                 scrollToTopOfFeed(store.roadHighlightObj.size)             
 
                                             }
@@ -827,17 +828,9 @@ export function createtool(sketchWidgetcreate, createretssym) {
                                             store.cancelpopup = true
                                             return
                                         }
-                                        if (store.isDetailsPage && store.isSaveBtnDisable && (store.roadHighlightObj.size > 1)){
+                                        if (store.isDetailsPage && store.isSaveBtnDisable && (store.roadHighlightObj.size != 1)){
     
                                             returnToFeedFunction()
-                                            //outlineFeedCards(store.roadHighlightObj)
-                                            removeOutline()
-                                            //utlineFeedCards(store.roadHighlightObj)
-                                        }
-                                        if (store.isDetailsPage && store.isSaveBtnDisable && (store.roadHighlightObj.size === 0)){
-    
-                                            returnToFeedFunction()
-                                            removeOutline()
                                         }
                                         if (store.isDetailsPage && store.isSaveBtnDisable && store.roadHighlightObj.size === 1 ){
                                             store.roadHighlightObj.forEach(entry => {
