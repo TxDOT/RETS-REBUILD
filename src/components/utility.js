@@ -84,6 +84,7 @@ export function clickRetsPoint(){
         view.on("click", (event)=>{
             view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt) =>{
                 store.clickStatus = true
+                console.log(evt)
                 if (event.button === 2){
                     let lat = Math.round(event.mapPoint.latitude * 100000000) / 100000000;
                     let lon = Math.round(event.mapPoint.longitude * 100000000) / 100000000;
@@ -101,23 +102,19 @@ export function clickRetsPoint(){
                         removeOutline()
                         removeHighlight("a", true)
                         clearRoadHighlightObj()
-                        canceldetailsfunction()
-                       
+                        store.isDetailsPage ? canceldetailsfunction() : null
                         return
                     }
                     const retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
                     if (store.isDetailsPage && !store.isSaveBtnDisable ){
                         store.cancelpopup = true  
-                        
                     }
+
                     if (store.isDetailsPage && store.isSaveBtnDisable){
                         //canceldetailsfunction()
                         openDetails(retsPt)
                         console.log("OPEJ DETAILS")
-                        
                     }
-                    
-
                     
                    
                     store.roadHighlightObj.clear()
@@ -608,7 +605,7 @@ export function getHistoryView(retsid){
     retsHistory.queryFeatures({
         groupByFieldsForStatistics: ["RETS_ID"],
         orderByFields: ["EDIT_DT DESC"],
-        outFields: ["RETS_ID", "CMNT_NM", "EDIT_DT", "CMNT_TYPE_ID"],
+        outFields: ["RETS_ID", "CMNT_NM", "CREATE_DT", "EDIT_DT", "CMNT_TYPE_ID"],
         where: `RETS_ID = ${retsid}`
     })
     .then((res) => {
@@ -617,9 +614,18 @@ export function getHistoryView(retsid){
             retCard.attributes.historyUpdate = "Heyyyyy Champ! When was the last time we chatted?"
             return
         }
-        let {CMNT_NM, EDIT_DT, CMNT_TYPE_ID} = res.features[0].attributes      
+        let {CMNT_NM, CREATE_DT, CMNT_TYPE_ID, EDIT_DT} = res.features[0].attributes
+        
+        if(!EDIT_DT){
+            let latestHistoryText = appConstants.defineCMNT[CMNT_TYPE_ID ? CMNT_TYPE_ID : 0](CMNT_NM, CREATE_DT) ?? 'Status Change issue'
+            retCard.attributes.historyUpdate = latestHistoryText
+            return
+        }
+
         let latestHistoryText = appConstants.defineCMNT[CMNT_TYPE_ID ? CMNT_TYPE_ID : 0](CMNT_NM, EDIT_DT) ?? 'Status Change issue'
         retCard.attributes.historyUpdate = latestHistoryText
+        return 
+
 
     })
     .catch(() => {
@@ -1032,6 +1038,7 @@ export async function createRoadGraphic(retsObj, onStartUp){
         store.alertTextInfo = {"text": `DFO is out of Range. Begin DFO: ${dfoIsInRange[1].toFixed(3)} End DFO: ${dfoIsInRange[2].toFixed(3)}`, "color": "red", "type":"error", "toggle": true}
         store.dfoIndex = "not in range"
         store.isSaveBtnDisable = true
+        store.outOfRange = true
         return
     }
 

@@ -18,7 +18,7 @@
                 <v-text-field :disabled="store.retsObj.attributes.NO_RTE === false" label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required, valueRequired.limitCharacter] : []" id="route" @update:model-value="completeDataSearch()" maxlength="17"></v-text-field>
             </v-col>
             <v-col cols="4" offset="0">
-                <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" :error-messages="(!store.retsObj.attributes.DFO || !store.retsObj.attributes.DFO.length) && !store.retsObj.attributes.NO_RTE ? 'But where am I? Don\'t leave me blank!' : null" v-model="store.retsObj.attributes.DFO" :rules="!store.retsObj.attributes.NO_RTE ? [onlyNumbers.required, onlyNumbers.numbers]: []" @update:model-value="manuallyUpdateDFO(store.retsObj.attributes.DFO)">
+                <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" :error-messages="(!store.retsObj.attributes.DFO || store.outOfRange) && !store.retsObj.attributes.NO_RTE ? returnErrMsg(store.retsObj.attributes.DFO, store.outOfRange) : null" v-model="store.retsObj.attributes.DFO" :rules="!store.retsObj.attributes.NO_RTE ? [onlyNumbers.required, onlyNumbers.numbers]: []" @update:model-value="!store.retsObj.attributes.NO_RTE ? manuallyUpdateDFO(store.retsObj.attributes.DFO) : null">
                         <template v-slot:append-inner>
                             <v-tooltip :text="store.zoomInText" location="top">
                                 <template v-slot:activator="{props}">
@@ -36,7 +36,7 @@
                 <div class="new-proposed-route">
                     <v-checkbox density="compact" class="checkbox-size" v-model="store.retsObj.attributes.NO_RTE" @update:model-value="noRTECheck(store.retsObj.attributes.RTE_NM)">
                         <template v-slot:label>
-                            <v-label class="main-color subtitle-text" text="New, Proposed, or Unspecified"></v-label>
+                            <v-label class="main-color" id="newProposedText" text="New, Proposed, or Unspecified"></v-label>
                         </template>
                     </v-checkbox>
                 </div>
@@ -157,7 +157,7 @@ import {store} from './store.js'
                 retsRouteArchive: {},
                 removeListner: {},
                 onlyNumbers: {
-                    required: value => !value || "But where am I? Don't leaves me blank!",
+                    required: value => !!value || "But where am I? Don't leaves me blank!",
                     numbers: value => /[\d]/.test(Number(value)) || `Whoa! Numbers are more my vibe!`,
                 },
                 valueRequired:{
@@ -166,7 +166,8 @@ import {store} from './store.js'
                 },
                 descRequired:{
                     required: value => !!value || "Description is empty."
-                }
+                },
+                outOfRange: false
             }
         },
         beforeMount(){
@@ -193,9 +194,9 @@ import {store} from './store.js'
 
         },
         methods:{
-            displayError(){
-                console.log("wrong")
-                return "wrong"
+            returnErrMsg(dfo, isOutOfRange){
+                console.log(dfo, isOutOfRange)
+                return isOutOfRange ? "DFO is out of Range" : "Where am I ? Don't leave me blank"
             },
             handleCleardate(){
                 if (this.datePicked != store.retsObj.attributes.DEADLINE){
@@ -282,6 +283,7 @@ import {store} from './store.js'
                 return
             },
             async noRTECheck(){
+                store.outOfRange = false
                 let roadDFO = store.retsObj.attributes.DFO
                 let routeName = store.retsObj.attributes.RTE_NM
                 if(store.retsObj.attributes.NO_RTE){
@@ -308,6 +310,7 @@ import {store} from './store.js'
                     store.alertTextInfo = {"text": `DFO is out of Range. Begin DFO: ${isInRange[1].toFixed(3)} End DFO: ${isInRange[2].toFixed(3)}`, "color": "red", "type":"error", "toggle": true}
                     store.dfoIndex = "not in range"
                     store.isSaveBtnDisable = true
+                    store.outOfRange = true
                     return
                 }
 
@@ -427,18 +430,20 @@ import {store} from './store.js'
             },
             actvNbrUpdate(txt){
                 if(txt){
-                        const regex = new RegExp(/[^\d]/)
-                        store.retsObj.attributes.ACTV_NBR = regex.test(store.retsObj.attributes.ACTV_NBR) ? store.retsObj.attributes.ACTV_NBR.slice(0,-1) : store.retsObj.attributes.ACTV_NBR.slice()
-                        this.completeDataSearch()
-                        return
-                    }
+                    const regex = new RegExp(/[^\d]/)
+                    store.retsObj.attributes.ACTV_NBR = regex.test(store.retsObj.attributes.ACTV_NBR) ? store.retsObj.attributes.ACTV_NBR.slice(0,-1) : store.retsObj.attributes.ACTV_NBR.slice()
+                     this.completeDataSearch()
+                    return
+                }
             },
             manuallyUpdateDFO(a){
                 store.isAlert = false
+                store.outOfRange = false
                 const validNumCheck = new RegExp('^[0-9]*[.]?[0-9]+$')
                 const check = validNumCheck.test(Number(a))
                 const b = a.split(".")
-                
+
+
                 if(b[1] && b[1].length > 3){
                     store.retsObj.attributes.DFO = b.length > 1 ? b[0].concat(".", b[1].slice(0,3)): b[0]
                     return
@@ -478,13 +483,20 @@ import {store} from './store.js'
                 },
                 immediate: true
             },
+            'store.outOfRange':{
+                handler: function(){
+
+                }
+            }
         },
 
     }
 </script>
 
 <style scoped>
-
+#newProposedText{
+    font-weight: bold;
+}
 .cleardate{
     position: absolute;
     bottom:10px;

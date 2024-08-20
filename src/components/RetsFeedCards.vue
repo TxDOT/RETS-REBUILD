@@ -498,6 +498,7 @@ export default{
         color: #4472C4 !important;
         font-style: normal !important;
         padding-left: 10px;
+        font-weight: 700 !important;
     }
     #addbtn{
         position: relative;
@@ -622,7 +623,6 @@ export default{
         max-width: 50%;
     }
 
-
     #flagBtnDetails{
         padding: 1px !important;
         margin: 15px !important;
@@ -669,6 +669,6 @@ export default{
         position:relative;
         top: 1px;
         right: 3px;
-        max-width: 34ch
+        max-width: 34ch;
     }
 </style>

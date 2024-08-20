@@ -83,6 +83,7 @@ export const store = reactive({
         addPtRd: "",
         toggleFeed: 1, 
         DFO: null,
+        outOfRange: false,
         isAdd: false,
         cancelEvent: null,
         highlight: null,
@@ -432,14 +433,15 @@ export const store = reactive({
                 let item = [this.retsObj.attributes.RTE_NM, this.retsObj.attributes.DFO, this.retsObj.attributes.STAT, this.retsObj.attributes.DESC_].filter(x => !x)
                 
                 const fieldsToCheck = [
-                        store.retsObj.attributes.GIS_ANALYST, store.retsObj.attributes.GRID_ANALYST, 
-                        store.retsObj.attributes.DIST_ANALYST, store.retsObj.attributes.DIST_NM, 
-                        store.retsObj.attributes.CNTY_NM
+                        this.retsObj.attributes.GIS_ANALYST, this.retsObj.attributes.GRID_ANALYST, 
+                        this.retsObj.attributes.DIST_ANALYST, this.retsObj.attributes.DIST_NM, 
+                        this.retsObj.attributes.CNTY_NM
                     ]
-    
+                
+                !this.retsObj.attributes.NO_RTE ? fieldsToCheck.push(this.retsObj.attributes.DFO) : null    
                 const metadataIsUpdate = fieldsToCheck.some(x => !x)
 
-                if(item.length && !store.retsObj.attributes.NO_RTE && store.isAlert){
+                if(item.length && !this.retsObj.attributes.NO_RTE && this.isAlert){
                     this.isSaveBtnDisable = true
                     return
                 }

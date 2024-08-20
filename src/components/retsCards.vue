@@ -2,44 +2,43 @@
     <div>
         <v-text-field v-if="!store.roadObj.length" disabled variant="plain" style="position: relative; left: 15px;">{{store.RetsCardStatus}}</v-text-field>
     </div>
-        <div v-for="(rd, road) in store.updateRetsSearch" :key="rd.attributes.OBJECTID" :id="rd.attributes.OBJECTID" class="rets-card-row">
-            <v-btn elevation="0" @click="changeColor(rd.attributes.RETS_ID);" class="flag-btn" size="small" max-width=".5px" density="compact" flat slim variant="plain">
-                <template v-slot:prepend>
-                    <v-icon size="medium" :id="`${rd.attributes.RETS_ID}Icon`" :color="rd.attributes.flagColor.FLAG" :icon="rd.attributes.flagColor.FLAG ? changeFlagIcon(rd.attributes.flagColor.FLAG) : 'mdi-flag-outline'"></v-icon>
-                </template>
-            </v-btn>
-            <div>
-
+    <div v-for="(rd, road) in store.updateRetsSearch" :key="rd.attributes.OBJECTID" :id="rd.attributes.OBJECTID" class="rets-card-row">
+        <v-btn elevation="0" @click="changeColor(rd.attributes.RETS_ID);" class="flag-btn" size="small" max-width=".5px" density="compact" flat slim variant="plain">
+            <template v-slot:prepend>
+                <v-icon size="medium" :id="`${rd.attributes.RETS_ID}Icon`" :color="rd.attributes.flagColor.FLAG" :icon="rd.attributes.flagColor.FLAG ? changeFlagIcon(rd.attributes.flagColor.FLAG) : 'mdi-flag-outline'"></v-icon>
+            </template>
+        </v-btn>
+        <div>
             <div class="color-picker" v-if="flagClickedId === rd.attributes.RETS_ID" v-click-outside="closeFlagDiv">
                 <v-icon style="font-size: 13.5px;" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" ></v-icon>
             </div>
-  
+
             <v-lazy :options="{'threshold':0.5}" transition="fade-transition">
                 <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `5px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="checkhighlight(String(rd.attributes.RETS_ID)) ?? 'card-rets'" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road);">
                     <!-- <div class="boundary-rets-card"> -->
 
-                    <div style="position: relative; top: 0px;">
-                        <v-card-text id="retsCard">
+                    <div style="top: 0px; max-height: 0px;">
+                        <v-card-text id="retsId">
                             RETS {{  rd.attributes.RETS_ID  }}
                         </v-card-text>
-    
 
-                        <v-card-text class="route-name">
-                            {{ rd.attributes.RTE_NM ?? "Route name not provided" }}
+                         <v-card-text class="route-name">
+                            {{ rd.attributes.RTE_NM ?? "Route name missing" }}
                         </v-card-text>
-                        
+
                         <v-card-text id="retsCMNT">
                             {{ rd.attributes.RETS_NM}}
-                        </v-card-text>
+                         </v-card-text>
+
+                        <div style="width: 100%;">
+                            <span class="text-concat">
+                                {{ rd.attributes.DESC_ ? rd.attributes.DESC_ : "Description is empty" }}
+                            </span>
+                        </div>
                     </div>
                     
-                    <div style="position: relative; bottom: 27px; width: 100%; max-height: 40px;">
-                        <p class="text-concat">
-                            {{ rd.attributes.DESC_ ? rd.attributes.DESC_ : "Description is empty" }}
-                        </p>
-                    </div>
                     <div class="bottomCardText">
-                        <div style="position:relative; float:right; font-size: 11px; bottom: 5px;" >
+                        <div style="position:relative; float:right; font-size: 11px; top: 45px; left: 210px;" >
                             <v-tooltip text="Assigned to you" location="top">
                                 <template v-slot:activator="{props}">
                                     <v-icon icon="mdi-account-multiple-check" color="white" v-if="rd.attributes.mdiaccountmultiplecheck === true" class="cardPRIO" v-bind="props"></v-icon>
@@ -102,9 +101,9 @@
                     <!-- </div> -->
                 </v-card>
             </v-lazy>
-            </div>
-        
         </div>
+    
+    </div>
       
     
 </template>
@@ -221,9 +220,7 @@ export default{
 <style scoped>
 .bottomCardText{
     position: relative;
-    top: 21px; 
-    height: 15px;
-    z-index: 9999;
+    top: 10px;
 }
 .rets-card-row{
     position: relative;
@@ -285,28 +282,27 @@ export default{
     position: relative;
     top: 0px;
 }
-#retsCard{
+#retsId{
     padding:0px; 
     position: relative; 
     bottom: 7px; 
-    width: fit-content;
+    width: 20%;
     font-size: 15px;
     color: #D9D9D9;
     font-weight: bold;
-    margin-right: 10px;;
+    margin-right: 10px;
+    justify-content: center;
 }
 #retsCMNT{
     position: relative;
-    max-width: 34ch;
     overflow: hidden;
     padding: 0px 0px 0px 10px;
     text-overflow: ellipsis;
     white-space: nowrap;
     font-weight: bold;
     color: #4472C4;
-    bottom: 26px;
+    bottom: 27px;
     left:75px;
-    justify-content: space-between;
 }
 .route-name{
     position: relative;
@@ -330,7 +326,8 @@ export default{
     font-size: 14px;
     position: relative;
     color: #a6a6a6;
-    width: 96%;
+    width: 100%;
+    bottom: 27px;
 }
 .cardPRIO{
     margin-left:10px;
