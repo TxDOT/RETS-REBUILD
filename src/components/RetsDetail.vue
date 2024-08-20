@@ -273,9 +273,11 @@
                     //store.roadHighlightObj.delete(b)
                     store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
                     if (store.roadHighlightObj.size === 1){
-                        removeHighlight(store.retsObj)
-                        store.roadHighlightObj.clear()
+                        //removeHighlight(store.retsObj)
+                        //store.roadHighlightObj.clear()
                         highlightRETSPoint(store.retsObj)
+                        store.roadHighlightObj.clear()
+                        store.roadHighlightObj.add(store.retsObj)
 
                     }
                     store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
