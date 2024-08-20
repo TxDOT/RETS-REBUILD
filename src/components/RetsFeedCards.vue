@@ -443,6 +443,17 @@ export default{
             },
             immediate: true
         },
+        'store.clickevent': {
+        handler: function(newVal) {
+           if (!store.isSaveBtnDisable && store.isDetailsPage ){
+            store.cancelpopup = true
+            return
+           }
+        },
+        immediate: true // Runs the watcher immediately upon creation
+    
+
+        },
         // 'store.isSelectEnabled':{
         //     handler: function(){
         //         store.roadHighlightObj.clear()
@@ -498,7 +509,6 @@ export default{
         color: #4472C4 !important;
         font-style: normal !important;
         padding-left: 10px;
-        font-weight: 700 !important;
     }
     #addbtn{
         position: relative;

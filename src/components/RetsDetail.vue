@@ -261,12 +261,23 @@
                 store.isCard = true
                 store.historyChat.length = 0
                 store.isSaveBtnDisable = true
-                if (store.roadHighlightObj.size === 0 && store.isSelectEnabled === false){
-                    removeHighlight(store.retsObj)
+                //store.roadHighlightObj.clear()
+                if (store.roadHighlightObj.size <= 1 && store.isSelectEnabled === false){
+                    if (store.roadHighlightObj.size === 0){
+                        removeHighlight(store.retsObj)
+                        store.roadHighlightObj.clear()
+
+                    }
+                    
                     //const b = store.roadObj.find(rd => rd.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
                     //store.roadHighlightObj.delete(b)
                     store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
-                    store.roadHighlightObj.clear()
+                    if (store.roadHighlightObj.size === 1){
+                        removeHighlight(store.retsObj)
+                        store.roadHighlightObj.clear()
+                        highlightRETSPoint(store.retsObj)
+
+                    }
                     store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                     return
                 }
@@ -340,6 +351,7 @@
                         });                                           
                     store.clickStatus = false
                     store.cancelpopup = false
+                    store.isSaveBtnDisable = true
                     return
                 }
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
