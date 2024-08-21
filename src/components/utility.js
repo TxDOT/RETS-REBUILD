@@ -646,8 +646,6 @@ export function getHistoryView(retsid){
         let latestHistoryText = appConstants.defineCMNT[CMNT_TYPE_ID ? CMNT_TYPE_ID : 0](CMNT_NM, CREATE_DT) ?? 'Status Change issue'
         retCard.attributes.historyUpdate = latestHistoryText
         return 
-
-
     })
     .catch(() => {
         //
