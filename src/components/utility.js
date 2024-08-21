@@ -601,10 +601,22 @@ export function splitAndAddRelatedRets(relatedRets){
     // return splitString
 }
 
+function updateCreateDateStatus(res, findMaxCreateDT){
+    let findItem = res.features.find(cmnt => cmnt.attributes.CREATE_DT === findMaxCreateDT)
+
+    return [findItem, "create"]
+}
+
+function updateEditDateStatus(res, findMaxEditDT){
+    let findItem = res.features.find(cmnt => cmnt.attributes.EDIT_DT === findMaxEditDT)
+
+    return [findItem, "edit"]
+}
+
 export function getHistoryView(retsid){
     retsHistory.queryFeatures({
         groupByFieldsForStatistics: ["RETS_ID"],
-        orderByFields: ["EDIT_DT DESC"],
+        orderByFields: ["CREATE_DT DESC"],
         outFields: ["RETS_ID", "CMNT_NM", "CREATE_DT", "EDIT_DT", "CMNT_TYPE_ID"],
         where: `RETS_ID = ${retsid}`
     })
@@ -614,15 +626,24 @@ export function getHistoryView(retsid){
             retCard.attributes.historyUpdate = "Heyyyyy Champ! When was the last time we chatted?"
             return
         }
-        let {CMNT_NM, CREATE_DT, CMNT_TYPE_ID, EDIT_DT} = res.features[0].attributes
+
+        let findMaxCreateDT = Math.max(...(res.features.map(c => c.attributes.CREATE_DT)))
+        let findMaxEditDT = Math.max(...(res.features.map(c => c.attributes.EDIT_DT)))
         
-        if(!EDIT_DT){
-            let latestHistoryText = appConstants.defineCMNT[CMNT_TYPE_ID ? CMNT_TYPE_ID : 0](CMNT_NM, CREATE_DT) ?? 'Status Change issue'
+        let returnItem = findMaxCreateDT > findMaxEditDT ? updateCreateDateStatus(res, findMaxCreateDT) : updateEditDateStatus(res, findMaxEditDT)      
+
+        console.log(returnItem)
+        // let {CMNT_NM, CREATE_DT, CMNT_TYPE_ID, EDIT_DT} = 
+
+        // console.log(CMNT_NM, CREATE_DT, CMNT_TYPE_ID, EDIT_DT)
+        if(returnItem[1] === "edit"){
+            let {CMNT_NM, EDIT_DT, CMNT_TYPE_ID} = returnItem[0].attributes
+            let latestHistoryText = appConstants.defineCMNT[CMNT_TYPE_ID ? CMNT_TYPE_ID : 0](CMNT_NM, EDIT_DT) ?? 'Status Change issue'
             retCard.attributes.historyUpdate = latestHistoryText
             return
         }
-
-        let latestHistoryText = appConstants.defineCMNT[CMNT_TYPE_ID ? CMNT_TYPE_ID : 0](CMNT_NM, EDIT_DT) ?? 'Status Change issue'
+        let {CMNT_NM, CREATE_DT, CMNT_TYPE_ID} = returnItem[0].attributes
+        let latestHistoryText = appConstants.defineCMNT[CMNT_TYPE_ID ? CMNT_TYPE_ID : 0](CMNT_NM, CREATE_DT) ?? 'Status Change issue'
         retCard.attributes.historyUpdate = latestHistoryText
         return 
 

@@ -23,7 +23,7 @@
                         </v-card-text>
 
                          <v-card-text class="route-name">
-                            {{ rd.attributes.RTE_NM ?? "Route name missing" }}
+                            {{ rd.attributes.RTE_NM ?? "No Route" }}
                         </v-card-text>
 
                         <v-card-text id="retsCMNT">
