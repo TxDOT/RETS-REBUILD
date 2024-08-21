@@ -1457,3 +1457,84 @@ export function canceldetailsfunction(){
     
     return
 }
+
+export function returntofeedcopy() {
+    if(store.cancelEvent){
+        store.cancelEvent.remove()
+        cancelSketchPt()
+    }
+    store.isAlert = false
+    clearGraphicsLayer()
+    store.isDetailsPage = false
+    store.isCancelBtnDisable = false
+    store.activityBanner = "Activity Feed"
+    store.isMoveRetsPt = false
+    store.isCard = true
+    store.historyChat.length = 0
+    store.isSaveBtnDisable = true
+    //store.roadHighlightObj.clear()
+    if (store.roadHighlightObj.size <= 1 && store.isSelectEnabled === false){
+        if (store.roadHighlightObj.size === 0){
+            removeHighlight(store.retsObj)
+            store.roadHighlightObj.clear()
+
+        }
+        
+        //const b = store.roadObj.find(rd => rd.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
+        //store.roadHighlightObj.delete(b)
+        store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+        if (store.roadHighlightObj.size === 1){
+            //removeHighlight(store.retsObj)
+            //store.roadHighlightObj.clear()
+            highlightRETSPoint(store.retsObj)
+            store.roadHighlightObj.clear()
+            store.roadHighlightObj.add(store.retsObj)
+
+        }
+        store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+        return
+    }
+    return
+}
+
+export function replacearchivecopy(old){
+    const filter = !store.isShowSelected ? store.updateRetsSearch : [...store.roadHighlightObj]
+    const currDate = filter?.find(x => x.attributes.RETS_ID === old.attributes.RETS_ID)?.attributes?.EDIT_DT ?? this.returnToFeed()
+    const rd = filter.findIndex(x => x.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
+    if(currDate !== old.attributes.EDIT_DT){
+        old.attributes.EDIT_DT === currDate
+    }
+    filter.splice(rd, 1, old)
+    !store.isShowSelected ? filter.splice(rd, 1, old) : store.roadHighlightObj = new Set(filter)
+    return
+}
+
+export function discardeditcopy(){
+    if(store.clickStatus){
+        let nextRets = store.nextRoad
+        const archiveRets = JSON.parse(store.archiveRetsDataString)
+        let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
+        updateRetsObj(findItem, archiveRets)
+        store.roadHighlightObj.forEach(entry => {
+            if (store.retsObj.attributes.RETS_ID != entry.attributes.RETS_ID){
+                openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === entry.attributes.RETS_ID))
+                removeHighlight("a", true)
+                highlightRETSPoint(entry.attributes)
+                outlineFeedCards(store.roadHighlightObj)
+            }
+            });                                           
+        store.clickStatus = false
+        store.cancelpopup = false
+        store.isSaveBtnDisable = true
+        return
+    }
+    const archiveRets = JSON.parse(store.archiveRetsDataString)
+    replacearchivecopy(archiveRets)
+    returntofeedcopy()
+    retsLayerView.layer.definitionExpression = store.savedFilter
+    store.isCard = true
+    store.toggleFeed = 1
+    store.cancelpopup = false
+    outlineFeedCards(store.roadHighlightObj)
+    return
+}

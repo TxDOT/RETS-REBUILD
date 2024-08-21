@@ -103,7 +103,7 @@
             <v-btn class="main-button-style" @click="deleteRets">DELETE</v-btn>
         </v-btn-group>
     </v-card>   
-    <v-card id="cancelpopup" v-if="store.cancelpopup">
+    <!-- <v-card id="cancelpopup" v-if="store.cancelpopup">
         <v-card-title class="popupheader" >
             Discard unsaved changes?
         </v-card-title>
@@ -116,7 +116,7 @@
             <v-btn class="main-button-style" @click="disgardEdits">DISCARD</v-btn>
         </v-btn-group>
 
-    </v-card>
+    </v-card> -->
     
 
 </template>
@@ -491,14 +491,7 @@
     padding-top: 1px;
 }
 
-#separator3{
-    border: 0;
-    border-bottom: 1px solid ;
-    margin: 0 auto;
-    width: 22.5rem;
-    padding-top: 1px;
-    margin-bottom: 10px;
-}
+
 
 #archivetext{
     position: absolute;
@@ -741,18 +734,7 @@ div .cardDiv{
     left: 10px;
 }
 
-#cancelpopup{
-    position: fixed;
-    border-radius: 5px;
-    width: 25rem;
-    height:20%; 
-    border-radius: 0;
-    left: 567px;
-    right:0;
-    top:0;
-    bottom: 0;
-    margin: auto;
-}
+
 
 .buttonpositioning{
     position: absolute;
