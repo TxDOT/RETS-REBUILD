@@ -634,16 +634,13 @@ export function getHistoryView(retsid){
         
         let returnItem = findMaxCreateDT > findMaxEditDT ? updateCreateDateStatus(res, findMaxCreateDT) : updateEditDateStatus(res, findMaxEditDT)      
 
-        console.log(returnItem)
-        // let {CMNT_NM, CREATE_DT, CMNT_TYPE_ID, EDIT_DT} = 
-
-        // console.log(CMNT_NM, CREATE_DT, CMNT_TYPE_ID, EDIT_DT)
         if(returnItem[1] === "edit"){
             let {CMNT_NM, EDIT_DT, CMNT_TYPE_ID} = returnItem[0].attributes
             let latestHistoryText = appConstants.defineCMNT[CMNT_TYPE_ID ? CMNT_TYPE_ID : 0](CMNT_NM, EDIT_DT) ?? 'Status Change issue'
             retCard.attributes.historyUpdate = latestHistoryText
             return
         }
+        
         let {CMNT_NM, CREATE_DT, CMNT_TYPE_ID} = returnItem[0].attributes
         let latestHistoryText = appConstants.defineCMNT[CMNT_TYPE_ID ? CMNT_TYPE_ID : 0](CMNT_NM, CREATE_DT) ?? 'Status Change issue'
         retCard.attributes.historyUpdate = latestHistoryText
@@ -653,6 +650,7 @@ export function getHistoryView(retsid){
         //
     })
     return
+
 }
 
 export function returnHistory(query){
