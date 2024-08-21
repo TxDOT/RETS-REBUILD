@@ -5,6 +5,7 @@ import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapA
 
 export const store = reactive({
         devStatus: "dev",
+        clickevent: "",
         count: 0,
         isCloseDetail: false,
         clickStatus: false,

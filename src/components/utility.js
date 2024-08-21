@@ -83,8 +83,8 @@ export function clickRetsPoint(){
     try{
         view.on("click", (event)=>{
             view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt) =>{
+                store.clickevent = event
                 store.clickStatus = true
-                console.log(evt)
                 if (event.button === 2){
                     let lat = Math.round(event.mapPoint.latitude * 100000000) / 100000000;
                     let lon = Math.round(event.mapPoint.longitude * 100000000) / 100000000;
@@ -106,19 +106,21 @@ export function clickRetsPoint(){
                         return
                     }
                     const retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
-                    if (store.isDetailsPage && !store.isSaveBtnDisable ){
-                        store.cancelpopup = true  
-                    }
-
+                   
                     if (store.isDetailsPage && store.isSaveBtnDisable){
                         //canceldetailsfunction()
                         openDetails(retsPt)
-                        console.log("OPEJ DETAILS")
                     }
+
                     
-                   
                     store.roadHighlightObj.clear()
                     store.roadHighlightObj.add(retsPt)
+
+                        
+                   
+                    
+                   
+                    
                     if (store.isSaveBtnDisable){
                         removeOutline()
                         removeHighlight("a", true)
