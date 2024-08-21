@@ -191,6 +191,10 @@
                                 value: 1,
                                 action: ()=>{
                                     //open feed
+                                    if (!store.isSaveBtnDisable){
+                                        store.cancelpopup = true
+                                        return
+                                    }
                                     store.isCard = true
                                     store.isDetailsPage = false
                                     this.toggle = 1
@@ -293,6 +297,7 @@
                             this.retsToolsTop[2].disabled = false
                             return
                         }
+                    
                         this.retsToolsTop[2].disabled = true
                         return
                     },
