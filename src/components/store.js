@@ -4,7 +4,7 @@ import {sendChatHistory} from './crud.js'
 import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapActivityFeed} from './utility.js'
 
 export const store = reactive({
-        devStatus: "dev",
+        devStatus: "prod", //dev or prod
         clickevent: "",
         count: 0,
         isCloseDetail: false,
@@ -40,6 +40,7 @@ export const store = reactive({
         zoomInText: "Move RETS Point",
         archiveRetsDataString: "",
         nextRoad: [],
+        nextRoadObj : [],
         roadObj: [],
         roadObjOverflow: [],
         retsObj: {
@@ -92,6 +93,7 @@ export const store = reactive({
         savedFilter: "",
         coordinatenotification: false,
         latlonstring:"",
+        unsavedChanges: false,
         defaultFilterSetup(){
                 // this.CREATE_DT.push({title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"})
                 // this.STAT = appConstants.defaultStatValues
@@ -174,8 +176,6 @@ export const store = reactive({
                                 }
                                 
                         })
-                        let test = new Set([...this.roadHighlightObj].sort((a,b) => new Date(a.attributes.EDIT_DT) - new Date(b.attributes.EDIT_DT)))
-                        console.log(test)
                 }
                 const findItem = this.historyChat.find(note => note.OBJECTID === oid)
                 findItem.EDIT_DT = modDate
@@ -224,15 +224,7 @@ export const store = reactive({
                 
                 return retsFlag ?? defaultValue
         },
-        // preserveHighlightCards(){
-        //         if(this.isShowSelected){
-        //                 console.log(this.roadHighlightObj)
-        //                 this.updateRetsSearch = [...this.roadHighlightObj]
-        //                 console.log(this.updateRetsSearch)
-        //                 return
-        //         }
-        //         return
-        // },
+
         async getRetsLayer(userid, where, layer, orderFields){
                 this.loggedInUser = userid
                 const queryString = {"whereString": where, "queryLayer": layer}
@@ -351,8 +343,6 @@ export const store = reactive({
         },
         deleteRetsID(){
                 const findIndex = this.roadObj.findIndex(ret => ret.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
-                console.log(findIndex)
-                console.log(this.updateRetsSearch)
                 this.updateRetsSearch.splice(findIndex, 1)
 
                 const cloneRets = [...this.roadObj]

@@ -72,20 +72,6 @@
     </v-card>
     <Filter v-if="store.isfilter"/>
 
-    <v-card style="position: absolute; float: center; width: 25%; left: 40%; top: 30%; margin: 15px; border-radius: 0%;" color="#212121" v-if="unsavedChanges">
-        <v-card-title>Discard unsaved changes?</v-card-title>
-        <v-divider style="margin-left: 15px; margin-right: 15px; color:white;"></v-divider>
-        <v-card-text>
-            If you proceed your changes will be discarded.
-        </v-card-text>
-        <div style="margin: 15px;">
-            <div style="float: right; margin-bottom: 15px;">
-                <v-btn variant="plain" @click="cancelReturn">Cancel & Return</v-btn>
-                <v-btn variant="outlined" style="border-radius: 0%;" @click="proceed">Proceeed</v-btn>
-            </div>
-        </div>
-    </v-card>
-
 </template>
 
 <script>
@@ -135,7 +121,6 @@ export default{
             count: 0,
             store,
             stageData: 0,
-            unsavedChanges: false,
             showChanges: false,
             showChanges: false,
             addNewPtEvent: false,
@@ -161,8 +146,6 @@ export default{
         clickRetsPoint()
     },
     mounted(){
-
-        console.log(document.querySelector(".rets-subtitle-text"))
         this.showChanges = true
         reactiveUtils.on(() => view.popup, "trigger-action",
             async (event) => {
@@ -189,15 +172,7 @@ export default{
     },
     methods:{
         retsSubtitleUpdate(a){
-            console.log(a)
-            store.checkDetailsForComplete()
-            // if(a.length >= 30){
-            //     console.log(a)
-            //     store.retsObj.attributes.RETS_NM = a.slice(0, 10)
-                
-            //     return
-            // }
-            
+            store.checkDetailsForComplete()    
         },
         clearContent(){
             this.actvFeedSearch = ""
@@ -225,14 +200,7 @@ export default{
         alert(s){
             window.alert(s)
         },
-        proceed(){
-            this.unsavedChanges = false
-            this.double({attributes: this.stageData.attributes, geometry: [this.stageData.geometry[0], this.stageData.geometry[1]]}, 1)
-        },
-        cancelReturn(){
-            this.unsavedChanges = false
-            //do nothing
-        },
+
         checkChanges(){
             const beforeAtt = JSON.parse(store.currentInfo)
             const afterAtt = JSON.parse(JSON.stringify(store.retsObj))
@@ -242,7 +210,7 @@ export default{
                     continue
                 }
                 if(value !== afterAtt.attributes[key]){
-                    this.unsavedChanges = true
+                    store.unsavedChanges = true
                     issue++
                     return
                 }
@@ -509,6 +477,7 @@ export default{
         color: #4472C4 !important;
         font-style: normal !important;
         padding-left: 10px;
+        font-weight: bold;
     }
     #addbtn{
         position: relative;

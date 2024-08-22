@@ -13,20 +13,7 @@
                 store
             }
         },
-        watch:{
-            'store.isAlert':{
-                handler: function(a){
-                    console.log(a)
-                    if(a){
-                        store.isSaveBtnDisable = true
-                        return
-                    }
-                    store.isAlert = false
-                },
-                immediate: true
-            }
-            
-        }
+
 
     }
 </script>

@@ -23,12 +23,6 @@ export async function getRetsLayerView (){
             async () => {
                 try{
                     retsLayerView = retLayerView
-                    //let ret = await retsLayerView.queryFeatures()
-                
-                    //ret.features.forEach(id => retsid.push(id.attributes.RETS_ID))
-                    //console.log(retsid)
-                    //let concatRetsId = retsid.join(",")
-                    //getHistoryView(concatRetsId)
                     
                     if(retsLayerView.view.zoom < 12){
                         store.zoomInText = "Zoom in to enable"
@@ -105,6 +99,7 @@ export function clickRetsPoint(){
                         store.isDetailsPage ? canceldetailsfunction() : null
                         return
                     }
+                    view.goTo(event.mapPoint)
                     const retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
                    
                     if (store.isDetailsPage && store.isSaveBtnDisable){
@@ -231,7 +226,7 @@ export function outlineFeedCards(cards){
     //store.roadHighlightObj.add(objectcomparison)
     //zoom to card in feed
             
-    findCard.scrollIntoView({behavior: "smooth", block: "nearest", inline: "start"})
+    findCard.scrollIntoView({behavior: "smooth", block: "start", inline: "start"})
     // const zoomToCard = document.createElement('a')
     // zoomToCard.href = `#${objectcomparison}`
     // zoomToCard.click(preventHashUrl())
@@ -586,21 +581,6 @@ export const toggleRelatedRets = (retsid) =>  {
         a.forEach(x => x.visible = true)
     })
     return
-}
-
-export function splitAndAddRelatedRets(relatedRets){
-    // console.log(relatedRets)
-    // if(typeof relatedRets === "object" || !relatedRets.length){
-    //     // relatedRets.map((ret)=>{
-    //     //     this.gimmeRETS(ret, `RETS_ID = ${ret}`)
-    //     // })
-    //     return
-    // }
-    
-    // const splitString = relatedRets.split(",")
-    // //store.retsObj.attributes.RELATED_RETS = []
-
-    // return splitString
 }
 
 function updateCreateDateStatus(res, findMaxCreateDT){
@@ -1051,7 +1031,6 @@ export async function createRoadGraphic(retsObj, onStartUp){
     let dfoIsInRange = isDFOInRange(returnRds, routeDFO)
 
     //if not on a road segment range
-    console.log(dfoIsInRange)
     if(!dfoIsInRange[0] && !store.retsObj.attributes.NO_RTE){
         store.isAlert = true
         store.alertTextInfo = {"text": `DFO is out of Range. Begin DFO: ${dfoIsInRange[1].toFixed(3)} End DFO: ${dfoIsInRange[2].toFixed(3)}`, "color": "red", "type":"error", "toggle": true}
@@ -1068,7 +1047,6 @@ export async function createRoadGraphic(retsObj, onStartUp){
 }
 
 export async function queryRoads(field, value){
-    console.log(value)
     return await roadLayerView.layer.queryFeatures({
         where: `${field} = ${value}`,
         returnM: true,
@@ -1205,8 +1183,11 @@ export function getRoadInformation(){
                             store.cancelEvent.remove()
                             getNewPoint.remove()
                             store.checkDetailsForComplete()
+                            store.isSaveBtnDisable = false
                             return
                         }
+                        store.isAlert = false
+                        store.outOfRange = false
                         const convertMapPts = webMercatorUtils.webMercatorToGeographic(event.graphic.geometry)
                         findDFOLocation(convertMapPts, hit.results[0].graphic.attributes.GID)
                         completeMovePtSketch()
@@ -1501,17 +1482,20 @@ export function replacearchivecopy(old){
     const filter = !store.isShowSelected ? store.updateRetsSearch : [...store.roadHighlightObj]
     const currDate = filter?.find(x => x.attributes.RETS_ID === old.attributes.RETS_ID)?.attributes?.EDIT_DT ?? this.returnToFeed()
     const rd = filter.findIndex(x => x.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
+    const findRetInMain = store.roadObj.findIndex(x => x.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
+
     if(currDate !== old.attributes.EDIT_DT){
         old.attributes.EDIT_DT === currDate
     }
+
     filter.splice(rd, 1, old)
-    !store.isShowSelected ? filter.splice(rd, 1, old) : store.roadHighlightObj = new Set(filter)
+    store.roadObj.splice(findRetInMain, 1, old)
+    !store.isShowSelected ? filter.splice(rd, 1, old) : store.updateRetsSearch = store.roadHighlightObj = new Set(filter)
     return
 }
 
 export function discardeditcopy(){
     if(store.clickStatus){
-        let nextRets = store.nextRoad
         const archiveRets = JSON.parse(store.archiveRetsDataString)
         let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
         updateRetsObj(findItem, archiveRets)
@@ -1530,11 +1514,14 @@ export function discardeditcopy(){
     }
     const archiveRets = JSON.parse(store.archiveRetsDataString)
     replacearchivecopy(archiveRets)
-    returntofeedcopy()
+    clearGraphicsLayer()
+    //returntofeedcopy()
     retsLayerView.layer.definitionExpression = store.savedFilter
     store.isCard = true
     store.toggleFeed = 1
     store.cancelpopup = false
+    store.isSaveBtnDisable = true
+    store.isAlert = false
     outlineFeedCards(store.roadHighlightObj)
     return
 }

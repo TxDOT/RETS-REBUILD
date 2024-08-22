@@ -103,20 +103,6 @@
             <v-btn class="main-button-style" @click="deleteRets">DELETE</v-btn>
         </v-btn-group>
     </v-card>   
-    <!-- <v-card id="cancelpopup" v-if="store.cancelpopup">
-        <v-card-title class="popupheader" >
-            Discard unsaved changes?
-        </v-card-title>
-        <hr id="separator3" />
-        <v-card-subtitle class="popuptext">
-            If you proceed, your changes will be discarded.
-        </v-card-subtitle>
-        <v-btn-group class="buttonpositioning" density="compact">
-            <v-btn class="secondary-button"  @click="store.cancelpopup = false">GO BACK</v-btn>
-            <v-btn class="main-button-style" @click="disgardEdits">DISCARD</v-btn>
-        </v-btn-group>
-
-    </v-card> -->
     
 
 </template>

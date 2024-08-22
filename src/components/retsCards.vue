@@ -14,21 +14,27 @@
             </div>
 
             <v-lazy :options="{'threshold':0.5}" transition="fade-transition">
-                <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `5px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="checkhighlight(String(rd.attributes.RETS_ID)) ?? 'card-rets'" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road);">
+                <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `5px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="checkhighlight(String(rd.attributes.RETS_ID)) ?? 'card-rets'"  @dblclick="double(rd, road);" @click="zoomToRetsPt(rd)">
                     <!-- <div class="boundary-rets-card"> -->
 
-                    <div style="top: 0px; max-height: 0px;">
-                        <v-card-text id="retsId">
-                            RETS {{  rd.attributes.RETS_ID  }}
-                        </v-card-text>
+                    <div style="top: 0px; max-height: 0px; position: relative;">
+                        <div style="position: relative;">
+                            <v-card-text id="retsId">
+                                RETS {{  rd.attributes.RETS_ID  }}
+                            </v-card-text>
+                        </div>
 
-                         <v-card-text class="route-name">
-                            {{ rd.attributes.RTE_NM ?? "No Route" }}
-                        </v-card-text>
+                        <div style="position: relative;">
+                            <v-card-text class="route-name">
+                                {{ rd.attributes.RTE_NM ?? "No Route" }}
+                            </v-card-text>
+                        </div>
 
-                        <v-card-text id="retsCMNT">
-                            {{ rd.attributes.RETS_NM}}
-                         </v-card-text>
+                        <div style="position: relative; margin-left: 5px;">
+                            <v-card-text id="retsCMNT">
+                                {{ rd.attributes.RETS_NM}}
+                            </v-card-text>
+                        </div>
 
                         <div style="width: 100%;">
                             <span class="text-concat">
@@ -104,7 +110,6 @@
         </div>
     
     </div>
-    
       
     
 </template>
@@ -136,7 +141,8 @@ export default{
             isColorPicked: true,
             roads: [],
             currIter: 0,
-            nextIter: 100
+            nextIter: 100,
+            stopBubbleEvent: false
         }
     },
 
@@ -187,7 +193,7 @@ export default{
                     const element = document.getElementById(elementId);
 
                     if (element) {
-                    element.classList.toggle('highlight-card');
+                        element.classList.toggle('highlight-card');
                     } 
                     return
                 }
@@ -197,12 +203,16 @@ export default{
             this.timer = setTimeout(()=>{
                 const zoomToRETS = rets.geometry
                 highlightRETSPoint(rets.attributes)
-
                 zoomTo(zoomToRETS)
-
             },250)
         },
         double(road, index){
+            if(!store.isSaveBtnDisable){
+                clearTimeout(this.timer)
+                store.cancelpopup = true
+                store.nextRoadObj = road
+                return
+            }
             openDetails(road)
             return
         },
@@ -302,7 +312,7 @@ export default{
     white-space: nowrap;
     font-weight: bold;
     color: #4472C4;
-    bottom: 27px;
+    bottom: 26px;
     left:75px;
 }
 .route-name{

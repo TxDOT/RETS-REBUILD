@@ -48,7 +48,6 @@ export async function updateRETSPT(retsObj){
 
     let esriUpdateGraphic = createGraphic(enable)
     esriUpdateGraphic.geometry = createGeo
-    console.log(esriUpdateGraphic)
 
     try{
         await retsLayer.applyEdits({
@@ -134,7 +133,6 @@ export async function sendChatHistory(chat, type){
 export function postFlagColor(rets){
     //if OBJECTID is blank, would mean its a new flag insert
     const flagGraphic = createGraphic(rets.attributes.flagColor)
-    console.log(rets)
     if(rets.attributes.flagColor.OBJECTID === ''){
         flagRetsColor.applyEdits({
             addFeatures: [flagGraphic]

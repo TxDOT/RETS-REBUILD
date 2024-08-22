@@ -15,7 +15,7 @@
         </v-row>
         <v-row align="center" no-gutters dense style="position: relative; bottom: 1.3rem; height: 70px; padding-bottom: 0% !important;" >
             <v-col cols="8" offset="0" style="position: relative; bottom: 5px !important;">
-                <v-text-field :disabled="store.retsObj.attributes.NO_RTE === false" label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required, valueRequired.limitCharacter] : []" id="route" @update:model-value="completeDataSearch()" maxlength="17"></v-text-field>
+                <v-text-field :disabled="store.retsObj.attributes.NO_RTE === false" label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required, valueRequired.limitCharacter] : []" id="route" @update:model-value="!store.retsObj.attributes.NO_RTE ? completeDataSearch() : null" maxlength="17"></v-text-field>
             </v-col>
             <v-col cols="4" offset="0">
                 <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" :error-messages="(!store.retsObj.attributes.DFO || store.outOfRange) && !store.retsObj.attributes.NO_RTE ? returnErrMsg(store.retsObj.attributes.DFO, store.outOfRange) : null" v-model="store.retsObj.attributes.DFO" :rules="!store.retsObj.attributes.NO_RTE ? [onlyNumbers.required, onlyNumbers.numbers]: []" @update:model-value="!store.retsObj.attributes.NO_RTE ? manuallyUpdateDFO(store.retsObj.attributes.DFO) : null">
@@ -195,7 +195,6 @@ import {store} from './store.js'
         },
         methods:{
             returnErrMsg(dfo, isOutOfRange){
-                console.log(dfo, isOutOfRange)
                 return isOutOfRange ? "DFO is out of Range" : "Where am I ? Don't leave me blank"
             },
             handleCleardate(){
@@ -243,12 +242,6 @@ import {store} from './store.js'
                     this.addGraphic([createRelatedRetsInfo])
                 })
                 //this.gimmeRETS(ret.title, `RETS_ID = ${Number(ret.title)}`)
-
-                
-                //console.log(x)
-               
-                
-
             },
             // splitAndAddRelatedRets(relatedRets){
             //     console.log(relatedRets)
@@ -349,6 +342,7 @@ import {store} from './store.js'
                     store.isMoveRetsPt = false
                     store.cancelEvent.remove()
                     cancelSketchPt()
+                    return
                 }
                 catch(err){
                     if(store.cancelEvent){
@@ -402,7 +396,6 @@ import {store} from './store.js'
                 }
             },
             addGraphic(e){
-                // e = typeof e === "object" ? e : splitAndAddRelatedRets(store.retsObj.attributes.RELATED_RETS)
                 addRelatedRetsToMap(e.at(-1))
                 store.isSaveBtnDisable = true
                 return
@@ -412,9 +405,6 @@ import {store} from './store.js'
             },
             closeRelatedRetsChip(ret){
                 removeRelatedRetsFromMap(ret.raw?.name)
-                // const retsPos = store.retsObj.attributes.RELATED_RETS.findIndex(x => x.name === Number(ret.raw?.name))
-                // console.log(retsPos)
-                //store.retsObj.attributes.RELATED_RETS.splice(retsPos,1)
             },
             selectDates(){
                 this.datePicker = this.returnDateFormat(this.datePicked)
