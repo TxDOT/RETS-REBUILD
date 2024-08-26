@@ -99,7 +99,6 @@ export function clickRetsPoint(){
                         store.isDetailsPage ? canceldetailsfunction() : null
                         return
                     }
-                    view.goTo(event.mapPoint)
                     const retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
                    
                     if (store.isDetailsPage && store.isSaveBtnDisable){
@@ -723,6 +722,7 @@ export function createtool(sketchWidgetcreate, createretssym) {
                             store.checkDetailsForComplete()
                             return
                         }
+                        store.retsObj.attributes.NO_RTE = false
                         const convertMapPts = webMercatorUtils.webMercatorToGeographic(event.graphic.geometry)
                         findDFOLocation(convertMapPts, hit.results[0].graphic.attributes.GID)
                     })  

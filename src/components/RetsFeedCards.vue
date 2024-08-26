@@ -231,7 +231,6 @@ export default{
             store.isCard = false
             store.isDetailsPage = true
             store.activityBanner = `${road.attributes.RETS_ID}`
-            highlightRETSPoint(road.attributes)
             //outlineFeedCards()
             this.zoomToRetsPt(road)
             toggleRelatedRets(JSON.stringify(road))
@@ -267,8 +266,8 @@ export default{
                             feat.attributes.EDIT_DT = store.returnDateFormat(feat.attributes.EDIT_DT)
                             feat.attributes.RTE_NM = store.retsObj.attributes.RTE_NM
                             feat.attributes.DFO = store.retsObj.attributes.DFO ? store.retsObj.attributes.DFO : null
+                            feat.attributes.NO_RTE = store.retsObj.attributes.NO_RTE
                             const addNewRetsPt = {attributes:feat.attributes, geometry:[feat.geometry.x,feat.geometry.y]}
-                            store.addRetsID(addNewRetsPt)
                             this.double(addNewRetsPt)
                         }
                     )
