@@ -110,11 +110,6 @@ export function clickRetsPoint(){
                     store.roadHighlightObj.clear()
                     store.roadHighlightObj.add(retsPt)
 
-                        
-                   
-                    
-                   
-                    
                     if (store.isSaveBtnDisable){
                         removeOutline()
                         removeHighlight("a", true)
@@ -225,7 +220,7 @@ export function outlineFeedCards(cards){
     //store.roadHighlightObj.add(objectcomparison)
     //zoom to card in feed
             
-    findCard.scrollIntoView({behavior: "smooth", block: "start", inline: "start"})
+    findCard.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"})
     // const zoomToCard = document.createElement('a')
     // zoomToCard.href = `#${objectcomparison}`
     // zoomToCard.click(preventHashUrl())
@@ -495,7 +490,7 @@ export function home(onrender){
 
 export function addRelatedRetsToMap(rets){ 
     const graphicInArr = retsGraphicLayer.graphics.items.find(ret => ret.attributes.OBJECTID === rets.OBJECTID)
-    if(graphicInArr){
+    if(graphicInArr || !rets.geometry){
         return
     }    
     
@@ -571,10 +566,9 @@ export function zoomToRelatedRets(relatedRets){
 export const toggleRelatedRets = (retsid) =>  {
     const parseRets = JSON.parse(retsid)
     if(!parseRets.attributes.RELATED_RETS) return
-    const newRetsId = parseRets.attributes.RELATED_RETS.includes(",") ? parseRets.attributes.RELATED_RETS.split(",") : parseRets.attributes.RELATED_RETS
+    const newRetsId = parseRets.attributes.RELATED_RETS.includes(",") ? parseRets.attributes.RELATED_RETS.split(",") : [parseRets.attributes.RELATED_RETS]
     store.retsObj.attributes.RELATED_RETS = newRetsId
     turnAllVisibleGraphicsOff()
-    
     newRetsId.forEach((ret) =>{
         let a = retsGraphicLayer.graphics.items.filter(item => item.attributes.retsId === Number(ret))
         a.forEach(x => x.visible = true)

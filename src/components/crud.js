@@ -27,7 +27,7 @@ export async function updateRETSPT(retsObj){
     enable.attributes.NO_RTE = enable.attributes.NO_RTE === true ? 1 : 0
 
     if(enable.attributes.RELATED_RETS){
-        enable.attributes.RELATED_RETS = enable.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID).toString()
+        enable.attributes.RELATED_RETS = enable.attributes.RELATED_RETS.map(x => x.fullData ? x.fullData.RETS_ID : x).toString()
     }
     //enable.attributes.DFO = Number(DFO)
     retsObj.attributes.flagColor.FLAG === "" ? null : postFlagColor(retsObj)

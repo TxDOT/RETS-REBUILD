@@ -1,11 +1,11 @@
 <template>
     <div>
         <v-card id="filterFeed" >
-            <div class="cardDiv regain">
+            <div class="cardDiv">
                 <v-card-title style="position: relative; bottom:.5rem;">Filter Activity Feed</v-card-title>
                 <hr class="popup-title-border" style="position: relative; bottom: 15px"></hr>
                 <v-row no-gutters class="adjustRow">
-                    <v-select :items="filterSort" item-title="title" return-object style="position: relative;" density="compact" label="Sort" variant="underlined" v-model="store.CREATE_DT"></v-select>
+                    <v-select :items="filterSort" item-title="title" return-object density="compact" label="Sort" variant="underlined" v-model="store.CREATE_DT"></v-select>
                 </v-row>
               
                 <v-row no-gutters dense class="adjustRow">
@@ -252,7 +252,7 @@
     #filterFeed{
         top: 57px;
         width: 47vh;
-        left: calc(52px + 509px);
+        left: calc(52px + 430px);
         display: flex;
         flex-direction: column;
         border-radius: 0%;
@@ -274,9 +274,10 @@
         right: 1rem;
     }
     .adjustRow{
-        position: relative !important; 
+        position: relative !important;
         margin-left: 15px !important; 
         margin-right: 15px !important;
+        margin-bottom: 50px; 
     }
     .checkbox-size{
         font-size: 10px !important;

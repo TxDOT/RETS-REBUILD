@@ -4,7 +4,7 @@ import {sendChatHistory} from './crud.js'
 import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapActivityFeed} from './utility.js'
 
 export const store = reactive({
-        devStatus: "dev", //dev or prod
+        devStatus: "prod", //dev or prod
         clickevent: "",
         count: 0,
         isCloseDetail: false,
@@ -109,29 +109,6 @@ export const store = reactive({
                 this.filter.user = this.USER
                 this.filter.isAssignedTo = this.isAssignedTo
                 return
-        },
-        async getHistoryChatRet(){
-                try{    
-                        if(!this.history.length) return
-                        const getRelatedHistory = this.historyChat
-                        const retsHistory = getRelatedHistory.filter(hist => hist.RETS_ID === this.historyRetsId)
-                        const attachment = await getAttachmentInfo(retsHistory.map(id => id.OBJECTID))
-                        retsHistory.forEach((hist) => {
-                                if(Object.hasOwn(attachment, hist.OBJECTID)){
-                                        hist.attachments = attachment[hist.OBJECTID].map((a) => {
-                                                if(a.parentObjectId === hist.OBJECTID){
-                                                        return {name: a.name, url: a.url}
-                                                }
-                                                
-                                        })
-                                }
-                        })
-                        // this.historyChat = retsHistory
-                }
-                catch(err){
-                        console.log(err)
-                }
-
         },
         async addNote(cmnt, isAttach, isExpand){
                 const date = new Date().getTime()
@@ -250,7 +227,7 @@ export const store = reactive({
                                                         x.attributes.mdiexclamation = this.isPrio(x.attributes.PRIO)
                                                         x.attributes.DFO = x.attributes.DFO ? x.attributes.DFO.toFixed(3) : x.attributes.DFO
                                                         x.attributes.historyUpdate = "Loading"
-                                                        this.roadObj.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
+                                                        this.roadObj.push({attributes: x.attributes, geometry: [x?.geometry?.x, x?.geometry?.y]})
                                                         //store.archiveRetsData.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                                                 })
                                                 

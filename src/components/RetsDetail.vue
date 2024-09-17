@@ -4,19 +4,19 @@
         <div id="detailsHeaderIcon">
             <v-btn density="compact" flat @click="changeColor(store.retsObj.attributes.RETS_ID);" id="flagBtnDetails">
                 <template v-slot:prepend>
-                    <v-icon size="25px" :id="`${store.retsObj.attributes.RETS_ID}Icon`" :color="store.retsObj.attributes.flagColor.FLAG" :icon="store.retsObj.attributes.flagColor.FLAG ? changeFlagIcon(store.retsObj.attributes.flagColor.FLAG) : 'mdi-flag-outline' " style="position: relative; bottom: 2px; left: 6px;"></v-icon>
+                    <v-icon size="20px" :id="`${store.retsObj.attributes.RETS_ID}Icon`" :color="store.retsObj.attributes.flagColor.FLAG" :icon="store.retsObj.attributes.flagColor.FLAG ? changeFlagIcon(store.retsObj.attributes.flagColor.FLAG) : 'mdi-flag-outline' " style="position: relative; bottom: 2px; left: 6px;"></v-icon>
                 </template>
             </v-btn>
             <v-col class="details-color-picker" v-if="flagClickedId === store.retsObj.attributes.RETS_ID" v-click-outside="closeFlagDiv">
-                <v-icon size="20px" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" style="position: relative; right: 9px;"></v-icon>
+                <v-icon size="20px" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" style="position: relative; right: 9px; font-size: 18px; bottom: 10px;"></v-icon>
             </v-col>
             <v-btn-toggle v-model="store.retsObj.attributes.PRIO" density="compact" @update:modelValue="updatePRIO">
-                <v-btn icon="mdi-exclamation" density="compact" style="color: #d9d9d9; opacity: 1;" selected-class="toggle-exclamation" variant="plain" active></v-btn>
+                <v-btn icon="mdi-exclamation" density="compact" style="color: #d9d9d9; opacity: 1; font-size: 15px; bottom: 1px;" selected-class="toggle-exclamation" variant="plain" active></v-btn>
             </v-btn-toggle>   
         </div>
     </div>
 
-    <div id="container-div">
+    <div class="container-div">
         <div id="details-page" >
             <v-btn-toggle selected-class="active-button" variant="plain" mandatory v-model="isBtnSet" id="retsDetailMeta">
                 <v-btn flat class="retsMetaBtn" @click="this.isDetails = true; this.isMetadata = false" density="compact">Details</v-btn>
@@ -33,14 +33,30 @@
             </span>
         </div>
         <!-- history section -->
-        <div>
+        <div style="position: relative; height: 42vh;">
             <v-card class="history-card">
-                <div style="float: right; font-size: 10px; position: relative; top: .5rem;" >
-                    <v-btn icon="mdi-arrow-expand" variant="plain" density="compact" @click="expandChatHistory" style="font-size: .8rem;"></v-btn>
+                <v-card-title style="padding-bottom: 30px; font-size: .8rem;">History</v-card-title>
+                <div style="font-size: 7px; position: relative; bottom: 3.7rem; float: right; " >
+                    <v-btn icon="mdi-arrow-expand" variant="plain" density="compact" @click="expandChatHistory" style="font-size: .6rem;"></v-btn>
                 </div>
-                <v-card-title style="padding-bottom: 30px;">History</v-card-title>
                 <historyViewSmall/>
             </v-card>
+            <div class="marginSetting" style="padding-top: 10px; position: absolute; width: 100%; padding-left: 10px; padding-right: 30px; top:calc(100% - 70px)">
+                <v-text-field label="Type a message" density="compact" tile v-model="addHistoryChat" style="margin-left: 0px; margin-right: 5px;" :error-messages= "initRules ? 'Write a note. Submit your thought to History!' : null" @update:modelValue="historyValue"></v-text-field>
+                <div style="float: left; bottom: 1rem; position: relative;">
+                    <v-btn prepend-icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 9px !important; top: 10px;" @click="displayAttachments()">Add an Attachment</v-btn>
+                </div>
+                <div style="top: 90px; position: absolute; display: flex; flex-direction: column; max-width: 400px; min-height: 5px; max-height: 23px; overflow-y: auto;"> 
+                    <div>
+                        <v-chip v-for="(attach, index) in addAttach" color="#4472C4" closable density="compact" rounded="0" variant="flat" :text="attach.name" @click:close="removeAttachment(index)" style="margin: 1px; width: fit-content"></v-chip>
+                    </div>
+                </div>
+            
+                <div style="float:right; bottom: .5rem; position: relative; right: 5px">
+                    <v-btn icon="mdi-close" variant="plain" density="compact" style="font-size: 15px !important;" @click="clearMessage"></v-btn>
+                    <v-btn icon="mdi-check" variant="plain" density="compact" style="font-size: 15px !important;" @click="addHistoryNote('Small')"></v-btn>
+                </div>
+            </div>
         </div>
     </div>
     <div id="commentDiv" v-if="editText">
@@ -63,7 +79,7 @@
                 
                 <div style="float:right; bottom: 2.7rem; position: relative; left: 7px;">
                     <v-btn icon="mdi-close" variant="plain" density="compact" style="font-size: 15px !important;" @click="clearMessage"></v-btn>
-                    <v-btn icon="mdi-check" variant="plain" density="compact" style="font-size: 15px !important;" @click="addHistoryNote"></v-btn>
+                    <v-btn icon="mdi-check" variant="plain" density="compact" style="font-size: 15px !important;" @click="addHistoryNote('Expand')"></v-btn>
                 </div>
             </div>
             
@@ -71,7 +87,7 @@
                 <div style="position: relative; float: right; padding-top: .5rem; left: 20px;">
                     <!-- <v-btn variant="plain" @click="deleteNote" class="secondary-button">Delete</v-btn>
                     <v-btn variant="plain" @click="closeNote" class="secondary-button">Cancel</v-btn> -->
-                    <v-btn variant="outlined" class="main-button" density="compact" @click="saveNote" style="margin-right: 15px;" :disabled="!this.addHistoryChat.length">Save & Close</v-btn>
+                    <v-btn variant="outlined" class="main-button" density="compact" @click="saveNote('Expand')" style="margin-right: 15px;" :disabled="!this.addHistoryChat.length">Save & Close</v-btn>
                 </div>
             </div>
         </v-card>
@@ -371,8 +387,8 @@
             closeNote(){
                 this.editText = false
             },
-            saveNote(){
-                this.addHistoryNote()
+            saveNote(size){
+                this.addHistoryNote(size)
                 this.editText = false
                 store.alertTextInfo = {"text": "Chat Saved", "color": "#70ad47", "type":"success", "toggle": true}
                 store.isAlert = true
@@ -403,7 +419,7 @@
                 this.editText = true
                 this.sendHistory = ""
             },
-            async addHistoryNote(){
+            async addHistoryNote(size){
                 if(!this.addHistoryChat.length){
                     this.initRules = true
                     return
@@ -412,7 +428,7 @@
                 await store.addNote(this.addHistoryChat, attach, store.attachment, true)
                 this.clearMessage()
                 this.addAttach.length = 0
-                document.getElementById(`${store.addNoteOid}Expand`).scrollIntoView({block: "end", inline: "nearest"})
+                document.getElementById(`${store.addNoteOid}${size}`).scrollIntoView({block: "end", inline: "nearest"})
                 return
             },
             clearMessage(){
@@ -497,7 +513,6 @@
     padding: 1px !important;
     margin: 15px !important;
     min-width: 15px !important;
-
 }
 .cardDiv .v-btn-toggle{
     position: relative !important;
@@ -520,12 +535,15 @@ div .cardDiv{
 }
 
 #details-page{
-    display:flex;
+    display: flex;
     flex-direction: column;
     margin-left: 10px;
     margin-right: 10px; 
     margin-bottom: 10px; 
     background-color: #212121;
+    height: 330px;
+    position: relative;
+    top: 10px;
     /* position: relative;
     height: 434px !important;
     bottom: .5rem;
@@ -536,16 +554,14 @@ div .cardDiv{
     margin-left: 10px;
     overflow-y: auto; */
 }
-#container-div{
+.container-div{
+    display: flex;
+    flex-direction: column;
     position: relative;
-    top: 1.5rem;
-    min-height: 0% !important;
-    max-height: calc(100% - 14rem) !important;
-    overflow-x: hidden;
-    scroll-behavior: smooth;
-    scrollbar-width: thin;
-    padding-bottom: 50px !important;
-    width:100%;
+    bottom: 1rem;
+    padding-bottom: 0px !important;
+    width: 100%;
+    height: 80%;
 }
 
 .number-field{
@@ -615,9 +631,9 @@ div .cardDiv{
 
 }
 .history-card{
-    position:relative; 
-    height: 30rem; 
-    bottom: 0.2rem; 
+    position:relative;
+    height: 47vh;
+    bottom: -.2rem; 
     border-radius: 0%; 
     margin-right: 10px;
     margin-left: 10px;
@@ -667,9 +683,9 @@ div .cardDiv{
 #detailsHeaderIcon{
     position: relative;
     float: right;
-    bottom: 0.5rem;
-    left: 27rem;
-    width: 99px
+    bottom: 22px;
+    left: 24.5rem;
+    width: 99px;
 }
 
 .details-color-picker{
@@ -677,11 +693,10 @@ div .cardDiv{
     display: flex; 
     flex-direction: column; 
     z-index: 9999; 
-    width: 20px; 
+    width: 0px !important; 
     float: right;
-    margin-left: 1rem;
+    margin-left: 15px;
     background-color: black;
-    top: 45px;
 }
 
 .toggleExclamation{
@@ -689,9 +704,12 @@ div .cardDiv{
 }
 
 #retsDetailMeta{
+    position: relative;
+    top: 10px; 
     padding-left: 15px;
+    margin-bottom: 5px;
     text-transform: capitalize !important;
-    height: 40px;
+    height: 30px;
     color: white;
     opacity: 1 !important
 }
@@ -701,12 +719,14 @@ div .cardDiv{
 
 .retsMetaBtn{
     text-transform: capitalize !important;
-    font-size: 1.25rem;
+    font-size: .8rem;
     font-weight: 500;
     letter-spacing: 0.0125em;
     opacity: 1 !important;
     padding: 0px;
-    margin-right: 19px;
+    margin-right: 0px;
+    bottom: 5.5px;
+    right: 11px;
 }
 #djpbuttons:hover{
     background: rgba(220, 220, 220, .1) !important;

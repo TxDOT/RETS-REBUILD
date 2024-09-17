@@ -1,23 +1,28 @@
 <template>
-    <div>
-    <v-container >
-        <v-row align="start" no-gutters dense style="position: relative; bottom: 1rem; height: 50px; ">
+    <v-container style="position: relative; height: 100%; display: flex; flex-direction: column;">
+        <v-row align="start" no-gutters dense align-content="space-evenly" style="position: relative; bottom: 2px;">
             <v-col cols="8" offset="0">
-                <v-autocomplete :items="activityList" label="Activity" variant="underlined" density="compact" item-title="value" item-value="name" return-object flat v-model="store.retsObj.attributes.ACTV" @update:model-value="completeDataSearch()"></v-autocomplete>
+                <v-autocomplete class="activity" :items="activityList" label="Activity" variant="underlined" density="compact" item-title="value" item-value="name" return-object flat v-model="store.retsObj.attributes.ACTV" @update:model-value="completeDataSearch()"></v-autocomplete>
             </v-col>
             <v-col cols="4" offset="0">
                 <v-text-field label="Number" density="compact" class="number-field" variant="underlined" :disabled="disableACTVNum(store.retsObj.attributes.ACTV)" v-model="store.retsObj.attributes.ACTV_NBR" @update:model-value="actvNbrUpdate(store.retsObj.attributes.ACTV_NBR)">
                     <template v-slot:append-inner >
-                        <v-icon icon="mdi-link" small class="number-field-icon" @click="paperClipFunc" ></v-icon>
+                        <v-tooltip text="Find Minute Order/TxDOT Connect" location="top">
+                                <template v-slot:activator="{props}">
+                                    <div v-bind="props">
+                                        <v-icon icon="mdi-link" small class="number-field-icon" @click="paperClipFunc" ></v-icon>
+                                    </div>
+                                </template>
+                            </v-tooltip>
                     </template>
                 </v-text-field>
             </v-col>
         </v-row>
-        <v-row align="center" no-gutters dense style="position: relative; bottom: 1.3rem; height: 70px; padding-bottom: 0% !important;" >
-            <v-col cols="8" offset="0" style="position: relative; bottom: 5px !important;">
-                <v-text-field :disabled="store.retsObj.attributes.NO_RTE === false" label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required, valueRequired.limitCharacter] : []" id="route" @update:model-value="!store.retsObj.attributes.NO_RTE ? completeDataSearch() : null" maxlength="17"></v-text-field>
+        <v-row align="center" no-gutters dense align-content="space-evenly" style="position: relative; top: 4px;">
+            <v-col cols="8" offset="0">
+                <v-text-field style="line-height: 19px; height: 0px !important; position: relative; bottom: 35px;" :disabled="store.retsObj.attributes.NO_RTE === false" label="Route" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required, valueRequired.limitCharacter] : []" id="route" @update:model-value="!store.retsObj.attributes.NO_RTE ? completeDataSearch() : null" maxlength="17"></v-text-field>
             </v-col>
-            <v-col cols="4" offset="0">
+            <v-col cols="4" offset="0" style="position: relative; top: 8px;">
                 <v-text-field label="DFO" density="compact" class="number-field" variant="underlined" :error-messages="(!store.retsObj.attributes.DFO || store.outOfRange) && !store.retsObj.attributes.NO_RTE ? returnErrMsg(store.retsObj.attributes.DFO, store.outOfRange) : null" v-model="store.retsObj.attributes.DFO" :rules="!store.retsObj.attributes.NO_RTE ? [onlyNumbers.required, onlyNumbers.numbers]: []" @update:model-value="!store.retsObj.attributes.NO_RTE ? manuallyUpdateDFO(store.retsObj.attributes.DFO) : null">
                         <template v-slot:append-inner>
                             <v-tooltip :text="store.zoomInText" location="top">
@@ -31,46 +36,56 @@
                 </v-text-field>
             </v-col>
         </v-row>
-        <v-row align="center" no-gutters dense>
-            <v-col>
-                <div class="new-proposed-route">
-                    <v-checkbox density="compact" class="checkbox-size" v-model="store.retsObj.attributes.NO_RTE" @update:model-value="noRTECheck(store.retsObj.attributes.RTE_NM)">
-                        <template v-slot:label>
-                            <v-label class="main-color" id="newProposedText" text="New, Proposed, or Unspecified"></v-label>
-                        </template>
-                    </v-checkbox>
-                </div>
-            </v-col>
-        </v-row>       
-        <v-row align="center" no-gutters dense style="position: relative; bottom: 5.4rem;">
+        <v-row align="center" no-gutters dense align-content="space-evenly" style="position: relative; top: 22px; ">
             <v-col cols="8" offset="0">
-                <v-autocomplete label="Related RETS" no-filter multiple variant="underlined" class="related-rets" v-model="store.retsObj.attributes.RELATED_RETS" :items="RETSData" item-title="RETS_ID" item-value="RETS_ID" return-object @update:search="gimmeRETS($event)" @update:modelValue="addGraphic($event)">
+                <v-autocomplete label="Related RETS" no-filter multiple variant="underlined" v-model="store.retsObj.attributes.RELATED_RETS" :items="RETSData" item-title="RETS_ID" item-value="RETS_ID" return-object @update:search="gimmeRETS($event)" @update:modelValue="addGraphic($event)">
                     <template v-slot:chip="{props, item}">
-                        <v-chip v-bind="props" closable @click:close="closeRelatedRetsChip(item)" @click="zoomToRelateRet(item)" style="z-index: 9999;">{{item.props.title}}</v-chip>
+                        <v-chip v-bind="props" closable @click:close="closeRelatedRetsChip(item)" @click="zoomToRelateRet(item)" style="z-index: 9999; font-size: 8px;">{{item.props.title}}</v-chip>
                     </template>
                 </v-autocomplete>
 
             </v-col>
             <v-col cols="1" offset="2">
-                <v-btn variant="plain" icon="mdi-magnify-plus-outline" @click="zoomToRETS"></v-btn>
+                <v-tooltip text="Zoom to Related Rets" location="top" class="popup">
+                    <template v-slot:activator="{props}">
+                        <div v-bind="props">
+                            <v-btn variant="plain" icon="mdi-magnify-plus-outline" @click="zoomToRETS" style="font-size: 14px;" ></v-btn>
+                        </div>
+                    </template>
+                </v-tooltip>
             </v-col>
             <v-col cols="1" offset="0">
-                <v-btn variant="plain" icon="mdi-cursor-default" disabled></v-btn>
+                <!-- <v-tooltip text="help" location="top" >
+                    <template v-slot:activator="{props}"> -->
+                        <!-- <div v-bind="props" > -->
+                            <v-btn variant="plain" icon="mdi-cursor-default" disabled style="font-size: 14px;" ></v-btn>
+                        <!-- </div> -->
+                    <!-- </template> -->
+                <!-- </v-tooltip> -->
+                
             </v-col>
         </v-row>
-        <v-row align="center" no-gutters dense style="position: relative; bottom:5.7rem;">
+
+        <v-row align="baseline" no-gutters dense align-content="space-evenly" class="new-proposed-route">
+            <v-checkbox density="compact" class="checkbox-size" v-model="store.retsObj.attributes.NO_RTE" @update:model-value="noRTECheck(store.retsObj.attributes.RTE_NM)">
+                <template v-slot:label>
+                    <v-label class="main-color" id="newProposedText" text="New, Proposed, or Unspecified"></v-label>
+                </template>
+            </v-checkbox>
+        </v-row>  
+        <v-row align="baseline" no-gutters dense align-content="space-evenly" style="position: relative; top: 25px;">
             <v-col cols="12" offset="0">
                 <v-select auto-select-first label="Status" variant="underlined" density="compact" class="rets-status" :items="detailsStat" item-title="name" item-value="value" v-model="store.retsObj.attributes.STAT" @update:modelValue="completeDataSearch()"></v-select>
             </v-col>
         </v-row>
-        <v-row align="center" no-gutters dense style="position: relative; bottom: 6.1rem; height: 0px;">
+        <v-spacer></v-spacer>
+        <v-row align="baseline" no-gutters dense align-content="space-evenly" style="position: relative; top: 10px; height: 0px;">
             <v-col cols="12" offset="0">
-                <v-textarea :error-messages="(!store.retsObj.attributes.DESC_ || !store.retsObj.attributes.DESC_.length) ? 'Fill out description' : null" label="Description" no-resize variant="underlined" class="rets-description" rows="3" v-model="store.retsObj.attributes.DESC_"  @update:model-value="descCheck(store.retsObj.attributes.DESC_)" @keydown.space="preventSpace"></v-textarea>
+                <v-textarea :error-messages="(!store.retsObj.attributes.DESC_ || !store.retsObj.attributes.DESC_.length) ? 'Fill out description' : null" label="Description" no-resize variant="underlined" class="rets-description" rows="2" v-model="store.retsObj.attributes.DESC_"  @update:model-value="descCheck(store.retsObj.attributes.DESC_)" @keydown.space="preventSpace"></v-textarea>
             </v-col>
         </v-row>
-        <v-row align="center" style="position: relative; bottom: 2.1rem; height: 25px;">
-            <div style="width: 100%; height: 5%">
-                <!-- <v-col cols="5" offset="0" style="z-index: 999;"> -->
+        <v-row align="baseline" align-content="space-evenly" style="position: relative; top: 35px; height: 0px !important;">
+            <div style="width: 100%;">
                 <div style="width: 35%;">
                     <v-btn icon="mdi-plus" variant="plain" @click="displayGemSearch" style="bottom: 0px;" disabled></v-btn>
                     <div id="chips">
@@ -90,16 +105,11 @@
                     </div>
                 </div>
                 
-            <!-- </v-col> -->
-                <div class="datepickeractivate" style="position:relative; bottom: 4.3rem; cursor: pointer !important; height: 32px; width: 119px; float: right" @click="toggleVisibility()">
+                <div style="position:relative; bottom: 4.6rem; cursor: pointer !important; height: 30px !important; width: 119px; float: right;" @click="toggleVisibility()">
                     <v-text-field prepend-icon="mdi-timer-outline" disabled density="compact" variant="plain" class="date-select" style="z-index: 9999; "> {{ datePicker }}</v-text-field>
-                    <!-- <v-col offset="0" style="z-index: 999; cursor: pointer; max-width: 6rem; height:2rem; padding: 0px; " @click="isDatePicker = true">
-                        
-                    </v-col> -->
                 </div>
             </div>
-            
-            <!-- <v-text-field prepend-icon="mdi-timer-outline" disabled density="compact" variant="plain" class="date-select" style="z-index: 9999; cursor: pointer !important;" @click="isDatePicker = true"> {{ datePicker }}</v-text-field> -->
+
             <div class="date-picker" v-if="isDatePicker" ref="datepickerelement" v-click-outside="toggleVisibility" >
                 <v-date-picker v-model="datePicked" class="date" hide-header @update:modelValue="selectDates()">
                 </v-date-picker>
@@ -113,17 +123,12 @@
                         <template v-slot:activator="{ props }">
                             <v-btn flat v-bind="props"  @click="handleCleardate" style="right: -150px;">CLEAR</v-btn>
                         </template>
-                    </v-tooltip>
-                   
-                        
+                    </v-tooltip>  
                        
                 </div>
-
             </div>
         </v-row>
     </v-container>
-    </div>
-    
 </template>
 
 <script>
@@ -134,9 +139,6 @@ import {store} from './store.js'
 
     export default{
         name: "DetailsCard",
-        props: {
-            taskGem: Number
-        },
         data(){
             return{
                 counter: 0,
@@ -380,11 +382,6 @@ import {store} from './store.js'
                         retsid.features.forEach((x) => {
                             this.RETSData.push({RETS_ID: x.attributes.RETS_ID, OBJECTID: x.attributes.OBJECTID, JOB_TYPE: x.attributes.JOB_TYPE, fullData: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                         })
-                        if(string){
-                            this.addGraphic(this.RETSData)
-                            store.retsObj.attributes.RELATED_RETS.push(this.RETSData[0])
-                            return
-                        }
                         return
                     }
                     catch(err){
@@ -396,8 +393,10 @@ import {store} from './store.js'
                 }
             },
             addGraphic(e){
+                store.isSaveBtnDisable = false
+                if(!e.length) return
                 addRelatedRetsToMap(e.at(-1))
-                store.isSaveBtnDisable = true
+                
                 return
             },
             zoomToRETS(){
@@ -461,31 +460,35 @@ import {store} from './store.js'
             }
         },
         watch:{
-            taskGem:{
-                handler: function(){
-                    if(!this.taskGem) return
-                    this.gemTasks.push(this.taskGem)
-                },
-            },
             'store.attributes.RETS_ID':{
                 handler: function(){
                     store.currentInfo = JSON.stringify(store.retsObj)
                 },
                 immediate: true
             },
-            'store.outOfRange':{
-                handler: function(){
-
-                }
-            }
         },
 
     }
 </script>
 
 <style scoped>
+.popup{
+    position: relative;
+    top: 0rem !important;
+}
+.checkbox-size{
+    position: relative;
+    top: 11px;
+    right: 10px; 
+    font-size: 9px !important;
+    border-radius: 0px !important;
+}
+.activity{
+    font-size: 10x !important;
+}
 #newProposedText{
     font-weight: bold;
+    padding-bottom: 15px !important;
 }
 .cleardate{
     position: absolute;
@@ -522,12 +525,12 @@ import {store} from './store.js'
     padding-left: 2.5rem;
     width: 142px;
     right: 0%;
-    font-size: 20vh;
-    top: 3px;
+    font-size: 22vh;
+    top: 0px;
 }
 
 .number-field-icon{
-    font-size: 17px;
+    font-size: 14px;
 }
 #dfoCrosshair{
     position: relative;
@@ -544,10 +547,11 @@ import {store} from './store.js'
 }
 
 .new-proposed-route{
-    font-size: 10px !important;
     position: relative;
-    bottom: 58px;
-    right: 7.2px;
+    max-height: 10px;
+    top: 25px; 
+    width: 200px; 
+    margin-bottom: 15px;
 }
 
 
@@ -556,7 +560,10 @@ import {store} from './store.js'
 }
 
 .date-select{
+    position: relative;
     float: right;
+    font-size: 14px;
+    top: 0px;
 }
 
 #deadline-div .v-btn{
@@ -572,7 +579,7 @@ import {store} from './store.js'
 
 #chips{
     position: relative;
-    bottom: 2.2rem;
+    bottom: .2rem;
     left: 3rem;
     width: 130%;
     display: flex;

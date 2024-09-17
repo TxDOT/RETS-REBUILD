@@ -186,7 +186,7 @@
                 }
                 this.loggedInUserName = appConstants.defaultUserValue[0].value
                 const usernameRow = appConstants.userRoles.find(name => name.value === n)
-                return usernameRow.name
+                return usernameRow?.name ?? n
             },
             queryAttachments(){
                 this.isAttachedActive = !this.isAttachedActive
