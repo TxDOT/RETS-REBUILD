@@ -14,8 +14,16 @@
             <v-list-item id="popoutitems" class="iconList-item" v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" :active-class="tool.name !== 'Jump To' && tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
                 <template v-if="tool.name != 'Basemaps' && tool.name != 'Jump To'">
                     <v-tooltip location="right" :text="tool.name">
-                            <template v-slot:activator="{ props }">
-                                <v-icon id="topIcon" size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
+                            <template v-if="tool.name != 'Multi-Select'" v-slot:activator="{ props }">
+                                    <v-icon id="topIcon" size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
+                            </template>
+                            <template v-if="tool.name === 'Multi-Select'"  v-slot:activator="{ props }">
+                                <v-badge location="top end" color="#4472C4" :content="store.roadHighlightObj.size" id="badge">
+                                    <v-icon id="topIcon" size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
+
+                                </v-badge>
+
+
                             </template>
                         
                     </v-tooltip>
@@ -746,6 +754,11 @@
     }
     .translatesettings{
         transform: translate(-200px) 
+    }
+    #badge{
+        position: absolute;
+        top: 20px;
+        left: 23px;
     }
 
 

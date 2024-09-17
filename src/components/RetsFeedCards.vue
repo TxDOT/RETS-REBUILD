@@ -1,5 +1,7 @@
 <template>
+    
     <div id="card-container">
+       
         <div id="activity-header" class="main-color">
             <div id="container-header">
                 <header>RETS Dashboard</header>
@@ -15,8 +17,13 @@
 
         <v-banner id="feed-banner" lines="two" density="default" min-width="0%">
             <div style="width: 100%;">
+                
                 <div class="banner-txt">
                     <p>{{store.activityBanner}}</p>
+                    <p id="headerCount" @mouseover="countPopupStatus = true; countHeaderColor = 'lightgray'" @mouseout="countPopupStatus = false; countHeaderColor = 'gray'">
+                        &nbsp;&nbsp;&nbsp; 
+                        <span :style="{ color: countHeaderColor }">[{{ store.updateRetsSearch.length }}]</span>
+                    </p>
                     <div class="retsSubtitle">
                         <div id="retSubText">
                             <v-text-field variant="plain" v-if="store.isDetailsPage" :disabled="isSubtitle" placeholder="Add a subtitle" id="subtitleCard" :class="store.retsObj.attributes.RETS_NM?.length ? 'rets-subtitle-text-active' : 'rets-subtitle-text'" v-model="store.retsObj.attributes.RETS_NM" @update:modelValue="retsSubtitleUpdate($event)" maxlength="34"></v-text-field>
@@ -72,7 +79,7 @@
     </v-card>
     <Filter v-if="store.isfilter"/>
 
-    <v-card style="position: absolute; float: center; width: 25%; left: 40%; top: 30%; margin: 15px; border-radius: 0%;" color="#212121" v-if="unsavedChanges">
+    <!-- <v-card style="position: absolute; float: center; width: 25%; left: 40%; top: 30%; margin: 15px; border-radius: 0%;" color="#212121" v-if="unsavedChanges">
         <v-card-title>Discard unsaved changes?</v-card-title>
         <v-divider style="margin-left: 15px; margin-right: 15px; color:white;"></v-divider>
         <v-card-text>
@@ -84,8 +91,31 @@
                 <v-btn variant="outlined" style="border-radius: 0%;" @click="proceed">Proceeed</v-btn>
             </div>
         </div>
-    </v-card>
+    </v-card> -->
+ <!-- <div class="count-div"> -->
+    <v-card id="countPopup" v-if="countPopupStatus">
+        <span>
+            &nbsp;&nbsp;
+            <span :style="{ color: notStartedColor, width: '3ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsNotStartedCount }}</span>
+            <span :style="{ color: 'black'}">&nbsp;&nbsp; Not Started</span><br>
+            
+            &nbsp;&nbsp;
+            <span :style="{ color: inProgressColor, width: '3ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsInProgressCount }}</span>
+            <span :style="{ color: 'black' }">&nbsp;&nbsp; In Progress</span><br>
+            
+            &nbsp;&nbsp;
+            <span :style="{ color: completeColor, width: '3ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsCompleteCount }}</span>
+            <span :style="{ color: 'black' }">&nbsp;&nbsp; Complete</span><br>
+            
+            &nbsp;&nbsp;
+            <span :style="{ color: onHoldColor, width: '3ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsOnHoldCount }}</span>
+            <span :style="{ color: 'black' }">&nbsp;&nbsp; On Hold</span><br>
 
+            
+        </span>
+       
+    </v-card>
+        <!-- </div> -->
 </template>
 
 <script>
@@ -106,6 +136,12 @@ export default{
                 }, 
     data(){
         return{
+            countHeaderColor: "gray",
+            countPopupStatus: false,
+            notStartedColor: appConstants.CardColorMap[1],
+            onHoldColor: appConstants.CardColorMap[4],
+            inProgressColor: appConstants.CardColorMap[2],
+            completeColor: appConstants.CardColorMap[3],
             loading: true,
             Spinneractive: false,
             isSpinner: false,
@@ -464,7 +500,18 @@ export default{
         // },
     },
     computed:{
-
+        retsInProgressCount(){
+            return store.updateRetsSearch.filter(item => item.attributes.STAT === 2).length;
+        },
+        retsNotStartedCount(){
+            return store.updateRetsSearch.filter(item => item.attributes.STAT === 1).length;
+        },
+        retsOnHoldCount(){
+            return store.updateRetsSearch.filter(item => item.attributes.STAT === 4).length;
+        },
+        retsCompleteCount(){
+            return store.updateRetsSearch.filter(item => item.attributes.STAT === 3).length;
+        },
     },
         
 
@@ -680,5 +727,19 @@ export default{
         top: 1px;
         right: 3px;
         max-width: 34ch;
+    }
+    #headerCount{
+        font-size:15px;
+        color: lightgray;
+        cursor: default;
+    }
+    #countPopup{
+        position: relative;
+        height: 100px;
+        width: 160px;
+        left: 270px;
+        top: 50px;
+        background-color: lightgray;
+        opacity: .8;
     }
 </style>

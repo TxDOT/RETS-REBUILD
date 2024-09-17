@@ -19,9 +19,12 @@ import TileInfo from "@arcgis/core/layers/support/TileInfo.js";
 import Legend from "@arcgis/core/widgets/Legend";
 import LegendViewModel from "@arcgis/core/widgets/Legend/LegendViewModel";
 import Graphic from "@arcgis/core/Graphic";
-import { outlineFeedCards, removeOutline, home, scrollToTopOfFeed} from "./utility.js";
+import { outlineFeedCards, removeOutline, home, scrollToTopOfFeed, highlightRETSPoint, removeHighlight} from "./utility.js";
 import Extent from "@arcgis/core/geometry/Extent.js";
 import {store} from './store.js'
+import esriConfig from "@arcgis/core/config.js";
+import Point from '@arcgis/core/geometry/Point';
+
 
 
 export const texasExtent = new Extent({
@@ -218,6 +221,16 @@ export const polygonsymbol = {
   } 
 }
 
+export const pointsymbol = {
+  type: "simple-marker",
+        color: "cyan",
+        size: 8,
+        outline:{
+            width:0,
+            color: "cyan"
+        }
+}
+
 //Highlight graphics layer construction
 export const highlightLayer = new GraphicsLayer();
 
@@ -277,6 +290,14 @@ export const retsLayer = new FeatureLayer({
   outFields: ["*"],
   renderer: retsPointRenderer,
   editingEnabled: true,
+})
+
+export const retsRole = new FeatureLayer({
+  //url: appConstants.retsUserRoleDev,
+  url: store.devStatus === "dev" ? appConstants.retsUserRoleDev : appConstants.retsUserRoleProd,
+  visible: false,
+  outFields: ["*"],
+
 })
 
 //RETS History
@@ -380,6 +401,7 @@ export const view = new MapView({
   },
   
 })
+export let featureSuggestions =  []  // To store the limited features
 
 //create search widget
 export const searchWidget = new Search({
@@ -390,8 +412,8 @@ export const searchWidget = new Search({
   allPlaceholder: "City, County, District, Route, Minute Order, RETS ID",
   popupEnabled: false,
   popupTemplate: false,
-  //minSuggestCharacters: 3,
-  //maxSuggestions: 3,
+  minSuggestCharacters: 3,
+  maxSuggestions: 3,
   sources:
   [
     {
@@ -447,13 +469,95 @@ export const searchWidget = new Search({
     {
       name: "Minute Order",
       layer: retsLayer, 
+      maxSuggestions:3,
       placeholder: "Minute Order",
       //zoomScale: 5000,
       searchFields: [ "ACTV_NBR" ],
       displayField: "ACTV_NBR",
       exactMatch: false,
       outFields: ["*"],
-      suggestionTemplate: "RETS: {RETS_ID} (MO: {ACTV_NBR})", 
+      suggestionTemplate: "RETS: {RETS_ID} (MO Number: {ACTV_NBR})", 
+      getSuggestions: async function (searchValue) {
+        const query = {
+          where: `ACTV_NBR IS NOT NULL`,
+          outFields: ["*"],
+          returnGeometry: false,
+          orderByFields: ["ACTV_NBR"]
+        };
+    
+        try {
+          const results = await retsLayer.queryFeatures(query);
+          const features = results.features;
+    
+          const filteredFeatures = features.filter(feature => {
+            const actvNbr = feature.attributes.ACTV_NBR;
+            return actvNbr &&
+                   String(actvNbr).toLowerCase().includes(searchValue.suggestTerm); 
+          });
+    
+          const limitedFeatures = filteredFeatures.slice(0, 3);
+          featureSuggestions = limitedFeatures
+          // Process features into suggestions
+          return limitedFeatures.map(feature => ({
+            key: `${feature.attributes.RETS_ID}`,
+            text: `RETS: ${feature.attributes.RETS_ID} (MO: ${feature.attributes.ACTV_NBR})`, 
+            sourceIndex: 5 
+
+          }));
+        } catch (error) {
+          console.error("Error fetching suggestions:", error);
+          return [];
+        }
+      },
+    
+      getResults: async function (suggestion) {
+
+    const retsId = suggestion.suggestResult.key;
+
+    const query = {
+        where: `RETS_ID = ${retsId}`, 
+        outFields: ["*"],
+        returnGeometry: true 
+    };
+
+    try {
+        const results = await retsLayer.queryFeatures(query);
+        const feature = results.features[0]; 
+       
+        if (feature) {
+            const geometry = feature.geometry
+            let point = geometry
+            view.goTo({
+              target: point,
+              zoom: 16,
+            })
+            highlightLayer.add(new Graphic({
+              geometry: feature.geometry,
+              symbol: pointsymbol
+            }));
+            const tempArray = [feature];
+            removeOutline();
+            outlineFeedCards(tempArray);
+            
+            const retsidnum = String(feature.attributes.OBJECTID).concat('-', feature.attributes.RETS_ID);
+            setTimeout(() => {
+              const element = document.getElementById(retsidnum);
+
+              if (element) {
+                element.classList.add("highlight-card");
+            } else {
+                console.log(`error`);
+            }
+            }, 1000);
+           
+        } 
+        
+    } catch (error) {
+        console.error("Error querying feature:", error);
+    }
+
+        
+    }
     },
     
     
@@ -580,7 +684,6 @@ map.addMany([TxDOTRoadways, retsLayer, graphics, retsGraphicLayer, texasCounties
 searchWidget.on("select-result", function(event) {
   const selectedFeature = event.result.feature;
   highlightLayer.removeAll(); // Clear previous highlights
-
     if (selectedFeature.geometry.type === "polygon") {
       
     // Highlight the selected polygon feature with highlightSymbol
@@ -603,10 +706,14 @@ searchWidget.on("select-result", function(event) {
     document.getElementById(retsidnum).classList.add("highlight-card")
     return
   }
+
   
 
 
 });
+
+
+
 searchWidget.on("search-clear", function(event) {
   // Clear the highlight when the search is cleared
     highlightLayer.removeAll();
@@ -628,19 +735,6 @@ document.addEventListener('click', function(event) {
       }
 });
 
-searchWidget.on("suggest-complete", function(event){
-  const suggestions = event.results; 
-  const searchTerm = event.searchTerm;
-  const hasLetters = /[a-zA-Z]/.test(searchTerm);
-  if ((hasLetters) && (event.activeSourceIndex === -1) && (suggestions[0]?.results[0]?.text)) {
-    suggestions[0] = []
-    suggestions[5] = []
-
-  }
-  suggestions[5].results[0].text = suggestions[5].results[0].text.replace(/,/g, '')
-  suggestions[5].results[1].text = suggestions[5].results[1].text.replace(/,/g, '')
-  suggestions[5].results[2].text = suggestions[5].results[2].text.replace(/,/g, '')
-})
 
 
 homeWidget.on("go", function() {

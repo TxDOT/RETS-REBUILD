@@ -261,133 +261,132 @@ export function getGEMTasks(){
 
 //filter Map and activity feed 
 export async function filterMapActivityFeed(filterOpt){
-    let GIS_ANALYST = []
-    let GRID_ANALYST = []
-    let DIST_ANALYST = []
-    let ANALYST = []
-    let ASSIGNED_TO = []
-    let STAT = []
-    let DIST_NM = []
-    let CNTY_NM = []
-    let ACTV = []
-    let JOB_TYPE = []
+        let GIS_ANALYST = []
+        let GRID_ANALYST = []
+        let DIST_ANALYST = []
+        let ANALYST = []
+        let ASSIGNED_TO = []
+        let STAT = []
+        let DIST_NM = []
+        let CNTY_NM = []
+        let ACTV = []
+        let JOB_TYPE = []
+        let EDIT_DT = []
+        
+        let fullFilter = []
 
-    let EDIT_DT = []
-    
-    let fullFilter = []
+        for(let [key, value] of Object.entries(filterOpt)){
+            if(!value) continue
+            if(value){
+                if(key === 'isAssignedTo' && value){
+                    fullFilter.push(`ASSIGNED_TO in ('${store.loggedInUser}')`)
+                }
+                if(key === 'user' && !filterOpt.isAssignedTo){
+                    let a; 
+                    for(a=0; a < value.length; a++){
+                        ASSIGNED_TO.push(`'${value[a].value}'`)
+                        if(value[a].type === 1){
+                            GIS_ANALYST.push(`'${value[a].value}'`)
+                        }
+                        if(value[a].type === 2){
+                            GRID_ANALYST.push(`'${value[a].value}'`)
+                        }
+                        if(value[a].type === 3){
+                            DIST_ANALYST.push(`'${value[a].value}'`)
+                        }
+                    }
+                    //(GIS_ANALYST in () and GIS_ANALYST in () and DIST_ANALYST in () OR ASSIGNED_TO in ()) AND STAT (1,2,4) 
+                    //[GIS_ANALYST in () , GIS_ANALYST in () , DIST_ANALYST in ()]
+                    GIS_ANALYST.length ? ANALYST.push(`GIS_ANALYST in (${GIS_ANALYST.join(" , ")})`) : null
+                    GRID_ANALYST.length ? ANALYST.push(`GRID_ANALYST in (${GRID_ANALYST.join(" , ")})`) : null
+                    DIST_ANALYST.length ? ANALYST.push(`DIST_ANALYST in (${DIST_ANALYST.join(" , ")})`) : null
+                    let mapAnalyst = ANALYST.map((analyst, index) =>{
+                        
+                        if(index === 0){
+                            return `(${analyst}`
+                        }
+                        return analyst
+                    })
+                    
+                    fullFilter = [...fullFilter, mapAnalyst.join(' OR ')]
+                    ASSIGNED_TO.length ? fullFilter.push(`OR ASSIGNED_TO in (${ASSIGNED_TO.join(" , ")}))`) : null
+                }
+                if(key === 'stat' || key === 'distNM' || key === 'cntyNM' || key === 'actv' || key === 'jobType'){
 
-    for(let [key, value] of Object.entries(filterOpt)){
-        if(!value) continue
-        if(value){
-            if(key === 'isAssignedTo' && value){
-                fullFilter.push(`ASSIGNED_TO in ('${store.loggedInUser}')`)
-            }
-            if(key === 'user' && !filterOpt.isAssignedTo){
-                let a; 
-                for(a=0; a < value.length; a++){
-                    ASSIGNED_TO.push(`'${value[a].value}'`)
-                    if(value[a].type === 1){
-                        GIS_ANALYST.push(`'${value[a].value}'`)
+                    if(key === "stat"){
+                        let a; 
+                        for(a=0; a < value.length; a++){
+                            STAT.push(value[a].value)
+                        }
+                        STAT.length ? fullFilter.push(`STAT in (${STAT.join(" , ")})`) : null
                     }
-                    if(value[a].type === 2){
-                        GRID_ANALYST.push(`'${value[a].value}'`)
+                    if(key === 'distNM'){
+                        let a; 
+                        for(a=0; a < value.length; a++){
+                            DIST_NM.push(value[a].value)
+                        }
+                        DIST_NM.length ? fullFilter.push(`DIST_NM in (${DIST_NM.join(" , ")})`) : null
                     }
-                    if(value[a].type === 3){
-                        DIST_ANALYST.push(`'${value[a].value}'`)
+                    if(key === 'cntyNM'){
+                        let a; 
+                        for(a=0; a < value.length; a++){
+                            CNTY_NM.push(value[a].value)
+                        }
+                        CNTY_NM.length ? fullFilter.push(`CNTY_NM in (${CNTY_NM.join(" , ")})`) : null
                     }
+                    if(key === 'actv'){
+                        let a; 
+                        for(a=0; a < value.length; a++){
+                            ACTV.push(`'${value[a].value}'`)
+                        }
+                        ACTV.length ? fullFilter.push(`ACTV in (${ACTV.join(" , ")})`) : null
+                    }
+                    if(key === 'jobType'){
+                        let a; 
+                        for(a=0; a < value.length; a++){
+                            JOB_TYPE.push(value[a].value)
+                        }
+                        JOB_TYPE.length ? fullFilter.push(`JOB_TYPE in (${JOB_TYPE.join(" , ")})`) : null
+                    }
+                        continue
                 }
-                //(GIS_ANALYST in () and GIS_ANALYST in () and DIST_ANALYST in () OR ASSIGNED_TO in ()) AND STAT (1,2,4) 
-                //[GIS_ANALYST in () , GIS_ANALYST in () , DIST_ANALYST in ()]
-                GIS_ANALYST.length ? ANALYST.push(`GIS_ANALYST in (${GIS_ANALYST.join(" , ")})`) : null
-                GRID_ANALYST.length ? ANALYST.push(`GRID_ANALYST in (${GRID_ANALYST.join(" , ")})`) : null
-                DIST_ANALYST.length ? ANALYST.push(`DIST_ANALYST in (${DIST_ANALYST.join(" , ")})`) : null
-                let mapAnalyst = ANALYST.map((analyst, index) =>{
-                   
-                    if(index === 0){
-                        return `(${analyst}`
-                    }
-                    return analyst
-                })
-                
-                fullFilter = [...fullFilter, mapAnalyst.join(' OR ')]
-                ASSIGNED_TO.length ? fullFilter.push(`OR ASSIGNED_TO in (${ASSIGNED_TO.join(" , ")}))`) : null
-            }
-            if(key === 'stat' || key === 'distNM' || key === 'cntyNM' || key === 'actv' || key === 'jobType'){
-
-                if(key === "stat"){
-                    let a; 
-                    for(a=0; a < value.length; a++){
-                        STAT.push(value[a].value)
-                    }
-                    STAT.length ? fullFilter.push(`STAT in (${STAT.join(" , ")})`) : null
-                }
-                if(key === 'distNM'){
-                    let a; 
-                    for(a=0; a < value.length; a++){
-                        DIST_NM.push(value[a].value)
-                    }
-                    DIST_NM.length ? fullFilter.push(`DIST_NM in (${DIST_NM.join(" , ")})`) : null
-                }
-                if(key === 'cntyNM'){
-                    let a; 
-                    for(a=0; a < value.length; a++){
-                        CNTY_NM.push(value[a].value)
-                    }
-                    CNTY_NM.length ? fullFilter.push(`CNTY_NM in (${CNTY_NM.join(" , ")})`) : null
-                }
-                if(key === 'actv'){
-                    let a; 
-                    for(a=0; a < value.length; a++){
-                        ACTV.push(`'${value[a].value}'`)
-                    }
-                    ACTV.length ? fullFilter.push(`ACTV in (${ACTV.join(" , ")})`) : null
-                }
-                if(key === 'jobType'){
-                    let a; 
-                    for(a=0; a < value.length; a++){
-                        JOB_TYPE.push(value[a].value)
-                    }
-                    JOB_TYPE.length ? fullFilter.push(`JOB_TYPE in (${JOB_TYPE.join(" , ")})`) : null
-                }
+                if(key === "editDt"){
+                    const splitDate = value.split("-")
+                    splitDate.length === 1 ? fullFilter.push(`EDIT_DT between timestamp '${splitDate[0]}' and timestamp '${splitDate[0]}'`) : fullFilter.push(`EDIT_DT  between timestamp '${splitDate[0]}' and timestamp '${splitDate[1]}'`)
+                    //retsDefinitionExpressionArr.push(`${key} between timestamp '${splitDate[0]}' and timestamp '${splitDate[1]}'`)\
                     continue
+                }
+                // retsDefinitionExpressionArr.push(`${key} in ('${value}')`)
             }
-            if(key === "editDt"){
-                const splitDate = value.split("-")
-                splitDate.length === 1 ? fullFilter.push(`EDIT_DT between timestamp '${splitDate[0]}' and timestamp '${splitDate[0]}'`) : fullFilter.push(`EDIT_DT  between timestamp '${splitDate[0]}' and timestamp '${splitDate[1]}'`)
-                //retsDefinitionExpressionArr.push(`${key} between timestamp '${splitDate[0]}' and timestamp '${splitDate[1]}'`)\
-                continue
-            }
-            // retsDefinitionExpressionArr.push(`${key} in ('${value}')`)
         }
-    }
-    const removeEmpty = fullFilter.filter(x => x.length)
-    let filterDef = removeEmpty.join(" AND ")
-    let newFilter = filterDef.replace("AND OR", "OR")
-    // if(!filterOpt.isAssignedTo){
-    //     const assignedToQuery = [...GIS_ANALYST, ...GRID_ANALYST, ...DIST_ANALYST]
-    //     assignedToQuery.map((i) => `${i}`).join(",")
-    //     filterDef = filterDef.concat(' OR (ASSIGNED_TO in (', assignedToQuery, '))')
+        const removeEmpty = fullFilter.filter(x => x.length)
+        let filterDef = removeEmpty.join(" AND ")
+        let newFilter = filterDef.replace("AND OR", "OR")
+        // if(!filterOpt.isAssignedTo){
+        //     const assignedToQuery = [...GIS_ANALYST, ...GRID_ANALYST, ...DIST_ANALYST]
+        //     assignedToQuery.map((i) => `${i}`).join(",")
+        //     filterDef = filterDef.concat(' OR (ASSIGNED_TO in (', assignedToQuery, '))')
 
-    // }
-    try{
-        const filterMapPromise = new Promise((res, rej) => {
-            retsLayerView.layer.definitionExpression = store.savedFilter = `${newFilter}`
-            res(filterDef)
-        })
+        // }
+        try{
+            const filterMapPromise = new Promise((res, rej) => {
+                retsLayerView.layer.definitionExpression = store.savedFilter = `${newFilter}`
+                res(filterDef)
+            })
 
-        retsLayerView.layer.queryExtent()
-        .then((resp) =>{
-            if(resp.count === 0){
-                view.goTo(texasExtent)
-                return
-            }
-            view.goTo(resp.extent)
-        })
-        return newFilter
-    }
-    catch(err){
-        store.RetsCardStatus = "Oops! There is an issue with the filter expression"
-    }
+            retsLayerView.layer.queryExtent()
+            .then((resp) =>{
+                if(resp.count === 0){
+                    view.goTo(texasExtent)
+                    return
+                }
+                view.goTo(resp.extent)
+            })
+            return newFilter
+        }
+        catch(err){
+            store.RetsCardStatus = "Oops! There is an issue with the filter expression"
+        }
 
 }
 

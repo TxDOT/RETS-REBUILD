@@ -5,6 +5,10 @@ import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapA
 
 export const store = reactive({
         devStatus: "dev",
+        currFilter: "",
+        lastQuery : "",
+        filterItems: [],
+        filterquery: "",
         clickevent: "",
         count: 0,
         isCloseDetail: false,
@@ -233,7 +237,7 @@ export const store = reactive({
         //         }
         //         return
         // },
-        async getRetsLayer(userid, where, layer, orderFields){
+        async getRetsLayer(userid, where, layer, orderFields){ //////////////////////////remove userid from here
                 this.loggedInUser = userid
                 const queryString = {"whereString": where, "queryLayer": layer}
                 //const orderField = "EDIT_DT DESC, PRIO"
