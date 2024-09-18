@@ -213,6 +213,8 @@
 
                 // }, 1000);
                 store.filterquery = null
+                this.errorMessages = []
+                this.filterDisableStatus = false
             },
             validateFields(){
                 let regex = /(\w+)\s*=/g;
