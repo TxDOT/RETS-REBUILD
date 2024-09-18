@@ -73,13 +73,11 @@ function alreadySignedIn(){
 }
 
 
-export function getFields (){ //function to extract the last filter (if available) from the FILTERS field
+export async function getFields (userId){ //function to extract the last filter (if available) from the FILTERS field
   
   const query = retsRole.createQuery();
-  setTimeout(() => {
-    query.where = `USERNAME = '${store.loggedInUser}'`;
+    query.where = `USERNAME = '${userId}'`;
 
-  }, 1000);
   query.returnGeometry = false; 
   query.outFields = ['FILTERS'];  
 
@@ -106,7 +104,7 @@ export function getFields (){ //function to extract the last filter (if availabl
 const setDefExpRets = async (userId) => {
   if(appConstants.defaultUserValue.length) return
   appConstants.defaultUserValue.push({"name": "Username", "value": `${userId}`})
-  store.savedFilter = await getFields()
+  store.savedFilter = await getFields(userId)
 
   //retsLayer.definitionExpression = store.savedFilter = appConstants['defaultQuery'](userId)
   if (store.savedFilter) {

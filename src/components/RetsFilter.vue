@@ -1,9 +1,9 @@
 <template>
-    <div>
+    <div >
         <v-card id="filterFeed" >
             <div class="cardDiv regain">
                 <v-card-title style="position: relative; bottom:.5rem;">Filter Activity Feed</v-card-title>
-                <hr class="popup-title-border" style="position: relative; bottom: 15px"></hr>
+                <hr class="popup-title-border" style="position: relative; bottom: 15px; margin : 10px"></hr>
                 <v-row no-gutters class="adjustRow">
                     <v-select :items="filterSort" item-title="title" return-object style="position: relative;" density="compact" label="Sort" variant="underlined" v-model="store.CREATE_DT" :disabled="filterDisableStatus"></v-select>
                 </v-row>
@@ -42,10 +42,10 @@
                 <div style="position: relative; float: left; margin-left: 10px; font-size: 11px; display: flex; flex-wrap: wrap; bottom: 1rem;">
                     <v-checkbox label="RETS Assigned to Me" density="compact" class="checkbox-size" v-model="store.isAssignedTo" :disabled="filterDisableStatus"></v-checkbox>
                 </div>
-                <v-expansion-panels flat variant="accordion"  style="width: 96.5%; left: 4px; bottom:5px;">
+                <v-expansion-panels flat variant="accordion"  style="width: 96.5%; left: 4px; bottom:5px;" >
                     <!-- disabled -->
                     <v-expansion-panel elevation="0" tile>
-                        <v-expansion-panel-title expand-icon="mdi-menu-down" collapse-icon="mdi-menu-up" static> Custom SQL Query</v-expansion-panel-title>
+                        <v-expansion-panel-title expand-icon="mdi-menu-down" collapse-icon="mdi-menu-up" static > Custom SQL Query</v-expansion-panel-title>
                             <v-expansion-panel-text>
                                 <v-combobox 
                                     v-model="store.filterquery" 
@@ -61,7 +61,6 @@
                                     rows="2" 
                                     variant="outlined" 
                                     style="position: relative !important; top: 0px !important;"
-                                    clearable
                                     ref="combobox"
 
 
@@ -73,8 +72,7 @@
                                         >
                                             <span>{{ data.item.raw }}</span> 
                                             <v-icon 
-                                                small 
-                                                class="ml-2" 
+                                                :size="'12px'"
                                                 @click.stop="deleteQuery(store.loggedInUser, data.item.raw)" 
                                                 style="cursor: pointer;"
                                             >
@@ -92,7 +90,7 @@
                 </v-expansion-panels>
             </div>
             <div>
-                <hr class="popup-title-border" style="position: relative; bottom: 0px; margin-right: 20px;"></hr>
+                <hr class="popup-title-border" style="position: relative; bottom: 0px; margin-right: 20px; margin: 10px;"></hr>
                 <div style="float: right; margin: 10px; position: relative;" >     
                     <v-btn @click="cancelFilter()" class="secondary-button" variant="plain">Cancel</v-btn>
                     <v-btn @click="setFilterNumber()" class="main-button-style" variant="outlined">Save</v-btn>
@@ -172,19 +170,24 @@
         },
         async created(){
             store.filterItems = await getFilterItems(store.loggedInUser); //creates array from filters in FILTERS field
-            //sets the placeholder for the query textbox
-            store.filterquery = store.currFilter !== '' 
-                ? store.currFilter 
-                : (store.lastQuery === appConstants['defaultQuery'](store.loggedInUser) 
-                    ? '' 
-                    : store.lastQuery);
-                            this.filteritems = store.filterItems.filter(item => item !== appConstants['defaultQuery'](store.loggedInUser));
+            if (store.currFilter !== '') {
+                store.filterquery = store.currFilter;
+            } else {
+                if (store.lastQuery === appConstants['defaultQuery'](store.loggedInUser)) {
+                    store.filterquery = '';
+                } else {
+                    store.filterquery = store.lastQuery;
+                }
+            }
 
+            if (store.filterItems) {
+                this.filteritems = store.filterItems.filter(item => item !== appConstants['defaultQuery'](store.loggedInUser));
+            }
         },
         computed:{
             filter() {
                 return this.$store.getters.filter;
-                }
+                },
         },
         methods:{
             handleFilters(){
@@ -204,11 +207,11 @@
                 store.filterquery = filter
             },
             clearQuery(){
-                setTimeout(() => {
-                    this.restoreDefault()
-                    updateRETSROLE(store.loggedInUser, appConstants['defaultQuery'](store.loggedInUser))
+                // setTimeout(() => {
+                //     this.restoreDefault()
+                //     updateRETSROLE(store.loggedInUser, appConstants['defaultQuery'](store.loggedInUser))
 
-                }, 1000);
+                // }, 1000);
                 store.filterquery = null
             },
             validateFields(){
@@ -302,6 +305,8 @@
                                 store.getRetsLayer(store.loggedInUser, filterQuery, 'retsLayerLayerView',' EDIT_DT DESC')////////////////////////////////////
                                 updateRETSROLE(store.loggedInUser, filterQuery)
                                 store.currFilter = store.filterquery
+                                store.isfilter = false
+
 
 
                             } else {
@@ -319,6 +324,13 @@
                 updateRETSROLE(store.loggedInUser, appConstants['defaultQuery'](store.loggedInUser))
                 store.filterquery = ""
                 this.$refs.combobox.blur();
+                store.isfilter = false;  // This runs after the first line completes
+
+                setTimeout(() => {
+                    store.isfilter = true;  // This runs after the first line completes
+
+                }, 5);
+
 
                 
                 
@@ -355,7 +367,7 @@
                 return
             },
             setFilterNumber(){
-                if (!store.filterquery){
+                //if (!store.filterquery){
                     store.filter = {
                     createDt: store.CREATE_DT,
                     jobType: store.JOB_TYPE,
@@ -368,12 +380,19 @@
                     isAssignedTo: store.isAssignedTo
                     
                 }
+                if (store.JOB_TYPE.length === appConstants.jobTypeDomainValues.length){
+                    store.filter.jobType = []
+                    console.log("okkkk")
+                }
+              
+
+                store.filterquery  = ""
                 this.calcFilterDiff()
                 store.setFilterFeed()
-                }
+      
                 
-               
-
+                //}
+                
                 store.isfilter = false
                 return
             },
