@@ -9,8 +9,8 @@
         <v-row style="position: relative; top: 4px;">
             <v-autocomplete :items="userRole" item-title="name" item-value="value" label="Asset Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.GRID_ANALYST" @update:modelValue="onDropDownChange(store.retsObj.attributes.GRID_ANALYST)" :rules="[emptyRow.required]"> </v-autocomplete>
         </v-row>
-        <v-row style="position: relative; top: 6px;">
-            <v-autocomplete multiple ref="dropdown" :items="[null, ...userRole]" item-title="name" item-value="value" label="District Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.DIST_ANALYST" @update:modelValue="onDropDownChange(store.retsObj.attributes.DIST_ANALYST)" ></v-autocomplete>
+        <v-row>
+            <v-autocomplete multiple ref="dropdown" :items="['   ', ...userRole]" item-title="name" item-value="value" label="District Editor" flat variant="underlined" density="compact" rounded="0" :model-value="store.retsObj.attributes.DIST_ANALYST ? store.retsObj.attributes.DIST_ANALYST.split(' ') : null" @update:modelValue="value => { store.retsObj.attributes.DIST_ANALYST = value.join(' '); onDropDownChange(store.retsObj.attributes.DIST_ANALYST); }" :rules="[emptyRow.required]"></v-autocomplete>
         </v-row>
         <v-row style="position: relative; top: 8px;">
             <v-autocomplete :items="districtMetadata" item-title="name" item-value="value" label="District" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.DIST_NM" @update:modelValue="onDropDownChange(store.retsObj.attributes.DIST_NM)" :rules="[emptyRow.required]"></v-autocomplete>
@@ -49,15 +49,22 @@ import {appConstants} from '../common/constant.js'
         },
         methods:{
             onDropDownChange(){
+                console.log(store.retsObj.attributes.DIST_ANALYST)
                 const metadataFieldPass = this.checkMetadatFields()
-                for (var item in store.retsObj.attributes.DIST_ANALYST){
-                    if (store.retsObj.attributes.DIST_ANALYST[item] === null){
-                        //store.retsObj.attributes.DIST_ANALYST = null
-                        this.$refs.dropdown.reset()
-                        this.$refs.dropdown.blur()
 
-                    }
+                // for (var item in store.retsObj.attributes.DIST_ANALYST){
+                //     if (store.retsObj.attributes.DIST_ANALYST[item] === null){
+                //         //store.retsObj.attributes.DIST_ANALYST = null
+                //         this.$refs.dropdown.reset()
+                //         this.$refs.dropdown.blur()
+
+                //     }
                     
+                // }
+                if (store.retsObj.attributes.DIST_ANALYST.includes('   ')){
+                    console.log("cjecl")
+                    this.$refs.dropdown.reset()
+                    this.$refs.dropdown.blur()
                 }
                 store.isSaveBtnDisable = metadataFieldPass
                 return 

@@ -7,7 +7,6 @@ export const appConstants = {
     retsUserRoleProd: "https://testportal.txdot.gov/createags/rest/services/RETS_SUPPORT/FeatureServer/1",
     retsFlagColorDev: "https://testportal.txdot.gov/createags/rest/services/RETS_SUPPORT_UAT/FeatureServer/3",
     retsFlagColorProd: "https://testportal.txdot.gov/createags/rest/services/RETS_SUPPORT/FeatureServer/3",
-    
     RetsStatus: ['Not Started', 'On Hold', 'In Progress'],
     CardColorMap:{
         '1': '#FF00C5',

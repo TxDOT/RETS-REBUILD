@@ -273,6 +273,7 @@
                     
                     //const b = store.roadObj.find(rd => rd.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
                     //store.roadHighlightObj.delete(b)
+
                     store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
                     if (store.roadHighlightObj.size === 1){
                         //removeHighlight(store.retsObj)
@@ -283,6 +284,7 @@
 
                     }
                     store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+
                     return
                 }
                 return
@@ -320,6 +322,7 @@
                 store.isSaveBtnDisable = true
                 //store.updateRetsID()
                 //retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
+                console.log(store.retsObj.attributes.DIST_ANALYST)
                 return
             },
             cancelDetailsMetadata(){
@@ -335,6 +338,11 @@
                 retsLayerView.layer.definitionExpression = store.savedFilter
                 store.toggleFeed = 1
                 store.cancelpopup = false
+                setTimeout(() => {
+                    outlineFeedCards(store.roadHighlightObj)
+
+                }, 1000);
+
                 //store.preserveHighlightCards()
                 // retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
                 return
