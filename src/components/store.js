@@ -1,10 +1,10 @@
 import { reactive } from 'vue';
 import { appConstants } from '../common/constant';
 import {sendChatHistory} from './crud.js'
-import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapActivityFeed} from './utility.js'
+import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapActivityFeed, getHistoryView} from './utility.js'
 
 export const store = reactive({
-        devStatus: "dev",
+        devStatus: "prod",
         currFilter: "",
         lastQuery : "",
         filterItems: [],
@@ -44,7 +44,6 @@ export const store = reactive({
         zoomInText: "Move RETS Point",
         archiveRetsDataString: "",
         nextRoad: [],
-        nextRoadObj : [],
         roadObj: [],
         roadObjOverflow: [],
         retsObj: {
@@ -97,7 +96,6 @@ export const store = reactive({
         savedFilter: "",
         coordinatenotification: false,
         latlonstring:"",
-        unsavedChanges: false,
         defaultFilterSetup(){
                 // this.CREATE_DT.push({title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"})
                 // this.STAT = appConstants.defaultStatValues
@@ -113,6 +111,29 @@ export const store = reactive({
                 this.filter.user = this.USER
                 this.filter.isAssignedTo = this.isAssignedTo
                 return
+        },
+        async getHistoryChatRet(){
+                try{    
+                        if(!this.history.length) return
+                        const getRelatedHistory = this.historyChat
+                        const retsHistory = getRelatedHistory.filter(hist => hist.RETS_ID === this.historyRetsId)
+                        const attachment = await getAttachmentInfo(retsHistory.map(id => id.OBJECTID))
+                        retsHistory.forEach((hist) => {
+                                if(Object.hasOwn(attachment, hist.OBJECTID)){
+                                        hist.attachments = attachment[hist.OBJECTID].map((a) => {
+                                                if(a.parentObjectId === hist.OBJECTID){
+                                                        return {name: a.name, url: a.url}
+                                                }
+                                                
+                                        })
+                                }
+                        })
+                        // this.historyChat = retsHistory
+                }
+                catch(err){
+                        console.log(err)
+                }
+
         },
         async addNote(cmnt, isAttach, isExpand){
                 const date = new Date().getTime()
@@ -157,6 +178,8 @@ export const store = reactive({
                                 }
                                 
                         })
+                        let test = new Set([...this.roadHighlightObj].sort((a,b) => new Date(a.attributes.EDIT_DT) - new Date(b.attributes.EDIT_DT)))
+                        console.log(test)
                 }
                 const findItem = this.historyChat.find(note => note.OBJECTID === oid)
                 findItem.EDIT_DT = modDate
@@ -214,7 +237,7 @@ export const store = reactive({
         //         }
         //         return
         // },
-        async getRetsLayer(userid, where, layer, orderFields){
+        async getRetsLayer(userid, where, layer, orderFields){ //////////////////////////remove userid from here
                 this.loggedInUser = userid
                 const queryString = {"whereString": where, "queryLayer": layer}
                 //const orderField = "EDIT_DT DESC, PRIO"
@@ -239,7 +262,7 @@ export const store = reactive({
                                                         x.attributes.mdiexclamation = this.isPrio(x.attributes.PRIO)
                                                         x.attributes.DFO = x.attributes.DFO ? x.attributes.DFO.toFixed(3) : x.attributes.DFO
                                                         x.attributes.historyUpdate = "Loading"
-                                                        this.roadObj.push({attributes: x.attributes, geometry: [x?.geometry?.x, x?.geometry?.y]})
+                                                        this.roadObj.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                                                         //store.archiveRetsData.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                                                 })
                                                 
@@ -332,6 +355,8 @@ export const store = reactive({
         },
         deleteRetsID(){
                 const findIndex = this.roadObj.findIndex(ret => ret.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
+                console.log(findIndex)
+                console.log(this.updateRetsSearch)
                 this.updateRetsSearch.splice(findIndex, 1)
 
                 const cloneRets = [...this.roadObj]

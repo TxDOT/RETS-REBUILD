@@ -15,12 +15,11 @@
                 <template v-if="tool.name != 'Basemaps' && tool.name != 'Jump To'">
                     <v-tooltip location="right" :text="tool.name">
                             <template v-if="tool.name != 'Multi-Select'" v-slot:activator="{ props }">
-                                    <v-icon id="topIcon" size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
+                                    <v-icon id="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
                             </template>
                             <template v-if="tool.name === 'Multi-Select'"  v-slot:activator="{ props }">
-                                <v-badge location="top end" color="#4472C4" :content="store.roadHighlightObj.size" id="badge">
-                                    <v-icon id="topIcon" size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
-
+                                <v-badge location="top end" color="#4472C4" :content="store.roadHighlightObj.size" id="badge" offset-y="-8" rounded="">
+                                    <v-icon id="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
                                 </v-badge>
 
 
@@ -742,7 +741,8 @@
     #badge{
         position: absolute;
         top: 20px;
-        left: 23px;
+        left: 20px;
+        font-size: 10px !important;
     }
 
 

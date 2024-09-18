@@ -106,7 +106,9 @@ export function getFields (){ //function to extract the last filter (if availabl
 const setDefExpRets = async (userId) => {
   if(appConstants.defaultUserValue.length) return
   appConstants.defaultUserValue.push({"name": "Username", "value": `${userId}`})
+  
   store.savedFilter = await getFields()
+  console.log(store.savedFilter)
 
   //retsLayer.definitionExpression = store.savedFilter = appConstants['defaultQuery'](userId)
   if (store.savedFilter) {
@@ -118,7 +120,7 @@ const setDefExpRets = async (userId) => {
 }
 
 export async function getUserId(){
-  console.warn(`VERSION: 2.0.18 -- dev status: ${store.devStatus}`)
+  console.warn(`VERSION: 2.0.19 -- dev status: ${store.devStatus}`)
   const user = await esriId.getCredential(`${authen.portalUrl}/sharing/rest`,{
     oAuthPopupConfirmation: false,
   })
