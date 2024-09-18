@@ -101,9 +101,6 @@
                 searchAttach: false,
             }
         },
-        mounted(){
-
-        }, 
         methods:{
             clearContent(){
                 this.searchHistoryFilter = ""
@@ -181,7 +178,6 @@
                 if(n === 'RETSBOT' || !n) {
                     return n ?? 'SYSTEM GENERATED'
                 }
-                console.log(n)
                 this.loggedInUserName = appConstants.defaultUserValue[0].value
                 const usernameRow = appConstants.userRoles.find(name => name.value === n)
                 return usernameRow?.name ?? n
@@ -249,8 +245,7 @@
             },
             'store.historyChat.length':{
                 handler: function(a,b){
-                    console.log(a)
-                    if(a === 0){
+                    if(a.length === 0){
                         this.isHistNotesEmpty = true
                         console.log(this.isHistNotesEmpty)
                         return

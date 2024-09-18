@@ -13,7 +13,7 @@
                 <v-icon style="font-size: 13.5px;" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" ></v-icon>
             </div>
 
-            <v-lazy :options="{'threshold':0.5, 'margin': '100'}" transition="fade-transition" height="100">
+            <v-lazy :options="{'threshold': 0.25}" transition="expand-transition" height="100">
                 <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `5px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="checkhighlight(String(rd.attributes.RETS_ID)) ?? 'card-rets'"  @dblclick="double(rd, road);" @click="zoomToRetsPt(rd)">
                     <!-- <div class="boundary-rets-card"> -->
 

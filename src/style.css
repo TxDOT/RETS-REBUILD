@@ -1,5 +1,7 @@
-*{
+html{
   scroll-behavior: smooth;
+}
+*{
   scrollbar-width: thin;
   font-family: Roboto, Avenir, Helvetica, Arial, sans-serif;
 }

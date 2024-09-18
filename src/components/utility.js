@@ -220,7 +220,7 @@ export function outlineFeedCards(cards){
     //store.roadHighlightObj.add(objectcomparison)
     //zoom to card in feed
             
-    findCard.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"})
+    findCard.scrollIntoView({behavior: "smooth", block: "start", inline: "center"})
     // const zoomToCard = document.createElement('a')
     // zoomToCard.href = `#${objectcomparison}`
     // zoomToCard.click(preventHashUrl())
@@ -628,10 +628,12 @@ export function getHistoryView(retsid){
 export function returnHistory(query){
     store.numAttachments = 0
     const queryString = {"whereString": `${query ?? '1=1'}`, "queryLayer": "retsHistory"}
-    getQueryLayer(queryString, "create_dt desc")
+
+    getQueryLayer(queryString, "CREATE_DT DESC")
         .then((hist) => {
             //const arrHist = []
             if(!hist.features.length){
+                store.isHistNotesEmpty = false
                 return store.historyChat = []
             }
             store.historyChat.length = 0
@@ -648,6 +650,7 @@ export function returnHistory(query){
                         store.historyChat.push(x.attributes)
                     })
             })
+            store.isHistNotesEmpty = true
         })
         .catch(err => console.log(err))
     return

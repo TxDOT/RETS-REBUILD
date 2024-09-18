@@ -11,18 +11,16 @@
             </v-list-item>
         </v-list>
         <v-list id="icons-bottom" class="iconList">
-            <v-list-item id="popoutitems" class="iconList-item" v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" :active-class="tool.name !== 'Jump To' && tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
-                <template v-if="tool.name != 'Basemaps' && tool.name != 'Jump To'">
+            <v-list-item id="popoutitems" class="iconList-item" v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" :active="tool.isActive" :active-class="tool.name !== 'Jump To' || tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
+                <template v-if="tool.name !== 'Basemaps' || tool.name !== 'Jump To'">
                     <v-tooltip location="right" :text="tool.name">
-                            <template v-if="tool.name != 'Multi-Select'" v-slot:activator="{ props }">
+                            <template v-if="tool.name !== 'Multi-Select'" v-slot:activator="{ props }">
                                     <v-icon id="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
                             </template>
                             <template v-if="tool.name === 'Multi-Select'"  v-slot:activator="{ props }">
-                                <v-badge location="top end" color="#4472C4" :content="store.roadHighlightObj.size" id="badge" offset-y="-8" rounded="">
+                                <v-badge location="top end" color="#4472C4" :content="store.roadHighlightObj.size" id="badge" offset-y="-8" rounded="1">
                                     <v-icon id="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
                                 </v-badge>
-
-
                             </template>
                         
                     </v-tooltip>
@@ -115,7 +113,7 @@
             </v-btn-group>
             <v-btn-group id = "savebutton" density="compact">
                 <v-btn size="small" class="secondary-button"  @click="handleSettingsTool();handleactiveclass()">CANCEL</v-btn>
-               
+
                 <v-btn size="small" class="main-button-style" @click="handleSettingsTool();handleactiveclass()">SAVE</v-btn>
             
                 
@@ -225,8 +223,15 @@
                             ],
  
                 retsToolsBottom: [
-                               {title:"Select", icon: 'mdi-select-multiple', color: "#D9D9D9", name: "Multi-Select", action: () =>{
+                               {title:"Select", icon: 'mdi-select-multiple', color: "#D9D9D9", name: "Multi-Select", isActive: false,
+                               action: () =>{
+                                store.isSelectEnabled = !store.isSelectEnabled
+                                console.log(this.retsToolsBottom[0].isActive)
+                                this.retsToolsBottom[0].isActive = !this.retsToolsBottom[0].isActive
                                 this.handleSelectTool();
+                               },
+                               setActive: () => {
+                                return true
                                },
                                hover:(i) => 
                                     {
@@ -234,8 +239,9 @@
                                         this.jumptocard= false;
                                     }
                                 },
-                               {title:"JumpTo", icon: 'mdi-run', color: "#D9D9D9", name: "Jump To", action: () =>{
-    
+                               {title:"JumpTo", icon: 'mdi-run', color: "#D9D9D9", name: "Jump To", isActive: false,
+                               action: () =>{
+                                return
                                },
                                hover:(i) => 
                                     { 
@@ -246,18 +252,20 @@
                                             }
                                     }
                                 },
-                               {title:"Legend", icon: 'mdi-format-list-bulleted-type', color: "white", name: "Legend", action: () =>{
+                               {title:"Legend", icon: 'mdi-format-list-bulleted-type', color: "white", name: "Legend", 
+                               action: () =>{
                                 this.handleLegendTool();
-
+                                this.retsToolsBottom[2].isActive = !this.retsToolsBottom[2].isActive
                                },
-                               hover:(i) => 
+                               hover:() => 
                                     {
                                         this.basemapcard = false;
                                         this.jumptocard= false;
                                     }
                                 },
-                               {title:"Basemap", icon: 'mdi-map-legend', color: "#D9D9D9", name: "Basemaps", action: () => {
-                            
+                               {title:"Basemap", icon: 'mdi-map-legend', color: "#D9D9D9", name: "Basemaps", isActive: false,
+                               action: () => {
+                                return
                                },
                                 hover:(i) => { 
                                     if (i === "Basemap")
@@ -267,9 +275,10 @@
                                         }
                                     }
                                 },
-                               {title:"Test", icon: 'mdi-cog', color: "#D9D9D9", name: "Settings", action: () =>{
+                               {title:"Test", icon: 'mdi-cog', color: "#D9D9D9", name: "Settings",
+                               action: () =>{
                                 this.handleSettingsTool();
-                                
+                                this.retsToolsBottom[3].isActive = !this.retsToolsBottom[3].isActive
                                },
                                hover:(i) => 
                                     {
@@ -403,14 +412,13 @@
                        
                     },
                     handleSelectTool() { 
-                        if (store.isSelectEnabled === false ){
-                            store.isSelectEnabled = !store.isSelectEnabled
+                        if (store.isSelectEnabled === true ){
                             this.selectfunction = selecttool(store.isSelectEnabled, sketchWidgetselect, graphics);
+                            console.log(this.selectfunction)
                         }
                         else{
                             sketchWidgetselect.cancel()
-                            this.selectfunction.remove()
-                            store.isSelectEnabled = !store.isSelectEnabled
+                            //this.selectfunction.remove()
                         }
 
                         
@@ -501,19 +509,19 @@
 
 <style>
      .btn-left-brder{
-        border-left: 8px solid #4472C4 !important;
+        border-left: 6px solid #4472C4 !important;
     }
     .btn-left-brder i {
         position: absolute;
         top: 35%;
-        left: 24% !important;
+        left: 20% !important;
         transform: translate(-25%, -25%);
     }
 
     #topIcon{
         position: absolute;
         top: 35%;
-        left: 35%;
+        left: 36%;
         transform: translate(-25%, -25%);
     }
     
@@ -530,7 +538,6 @@
         position: absolute;
         width: 320px !important;
         top: 9px;
-        left: 29%;
     }
     #iconcontent i {
         right: 5px;
@@ -741,7 +748,7 @@
     #badge{
         position: absolute;
         top: 20px;
-        left: 20px;
+        left: 20x;
         font-size: 10px !important;
     }
 
