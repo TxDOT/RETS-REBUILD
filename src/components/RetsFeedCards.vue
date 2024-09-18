@@ -740,6 +740,6 @@ export default{
         left: 270px;
         top: 50px;
         background-color: lightgray;
-        opacity: .8;
+        opacity: .95;
     }
 </style>
