@@ -1,7 +1,7 @@
 import { reactive } from 'vue';
 import { appConstants } from '../common/constant';
 import {sendChatHistory} from './crud.js'
-import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapActivityFeed, getHistoryView} from './utility.js'
+import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapActivityFeed} from './utility.js'
 
 export const store = reactive({
         devStatus: "dev",
@@ -267,7 +267,7 @@ export const store = reactive({
                                                         //store.archiveRetsData.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                                                 })
                                                 
-                                                this.updateRetsSearch = this.roadObj
+                                                
                                                 return
                                         }
                                         if(!obj.features.length){

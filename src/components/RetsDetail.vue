@@ -250,6 +250,7 @@
                 this.saveDisable = bool
             },
             returnToFeed(){
+                store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
                 if(store.cancelEvent){
                     store.cancelEvent.remove()
                     cancelSketchPt()
@@ -274,7 +275,7 @@
                     //const b = store.roadObj.find(rd => rd.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
                     //store.roadHighlightObj.delete(b)
 
-                    store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                    //store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
                     if (store.roadHighlightObj.size === 1){
                         //removeHighlight(store.retsObj)
                         //store.roadHighlightObj.clear()
@@ -313,7 +314,7 @@
                 store.retsObj.attributes.JOB_TYPE = this.isAsset === true ? 2 : 1
                 
                 await updateRETSPT(store.retsObj)
-                store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                
                 store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                 this.returnToFeed()
                 store.isShowSelected = false
@@ -340,7 +341,6 @@
                 store.cancelpopup = false
                 setTimeout(() => {
                     outlineFeedCards(store.roadHighlightObj)
-
                 }, 1000);
 
                 //store.preserveHighlightCards()
@@ -349,7 +349,6 @@
             },
             disgardEdits(){
                 if(store.clickStatus){
-                    let nextRets = store.nextRoad
                     const archiveRets = JSON.parse(store.archiveRetsDataString)
                     let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
                     updateRetsObj(findItem, archiveRets)

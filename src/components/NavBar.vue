@@ -18,7 +18,7 @@
                                     <v-icon id="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
                             </template>
                             <template v-if="tool.name === 'Multi-Select'"  v-slot:activator="{ props }">
-                                <v-badge location="top end" color="#4472C4" :content="store.roadHighlightObj.size" id="badge" offset-y="-8" rounded="1">
+                                <v-badge location="top end" color="#4472C4" :content="store.roadHighlightObj.size" id="badge" offset-y="-8">
                                     <v-icon id="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
                                 </v-badge>
                             </template>
@@ -514,14 +514,14 @@
     .btn-left-brder i {
         position: absolute;
         top: 35%;
-        left: 20% !important;
+        left: 28% !important;
         transform: translate(-25%, -25%);
     }
 
     #topIcon{
         position: absolute;
         top: 35%;
-        left: 36%;
+        left: 40%;
         transform: translate(-25%, -25%);
     }
     
@@ -745,16 +745,10 @@
     .translatesettings{
         transform: translate(-200px) 
     }
-    #badge{
+    #badge {
         position: absolute;
         top: 20px;
         left: 20x;
-        font-size: 10px !important;
     }
-
-
  
-
-
-      
 </style>

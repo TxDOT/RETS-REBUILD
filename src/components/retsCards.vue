@@ -13,7 +13,7 @@
                 <v-icon style="font-size: 13.5px;" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" ></v-icon>
             </div>
 
-            <v-lazy :options="{'threshold': 0.25}" transition="expand-transition" height="100">
+            <v-lazy :options="{'threshold': 0}" transition="expand-transition" height="100">
                 <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `5px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="checkhighlight(String(rd.attributes.RETS_ID)) ?? 'card-rets'"  @dblclick="double(rd, road);" @click="zoomToRetsPt(rd)">
                     <!-- <div class="boundary-rets-card"> -->
 
@@ -116,7 +116,7 @@
 
 <script>
 import {postFlagColor} from '../components/crud.js'
-import {zoomTo, highlightRETSPoint, toggleRelatedRets,returnHistory, removeHighlight, removeOutline, includes, checkhighlightfunction, loadData, openDetails} from './utility.js'
+import {zoomTo, highlightRETSPoint, removeHighlight, removeOutline, includes, checkhighlightfunction, loadData, openDetails} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {store} from './store.js'
 
@@ -148,6 +148,7 @@ export default{
 
     mounted(){
         //outlineFeedCards()
+        this.setLayer
         store.isSaving = false
         loadData()
         //outlineFeedCards(store.roadHighlightObj)
@@ -155,6 +156,7 @@ export default{
     },
 
     updated(){
+        this.setLayer
         loadData()
         store.toggleFeed = 1
         store.activityBanner = "Activity Feed"
@@ -223,6 +225,11 @@ export default{
             this.isColorPicked = true;
         },
 
+    },
+    computed: {
+        setLayer: () => {                                              
+            store.updateRetsSearch = store.roadObj
+        } 
     }
 }
 
