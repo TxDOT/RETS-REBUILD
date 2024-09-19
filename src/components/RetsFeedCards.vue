@@ -96,22 +96,23 @@
     <v-card id="countPopup" v-if="countPopupStatus">
         <span>
             &nbsp;&nbsp;
-            <span :style="{ color: notStartedColor, width: '3ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsNotStartedCount }}</span>
+            <span :style="{ color: notStartedColor, width: '5ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsNotStartedCount }}</span>
             <span :style="{ color: 'black'}">&nbsp;&nbsp; Not Started</span><br>
             
             &nbsp;&nbsp;
-            <span :style="{ color: inProgressColor, width: '3ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsInProgressCount }}</span>
+            <span :style="{ color: inProgressColor, width: '5ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsInProgressCount }}</span>
             <span :style="{ color: 'black' }">&nbsp;&nbsp; In Progress</span><br>
            
+            &nbsp;&nbsp;
+            <span :style="{ color: completeColor, width: '5ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsCompleteCount }}</span>
+            <span :style="{ color: 'black' }">&nbsp;&nbsp; Complete</span><br>
             
             &nbsp;&nbsp;
-            <span :style="{ color: onHoldColor, width: '3ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsOnHoldCount }}</span>
+            <span :style="{ color: onHoldColor, width: '5ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsOnHoldCount }}</span>
             <span :style="{ color: 'black' }">&nbsp;&nbsp; On Hold</span><br>
 
              
-            &nbsp;&nbsp;
-            <span :style="{ color: completeColor, width: '3ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsCompleteCount }}</span>
-            <span :style="{ color: 'black' }">&nbsp;&nbsp; Complete</span><br>
+           
 
             
         </span>
