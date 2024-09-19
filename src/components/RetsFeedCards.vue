@@ -19,7 +19,7 @@
             <div style="width: 100%;">
                 
                 <div class="banner-txt">
-                    <p>{{store.activityBanner}}</p>
+                    <p id=activityType>{{store.activityBanner}}</p>
                     <p id="headerCount" @mouseover="countPopupStatus = true; countHeaderColor = 'lightgray'" @mouseout="countPopupStatus = false; countHeaderColor = 'gray'">
                         &nbsp;&nbsp;&nbsp; 
                         <span :style="{ color: countHeaderColor }">[{{ store.updateRetsSearch.length }}]</span>
@@ -102,14 +102,16 @@
             &nbsp;&nbsp;
             <span :style="{ color: inProgressColor, width: '3ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsInProgressCount }}</span>
             <span :style="{ color: 'black' }">&nbsp;&nbsp; In Progress</span><br>
-            
-            &nbsp;&nbsp;
-            <span :style="{ color: completeColor, width: '3ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsCompleteCount }}</span>
-            <span :style="{ color: 'black' }">&nbsp;&nbsp; Complete</span><br>
+           
             
             &nbsp;&nbsp;
             <span :style="{ color: onHoldColor, width: '3ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsOnHoldCount }}</span>
             <span :style="{ color: 'black' }">&nbsp;&nbsp; On Hold</span><br>
+
+             
+            &nbsp;&nbsp;
+            <span :style="{ color: completeColor, width: '3ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsCompleteCount }}</span>
+            <span :style="{ color: 'black' }">&nbsp;&nbsp; Complete</span><br>
 
             
         </span>
@@ -732,6 +734,7 @@ export default{
         font-size:15px;
         color: lightgray;
         cursor: default;
+        white-space: nowrap;
     }
     #countPopup{
         position: relative;
@@ -742,4 +745,8 @@ export default{
         background-color: lightgray;
         opacity: .95;
     }
+    #activityType {
+        white-space: nowrap; 
+        overflow: hidden;
+}
 </style>
