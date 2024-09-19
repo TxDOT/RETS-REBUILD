@@ -1,12 +1,13 @@
 <template>
     <div id="viewDiv">
         <detailsAlert v-if="store.isAlert" id="showAlert"/>
-        <v-banner v-if="store.devStatus === 'dev'" lines="one" class="" style="position: absolute; width: fit-content; top: 0px; left: 0; right:0; margin: auto; justify-content: center; display: flex;" bg-color="warning">
+        <v-banner v-if="store.devStatus === 'dev'" lines="one" class="" style="position: absolute; width: fit-content; top: 0px; left: 0; right:1030px; margin: auto; justify-content: center; display: flex;" bg-color="warning">
             <p>You are in the TEST enviornment. Using UAT data.</p>
         </v-banner>
         <v-banner v-if="store.coordinatenotification" lines="one"  style="position: absolute; width: fit-content; left: 0; right: 0; margin: auto; justify-content: center; display: flex;" bg-color="success">
             ({{store.latlonstring}}) has been copied to clipboard.
         </v-banner>
+        
         <div>
             <v-card id="cancelpopup" v-if="store.cancelpopup">
             <v-card-title class="popupheader2" >
@@ -17,7 +18,7 @@
                 If you proceed, your changes will be discarded.
             </v-card-subtitle>
             <v-btn-group class="buttonpositioning2" density="compact">
-                <v-btn class="secondary-button"  @click="store.cancelpopup = false">GO BACK</v-btn>
+                <v-btn class="secondary-button"  @click="goBackActivity()">GO BACK</v-btn>
                 <v-btn class="main-button-style" @click="discardedits">DISCARD</v-btn>
             </v-btn-group>
 
@@ -34,7 +35,7 @@
 //import functions
 //import {queryRetsTable} from './utility.js'
 import {view} from './map-Init.js'
-import {home, hoverRetsPoint, discardeditcopy} from './utility.js'
+import {home, hoverRetsPoint, discardeditcopy, openDetails, updateRetsObj, removeOutline, removeHighlight, highlightRETSPoint} from './utility.js'
 import {store} from './store.js'
 
 // import ShowChanges from './showChanges.vue'
@@ -59,7 +60,38 @@ export default{
     },
     methods:{
         discardedits(){
+            if(!store.isDetailsPage){
+                const archiveRets = JSON.parse(store.archiveRetsDataString)
+                let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
+                updateRetsObj(findItem, archiveRets)
+                openDetails(store.nextRoadObj)
+                store.cancelpopup = false
+                store.toggleFeed = 2
+                view.goTo(store.nextRoadObj.geometry)
+                return
+            }
+            
             discardeditcopy();
+            return
+        },
+        goBackActivity(){
+            if(!store.isSaveBtnDisable){
+                removeOutline()
+                removeHighlight("a", true)
+                highlightRETSPoint(store.retsObj.attributes)
+                const elementId = String(store.retsObj.attributes.RETS_ID).concat('-', store.retsObj.attributes.OBJECTID);
+                const element = document.getElementById(elementId);
+                element.classList.toggle('highlight-card');
+
+                store.isCard = false
+                store.isDetailsPage = true
+                store.cancelpopup = false
+                store.toggleFeed = 2
+                return
+            }
+            store.cancelpopup = false;
+            store.isSaveBtnDisable = true
+            return
         }
 
     }

@@ -23,12 +23,6 @@ export async function getRetsLayerView (){
             async () => {
                 try{
                     retsLayerView = retLayerView
-                    //let ret = await retsLayerView.queryFeatures()
-                
-                    //ret.features.forEach(id => retsid.push(id.attributes.RETS_ID))
-                    //console.log(retsid)
-                    //let concatRetsId = retsid.join(",")
-                    //getHistoryView(concatRetsId)
                     
                     if(retsLayerView.view.zoom < 12){
                         store.zoomInText = "Zoom in to enable"
@@ -116,11 +110,6 @@ export function clickRetsPoint(){
                     store.roadHighlightObj.clear()
                     store.roadHighlightObj.add(retsPt)
 
-                        
-                   
-                    
-                   
-                    
                     if (store.isSaveBtnDisable){
                         removeOutline()
                         removeHighlight("a", true)
@@ -231,7 +220,7 @@ export function outlineFeedCards(cards){
     //store.roadHighlightObj.add(objectcomparison)
     //zoom to card in feed
             
-    findCard.scrollIntoView({behavior: "smooth", block: "nearest", inline: "start"})
+    findCard.scrollIntoView({behavior: "smooth", block: "start", inline: "center"})
     // const zoomToCard = document.createElement('a')
     // zoomToCard.href = `#${objectcomparison}`
     // zoomToCard.click(preventHashUrl())
@@ -500,7 +489,7 @@ export function home(onrender){
 
 export function addRelatedRetsToMap(rets){ 
     const graphicInArr = retsGraphicLayer.graphics.items.find(ret => ret.attributes.OBJECTID === rets.OBJECTID)
-    if(graphicInArr){
+    if(graphicInArr || !rets.geometry){
         return
     }    
     
@@ -576,10 +565,9 @@ export function zoomToRelatedRets(relatedRets){
 export const toggleRelatedRets = (retsid) =>  {
     const parseRets = JSON.parse(retsid)
     if(!parseRets.attributes.RELATED_RETS) return
-    const newRetsId = parseRets.attributes.RELATED_RETS.includes(",") ? parseRets.attributes.RELATED_RETS.split(",") : parseRets.attributes.RELATED_RETS
+    const newRetsId = parseRets.attributes.RELATED_RETS.includes(",") ? parseRets.attributes.RELATED_RETS.split(",") : [parseRets.attributes.RELATED_RETS]
     store.retsObj.attributes.RELATED_RETS = newRetsId
     turnAllVisibleGraphicsOff()
-    
     newRetsId.forEach((ret) =>{
         let a = retsGraphicLayer.graphics.items.filter(item => item.attributes.retsId === Number(ret))
         a.forEach(x => x.visible = true)
@@ -587,25 +575,22 @@ export const toggleRelatedRets = (retsid) =>  {
     return
 }
 
-export function splitAndAddRelatedRets(relatedRets){
-    // console.log(relatedRets)
-    // if(typeof relatedRets === "object" || !relatedRets.length){
-    //     // relatedRets.map((ret)=>{
-    //     //     this.gimmeRETS(ret, `RETS_ID = ${ret}`)
-    //     // })
-    //     return
-    // }
-    
-    // const splitString = relatedRets.split(",")
-    // //store.retsObj.attributes.RELATED_RETS = []
+function updateCreateDateStatus(res, findMaxCreateDT){
+    let findItem = res.features.find(cmnt => cmnt.attributes.CREATE_DT === findMaxCreateDT)
 
-    // return splitString
+    return [findItem, "create"]
+}
+
+function updateEditDateStatus(res, findMaxEditDT){
+    let findItem = res.features.find(cmnt => cmnt.attributes.EDIT_DT === findMaxEditDT)
+
+    return [findItem, "edit"]
 }
 
 export function getHistoryView(retsid){
     retsHistory.queryFeatures({
         groupByFieldsForStatistics: ["RETS_ID"],
-        orderByFields: ["EDIT_DT DESC"],
+        orderByFields: ["CREATE_DT DESC"],
         outFields: ["RETS_ID", "CMNT_NM", "CREATE_DT", "EDIT_DT", "CMNT_TYPE_ID"],
         where: `RETS_ID = ${retsid}`
     })
@@ -615,33 +600,40 @@ export function getHistoryView(retsid){
             retCard.attributes.historyUpdate = "Heyyyyy Champ! When was the last time we chatted?"
             return
         }
-        let {CMNT_NM, CREATE_DT, CMNT_TYPE_ID, EDIT_DT} = res.features[0].attributes
+
+        let findMaxCreateDT = Math.max(...(res.features.map(c => c.attributes.CREATE_DT)))
+        let findMaxEditDT = Math.max(...(res.features.map(c => c.attributes.EDIT_DT)))
         
-        if(!EDIT_DT){
-            let latestHistoryText = appConstants.defineCMNT[CMNT_TYPE_ID ? CMNT_TYPE_ID : 0](CMNT_NM, CREATE_DT) ?? 'Status Change issue'
+        let returnItem = findMaxCreateDT > findMaxEditDT ? updateCreateDateStatus(res, findMaxCreateDT) : updateEditDateStatus(res, findMaxEditDT)      
+
+        if(returnItem[1] === "edit"){
+            let {CMNT_NM, EDIT_DT, CMNT_TYPE_ID} = returnItem[0].attributes
+            let latestHistoryText = appConstants.defineCMNT[CMNT_TYPE_ID ? CMNT_TYPE_ID : 0](CMNT_NM, EDIT_DT) ?? 'Status Change issue'
             retCard.attributes.historyUpdate = latestHistoryText
             return
         }
-
-        let latestHistoryText = appConstants.defineCMNT[CMNT_TYPE_ID ? CMNT_TYPE_ID : 0](CMNT_NM, EDIT_DT) ?? 'Status Change issue'
+        
+        let {CMNT_NM, CREATE_DT, CMNT_TYPE_ID} = returnItem[0].attributes
+        let latestHistoryText = appConstants.defineCMNT[CMNT_TYPE_ID ? CMNT_TYPE_ID : 0](CMNT_NM, CREATE_DT) ?? 'Status Change issue'
         retCard.attributes.historyUpdate = latestHistoryText
         return 
-
-
     })
     .catch(() => {
         //
     })
     return
+
 }
 
 export function returnHistory(query){
     store.numAttachments = 0
     const queryString = {"whereString": `${query ?? '1=1'}`, "queryLayer": "retsHistory"}
-    getQueryLayer(queryString, "create_dt desc")
+
+    getQueryLayer(queryString, "CREATE_DT DESC")
         .then((hist) => {
             //const arrHist = []
             if(!hist.features.length){
+                store.isHistNotesEmpty = false
                 return store.historyChat = []
             }
             store.historyChat.length = 0
@@ -658,6 +650,7 @@ export function returnHistory(query){
                         store.historyChat.push(x.attributes)
                     })
             })
+            store.isHistNotesEmpty = true
         })
         .catch(err => console.log(err))
     return
@@ -725,6 +718,7 @@ export function createtool(sketchWidgetcreate, createretssym) {
                             store.checkDetailsForComplete()
                             return
                         }
+                        store.retsObj.attributes.NO_RTE = false
                         const convertMapPts = webMercatorUtils.webMercatorToGeographic(event.graphic.geometry)
                         findDFOLocation(convertMapPts, hit.results[0].graphic.attributes.GID)
                     })  
@@ -1033,7 +1027,6 @@ export async function createRoadGraphic(retsObj, onStartUp){
     let dfoIsInRange = isDFOInRange(returnRds, routeDFO)
 
     //if not on a road segment range
-    console.log(dfoIsInRange)
     if(!dfoIsInRange[0] && !store.retsObj.attributes.NO_RTE){
         store.isAlert = true
         store.alertTextInfo = {"text": `DFO is out of Range. Begin DFO: ${dfoIsInRange[1].toFixed(3)} End DFO: ${dfoIsInRange[2].toFixed(3)}`, "color": "red", "type":"error", "toggle": true}
@@ -1050,7 +1043,6 @@ export async function createRoadGraphic(retsObj, onStartUp){
 }
 
 export async function queryRoads(field, value){
-    console.log(value)
     return await roadLayerView.layer.queryFeatures({
         where: `${field} = ${value}`,
         returnM: true,
@@ -1187,8 +1179,11 @@ export function getRoadInformation(){
                             store.cancelEvent.remove()
                             getNewPoint.remove()
                             store.checkDetailsForComplete()
+                            store.isSaveBtnDisable = false
                             return
                         }
+                        store.isAlert = false
+                        store.outOfRange = false
                         const convertMapPts = webMercatorUtils.webMercatorToGeographic(event.graphic.geometry)
                         findDFOLocation(convertMapPts, hit.results[0].graphic.attributes.GID)
                         completeMovePtSketch()
@@ -1483,17 +1478,20 @@ export function replacearchivecopy(old){
     const filter = !store.isShowSelected ? store.updateRetsSearch : [...store.roadHighlightObj]
     const currDate = filter?.find(x => x.attributes.RETS_ID === old.attributes.RETS_ID)?.attributes?.EDIT_DT ?? this.returnToFeed()
     const rd = filter.findIndex(x => x.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
+    const findRetInMain = store.roadObj.findIndex(x => x.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
+
     if(currDate !== old.attributes.EDIT_DT){
         old.attributes.EDIT_DT === currDate
     }
+
     filter.splice(rd, 1, old)
-    !store.isShowSelected ? filter.splice(rd, 1, old) : store.roadHighlightObj = new Set(filter)
+    store.roadObj.splice(findRetInMain, 1, old)
+    !store.isShowSelected ? filter.splice(rd, 1, old) : store.updateRetsSearch = store.roadHighlightObj = new Set(filter)
     return
 }
 
 export function discardeditcopy(){
     if(store.clickStatus){
-        let nextRets = store.nextRoad
         const archiveRets = JSON.parse(store.archiveRetsDataString)
         let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
         updateRetsObj(findItem, archiveRets)
@@ -1512,11 +1510,14 @@ export function discardeditcopy(){
     }
     const archiveRets = JSON.parse(store.archiveRetsDataString)
     replacearchivecopy(archiveRets)
-    returntofeedcopy()
+    clearGraphicsLayer()
+    //returntofeedcopy()
     retsLayerView.layer.definitionExpression = store.savedFilter
     store.isCard = true
     store.toggleFeed = 1
     store.cancelpopup = false
+    store.isSaveBtnDisable = true
+    store.isAlert = false
     outlineFeedCards(store.roadHighlightObj)
     return
 }

@@ -13,22 +13,28 @@
                 <v-icon style="font-size: 13.5px;" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" ></v-icon>
             </div>
 
-            <v-lazy :options="{'threshold':0.5}" transition="fade-transition">
-                <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `5px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="checkhighlight(String(rd.attributes.RETS_ID)) ?? 'card-rets'" @click="zoomToRetsPt(rd)" @dblclick="double(rd, road);">
+            <v-lazy :options="{'threshold': 0}" transition="expand-transition" height="100">
+                <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `5px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="checkhighlight(String(rd.attributes.RETS_ID)) ?? 'card-rets'"  @dblclick="double(rd, road);" @click="zoomToRetsPt(rd)">
                     <!-- <div class="boundary-rets-card"> -->
 
-                    <div style="top: 0px; max-height: 0px;">
-                        <v-card-text id="retsId">
-                            RETS {{  rd.attributes.RETS_ID  }}
-                        </v-card-text>
+                    <div style="top: 0px; max-height: 0px; position: relative;">
+                        <div style="position: relative;">
+                            <v-card-text id="retsId">
+                                RETS {{  rd.attributes.RETS_ID  }}
+                            </v-card-text>
+                        </div>
 
-                         <v-card-text class="route-name">
-                            {{ rd.attributes.RTE_NM ?? "Route name missing" }}
-                        </v-card-text>
+                        <div style="position: relative;">
+                            <v-card-text class="route-name">
+                                {{ rd.attributes.RTE_NM ?? "No Route" }}
+                            </v-card-text>
+                        </div>
 
-                        <v-card-text id="retsCMNT">
-                            {{ rd.attributes.RETS_NM}}
-                         </v-card-text>
+                        <div style="position: relative; margin-left: 5px;">
+                            <v-card-text id="retsCMNT">
+                                {{ rd.attributes.RETS_NM}}
+                            </v-card-text>
+                        </div>
 
                         <div style="width: 100%;">
                             <span class="text-concat">
@@ -38,7 +44,7 @@
                     </div>
                     
                     <div class="bottomCardText">
-                        <div style="position:relative; float:right; font-size: 11px; top: 45px; left: 210px;" >
+                        <div style="position:relative; float:right; font-size: 11px; top: 45px; left: 175px;" >
                             <v-tooltip text="Assigned to you" location="top">
                                 <template v-slot:activator="{props}">
                                     <v-icon icon="mdi-account-multiple-check" color="white" v-if="rd.attributes.mdiaccountmultiplecheck === true" class="cardPRIO" v-bind="props"></v-icon>
@@ -104,14 +110,13 @@
         </div>
     
     </div>
-    
       
     
 </template>
 
 <script>
 import {postFlagColor} from '../components/crud.js'
-import {zoomTo, highlightRETSPoint, toggleRelatedRets,returnHistory, removeHighlight, removeOutline, includes, checkhighlightfunction, loadData, openDetails} from './utility.js'
+import {zoomTo, highlightRETSPoint, removeHighlight, removeOutline, includes, checkhighlightfunction, loadData, openDetails} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {store} from './store.js'
 
@@ -136,12 +141,14 @@ export default{
             isColorPicked: true,
             roads: [],
             currIter: 0,
-            nextIter: 100
+            nextIter: 100,
+            stopBubbleEvent: false
         }
     },
 
     mounted(){
         //outlineFeedCards()
+        this.setLayer
         store.isSaving = false
         loadData()
         //outlineFeedCards(store.roadHighlightObj)
@@ -149,6 +156,7 @@ export default{
     },
 
     updated(){
+        this.setLayer
         loadData()
         store.toggleFeed = 1
         store.activityBanner = "Activity Feed"
@@ -187,7 +195,7 @@ export default{
                     const element = document.getElementById(elementId);
 
                     if (element) {
-                    element.classList.toggle('highlight-card');
+                        element.classList.toggle('highlight-card');
                     } 
                     return
                 }
@@ -197,12 +205,16 @@ export default{
             this.timer = setTimeout(()=>{
                 const zoomToRETS = rets.geometry
                 highlightRETSPoint(rets.attributes)
-
                 zoomTo(zoomToRETS)
-
             },250)
         },
         double(road, index){
+            if(!store.isSaveBtnDisable){
+                clearTimeout(this.timer)
+                store.cancelpopup = true
+                store.nextRoadObj = road
+                return
+            }
             openDetails(road)
             return
         },
@@ -213,6 +225,11 @@ export default{
             this.isColorPicked = true;
         },
 
+    },
+    computed: {
+        setLayer: () => {                                              
+            store.updateRetsSearch = store.roadObj
+        } 
     }
 }
 
@@ -221,7 +238,7 @@ export default{
 <style scoped>
 .bottomCardText{
     position: relative;
-    top: 10px;
+    bottom: 11px;
 }
 .rets-card-row{
     position: relative;
@@ -229,8 +246,7 @@ export default{
     right: 23px;
     width: 100% !important;
     padding: 0% 5% 5% 0%;
-    height: 120px;
-    min-height: 120px;
+    height: 70px;
     opacity: 1;
     /* transform: translateX(30px);
     transition: 150ms; */
@@ -240,12 +256,12 @@ export default{
     /* transform: translateX(0); */
     padding: 0px;
     width: 96% !important;
-    height: 120px;
+    height: 100px;
 }
 .flag-btn{
     font-size: 10px;
-    top: 1.6rem;
-    left: 500px;
+    top: 21.2px;
+    left: 450px;
     z-index: 999;
     width: 1px !important;
     padding: 0px !important;
@@ -255,7 +271,7 @@ export default{
 .color-picker{
     position: absolute;
     background-color: black;
-    left: 496px;
+    left: 446px;
     top: 2.7rem;
     width: 19px;
     /* top right bottom left */
@@ -271,7 +287,7 @@ export default{
     width: 100% !important;
     border-radius: 0% !important;
     margin: 0% !important;
-    height: 115px !important;
+    height: 95px !important;
     padding: 15px !important;
     left: 40px;
     box-sizing: border-box;
@@ -286,9 +302,9 @@ export default{
 #retsId{
     padding:0px; 
     position: relative; 
-    bottom: 7px; 
+    bottom: 12px; 
     width: 20%;
-    font-size: 15px;
+    font-size: 12px;
     color: #D9D9D9;
     font-weight: bold;
     margin-right: 10px;
@@ -297,25 +313,26 @@ export default{
 #retsCMNT{
     position: relative;
     overflow: hidden;
-    padding: 0px 0px 0px 10px;
+    padding: 0px 0px 0px 0px;
     text-overflow: ellipsis;
     white-space: nowrap;
     font-weight: bold;
     color: #4472C4;
-    bottom: 27px;
+    bottom: 33px;
     left:75px;
+    font-size: 12.5px;
 }
 .route-name{
     position: relative;
-    right: 23px;
+    right: 30px;
     float: right;
-    bottom: 26.6px;
+    bottom: 32px;
     justify-content: end;
     width: 45%;
     display: flex;
     flex-direction: row;
     padding: 0px;
-    font-size: 14px;
+    font-size: 12.3px;
     color:#D9D9D9;
     font-weight: bold;
 }
@@ -324,11 +341,11 @@ export default{
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;  
     overflow: hidden;
-    font-size: 14px;
+    font-size: 11.5px;
     position: relative;
     color: #a6a6a6;
     width: 100%;
-    bottom: 27px;
+    bottom: 33px;
 }
 .cardPRIO{
     margin-left:10px;

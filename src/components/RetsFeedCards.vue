@@ -15,7 +15,7 @@
             </div>
         </div>
 
-        <v-banner id="feed-banner" lines="two" density="default" min-width="0%">
+        <v-banner id="feed-banner" lines="one" density="default" min-width="0%">
             <div style="width: 100%;">
                 
                 <div class="banner-txt">
@@ -53,7 +53,7 @@
         </v-banner>
 
         <div id="search-feed" v-if="!store.isDetailsPage">
-            <v-text-field density="compact" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" v-model="actvFeedSearch" variant="solo-filled" >
+            <v-text-field class="search" density="compact" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" v-model="actvFeedSearch" variant="solo-filled">
                 <template v-slot:append-inner>
                     <v-icon icon="mdi-close" v-if="actvFeedSearch.length" @click="clearContent"></v-icon>
                 </template>
@@ -174,7 +174,6 @@ export default{
             count: 0,
             store,
             stageData: 0,
-            unsavedChanges: false,
             showChanges: false,
             showChanges: false,
             addNewPtEvent: false,
@@ -200,8 +199,6 @@ export default{
         clickRetsPoint()
     },
     mounted(){
-
-        console.log(document.querySelector(".rets-subtitle-text"))
         this.showChanges = true
         reactiveUtils.on(() => view.popup, "trigger-action",
             async (event) => {
@@ -228,15 +225,7 @@ export default{
     },
     methods:{
         retsSubtitleUpdate(a){
-            console.log(a)
-            store.checkDetailsForComplete()
-            // if(a.length >= 30){
-            //     console.log(a)
-            //     store.retsObj.attributes.RETS_NM = a.slice(0, 10)
-                
-            //     return
-            // }
-            
+            store.checkDetailsForComplete()    
         },
         clearContent(){
             this.actvFeedSearch = ""
@@ -264,14 +253,7 @@ export default{
         alert(s){
             window.alert(s)
         },
-        proceed(){
-            this.unsavedChanges = false
-            this.double({attributes: this.stageData.attributes, geometry: [this.stageData.geometry[0], this.stageData.geometry[1]]}, 1)
-        },
-        cancelReturn(){
-            this.unsavedChanges = false
-            //do nothing
-        },
+
         checkChanges(){
             const beforeAtt = JSON.parse(store.currentInfo)
             const afterAtt = JSON.parse(JSON.stringify(store.retsObj))
@@ -281,7 +263,7 @@ export default{
                     continue
                 }
                 if(value !== afterAtt.attributes[key]){
-                    this.unsavedChanges = true
+                    store.unsavedChanges = true
                     issue++
                     return
                 }
@@ -302,7 +284,6 @@ export default{
             store.isCard = false
             store.isDetailsPage = true
             store.activityBanner = `${road.attributes.RETS_ID}`
-            highlightRETSPoint(road.attributes)
             //outlineFeedCards()
             this.zoomToRetsPt(road)
             toggleRelatedRets(JSON.stringify(road))
@@ -338,8 +319,8 @@ export default{
                             feat.attributes.EDIT_DT = store.returnDateFormat(feat.attributes.EDIT_DT)
                             feat.attributes.RTE_NM = store.retsObj.attributes.RTE_NM
                             feat.attributes.DFO = store.retsObj.attributes.DFO ? store.retsObj.attributes.DFO : null
+                            feat.attributes.NO_RTE = store.retsObj.attributes.NO_RTE
                             const addNewRetsPt = {attributes:feat.attributes, geometry:[feat.geometry.x,feat.geometry.y]}
-                            store.addRetsID(addNewRetsPt)
                             this.double(addNewRetsPt)
                         }
                     )
@@ -406,6 +387,7 @@ export default{
 
         updateSelection(e){
             if(!e){
+                store.activityBanner = "Activity Feed"
                 store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
                 store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                 outlineFeedCards(store.roadHighlightObj)
@@ -527,12 +509,11 @@ export default{
         flex-direction: column;
         gap: 1rem;
         align-items: flex-start;
-
-        width: 509px;
-        height: 100%;
+        width: 450px;
+        height: 100vh;
         background-color: black;
         position: absolute;
-        left: 52px;
+        left: 33px;
         padding: 0px;
         font-size: 7px;
     }
@@ -559,6 +540,7 @@ export default{
         color: #4472C4 !important;
         font-style: normal !important;
         padding-left: 10px;
+        font-weight: bold;
     }
     #addbtn{
         position: relative;
@@ -586,9 +568,9 @@ export default{
 
     #feed-banner{
         font-size: 20px;
-        height: 56px;
+        height: 39px;
         position: absolute;
-        top: 50px;
+        top: 37px;
         width:100%;
     }
 
@@ -605,28 +587,26 @@ export default{
     }
 
     .rets-card-row.show{
-        transform: translateX(0);
+        transform: translateX(50);
         opacity: 1;
     }
 
     .card-feed-div{
-        top: 2rem;
+        top: 2.3rem;
         width: 100%;
         display: flex;
         flex-direction: column;
         overflow-y: auto;
         overflow-x: hidden;
         position: relative;
-        /* background: red; */
-        /* min-height: 28vh; */
-        max-height: 83vh;
+        max-height: 87vh;
         padding-top: 10px;
     }
 
     #container-header{
         position: relative;
-        top: 9px;
-        font-size: 23px;
+        top: 6px;
+        font-size: 17px;
         font-weight: bold; 
         padding-left: 20px;
     }
@@ -637,7 +617,7 @@ export default{
     }
     .banner-btn{
         position: relative;
-        bottom: 24px;
+        bottom: 25px;
         float: right;
         margin: 0% !important;
         padding: 0% !important;
@@ -645,35 +625,36 @@ export default{
     }
     .banner-txt{
         position: relative;
-        bottom: calc(6% - -3px);
+        bottom: 3px;
         font-weight: bold;
-        font-size: 23px;
+        font-size: 20px;
         left: 5px;
         display: flex;
         flex-direction: row;
     }
     .retsSubtitleTxt{
         position: relative;
-        font-size: 23px;
+        font-size: 20px;
         left: 5px;
     }
     .add-new-btn{
         position: absolute;
         right: 1rem;
-        top: 11px;
+        top: 7px;
         text-align: center;
     }
     .text-btn{
         position: relative;
         padding-top: .2rem;
         right: .3rem;
+        font-size: 13px;
     }
 
     #search-feed{
         position: relative;
-        height: 54px;
+        height: 28px !important;
         width: 100%;
-        top: 58px;
+        top: 36px;
         border-radius: 0px;
         padding: 0px 10px 10px 14px;
     }
@@ -714,15 +695,10 @@ export default{
 
     .switch{
         position: relative;
-        bottom: 32px;
+        bottom: 35px;
         right: 45px;
         float: right;
         font-size: 10px;
-    }
-
-    :deep(.v-switch--inset .v-switch__track){
-        height: 20px !important;
-        width: 45px !important;
     }
 
     #subtitleCard{

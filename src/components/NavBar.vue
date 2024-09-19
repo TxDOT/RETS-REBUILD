@@ -1,35 +1,32 @@
-<template style="overflow-y:hidden;">
-    <v-navigation-drawer width="200" height="100" permanent color="black">
-        <v-list height="100%" id="icons-top" class="iconList">
+<template>
+    <v-navigation-drawer permanent color="black" rail width="10">
+        <v-list height="95%" id="icons-top" class="iconList">
             <v-list-item class="iconList-item"  id="popoutitems" v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" active-class="btn-left-brder" :active="store.toggleFeed === tool.value" :disabled="tool.disabled">    
                 <v-tooltip location="right bottom" :text=tool.name >
                     <template v-slot:activator="{ props}">
-                        <v-icon id="topIcon" size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
+                        <v-icon id="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
                     </template>
                 </v-tooltip>
                 
             </v-list-item>
         </v-list>
         <v-list id="icons-bottom" class="iconList">
-            <v-list-item id="popoutitems" class="iconList-item" v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" :active-class="tool.name !== 'Jump To' && tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
-                <template v-if="tool.name != 'Basemaps' && tool.name != 'Jump To'">
+            <v-list-item id="popoutitems" class="iconList-item" v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" :active="tool.isActive" :active-class="tool.name !== 'Jump To' || tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
+                <template v-if="tool.name !== 'Basemaps' || tool.name !== 'Jump To'">
                     <v-tooltip location="right" :text="tool.name">
-                            <template v-if="tool.name != 'Multi-Select'" v-slot:activator="{ props }">
-                                    <v-icon id="topIcon" size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
+                            <template v-if="tool.name !== 'Multi-Select'" v-slot:activator="{ props }">
+                                    <v-icon id="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
                             </template>
                             <template v-if="tool.name === 'Multi-Select'"  v-slot:activator="{ props }">
-                                <v-badge location="top end" color="#4472C4" :content="store.roadHighlightObj.size" id="badge">
-                                    <v-icon id="topIcon" size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
-
+                                <v-badge location="top end" color="#4472C4" :content="store.roadHighlightObj.size" id="badge" offset-y="-8">
+                                    <v-icon id="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
                                 </v-badge>
-
-
                             </template>
                         
                     </v-tooltip>
                 </template>
                 <template v-else>
-                        <v-icon id="topIcon" size="30" :icon="tool.icon" :color="tool.color" :name="tool.name" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
+                        <v-icon id="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
                 </template>
             </v-list-item>
         </v-list>
@@ -116,7 +113,7 @@
             </v-btn-group>
             <v-btn-group id = "savebutton" density="compact">
                 <v-btn size="small" class="secondary-button"  @click="handleSettingsTool();handleactiveclass()">CANCEL</v-btn>
-               
+
                 <v-btn size="small" class="main-button-style" @click="handleSettingsTool();handleactiveclass()">SAVE</v-btn>
             
                 
@@ -199,10 +196,7 @@
                                 value: 1,
                                 action: ()=>{
                                     //open feed
-                                    if (!store.isSaveBtnDisable){
-                                        store.cancelpopup = true
-                                        return
-                                    }
+
                                     store.isCard = true
                                     store.isDetailsPage = false
                                     this.toggle = 1
@@ -229,8 +223,15 @@
                             ],
  
                 retsToolsBottom: [
-                               {title:"Select", icon: 'mdi-select-multiple', color: "#D9D9D9", name: "Multi-Select", action: () =>{
+                               {title:"Select", icon: 'mdi-select-multiple', color: "#D9D9D9", name: "Multi-Select", isActive: false,
+                               action: () =>{
+                                store.isSelectEnabled = !store.isSelectEnabled
+                                console.log(this.retsToolsBottom[0].isActive)
+                                this.retsToolsBottom[0].isActive = !this.retsToolsBottom[0].isActive
                                 this.handleSelectTool();
+                               },
+                               setActive: () => {
+                                return true
                                },
                                hover:(i) => 
                                     {
@@ -238,8 +239,9 @@
                                         this.jumptocard= false;
                                     }
                                 },
-                               {title:"JumpTo", icon: 'mdi-run', color: "#D9D9D9", name: "Jump To", action: () =>{
-    
+                               {title:"JumpTo", icon: 'mdi-run', color: "#D9D9D9", name: "Jump To", isActive: false,
+                               action: () =>{
+                                return
                                },
                                hover:(i) => 
                                     { 
@@ -250,18 +252,20 @@
                                             }
                                     }
                                 },
-                               {title:"Legend", icon: 'mdi-format-list-bulleted-type', color: "white", name: "Legend", action: () =>{
+                               {title:"Legend", icon: 'mdi-format-list-bulleted-type', color: "white", name: "Legend", 
+                               action: () =>{
                                 this.handleLegendTool();
-
+                                this.retsToolsBottom[2].isActive = !this.retsToolsBottom[2].isActive
                                },
-                               hover:(i) => 
+                               hover:() => 
                                     {
                                         this.basemapcard = false;
                                         this.jumptocard= false;
                                     }
                                 },
-                               {title:"Basemap", icon: 'mdi-map-legend', color: "#D9D9D9", name: "Basemaps", action: () => {
-                            
+                               {title:"Basemap", icon: 'mdi-map-legend', color: "#D9D9D9", name: "Basemaps", isActive: false,
+                               action: () => {
+                                return
                                },
                                 hover:(i) => { 
                                     if (i === "Basemap")
@@ -271,9 +275,10 @@
                                         }
                                     }
                                 },
-                               {title:"Test", icon: 'mdi-cog', color: "#D9D9D9", name: "Settings", action: () =>{
+                               {title:"Test", icon: 'mdi-cog', color: "#D9D9D9", name: "Settings",
+                               action: () =>{
                                 this.handleSettingsTool();
-                                
+                                this.retsToolsBottom[3].isActive = !this.retsToolsBottom[3].isActive
                                },
                                hover:(i) => 
                                     {
@@ -319,13 +324,6 @@
                 
                 methods: {
                     shiftDiv(){
-                        // console.log(this.isActOpen)
-                        // this.shiftmap = this.isActOpen
-                        //const elements = document.getElementsByClassName('esri-view-root');
-                        
-
-
-                        //elements[0].classList.toggle('esri-view-surface');
                         const viewSurface = document.querySelector('.esri-view');
                         viewSurface.classList.toggle('translateX-500px');
                         const settingspopup = document.querySelector('#containersettings')
@@ -414,14 +412,13 @@
                        
                     },
                     handleSelectTool() { 
-                        if (store.isSelectEnabled === false ){
-                            store.isSelectEnabled = !store.isSelectEnabled
+                        if (store.isSelectEnabled === true ){
                             this.selectfunction = selecttool(store.isSelectEnabled, sketchWidgetselect, graphics);
+                            console.log(this.selectfunction)
                         }
                         else{
                             sketchWidgetselect.cancel()
-                            this.selectfunction.remove()
-                            store.isSelectEnabled = !store.isSelectEnabled
+                            //this.selectfunction.remove()
                         }
 
                         
@@ -512,21 +509,20 @@
 
 <style>
      .btn-left-brder{
-        border-left: 8px solid #4472C4 !important;
+        border-left: 6px solid #4472C4 !important;
     }
     .btn-left-brder i {
         position: absolute;
         top: 35%;
-        left: 24% !important;
+        left: 28% !important;
         transform: translate(-25%, -25%);
     }
 
     #topIcon{
         position: absolute;
         top: 35%;
-        left: 35%;
+        left: 40%;
         transform: translate(-25%, -25%);
-        width: fit-content;
     }
     
     .v-list-item:hover{
@@ -534,32 +530,30 @@
         background-color: rgba(128,128,128,.3);
     }
     #popoutitems{
-       height: 56px;
-       width: 56px;
-       bottom: 6px;
+       bottom: 0px;
+       margin-bottom: 0px !important;
+       min-height: 39px !important;
     }
     #iconcontent  {
         position: absolute;
-        width: 30px !important;
+        width: 320px !important;
         top: 9px;
-        left: 29%;
     }
     #iconcontent i {
         right: 5px;
     }
     #icons-bottom{
         position: relative;
-        bottom: 18rem;
-        left: 10%;
+        bottom: 170px;
+        left: 12%;
     }
     #icons-top{
-        right: 10%;
-        top: -8px;
+        bottom: 10px;
     }
     .v-navigation-drawer{
         overflow-y: hidden !important;
         height: 100% !important;
-        width: 56px !important;
+        width: 38px !important;
         color: black;
         border: 0;
     }
@@ -592,7 +586,6 @@
         left: 58px;
         z-index: 9999;
         border-radius: 0px;
-
     }
     #jumptofont{
         font-size: 13px;
@@ -654,8 +647,6 @@
         font-size: 14px;
         left: 1rem;
         bottom: -2px;
-
-        
     }
     #notificationsitems{
         position: relative;
@@ -710,7 +701,6 @@
         position: absolute;
         bottom: 10px;
         width: 25rem;
-        
     }
     #logoutbutton{
         position: absolute;
@@ -731,20 +721,20 @@
     }
     .iconList{
         position: relative;
-        width: 58px ;
-        left:0px !important;
+        width: 40px;
+        left: 0px !important;
     }
     .iconList-item{
         position: relative;
         right: 5%;
-        width: 100%;
+        width: 39px;
+        margin: 0px !important;
     }
 
     .esri-view {
-        width: calc(100% - 555px) !important;
-        transform: translate(555px);
-        transition: transform 0.1s ease;
-        left: 0px;
+        width: calc(100% - 484px) !important;
+        transform: translate(484px);
+        transition: transform 0.3s ease;
     }
 
     .translateX-500px {
@@ -755,15 +745,10 @@
     .translatesettings{
         transform: translate(-200px) 
     }
-    #badge{
+    #badge {
         position: absolute;
         top: 20px;
-        left: 23px;
+        left: 20x;
     }
-
-
  
-
-
-      
 </style>

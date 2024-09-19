@@ -29,7 +29,7 @@ export async function updateRETSPT(retsObj){
     enable.attributes.NO_RTE = enable.attributes.NO_RTE === true ? 1 : 0
 
     if(enable.attributes.RELATED_RETS){
-        enable.attributes.RELATED_RETS = enable.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID).toString()
+        enable.attributes.RELATED_RETS = enable.attributes.RELATED_RETS.map(x => x.fullData ? x.fullData.RETS_ID : x).toString()
     }
     //enable.attributes.DFO = Number(DFO)
     retsObj.attributes.flagColor.FLAG === "" ? null : postFlagColor(retsObj)
@@ -50,7 +50,6 @@ export async function updateRETSPT(retsObj){
 
     let esriUpdateGraphic = createGraphic(enable)
     esriUpdateGraphic.geometry = createGeo
-    console.log(esriUpdateGraphic)
 
     try{
         await retsLayer.applyEdits({
@@ -258,7 +257,6 @@ export async function sendChatHistory(chat, type){
 export function postFlagColor(rets){
     //if OBJECTID is blank, would mean its a new flag insert
     const flagGraphic = createGraphic(rets.attributes.flagColor)
-    console.log(rets)
     if(rets.attributes.flagColor.OBJECTID === ''){
         flagRetsColor.applyEdits({
             addFeatures: [flagGraphic]

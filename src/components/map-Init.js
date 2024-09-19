@@ -19,11 +19,9 @@ import TileInfo from "@arcgis/core/layers/support/TileInfo.js";
 import Legend from "@arcgis/core/widgets/Legend";
 import LegendViewModel from "@arcgis/core/widgets/Legend/LegendViewModel";
 import Graphic from "@arcgis/core/Graphic";
-import { outlineFeedCards, removeOutline, home, scrollToTopOfFeed, highlightRETSPoint, removeHighlight} from "./utility.js";
+import { outlineFeedCards, removeOutline, home, scrollToTopOfFeed} from "./utility.js";
 import Extent from "@arcgis/core/geometry/Extent.js";
 import {store} from './store.js'
-import esriConfig from "@arcgis/core/config.js";
-import Point from '@arcgis/core/geometry/Point';
 
 
 
@@ -477,90 +475,7 @@ export const searchWidget = new Search({
       exactMatch: false,
       outFields: ["*"],
       suggestionTemplate: "RETS: {RETS_ID} (MO Number: {ACTV_NBR})", 
-      getSuggestions: async function (searchValue) {
-        const query = {
-          where: `ACTV_NBR IS NOT NULL`,
-          outFields: ["*"],
-          returnGeometry: false,
-          orderByFields: ["ACTV_NBR"]
-        };
-    
-        try {
-          const results = await retsLayer.queryFeatures(query);
-          const features = results.features;
-    
-          const filteredFeatures = features.filter(feature => {
-            const actvNbr = feature.attributes.ACTV_NBR;
-            return actvNbr &&
-                   String(actvNbr).toLowerCase().includes(searchValue.suggestTerm); 
-          });
-    
-          const limitedFeatures = filteredFeatures.slice(0, 3);
-          featureSuggestions = limitedFeatures
-          // Process features into suggestions
-          return limitedFeatures.map(feature => ({
-            key: `${feature.attributes.RETS_ID}`,
-            text: `RETS: ${feature.attributes.RETS_ID} (MO: ${feature.attributes.ACTV_NBR})`, 
-            sourceIndex: 5 
-
-          }));
-        } catch (error) {
-          console.error("Error fetching suggestions:", error);
-          return [];
-        }
-      },
-    
-      getResults: async function (suggestion) {
-
-    const retsId = suggestion.suggestResult.key;
-
-    const query = {
-        where: `RETS_ID = ${retsId}`, 
-        outFields: ["*"],
-        returnGeometry: true 
-    };
-
-    try {
-        const results = await retsLayer.queryFeatures(query);
-        const feature = results.features[0]; 
-       
-        if (feature) {
-            const geometry = feature.geometry
-            let point = geometry
-            view.goTo({
-              target: point,
-              zoom: 16,
-            })
-            highlightLayer.add(new Graphic({
-              geometry: feature.geometry,
-              symbol: pointsymbol
-            }));
-            const tempArray = [feature];
-            removeOutline();
-            outlineFeedCards(tempArray);
-            
-            const retsidnum = String(feature.attributes.OBJECTID).concat('-', feature.attributes.RETS_ID);
-            setTimeout(() => {
-              const element = document.getElementById(retsidnum);
-
-              if (element) {
-                element.classList.add("highlight-card");
-            } else {
-                console.log(`error`);
-            }
-            }, 1000);
-           
-        } 
-        
-    } catch (error) {
-        console.error("Error querying feature:", error);
-    }
-
-        
-    }
     },
-    
-    
   ]
 
 });

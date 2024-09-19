@@ -1,6 +1,6 @@
 import OAuthInfo from "@arcgis/core/identity/OAuthInfo.js";
 import esriId from "@arcgis/core/identity/IdentityManager.js";
-import { retsLayer, view, retsUserRole, retsRole} from './map-Init.js'
+import { view, retsUserRole, retsLayer} from './map-Init.js'
 import {getDomainValues, getDistinctAttributeValues, getUniqueQueryValues, queryFlags, getRetsLayerView, getHistoryView, getTxDotRdWayLayerView, home} from './utility.js'
 import { appConstants } from "../common/constant.js";
 import router from '../router/index.js'
@@ -33,15 +33,8 @@ async function signIn(){
   await getUniqueQueryValues(retsUserRole, appConstants.userRoles)
   const userId = await getUserId()
   await queryFlags(userId)
-  await setDefExpRets(userId)
-  if (store.savedFilter){ //update the feed 
-    store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
-
-  }
-  else{
-    store.getRetsLayer(userId, appConstants['defaultQuery'](userId), "retsLayer", "EDIT_DT DESC, PRIO")
-
-  }
+  setDefExpRets(userId)
+  store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
   appConstants.userQueryField = appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]
   store.USER = [appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value)]
   //needs to be worked on//
@@ -73,50 +66,15 @@ function alreadySignedIn(){
 }
 
 
-export async function getFields (userId){ //function to extract the last filter (if available) from the FILTERS field
-  
-  const query = retsRole.createQuery();
-    query.where = `USERNAME = '${userId}'`;
-
-  query.returnGeometry = false; 
-  query.outFields = ['FILTERS'];  
-
-  return retsRole.queryFeatures(query)
-    .then((result) => {
-      if (result.features.length > 0) {
-
-        const filtersString = result.features[0].attributes.FILTERS;
-
-      const filtersArray = filtersString.split(',');
-      store.lastQuery = filtersArray[filtersArray.length - 1].trim();  
-
-      return store.lastQuery;
-      } else {
-        console.log('No FILTERS found');
-        return false;  
-      }
-    })
-    .catch((error) => {
-      console.error('Error querying the feature layer:', error);
-      return false;
-    });
-}
-const setDefExpRets = async (userId) => {
+const setDefExpRets = (userId) => {
   if(appConstants.defaultUserValue.length) return
   appConstants.defaultUserValue.push({"name": "Username", "value": `${userId}`})
-  store.savedFilter = await getFields(userId)
-
-  //retsLayer.definitionExpression = store.savedFilter = appConstants['defaultQuery'](userId)
-  if (store.savedFilter) {
-    retsLayer.definitionExpression = store.savedFilter;
-  } else {
-    retsLayer.definitionExpression = appConstants['defaultQuery'](userId);
-  }
+  retsLayer.definitionExpression = store.savedFilter = appConstants['defaultQuery'](userId)
   return
 }
 
 export async function getUserId(){
-  console.warn(`VERSION: 2.0.15 -- dev status: ${store.devStatus}`)
+  console.warn(`VERSION: 2.0.19 -- dev status: ${store.devStatus}`)
   const user = await esriId.getCredential(`${authen.portalUrl}/sharing/rest`,{
     oAuthPopupConfirmation: false,
   })
