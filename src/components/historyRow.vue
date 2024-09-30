@@ -10,16 +10,16 @@
             </v-text-field>
         </div>
         <div style="position: relative; bottom: 2rem; left: 43px;">
-                <v-btn variant="plain" density="compact" style="font-size: 10px; float: right; position: relative; top:7px; margin:0%; padding: 0%; padding:0px 10px 0px 10px; margin-right: 10px; margin-bottom: 0px" @click="queryAttachments" :disabled="store.numAttachments === 0" v-model="isAttachedActive" :active="isAttachedActive" active-class="active-button">
-                    <template v-slot:prepend>
-                        <v-icon icon="mdi-filter"></v-icon>
-                    </template>
-                    Has attachments
-                </v-btn>
-                <div class="filter-notification-bubble" v-if="store.numAttachments > 0">
-                    <p style="font-size: 11px; position: relative; left: 27%; bottom: 2px;"><b> {{ store.numAttachments }}</b></p>
-                </div>
+            <v-btn variant="plain" density="compact" style="font-size: 10px; float: right; position: relative; top:2px; margin:0%; padding: 0%; padding:0px 10px 0px 10px; margin-right: 10px; margin-bottom: 0px" @click="queryAttachments" :disabled="store.numAttachments === 0" v-model="isAttachedActive" :active="isAttachedActive" active-class="active-button">
+                <template v-slot:prepend>
+                    <v-icon icon="mdi-filter"></v-icon>
+                </template>
+                Has attachments
+            </v-btn>
+            <div class="filter-notification-bubble" v-if="store.numAttachments > 0">
+                <p style="font-size: 11px; position: relative; left: 27%; bottom: 2px;"><b> {{ store.numAttachments }}</b></p>
             </div>
+        </div>
         <div id="displayHistory">
                 <div v-for="(note, i) in histNotes" :key="note.OBJECTID" track-by="OBJECTID" v-if="!isHistNotesEmpty">
                     <v-banner :id="`${note.OBJECTID}Expand`" v-model="note[i]" density="compact" style="padding: 0px; padding-left: 5px; border-left: 3px solid #4472C4 !important;">
@@ -291,7 +291,7 @@
     }
     #search{
         position: relative;
-        bottom: 1.5rem;
+        bottom: 1.7rem;
         right: 6px;
         width: 69%;
     }

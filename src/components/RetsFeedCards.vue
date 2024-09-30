@@ -15,15 +15,16 @@
             </div>
         </div>
 
-        <v-banner id="feed-banner" lines="one" density="default" min-width="0%">
-            <div style="width: 100%;">
-                
-                <div class="banner-txt">
-                    <p>{{store.activityBanner}}</p>
-                    <p id="headerCount" @mouseover="countPopupStatus = true; countHeaderColor = 'lightgray'" @mouseout="countPopupStatus = false; countHeaderColor = 'gray'">
-                        &nbsp;&nbsp;&nbsp; 
-                        <span :style="{ color: countHeaderColor }">[{{ store.updateRetsSearch.length }}]</span>
-                    </p>
+        <div class="feed-banner">
+            <div style="position: relative; display: flex; flex-direction: row; width: 100% !important; max-height: 100%; padding-left: 10px; padding-right: 10px;">
+                <div class="banner-txt" style="display: flex; flex-direction: row;">
+                    <div style="position: relative; height: 100%; top: 4px; min-width: fit-content !important;">
+                        {{store.activityBanner}}
+                    </div>
+                    <div style="width: fit-content; position: relative; top: 2px; height: fit-content; max-width: 100px; min-width: 33px;">
+                        <span id="headerCount" :style="{ color: countHeaderColor }" @mouseover="countPopupStatus = true; countHeaderColor = 'lightgray'" @mouseout="countPopupStatus = false; countHeaderColor = 'gray'">[{{ store.updateRetsSearch.length }}]</span>
+                    </div>
+
                     <div class="retsSubtitle">
                         <div id="retSubText">
                             <v-text-field variant="plain" v-if="store.isDetailsPage" :disabled="isSubtitle" placeholder="Add a subtitle" id="subtitleCard" :class="store.retsObj.attributes.RETS_NM?.length ? 'rets-subtitle-text-active' : 'rets-subtitle-text'" v-model="store.retsObj.attributes.RETS_NM" @update:modelValue="retsSubtitleUpdate($event)" maxlength="34"></v-text-field>
@@ -31,26 +32,27 @@
                     </div>
                 </div>
 
-                <div v-if="!store.isDetailsPage" style="position: relative; top: .1rem">
-                    <div>
-                        <v-btn class="banner-btn" @click="store.isfilter = !store.isfilter" density="compact" variant="flat" flat min-width="30">
-                            <v-badge color="#4472C4" :content="store.filterTotal">
-                                <v-icon size="x-large">mdi-filter</v-icon>
+                <div v-if="!store.isDetailsPage" style="position: relative; top: 4px; display: flex; flex-direction: row; width: 100%; gap: 0px;">
+                    <div style="flex: auto;">
+                        <v-tooltip location="bottom">
+                            <template v-slot:activator="{props}">
+                                <v-switch style="position: relative; bottom: 4px;" v-bind="props" flat v-model="store.isShowSelected" density="compact" @update:modelValue="updateSelection(store.isShowSelected)" color="primary" :disabled="!store.roadHighlightObj.size"></v-switch>
+                            </template>
+                            <span>Show Selected Cards</span>
+                        </v-tooltip>
+                    </div>
+
+                    <div style="flex: auto;">
+                        <v-btn class="banner-btn" @click="store.isfilter = !store.isfilter" density="compact" variant="flat" flat size="20">
+                            <v-badge color="#4472C4" :content="store.filterTotal" location="top end"> 
+                                <v-icon size="20" style="position: relative; right: 4px;" >mdi-filter</v-icon>
                             </v-badge>
                         </v-btn>
                     </div>
-     
-                    <v-tooltip location="top">
-                        <template v-slot:activator="{props}">
-                            <div class="switch" v-bind="props">
-                                <v-switch flat v-model="store.isShowSelected" density="compact"  @update:modelValue="updateSelection(store.isShowSelected)" color="primary" :disabled="!store.roadHighlightObj.size"></v-switch>
-                            </div>
-                        </template>
-                        <span>Show Selected Cards</span>
-                    </v-tooltip>
+                    
                 </div>
             </div>
-        </v-banner>
+        </div>
 
         <div id="search-feed" v-if="!store.isDetailsPage">
             <v-text-field class="search" density="compact" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" v-model="actvFeedSearch" variant="solo-filled">
@@ -96,24 +98,23 @@
     <v-card id="countPopup" v-if="countPopupStatus">
         <span>
             &nbsp;&nbsp;
-            <span :style="{ color: notStartedColor, width: '3ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsNotStartedCount }}</span>
+            <span :style="{ color: notStartedColor, width: '5ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsNotStartedCount }}</span>
             <span :style="{ color: 'black'}">&nbsp;&nbsp; Not Started</span><br>
             
             &nbsp;&nbsp;
-            <span :style="{ color: inProgressColor, width: '3ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsInProgressCount }}</span>
+            <span :style="{ color: inProgressColor, width: '5ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsInProgressCount }}</span>
             <span :style="{ color: 'black' }">&nbsp;&nbsp; In Progress</span><br>
             
             &nbsp;&nbsp;
-            <span :style="{ color: completeColor, width: '3ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsCompleteCount }}</span>
+            <span :style="{ color: completeColor, width: '5ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsCompleteCount }}</span>
             <span :style="{ color: 'black' }">&nbsp;&nbsp; Complete</span><br>
             
             &nbsp;&nbsp;
-            <span :style="{ color: onHoldColor, width: '3ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsOnHoldCount }}</span>
+            <span :style="{ color: onHoldColor, width: '5ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsOnHoldCount }}</span>
             <span :style="{ color: 'black' }">&nbsp;&nbsp; On Hold</span><br>
 
             
         </span>
-       
     </v-card>
         <!-- </div> -->
 </template>
@@ -510,7 +511,7 @@ export default{
         height: 100vh;
         background-color: black;
         position: absolute;
-        left: 33px;
+        left: 38px;
         padding: 0px;
         font-size: 7px;
     }
@@ -549,10 +550,9 @@ export default{
         right: 15px;
         padding: 0px;
         margin-left: 10px;
-        bottom: .3rem;
         max-width: 310px;
         min-width: 20px;
-        height:0px;
+        bottom: 12px
     }
     .attachCard{
         position: relative; 
@@ -563,12 +563,14 @@ export default{
         width: 25% !important;
     }
 
-    #feed-banner{
+    .feed-banner{
         font-size: 20px;
-        height: 39px;
-        position: absolute;
-        top: 37px;
-        width:100%;
+        min-height: 39px !important;
+        max-height: 39px !important;
+        position: relative;
+        bottom: 9px;
+        width: 100%;
+        background-color: #212121;
     }
 
     .v-icon{
@@ -589,21 +591,20 @@ export default{
     }
 
     .card-feed-div{
-        top: 2.3rem;
+        bottom: 24px;
         width: 100%;
         display: flex;
         flex-direction: column;
         overflow-y: auto;
         overflow-x: hidden;
         position: relative;
-        max-height: 87vh;
-        padding-top: 10px;
+        padding-top: 5px !important;
     }
 
     #container-header{
         position: relative;
-        top: 6px;
-        font-size: 17px;
+        top: 4px;
+        font-size: 20px;
         font-weight: bold; 
         padding-left: 20px;
     }
@@ -611,28 +612,22 @@ export default{
         position: relative;
         top: 0px;
         width: 100%;
+        font-weight: normal !important;
     }
     .banner-btn{
         position: relative;
-        bottom: 25px;
-        float: right;
-        margin: 0% !important;
-        padding: 0% !important;
-        right: 15px;
     }
     .banner-txt{
         position: relative;
-        bottom: 3px;
-        font-weight: bold;
+        bottom: 0px;
+        font-weight: normal;
         font-size: 20px;
-        left: 5px;
-        display: flex;
-        flex-direction: row;
+        left: 0px;
+        width: 100%;
     }
     .retsSubtitleTxt{
         position: relative;
-        font-size: 20px;
-        left: 5px;
+        font-size: 20px; 
     }
     .add-new-btn{
         position: absolute;
@@ -651,9 +646,9 @@ export default{
         position: relative;
         height: 28px !important;
         width: 100%;
-        top: 36px;
+        bottom: 23px;
         border-radius: 0px;
-        padding: 0px 10px 10px 14px;
+        padding: 0px 0px 0px 0px;
     }
 
     .route-card{
@@ -689,13 +684,15 @@ export default{
         left: 2.5rem;
         border-radius: 50%;
     }
-
+    
     .switch{
         position: relative;
-        bottom: 35px;
-        right: 45px;
-        float: right;
-        font-size: 10px;
+        bottom: 0px;
+        right: 0px;
+        font-size: 7px;
+        height: 100%;
+        min-width: 50% !important;
+        border: 2px solid hotpink;
     }
 
     #subtitleCard{
@@ -705,9 +702,12 @@ export default{
         max-width: 34ch;
     }
     #headerCount{
-        font-size:15px;
-        color: lightgray;
+        position: relative;
+        flex: auto;
+        padding-left: 5px;
+        font-size: 15px;
         cursor: default;
+        height: 20px;
     }
     #countPopup{
         position: relative;
@@ -718,4 +718,12 @@ export default{
         background-color: lightgray;
         opacity: .8;
     }
+    :deep(.v-switch__thumb){
+        height: 16px !important;
+        width: 16px !important;
+    }
+    :deep(.v-switch__track){
+        height: 10px !important;
+    }
+
 </style>

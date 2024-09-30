@@ -220,7 +220,7 @@ export function outlineFeedCards(cards){
     //store.roadHighlightObj.add(objectcomparison)
     //zoom to card in feed
             
-    findCard.scrollIntoView({behavior: "smooth", block: "start", inline: "center"})
+    findCard.scrollIntoView({behavior: "smooth", block: "start", inline: "end"})
     // const zoomToCard = document.createElement('a')
     // zoomToCard.href = `#${objectcomparison}`
     // zoomToCard.click(preventHashUrl())

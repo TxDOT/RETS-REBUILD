@@ -1,49 +1,52 @@
 <template>
-    <div>
-        <v-card id="filterFeed" >
-            <div class="cardDiv">
-                <v-card-title style="position: relative; bottom:.5rem;">Filter Activity Feed</v-card-title>
-                <hr class="popup-title-border" style="position: relative; bottom: 15px"></hr>
-                <v-row no-gutters class="adjustRow">
-                    <v-select :items="filterSort" item-title="title" return-object density="compact" label="Sort" variant="underlined" v-model="store.CREATE_DT"></v-select>
-                </v-row>
-              
-                <v-row no-gutters dense class="adjustRow">
+        <div id="filterFeed">
+        <v-card>
+        <div style="margin: 10px;">
+            <div style="position: relative; bottom:0rem; font-weight: normal; font-size: 20px; flex: auto;">Filter Activity Feed</div>
+            <hr></hr>
+            <div class="container">
+                <div no-gutters class="item">
+                    <v-select :items="filterSort" item-title="title" return-object density="compact" label="Sort" variant="underlined" v-model="store.CREATE_DT" style="">
+                    </v-select>
+                </div>
+
+                <div no-gutters dense class="item">
                     <v-select :items="filterJobType" item-title="name" item-value="value" return-object multiple chips closable-chips density="compact" label="Job Type" variant="underlined" v-model="store.JOB_TYPE">
                     </v-select>
-                </v-row>
-            
-                <v-row no-gutters dense id="date" class="adjustRow"> 
+                </div>
+
+                <div no-gutters dense id="date" class="item"> 
                     <v-select label="Date" chips closable-chips variant="underlined" density="compact" v-model="store.EDIT_DT" hide-no-data @click="isDate = !isDate">
                         <template v-slot:chip="{item}">
                             <v-chip closable @click:close="closeDateChip()">{{ item.props.title}}</v-chip>
                         </template>
                     </v-select>
-                </v-row>
-                
-                <v-row no-gutters dense class="adjustRow">
-                        <v-select :items="filterStatus" item-title="name" item-value="value" label="Status" return-object chips closable-chips multiple variant="underlined" density="compact" v-model="store.STAT">
-                        </v-select>
-                </v-row>
-       
-                <v-row no-gutters dense class="adjustRow">
-                    <v-autocomplete :items="filterActivity" item-title="value" item-value="value" return-object multiple label="Activity" chips closable-chips variant="underlined" density="compact" v-model="store.ACTV" @update:modelValue="actvSearch = ''" :search="actvSearch" @update:search="this.actvSearch = $event" @update:menu="actvSearch = ''"></v-autocomplete>
-                </v-row>
-
-                <v-row no-gutters dense class="adjustRow"> 
-                    <v-autocomplete :items="filterDistrict" item-title="name" item-value="value" return-object multiple label="District" chips closable-chips variant="underlined" density="compact" v-model="store.DIST_NM" @update:modelValue="this.districtSearch = ''" :search="this.districtSearch" @update:search="this.districtSearch = $event" @update:menu="districtSearch = ''"></v-autocomplete>
-                </v-row>
-                <v-row no-gutters dense class="adjustRow">
-                    <v-autocomplete :items="filterCounty" item-title="name" item-value="value" return-object multiple label="County" chips closable-chips variant="underlined" density="compact" v-model="store.CNTY_NM" @update:modelValue="countySearch = ''" :search="countySearch" @update:search="countySearch = $event" @update:menu="countySearch = ''"></v-autocomplete>
-                </v-row>
-                <v-row no-gutters dense class="adjustRow"> 
-                    <v-autocomplete :items="filterUser" item-title="name" item-value="value" return-object label="Users" multiple chips closable-chips variant="underlined" density="compact" v-model="store.USER" :disabled="store.isAssignedTo" @update:modelValue="userSearch = ''" :search="userSearch" @update:search="userSearch = $event" @update:menu="userSearch = ''"></v-autocomplete>
-                </v-row>
-                <div style="position: relative; float: left; margin-left: 10px; font-size: 11px; display: flex; flex-wrap: wrap; bottom: 1rem;">
-                    <v-checkbox label="RETS Assigned to Me" density="compact" class="checkbox-size" v-model="store.isAssignedTo"></v-checkbox>
                 </div>
                 
-                <v-expansion-panels flat variant="accordion" disabled style="width: 96.5%; left: 4px; bottom:5px;">
+                <div no-gutters dense class="item">
+                    <v-select :items="filterStatus" item-title="name" item-value="value" label="Status" return-object chips closable-chips multiple variant="underlined" density="compact" v-model="store.STAT"></v-select>
+                </div>
+
+                <div no-gutters dense class="item">
+                    <v-autocomplete :items="filterActivity" item-title="value" item-value="value" return-object multiple label="Activity" chips closable-chips variant="underlined" density="compact" v-model="store.ACTV" @update:modelValue="actvSearch = ''" :search="actvSearch" @update:search="this.actvSearch = $event" @update:menu="actvSearch = ''"></v-autocomplete>
+                </div>
+
+                <div no-gutters dense class="item"> 
+                    <v-autocomplete :items="filterDistrict" item-title="name" item-value="value" return-object multiple label="District" chips closable-chips variant="underlined" density="compact" v-model="store.DIST_NM" @update:modelValue="this.districtSearch = ''" :search="this.districtSearch" @update:search="this.districtSearch = $event" @update:menu="districtSearch = ''"></v-autocomplete>
+                </div>
+                <div no-gutters dense class="item">
+                    <v-autocomplete :items="filterCounty" item-title="name" item-value="value" return-object multiple label="County" chips closable-chips variant="underlined" density="compact" v-model="store.CNTY_NM" @update:modelValue="countySearch = ''" :search="countySearch" @update:search="countySearch = $event" @update:menu="countySearch = ''"></v-autocomplete>
+                </div>
+                <div no-gutters dense class="item"> 
+                    <v-autocomplete :items="filterUser" item-title="name" item-value="value" return-object label="Users" multiple chips closable-chips variant="underlined" density="compact" v-model="store.USER" :disabled="store.isAssignedTo" @update:modelValue="userSearch = ''" :search="userSearch" @update:search="userSearch = $event" @update:menu="userSearch = ''"></v-autocomplete>
+                </div>
+                <div style="position: relative; float: left; max-height: 40px !important; font-size: 11px; display: flex; flex-wrap: wrap; bottom: 0rem;" class="item">
+                    <v-checkbox label="RETS Assigned to Me" density="compact" class="checkbox-size" v-model="store.isAssignedTo"></v-checkbox>
+                </div>
+            </div>
+                
+            <div>
+                <v-expansion-panels flat variant="accordion" style="left: 0px; bottom: 0px; width: 100%; margin-bottom: 10px;" class="item" disabled>
                     <v-expansion-panel elevation="0" tile>
                         <v-expansion-panel-title expand-icon="mdi-menu-down" collapse-icon="mdi-menu-up" static> Custom SQL Query</v-expansion-panel-title>
                             <v-expansion-panel-text>
@@ -55,31 +58,35 @@
                             </v-expansion-panel-text>
                     </v-expansion-panel>
                 </v-expansion-panels>
+                <hr class="popup-title-border" style="position: relative; width: 100%;"></hr>
+                
+            </div>
+            
+        
+            <div style="position: relative; float: right;">
+                <v-btn-toggle id="trigger-buttons" density="compact">
+                    <v-btn @click="cancelFilter()" class="secondary-button" variant="plain" size="small">Cancel</v-btn>
+                    <v-btn @click="setFilterNumber()" class="main-button-style" variant="outlined" size="small">Save</v-btn>
+                </v-btn-toggle>
             </div>
             <div>
-                <hr class="popup-title-border" style="position: relative; bottom: 0px; margin-right: 20px;"></hr>
-                <div style="float: right; margin: 10px; position: relative;" >     
-                    <v-btn @click="cancelFilter()" class="secondary-button" variant="plain">Cancel</v-btn>
-                    <v-btn @click="setFilterNumber()" class="main-button-style" variant="outlined">Save</v-btn>
-                </div>
-                <div style="float: left; margin-left: 15px; position: relative; top: 9px;">
-                    <v-btn id="restoreDefault" variant="plain" @click="restoreDefault()">Restore Default</v-btn>
-                </div>
+                <v-btn id="restoreDefault" variant="plain" @click="restoreDefault()">Restore Default</v-btn>
             </div>
-        </v-card>
-    </div>
-    <div style="position: absolute; left: calc(50vh + 47vh + 74px); top: 21.5%;" v-if="isDate">
 
-            <v-date-picker class="date" multiple hide-header v-model="selectDate" @update:modelValue="selectDates()" tile width="300" :disabled="selectDate.length === 2"></v-date-picker>
-                
+        </div> 
+        </v-card>
+        </div>
         
-        <div style="position: relative; bottom: 3.3rem; ">
-            <v-checkbox label="Current Year" style="position: relative; z-index: 9999; float: right; margin-bottom: 15px; margin-right: 15px" v-model="currentYear"></v-checkbox>
+
+        <div style="position: absolute; left: calc(50vh + 47vh + 74px); top: 21.5%;" v-if="isDate">
+            <v-date-picker class="date" multiple hide-header v-model="selectDate" @update:modelValue="selectDates()" tile width="300" :disabled="selectDate.length === 2"></v-date-picker>
+            <div style="position: relative; bottom: 3.3rem; ">
+                <v-checkbox label="Current Year" style="position: relative; z-index: 9999; float: right; margin-bottom: 15px; margin-right: 15px" v-model="currentYear"></v-checkbox>
+            </div>
+            <div style="position: relative; bottom: 3.3rem; height: 50px; width: 98px;">
+                <v-btn style="float: left; margin-left: 10px; top: 12px;" @click="isDate = false" flat>CLOSE</v-btn>
+            </div>
         </div>
-        <div style="position: relative; bottom: 3.3rem; height: 50px; width: 98px;">
-            <v-btn style="float: left; margin-left: 10px; top: 12px;" @click="isDate = false" flat>CLOSE</v-btn>
-        </div>
-    </div>
 </template>
 
 <script>
@@ -249,25 +256,30 @@
 </script>
 
 <style scoped>
-    #filterFeed{
-        top: 57px;
-        width: 47vh;
-        left: calc(52px + 430px);
+    .container{
         display: flex;
         flex-direction: column;
+        margin-top: 10px;
+        gap: 0px;
+    }
+    .item{
+        flex: auto;
+    }
+    .v-input{
+        padding: 0px;
+    }
+    #filterFeed{
+        position: relative;
+        top: 39px;
+        width: 400px;
+        left: calc(59px + 429px);
         border-radius: 0%;
-        position: absolute;
-        min-height: 64vh;
-        max-height: 91vh;
+        min-height: 53%;
+        max-height: 80%;
         overflow-y: auto;
     }
 
-    .v-btn + .v-btn {
-        margin-left: 10px;
-    }
-
     #restoreDefault{
-        float: left;
         font-size: 8px;
         text-decoration: underline;
         color: #4472C4;
@@ -275,11 +287,22 @@
     }
     .adjustRow{
         position: relative !important;
-        margin-left: 15px !important; 
-        margin-right: 15px !important;
-        margin-bottom: 50px; 
     }
     .checkbox-size{
         font-size: 10px !important;
+    }
+
+    #trigger-buttons{
+        padding-top: .5rem;
+        position: relative;
+        margin-right: 0px;
+        left: 10px; 
+    }
+
+    :deep(.v-input__details){
+        min-height: 1px !important;
+    }
+    :deep(.v-messages){
+        min-height: 1px !important;
     }
 </style>

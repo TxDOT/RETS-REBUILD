@@ -18,11 +18,10 @@
                                     <v-icon id="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
                             </template>
                             <template v-if="tool.name === 'Multi-Select'"  v-slot:activator="{ props }">
-                                <v-badge location="top end" color="#4472C4" :content="store.roadHighlightObj.size" id="badge" offset-y="-8">
+                                <v-badge location="top" floating color="#4472C4" :content="store.roadHighlightObj.size" id="badge">
                                     <v-icon id="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
                                 </v-badge>
                             </template>
-                        
                     </v-tooltip>
                 </template>
                 <template v-else>
@@ -666,12 +665,7 @@
         left: 18px;
         height: 500px;
     }
-    #viewDiv{
-        top: 0px;
-        bottom: 0px;
-        left: 0px;
-        width: 100%;
-    }
+
     #darkmodeswitch{
         margin-left: 1px; 
         margin-bottom: -55px;

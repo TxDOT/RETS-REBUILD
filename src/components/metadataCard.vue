@@ -1,32 +1,32 @@
 <template>
-    <div style="font-size: 0px !important; margin-right: 10px; margin-left: 10px; display: flex; flex-direction: column; position: relative; height: 100%; bottom: 0px;"> 
-        <v-row style="position: relative; bottom: 0px;">
-            <v-autocomplete :items="userRole" item-title="name" item-value="value" label="Assigned To" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.ASSIGNED_TO" @update:modelValue="onDropDownChange(store.retsObj.attributes.ASSIGNED_TO)"></v-autocomplete>
-        </v-row>
-        <v-row style="position: relative; top: 2px;">
-            <v-autocomplete :items="userRole" item-title="name" item-value="value" label="GIS Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.GIS_ANALYST" @update:modelValue="onDropDownChange()" :rules="[emptyRow.required]"></v-autocomplete>
-        </v-row>
-        <v-row style="position: relative; top: 4px;">
-            <v-autocomplete :items="userRole" item-title="name" item-value="value" label="Asset Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.GRID_ANALYST" @update:modelValue="onDropDownChange(store.retsObj.attributes.GRID_ANALYST)" :rules="[emptyRow.required]"> </v-autocomplete>
-        </v-row>
-        <v-row>
-            <v-autocomplete multiple ref="dropdown" :items="['   ', ...userRole]" item-title="name" item-value="value" label="District Editor" flat variant="underlined" density="compact" rounded="0" :model-value="store.retsObj.attributes.DIST_ANALYST ? store.retsObj.attributes.DIST_ANALYST.split(' ') : null" @update:modelValue="value => { store.retsObj.attributes.DIST_ANALYST = value.join(' '); onDropDownChange(store.retsObj.attributes.DIST_ANALYST); }" :rules="[emptyRow.required]"></v-autocomplete>
-        </v-row>
-        <v-row style="position: relative; top: 8px;">
-            <v-autocomplete :items="districtMetadata" item-title="name" item-value="value" label="District" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.DIST_NM" @update:modelValue="onDropDownChange(store.retsObj.attributes.DIST_NM)" :rules="[emptyRow.required]"></v-autocomplete>
-        </v-row>
-        <v-row style="position: relative; top: 10px;">
-            <v-autocomplete :items="countyMetadata" item-title="name" item-value="value" label="County" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.CNTY_NM" @update:modelValue="onDropDownChange(store.retsObj.attributes.CNTY_NM)" :rules="[emptyRow.required]"></v-autocomplete>
-        </v-row>
-        <div style="position: relative; top: 12px; margin-left: 6px;">
-            <v-text-field variant="plain" disabled density="compact">Created {{ createDate }} by {{createName}}</v-text-field>
-        </div>
+    <div style="display: flex; flex-direction: column; position: relative; height: 90%; gap: 40px; padding-top: 15px; ">
+            <v-row>
+                <v-autocomplete :items="userRole" item-title="name" item-value="value" label="Assigned To" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.ASSIGNED_TO" @update:modelValue="onDropDownChange(store.retsObj.attributes.ASSIGNED_TO)"></v-autocomplete>
+            </v-row>
+            <v-row>
+                <v-autocomplete :items="userRole" item-title="name" item-value="value" label="GIS Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.GIS_ANALYST" @update:modelValue="onDropDownChange()" :rules="[emptyRow.required]"></v-autocomplete>
+            </v-row>
+            <v-row>
+                <v-autocomplete :items="userRole" item-title="name" item-value="value" label="Asset Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.GRID_ANALYST" @update:modelValue="onDropDownChange(store.retsObj.attributes.GRID_ANALYST)" :rules="[emptyRow.required]"> </v-autocomplete>
+            </v-row>
+            <v-row>
+                <v-autocomplete multiple :items="userRole" item-title="name" item-value="value" label="District Editor" flat variant="underlined" density="compact" rounded="0" :model-value="store.retsObj.attributes.DIST_ANALYST" @update:modelValue="onDropDownChange(store.retsObj.attributes.DIST_ANALYST);" :rules="[emptyRow.required]"></v-autocomplete>
+            </v-row>
+            <v-row>
+                <v-autocomplete :items="districtMetadata" item-title="name" item-value="value" label="District" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.DIST_NM" @update:modelValue="onDropDownChange(store.retsObj.attributes.DIST_NM)" :rules="[emptyRow.required]"></v-autocomplete>
+            </v-row>
+            <v-row>
+                <v-autocomplete :items="countyMetadata" item-title="name" item-value="value" label="County" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.CNTY_NM" @update:modelValue="onDropDownChange(store.retsObj.attributes.CNTY_NM)" :rules="[emptyRow.required]"></v-autocomplete>
+            </v-row>
+            <div style="position: relative; top: 12px; margin-left: 6px; flex: auto;">
+                <v-text-field variant="plain" disabled density="compact">Created {{ createDate }} by {{createName}}</v-text-field>
+            </div>
     </div>
 </template>
 
 <script>
 
-import {appConstants} from '../common/constant.js'
+    import {appConstants} from '../common/constant.js'
     import {store} from './store.js'
     export default{
         name: "MetadataCard",
@@ -95,12 +95,9 @@ import {appConstants} from '../common/constant.js'
 
 <style scoped>
 .v-row{
-    position: relative;
-    margin: 0% !important;
-    padding-right: 0% !important;
-    padding: 0px !important; 
-    margin-right: 5px !important;
-    margin-left: 5px !important; 
+    margin-right: 10px;
+    margin-left: 10px;
+    flex: auto;
 }
 
 .v-autocomplete{

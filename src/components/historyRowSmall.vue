@@ -1,51 +1,53 @@
 
 <template>
-    <hr class="popup-title-border"></hr>
-    <div style="margin-right: 10px; margin-left: 10px; width: 100%; height: 250px;">
-        <div id="search">
-            <v-text-field class="search-history" placeholder="Search..." flat rounded="0" prepend-inner-icon="mdi-magnify" density="compact" v-model="searchHistoryFilter" variant="solo-filled" elevation="0" >
+    <hr></hr>
+    <div style="width: 99%; margin-left: 10px; height: 100%; display: flex; flex-direction: column; gap: 2px;">
+        <div id="search" >
+            <div style="position: relative; display: flex; flex-direction: row;">
+                <v-text-field class="search-history" placeholder="Search..." flat rounded="0" prepend-inner-icon="mdi-magnify" density="compact" v-model="searchHistoryFilter" variant="solo-filled" elevation="0" >
                 <template v-slot:append-inner>
                     <v-icon icon="mdi-close" @click="clearContent" v-if="searchHistoryFilter.length"></v-icon>
                 </template>
-            </v-text-field>
-        </div>
-        <div style="position: relative; bottom: 2rem;">
-            <v-btn variant="plain" density="compact" style="left: 30px; font-size: 8px; float: right; position: relative; top:15px; margin:0%; padding: 0%; padding:0px 0px 0px 10px; margin-bottom: 0px" @click="queryAttachments" :disabled="store.numAttachments === 0" v-model="isAttachedActive" :active="isAttachedActive" active-class="active-button">
-                <template v-slot:prepend>
-                    <v-icon icon="mdi-filter"></v-icon>
-                </template>
-                Has attachments
-            </v-btn>
-            <div class="filter-notification-bubble" v-if="store.numAttachments > 0">
-                <p style="font-size: 11px; position: relative; left: 27%; bottom: 1px;"><b> {{ store.numAttachments }}</b></p>
+                </v-text-field>
+
+                <div style="position: relative; flex: auto; width: 0%; padding-top: 5px; right: 2px;">
+                    <v-btn variant="plain" density="compact" style="font-size: 8px; float: right;" @click="queryAttachments" :disabled="store.numAttachments === 0" v-model="isAttachedActive" :active="isAttachedActive" active-class="active-button">
+                        <template v-slot:prepend>
+                            <v-icon icon="mdi-filter"></v-icon>
+                        </template>
+                        Has attachments
+                    </v-btn>
+                    <div class="filter-notification-bubble" v-if="store.numAttachments > 0">
+                        <p style="font-size: 11px; position: relative; left: 27%; bottom: 1px;"><b> {{ store.numAttachments }}</b></p>
+                    </div>
+                </div>
             </div>
         </div>
-        <div v-if="isHistNotesEmpty">
+        
+        <div v-if="isHistNotesEmpty" style="flex: auto;">
             <v-text-field disabled variant="plain">No History for this RETS</v-text-field>
         </div>
-        <div id="displayHistory" v-if="!this.isHistNotesEmpty">
-            <div v-for="(note, i) in histNotes" :key="note.OBJECTID" track-by="OBJECTID">
-                <v-banner :id="`${note.OBJECTID}Small`" v-model="note[i]" density="compact" style="padding: 0px; padding-left: 5px; border-left: 3px solid #4472C4 !important;">
-                    <v-banner-text class="mx-auto">
-                        <div>
-                            <div>
+        <div id="displayHistory" v-if="!this.isHistNotesEmpty" style="flex: auto;">
+            <div v-for="(note, i) in histNotes" :key="note.OBJECTID" track-by="OBJECTID" id="notesDiv">
+                <v-banner :id="`${note.OBJECTID}Small`" v-model="note[i]" density="compact" height="100" style="padding: 0px; padding-left: 5px; border-left: 3px solid #4472C4 !important; margin-bottom: 0px;">
+                    <v-banner-text>
+                         
                                 <span v-if="note.PARENT_ID" style="margin:0% !important;">
                                     <p id="replyingToCmnt">Replying to "{{store.historyChat.find(x => x.OBJECTID === note.PARENT_ID)?.CMNT ?? "Referenced Note has been deleted"}}"</p>
                                 </span>
-                            </div>
                           
-                            <v-textarea class="history-note mx-2" rows="1" auto-grow density="compact" variant="plain" :disabled="note.OBJECTID !== updateOID" v-model="note.CMNT" placeholder="Enter Comment" autofocus></v-textarea>
+                          
+                                <v-textarea class="history-note" rows="1" auto-grow density="compact" variant="plain" :disabled="note.OBJECTID !== updateOID" v-model="note.CMNT" placeholder="Enter Comment" autofocus></v-textarea>
                     
                                     
-                            <div style="position: relative; bottom: 1px;">
-                                <span style="font-size: 10px; color: grey; padding-left: 2px;">{{ returnUserName(note.CMNT_NM) }} {{ returnDateFormat(note.CREATE_DT) }} <b v-if="note.CREATE_DT !== note.EDIT_DT && note.SYS_GEN === 0" class="main-color">{{ `Edited ${returnDateFormat(note.EDIT_DT)}` }}</b></span>
-                            </div>
-                            <div style="position: relative; bottom: 0px;" v-if="note.attachments">
+                            
+                                <span style="font-size: 10px; color: grey; padding-left: 2px; position: relative; bottom: 5px; padding: 0px;">{{ returnUserName(note.CMNT_NM) }} {{ returnDateFormat(note.CREATE_DT) }} <b v-if="note.CREATE_DT !== note.EDIT_DT && note.SYS_GEN === 0" class="main-color">{{ `Edited ${returnDateFormat(note.EDIT_DT)}` }}</b></span>
+                            
+                            <div style="position: relative; top: 0px;" v-if="note.attachments">
                                 <span v-for="attach in note.attachments" style="padding-right: 3px;">
                                     <v-chip :text="attach.name" color="#4472C4" class="" :closable="editContent && updateOID === note.OBJECTID ? true: false" density="compact" rounded="0" variant="flat" @click="openAttachement(attach.url)" @click:close="deleteAttach(note.OBJECTID, attach.name)"></v-chip>
                                 </span>
                             </div>
-                        </div>
                     </v-banner-text>
 
                     <div v-if="note.SYS_GEN === 0" style="width: 16%; position: relative; right: 50px;">
@@ -268,29 +270,25 @@
 
 <style scoped>
     .search-history{
-        height: 0px !important;
-        margin-left: 10px; 
-        margin-right: 10px;
-        max-width: 550px;
-        min-width: 100px;
         position: relative;
+        width: 38%;
+        max-height: 4px;
+        min-height: 4px;
     }
 
     #displayHistory{
         position: relative; 
         display: flex;
         flex-direction: column;
-        min-height: 100px;
-        max-height: calc(38vh - 130px);
+        height: calc(38vh - 130px);
         width: 95.7%;
         overflow-y: auto;
         padding-bottom: 30px;
     }
     #search{
         position: relative;
-        bottom: 1.5rem;
-        right: 6px;
-        width: 69%;
+        width: 100%;
+        height: 40px;
     }
     #replyingToCmnt{
         position: relative;
@@ -339,6 +337,7 @@
     .history-note{
         width: 320px;
         position: relative;
+
         /* position: relative; 
         width: 380px;
         position: relative;
