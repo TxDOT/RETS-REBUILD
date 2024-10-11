@@ -1,132 +1,127 @@
 <template>
         <div id="filterFeed">
-        <v-card>
-        <div style="margin: 10px;">
-            <div style="position: relative; bottom:0rem; font-weight: normal; font-size: 20px; flex: auto;">Filter Activity Feed</div>
-            <hr></hr>
-            <div class="container">
-                <div no-gutters class="item">
-                    <v-select :items="filterSort" item-title="title" return-object density="compact" label="Sort" variant="underlined" v-model="store.CREATE_DT" style="">
-                    </v-select>
-                </div>
+            <v-card>
+                <div style="margin: 10px;">
+                    <div style="position: relative; bottom:0rem; font-weight: normal; font-size: 20px; flex: auto;">Filter Activity Feed</div>
+                    <hr></hr>
+                    <div class="container" @click="isDisabled = false; store.customquery = null">
+                        <div no-gutters class="item">
+                            <v-select :disabled="isDisabled" :items="filterSort" item-title="title" return-object density="compact" label="Sort" variant="underlined" v-model="store.CREATE_DT" style="">
+                            </v-select>
+                        </div>
 
-                <div no-gutters dense class="item">
-                    <v-select :items="filterJobType" item-title="name" item-value="value" return-object multiple chips closable-chips density="compact" label="Job Type" variant="underlined" v-model="store.JOB_TYPE">
-                    </v-select>
-                </div>
+                        <div no-gutters dense class="item">
+                            <v-select :disabled="isDisabled" :items="filterJobType" item-title="name" item-value="value" return-object multiple chips closable-chips density="compact" label="Job Type" variant="underlined" v-model="store.JOB_TYPE">
+                            </v-select>
+                        </div>
 
-                <div no-gutters dense id="date" class="item"> 
-                    <v-select label="Date" chips closable-chips variant="underlined" density="compact" v-model="store.EDIT_DT" hide-no-data @click="isDate = !isDate">
-                        <template v-slot:chip="{item}">
-                            <v-chip closable @click:close="closeDateChip()">{{ item.props.title}}</v-chip>
-                        </template>
-                    </v-select>
-                </div>
-                
-                <div no-gutters dense class="item">
-                    <v-select :items="filterStatus" item-title="name" item-value="value" label="Status" return-object chips closable-chips multiple variant="underlined" density="compact" v-model="store.STAT"></v-select>
-                </div>
+                        <div no-gutters dense id="date" class="item"> 
+                            <v-select :disabled="isDisabled" label="Date" chips closable-chips variant="underlined" density="compact" v-model="store.EDIT_DT" hide-no-data @click="isDate = !isDate">
+                                <template v-slot:chip="{item}">
+                                    <v-chip closable @click:close="closeDateChip()">{{ item.props.title}}</v-chip>
+                                </template>
+                            </v-select>
+                        </div>
+                        
+                        <div no-gutters dense class="item">
+                            <v-select :disabled="isDisabled" :items="filterStatus" item-title="name" item-value="value" label="Status" return-object chips closable-chips multiple variant="underlined" density="compact" v-model="store.STAT"></v-select>
+                        </div>
 
-                <div no-gutters dense class="item">
-                    <v-autocomplete :items="filterActivity" item-title="value" item-value="value" return-object multiple label="Activity" chips closable-chips variant="underlined" density="compact" v-model="store.ACTV" @update:modelValue="actvSearch = ''" :search="actvSearch" @update:search="this.actvSearch = $event" @update:menu="actvSearch = ''"></v-autocomplete>
-                </div>
+                        <div no-gutters dense class="item">
+                            <v-autocomplete :disabled="isDisabled" :items="filterActivity" item-title="value" item-value="value" return-object multiple label="Activity" chips closable-chips variant="underlined" density="compact" v-model="store.ACTV" @update:modelValue="actvSearch = ''" :search="actvSearch" @update:search="this.actvSearch = $event" @update:menu="actvSearch = ''"></v-autocomplete>
+                        </div>
 
-                <div no-gutters dense class="item"> 
-                    <v-autocomplete :items="filterDistrict" item-title="name" item-value="value" return-object multiple label="District" chips closable-chips variant="underlined" density="compact" v-model="store.DIST_NM" @update:modelValue="this.districtSearch = ''" :search="this.districtSearch" @update:search="this.districtSearch = $event" @update:menu="districtSearch = ''"></v-autocomplete>
-                </div>
-                <div no-gutters dense class="item">
-                    <v-autocomplete :items="filterCounty" item-title="name" item-value="value" return-object multiple label="County" chips closable-chips variant="underlined" density="compact" v-model="store.CNTY_NM" @update:modelValue="countySearch = ''" :search="countySearch" @update:search="countySearch = $event" @update:menu="countySearch = ''"></v-autocomplete>
-                </div>
-                <div no-gutters dense class="item"> 
-                    <v-autocomplete :items="filterUser" item-title="name" item-value="value" return-object label="Users" multiple chips closable-chips variant="underlined" density="compact" v-model="store.USER" :disabled="store.isAssignedTo" @update:modelValue="userSearch = ''" :search="userSearch" @update:search="userSearch = $event" @update:menu="userSearch = ''"></v-autocomplete>
-                </div>
-                <div style="position: relative; float: left; max-height: 40px !important; font-size: 11px; display: flex; flex-wrap: wrap; bottom: 0rem;" class="item">
-                    <v-checkbox label="RETS Assigned to Me" density="compact" class="checkbox-size" v-model="store.isAssignedTo"></v-checkbox>
-                </div>
-            </div>
-                
-                
-                <v-expansion-panels flat variant="accordion" style="width: 96.5%; left: 4px; bottom:5px;">
-                    <v-expansion-panel elevation="0" tile>
-                        <v-expansion-panel-title expand-icon="mdi-menu-down" collapse-icon="mdi-menu-up" static > Custom SQL Query</v-expansion-panel-title>
-                            <v-expansion-panel-text>
-                                <v-combobox ref="combobox" @input="clearValidation" v-model="store.customquery" :items="store.userFilters.customQuery" class="cardDiv" id="textarea" rounded="0" flat density="compact" rows="2" variant="outlined" style="position: relative !important; top: 0px !important; width: 110%; left: -32px;">
-                                    <template #item="{ item }">
-                                        <v-list-item style="width: 311px; height: 10px; ">
-                                            <v-list-item-title  style=" width: 311px; margin: 5px; top: 0; bottom: 0; font-size: 12px;" @click="selectQuery(item.value)" >{{ item.value }}</v-list-item-title>
-                                            <v-btn  
-                                                @click="deleteQuery(item.value)"
-                                                icon="mdi-close"
-                                                density="compact"
-                                                tile
-                                                flat
-                                                style="position: absolute; right: 3%; top: 25%"
+                        <div no-gutters dense class="item"> 
+                            <v-autocomplete :disabled="isDisabled" :items="filterDistrict" item-title="name" item-value="value" return-object multiple label="District" chips closable-chips variant="underlined" density="compact" v-model="store.DIST_NM" @update:modelValue="this.districtSearch = ''" :search="this.districtSearch" @update:search="this.districtSearch = $event" @update:menu="districtSearch = ''"></v-autocomplete>
+                        </div>
+                        <div no-gutters dense class="item">
+                            <v-autocomplete :disabled="isDisabled" :items="filterCounty" item-title="name" item-value="value" return-object multiple label="County" chips closable-chips variant="underlined" density="compact" v-model="store.CNTY_NM" @update:modelValue="countySearch = ''" :search="countySearch" @update:search="countySearch = $event" @update:menu="countySearch = ''"></v-autocomplete>
+                        </div>
+                        <div no-gutters dense class="item"> 
+                            <v-autocomplete :items="filterUser" item-title="name" item-value="value" return-object label="Users" multiple chips closable-chips variant="underlined" density="compact" v-model="store.USER" :disabled="store.isAssignedTo || isDisabled" @update:modelValue="userSearch = ''" :search="userSearch" @update:search="userSearch = $event" @update:menu="userSearch = ''"></v-autocomplete>
+                        </div>
+                        <div style="position: relative; float: left; max-height: 40px !important; font-size: 11px; display: flex; flex-wrap: wrap; bottom: 0rem;" class="item">
+                            <v-checkbox :disabled="isDisabled" label="RETS Assigned to Me" density="compact" class="checkbox-size" v-model="store.isAssignedTo"></v-checkbox>
+                        </div>
+                    </div>
+                        
+                        
+                    <v-expansion-panels flat variant="accordion">
+                        <v-expansion-panel elevation="0" tile>
+                            <v-expansion-panel-title expand-icon="mdi-menu-down" collapse-icon="mdi-menu-up" static > Custom SQL Query</v-expansion-panel-title>
+                                <v-expansion-panel-text>
+                                    <v-combobox style="position: relative; right: 25px; width: 115.5% !important;" ref="combobox" @input="clearValidation" v-model="store.customquery" :items="store.userFilters.customQuery" rounded="0" flat density="compact" variant="outlined">
+                                        <template #item="{ item }">
+                                            <v-list-item :title="item.value" @click="selectQuery(item.value)">
+                                                 <template v-slot:append>
+                                                    <v-btn  
+                                                    @click="deleteQuery(item.value)"
+                                                    icon="mdi-close"
+                                                    density="compact"
+                                                    tile
+                                                    flat
+                                                    size="small"
+                                                    style="position: relative; right: 10px;"
+                                                    >
+                                                    </v-btn>
+                                                 </template>
 
-                                                >
-                                                
-                                            </v-btn>
-                                        </v-list-item>
-                                    </template>
-                                    <template #append style="border: 2px solid red">
-                                        <v-menu open-on-click v-model="fieldDiv" style=" width: 300px; left:910px ;position: absolute; ">
-                                            <template v-slot:activator="{ props }">
-                                                <v-tooltip text="Field Names" location="top">
-                                                    <template v-slot:activator="{ props }">
-                                                        <v-btn 
-                                                            icon="mdi-table-eye"
-                                                            v-bind="props"
-                                                            flat
-                                                            @click="fieldDiv = true"
-                                                            >
-                                                        </v-btn>
-                                                    </template>
-                                                    
-                                                </v-tooltip>
-                                                
+                                            </v-list-item>
+                                        </template>
+                                        <template #append style="border: 2px solid red">
+                                            <v-menu open-on-click v-model="fieldDiv" style=" width: 300px; left:910px ;position: absolute; ">
+                                                <template v-slot:activator="{ props }">
+                                                    <v-tooltip text="Field Names" location="top">
+                                                        <template v-slot:activator="{ props }">
+                                                            <v-btn 
+                                                                icon="mdi-table-eye"
+                                                                v-bind="props"
+                                                                flat
+                                                                @click="fieldDiv = true"
+                                                                size="small"
+                                                                >
+                                                            </v-btn>
+                                                        </template>
+                                                    </v-tooltip>
+    
 
-                                            </template>
-                                            <v-list id="fieldsList" value = "selected" max-height="800">
-                                                <v-list-item v-for="(item,index) in fieldNames" :key="index" density="compact">
-                                                <v-list-item-title @click="appendField(item)" density="compact"> {{ item }}</v-list-item-title>
-                                                </v-list-item>
-                                            </v-list>
-                                        </v-menu>
-                                    </template>
-                                </v-combobox> 
-                                <span style="color: red; font-size: 12px; margin-left: 10px;">{{validationMessage}}</span>
-                                    <div style="float:right; bottom: 1rem; position: relative; margin-right:10px;">
-                                        <v-btn variant="plain" @click="clearCustomQuery">Clear</v-btn>
-                                        <v-btn variant="outlined" class="main-button-style" @click="runCustomQuery">Run</v-btn>
-                                    </div>
-                            </v-expansion-panel-text>
-                    </v-expansion-panel>
-                </v-expansion-panels>
-                <hr class="popup-title-border" style="position: relative; width: 100%;"></hr>
-                
-            </div>
+                                                </template>
+                                                <v-list id="fieldsList" value = "selected" max-height="800">
+                                                    <v-list-item v-for="(item,index) in fieldNames" :key="index" density="compact">
+                                                    <v-list-item-title @click="appendField(item)" density="compact"> {{ item }}</v-list-item-title>
+                                                    </v-list-item>
+                                                </v-list>
+                                            </v-menu>
+                                        </template>
+                                    </v-combobox> 
+                                    <span style="color: red; font-size: 12px; margin-left: 10px;">{{validationMessage}}</span>
+                                        <div style="float:right; position: relative; left: 29px;">
+                                            <v-btn-toggle class="trigger-buttons" density="compact">
+                                                <v-btn variant="plain" @click="clearCustomQuery">Clear</v-btn>
+                                                <v-btn variant="outlined" class="main-button-style" @click="runCustomQuery" :disabled="store.customquery?.length > 5 ? false : true">Run</v-btn>
+                                            </v-btn-toggle>
+                                        </div>
+                                </v-expansion-panel-text>
+                        </v-expansion-panel>
+                    </v-expansion-panels>
+                    
+                    <hr class="popup-title-border" style="position: relative; width: 100%; position: relative; bottom: 0px;"></hr>
+                    <div style="position: relative; float: right;">
+                        <v-btn-toggle class="trigger-buttons" density="compact">
+                            <v-btn @click="cancelFilter()" class="secondary-button" variant="plain" size="small">Cancel</v-btn>
+                            <v-btn @click="setFilterNumber()" class="main-button-style" variant="outlined" size="small">Save</v-btn>
+                        </v-btn-toggle>
+                    </div>
+                    <div>
+                        <div style="float: left; margin-left: 15px; position: relative; top: 9px;">
+                            <v-btn id="restoreDefault" variant="plain" @click="restoreDefault()">Restore Default</v-btn>
+                        </div>
+                    </div>    
+                </div>
             
-        
-            <div style="position: relative; float: right;">
-                <v-btn-toggle class="trigger-buttons" density="compact">
-                    <v-btn @click="cancelFilter()" class="secondary-button" variant="plain" size="small">Cancel</v-btn>
-                    <v-btn @click="setFilterNumber()" class="main-button-style" variant="outlined" size="small">Save</v-btn>
-                </v-btn-toggle>
-            </div>
-            <div>
-                <hr class="popup-title-border" style="position: relative; bottom: 0px; margin-right: 20px; margin: 10px;"></hr>
-                <div style="float: right; margin: 10px; position: relative;" >     
-                    <v-btn @click="cancelFilter()" class="secondary-button" variant="plain">Cancel</v-btn>
-                    <v-btn @click="setFilterNumber()" class="main-button-style" variant="outlined">Save</v-btn>
-                </div>
-                <div style="float: left; margin-left: 15px; position: relative; top: 9px;">
-                    <v-btn id="restoreDefault" variant="plain" @click="restoreDefault()">Restore Default</v-btn>
-                </div>
-            </div>
-        </v-card>
+            </v-card>
         </div>
-        
-
-        <div style="position: absolute; left: calc(50vh + 47vh + 74px); top: 21.5%;" v-if="isDate">
+        <div style="position: absolute; left: 890px; top: 100px;" v-if="isDate">
             <v-date-picker class="date" multiple hide-header v-model="selectDate" @update:modelValue="selectDates()" tile width="300" :disabled="selectDate.length === 2"></v-date-picker>
             <div style="position: relative; bottom: 3.3rem; ">
                 <v-checkbox label="Current Year" style="position: relative; z-index: 9999; float: right; margin-bottom: 15px; margin-right: 15px" v-model="currentYear"></v-checkbox>
@@ -135,6 +130,16 @@
                 <v-btn style="float: left; margin-left: 10px; top: 12px;" @click="isDate = false" flat>CLOSE</v-btn>
             </div>
         </div>
+
+        <!-- <div style="position: absolute; left: calc(50vh + 47vh + 74px); top: 21.5%;" v-if="isDate">
+            <v-date-picker class="date" multiple hide-header v-model="selectDate" @update:modelValue="selectDates()" tile width="300" :disabled="selectDate.length === 2"></v-date-picker>
+            <div style="position: relative; bottom: 3.3rem; ">
+                <v-checkbox label="Current Year" style="position: relative; z-index: 9999; float: right; margin-bottom: 15px; margin-right: 15px" v-model="currentYear"></v-checkbox>
+            </div>
+            <div style="position: relative; bottom: 3.3rem; height: 50px; width: 98px;">
+                <v-btn style="float: left; margin-left: 10px; top: 12px;" @click="isDate = false" flat>CLOSE</v-btn>
+            </div>
+        </div> -->
 </template>
 
 <script>
@@ -184,7 +189,8 @@
                 validationMessage: "",
                 isDisabled: store.customquery ? true : false,
                 customqueryArray: [],
-                fieldDiv: false
+                fieldDiv: false,
+                isExpandCustomQuery: true
             }
         },
         mounted(){
@@ -215,6 +221,7 @@
                 addRETSFilter(filterObject)
             },
             deleteQuery(selection){
+                console.log(selection)
                 const findItem = store.userFilters.customQuery.findIndex((index) => {
                     return index === selection
                     
@@ -239,7 +246,6 @@
                     store.customquery = store.customquery + ' ' + field
 
                 }
-                document.getElementById("textarea").focus()
             },
             getFields(){
                 retsLayer.when(() => {
@@ -274,12 +280,7 @@
                                                 
                                                 store.userFilters.customQuery.push(store.customquery)
                                                 this.isDisabled = true
-                                                //store.isfilter = false
                                                 store.customquery = store.userFilters.customQuery.at(-1)
-                                                
-                                                
-
-        
                                             }
                                         
                                     })
@@ -304,8 +305,6 @@
                 store.customquery = ""
                 this.isDisabled = false
                 this.validationMessage = ""
-
-
             },
             archiveFilter(){
                 store.archiveFilter = JSON.stringify({
@@ -333,7 +332,6 @@
                 store.USER = filterParse.user
                 store.isAssignedTo = filterParse.isAssignedTo
 
-                store.isfilter = false
                 const filterObject = {
                     createDt: store.CREATE_DT,
                     jobType: store.JOB_TYPE,
@@ -349,6 +347,7 @@
                 }
                 this.cancelsaveQuery(filterObject)
                 this.calcFilterDiff()
+                store.isfilter = false
                 return
             },
             setFilterNumber(){
@@ -366,15 +365,9 @@
 
                 }
 
-                if (store.customquery === retsLayer.definitionExpression){
-                    store.isfilter = false
-                    return
-                }
                 this.cancelsaveQuery(store.filter)
                 this.calcFilterDiff()
-                store.setFilterFeed()
-                
-
+                store.customquery ? null : store.setFilterFeed()
                 store.isfilter = false
                 return
             },
@@ -397,7 +390,7 @@
                 store.CNTY_NM.length = 0
                 store.USER = [appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value)]
                 store.isAssignedTo = false
-            
+                store.customquery =  null
                 store.defaultFilterSetup()
                 // this.defaultFilter.loggedInUser = appConstants.defaultUserValue[0].value
                 // this.filter.CREATE_DT = this.defaultFilter.CREATE_DT
