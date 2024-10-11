@@ -1,7 +1,7 @@
 import OAuthInfo from "@arcgis/core/identity/OAuthInfo.js";
 import esriId from "@arcgis/core/identity/IdentityManager.js";
 import { view, retsUserRole, retsLayer} from './map-Init.js'
-import {getDomainValues, getDistinctAttributeValues, getUniqueQueryValues, queryFlags, getRetsLayerView, getHistoryView, getTxDotRdWayLayerView, home} from './utility.js'
+import {getDomainValues, getDistinctAttributeValues, getUniqueQueryValues, queryFlags, getRetsLayerView, getHistoryView, getTxDotRdWayLayerView, home, getUserOBJECTID, filterMapActivityFeed, setFilterProperties} from './utility.js'
 import { appConstants } from "../common/constant.js";
 import router from '../router/index.js'
 import {store} from './store.js'
@@ -33,10 +33,9 @@ async function signIn(){
   await getUniqueQueryValues(retsUserRole, appConstants.userRoles)
   const userId = await getUserId()
   await queryFlags(userId)
-  setDefExpRets(userId)
+  await setDefExpRets(userId)
   store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
   appConstants.userQueryField = appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]
-  store.USER = [appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value)]
   //needs to be worked on//
   router.push({name: "Map"})
   
@@ -66,10 +65,21 @@ function alreadySignedIn(){
 }
 
 
-const setDefExpRets = (userId) => {
+const setDefExpRets = async (userId) => {
   if(appConstants.defaultUserValue.length) return
-  appConstants.defaultUserValue.push({"name": "Username", "value": `${userId}`})
-  retsLayer.definitionExpression = store.savedFilter = appConstants['defaultQuery'](userId)
+  const userOBJECTID = await getUserOBJECTID(userId)
+  appConstants.defaultUserValue.push({"name": "Username", "value": `${userId}`, "objectid" : userOBJECTID.OBJECTID, "webhook" : userOBJECTID.WEBHOOK, "email" : userOBJECTID.EMAIL, "filters" : userOBJECTID.FILTERS})
+  if (userOBJECTID.FILTERS === null){
+    retsLayer.definitionExpression = store.savedFilter = appConstants['defaultQuery'](userId)
+    store.USER = [appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value)]
+    return
+  }
+  const parsedUSEROBJECTID = JSON.parse(userOBJECTID.FILTERS)
+
+  store.userFilters = parsedUSEROBJECTID
+  filterMapActivityFeed(parsedUSEROBJECTID)
+  setFilterProperties(parsedUSEROBJECTID)
+
   return
 }
 
@@ -81,3 +91,4 @@ export async function getUserId(){
 
   return user.userId
 }
+

@@ -18,7 +18,7 @@
                                     <v-icon id="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
                             </template>
                             <template v-if="tool.name === 'Multi-Select'"  v-slot:activator="{ props }">
-                                <v-badge location="top end" color="#4472C4" :content="store.roadHighlightObj.size" id="badge" offset-y="-8">
+                                <v-badge location="top begin" color="#4472C4" :content="store.roadHighlightObj.size" id="badge" offset-y="-8">
                                     <v-icon id="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
                                 </v-badge>
                             </template>
@@ -414,7 +414,6 @@
                     handleSelectTool() { 
                         if (store.isSelectEnabled === true ){
                             this.selectfunction = selecttool(store.isSelectEnabled, sketchWidgetselect, graphics);
-                            console.log(this.selectfunction)
                         }
                         else{
                             sketchWidgetselect.cancel()

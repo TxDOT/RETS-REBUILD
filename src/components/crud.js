@@ -281,3 +281,22 @@ export function postFlagColor(rets){
     .catch(err => console.log(err)) 
     return
 }
+
+
+export async function addRETSFilter(customQuery){
+    
+    
+    let esriUpdateGraphic = createGraphic(customQuery)
+
+    try{
+        await retsRole.applyEdits({
+            updateFeatures: [esriUpdateGraphic]
+        })
+        console.log(`RETSROLE updated`)
+    }
+    catch(err){
+        console.log(err)
+    }
+
+   
+}

@@ -5,6 +5,20 @@ import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapA
 
 export const store = reactive({
         devStatus: "dev",
+        userFilters: {
+                createDt: '',
+                jobType: '',
+                editDt: '',
+                stat: '',
+                actv:'',
+                distNM:'',
+                cntyNM: '',
+                user: '',
+                isAssignedTo: '',
+                customQuery: []
+
+        },
+        customquery:"",
         currFilter: "",
         lastQuery : "",
         filterItems: [],

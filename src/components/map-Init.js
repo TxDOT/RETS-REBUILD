@@ -469,12 +469,72 @@ export const searchWidget = new Search({
       layer: retsLayer, 
       maxSuggestions:3,
       placeholder: "Minute Order",
-      //zoomScale: 5000,
       searchFields: [ "ACTV_NBR" ],
       displayField: "ACTV_NBR",
       exactMatch: false,
       outFields: ["*"],
-      suggestionTemplate: "RETS: {RETS_ID} (MO Number: {ACTV_NBR})", 
+      getSuggestions: async function (params) {
+        let currquery = retsLayer.definitionExpression 
+        if (currquery != ""){
+          currquery = currquery + ' AND '
+        }
+        const query = {
+          where: `${currquery}  CAST(ACTV_NBR AS VARCHAR(10)) LIKE '%${params.suggestTerm}%'`,
+          outFields: ["*"],
+          returnGeometry: false,
+          orderByFields: ["ACTV_NBR"],          
+        };
+       const feats = await retsLayer.queryFeatures(query)
+       const featuresArray = feats.features.slice(0,3)
+
+       return featuresArray.map((feature) => {
+        return {
+            key: `${feature.attributes.RETS_ID}`,
+            text: `RETS: ${feature.attributes.RETS_ID} (MO: ${feature.attributes.ACTV_NBR})`, 
+            sourceIndex: 5 ,
+        }
+       })
+      },
+      getResults: async function (params){
+        const query = {
+          where: `RETS_ID = ${params.suggestResult.key}`,
+          returnGeometry: true,
+          outFields: ["*"],
+
+        }
+
+        const feats = await retsLayer.queryFeatures(query)
+        const feature = feats.features[0]
+
+        view.goTo({
+          target: feats.features[0].geometry,
+          zoom: 16
+          
+        })
+        highlightLayer.add({
+          geometry: feats.features[0].geometry,
+          symbol: pointsymbol
+        })
+
+
+        const retsidnum = String(feature.attributes.OBJECTID).concat('-',feature.attributes.RETS_ID)
+        removeOutline()
+        outlineFeedCards([feature])
+
+        setTimeout(() => {
+
+          const element = document.getElementById(retsidnum);
+
+          if (element){
+            element.classList.add("highlight-card")
+          }
+        }, 1000);
+        setTimeout(() => {
+          searchWidget.activeMenu = "none"
+
+        }, 10);
+
+      }
     },
   ]
 
