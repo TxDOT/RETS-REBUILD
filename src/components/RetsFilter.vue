@@ -113,7 +113,7 @@
                         </v-btn-toggle>
                     </div>
                     <div>
-                        <div style="float: left; margin-left: 15px; position: relative; top: 9px;">
+                        <div style="float: left;">
                             <v-btn id="restoreDefault" variant="plain" @click="restoreDefault()">Restore Default</v-btn>
                         </div>
                     </div>    

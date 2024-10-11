@@ -707,7 +707,7 @@ export default{
         font-weight: normal;
     }
     #countPopup{
-        position: relative;
+        position: absolute;
         height: 100px;
         width: 180px;
         left: 220px;

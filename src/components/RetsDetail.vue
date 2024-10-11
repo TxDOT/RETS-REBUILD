@@ -10,8 +10,8 @@
             <div class="details-color-picker" v-if="flagClickedId === store.retsObj.attributes.RETS_ID" v-click-outside="closeFlagDiv">
                 <v-icon style="position: relative; padding: 0px !important; margin: 0px !important;" size="20px" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])"></v-icon>
             </div>
-            <v-btn-toggle v-model="store.retsObj.attributes.PRIO" density="compact" @update:modelValue="updatePRIO" style="flex: auto;">
-                <v-btn icon="mdi-exclamation" density="compact" style="color: #d9d9d9; opacity: 1; font-size: 15px; bottom: 1px;" selected-class="toggle-exclamation" variant="plain" active></v-btn>
+            <v-btn-toggle v-model="store.retsObj.attributes.PRIO" density="compact" @update:modelValue="updatePRIO">
+                <v-btn icon="mdi-exclamation" density="compact" style="color: #d9d9d9; opacity: 1; font-size: 15px;" selected-class="toggle-exclamation" variant="plain" active></v-btn>
             </v-btn-toggle>   
         </div>
         <div style="height: 100%; width: 100%; ">
@@ -530,9 +530,11 @@
     position: relative;
     flex: auto;
     float: right;
-    padding: 14px !important;
+    top: 5px !important;
     margin: 0px !important;
-    min-width: 15px !important;
+    margin-right: 15px !important;
+    max-width: 5px !important;
+    min-width: 5px !important;
 }
 
 #commentDiv{
@@ -702,8 +704,8 @@
     flex-direction: row;
     position: relative;
     bottom: 64px;
-    left: 22rem;
-    width: 20%;
+    left: 23.5rem;
+    width: 16%;
 }
 
 .details-color-picker{
