@@ -45,15 +45,58 @@
                 </div>
             </div>
                 
-            <div>
-                <v-expansion-panels flat variant="accordion" style="left: 0px; bottom: 0px; width: 100%; margin-bottom: 10px;" class="item" disabled>
+                
+                <v-expansion-panels flat variant="accordion" style="width: 96.5%; left: 4px; bottom:5px;">
                     <v-expansion-panel elevation="0" tile>
-                        <v-expansion-panel-title expand-icon="mdi-menu-down" collapse-icon="mdi-menu-up" static> Custom SQL Query</v-expansion-panel-title>
+                        <v-expansion-panel-title expand-icon="mdi-menu-down" collapse-icon="mdi-menu-up" static > Custom SQL Query</v-expansion-panel-title>
                             <v-expansion-panel-text>
-                                <v-textarea class="cardDiv" rounded="0" flat density="compact" rows="2" variant="outlined" style="position: relative !important; top: 0px !important;"></v-textarea>
+                                <v-combobox ref="combobox" @input="clearValidation" v-model="store.customquery" :items="store.userFilters.customQuery" class="cardDiv" id="textarea" rounded="0" flat density="compact" rows="2" variant="outlined" style="position: relative !important; top: 0px !important; width: 110%; left: -32px;">
+                                    <template #item="{ item }">
+                                        <v-list-item style="width: 311px; height: 10px; ">
+                                            <v-list-item-title  style=" width: 311px; margin: 5px; top: 0; bottom: 0; font-size: 12px;" @click="selectQuery(item.value)" >{{ item.value }}</v-list-item-title>
+                                            <v-btn  
+                                                @click="deleteQuery(item.value)"
+                                                icon="mdi-close"
+                                                density="compact"
+                                                tile
+                                                flat
+                                                style="position: absolute; right: 3%; top: 25%"
+
+                                                >
+                                                
+                                            </v-btn>
+                                        </v-list-item>
+                                    </template>
+                                    <template #append style="border: 2px solid red">
+                                        <v-menu open-on-click v-model="fieldDiv" style=" width: 300px; left:910px ;position: absolute; ">
+                                            <template v-slot:activator="{ props }">
+                                                <v-tooltip text="Field Names" location="top">
+                                                    <template v-slot:activator="{ props }">
+                                                        <v-btn 
+                                                            icon="mdi-table-eye"
+                                                            v-bind="props"
+                                                            flat
+                                                            @click="fieldDiv = true"
+                                                            >
+                                                        </v-btn>
+                                                    </template>
+                                                    
+                                                </v-tooltip>
+                                                
+
+                                            </template>
+                                            <v-list id="fieldsList" value = "selected" max-height="800">
+                                                <v-list-item v-for="(item,index) in fieldNames" :key="index" density="compact">
+                                                <v-list-item-title @click="appendField(item)" density="compact"> {{ item }}</v-list-item-title>
+                                                </v-list-item>
+                                            </v-list>
+                                        </v-menu>
+                                    </template>
+                                </v-combobox> 
+                                <span style="color: red; font-size: 12px; margin-left: 10px;">{{validationMessage}}</span>
                                     <div style="float:right; bottom: 1rem; position: relative; margin-right:10px;">
-                                        <v-btn variant="plain">Clear</v-btn>
-                                        <v-btn variant="outlined" class="main-button-style">Run</v-btn>
+                                        <v-btn variant="plain" @click="clearCustomQuery">Clear</v-btn>
+                                        <v-btn variant="outlined" class="main-button-style" @click="runCustomQuery">Run</v-btn>
                                     </div>
                             </v-expansion-panel-text>
                     </v-expansion-panel>
@@ -70,10 +113,15 @@
                 </v-btn-toggle>
             </div>
             <div>
-                <v-btn id="restoreDefault" variant="plain" @click="restoreDefault()">Restore Default</v-btn>
+                <hr class="popup-title-border" style="position: relative; bottom: 0px; margin-right: 20px; margin: 10px;"></hr>
+                <div style="float: right; margin: 10px; position: relative;" >     
+                    <v-btn @click="cancelFilter()" class="secondary-button" variant="plain">Cancel</v-btn>
+                    <v-btn @click="setFilterNumber()" class="main-button-style" variant="outlined">Save</v-btn>
+                </div>
+                <div style="float: left; margin-left: 15px; position: relative; top: 9px;">
+                    <v-btn id="restoreDefault" variant="plain" @click="restoreDefault()">Restore Default</v-btn>
+                </div>
             </div>
-
-        </div> 
         </v-card>
         </div>
         
@@ -90,9 +138,11 @@
 </template>
 
 <script>
-    import {filterMapActivityFeed} from './utility.js'
+    import {filterMapActivityFeed, home} from './utility.js'
     import {appConstants} from '../common/constant.js'
     import { store } from './store'
+    import {addRETSFilter} from './crud.js'
+    import { retsLayer, view } from './map-Init.js';
 
     export default{
         name: "Filter",
@@ -122,13 +172,141 @@
                 countySearch: "",
                 districtSearch: "",
                 actvSearch: "",
+                customquery: "",
+                itemsTest: [
+                    { title: 'Click Me 1' },
+                    { title: 'Click Me 2' },
+                    { title: 'Click Me 3' },
+                    { title: 'Click Me 4 ' },
+                ],
+                fieldNames : [],
+                selected:"",
+                validationMessage: "",
+                isDisabled: store.customquery ? true : false,
+                customqueryArray: [],
+                fieldDiv: false
             }
         },
         mounted(){
-            this.archiveFilter()
+            this.archiveFilter(),
+            this.getFields(),
+            this.testmethod()
+            
 
+            
+        },
+        computed: {
+            
         },
         methods:{
+            clearValidation(){
+                if ((store.customquery === null || store.customquery === "") && (this.validationMessage != null || this.validationMessage != "" ) ){
+                    this.validationMessage = ''
+                }
+            },
+            testmethod(){
+                if (store.customquery === retsLayer.definitionExpression){
+                    
+                    return
+                }
+            },
+            cancelsaveQuery(filter){
+                const filterObject = {attributes: {OBJECTID : appConstants.defaultUserValue[0].objectid, FILTERS : JSON.stringify(filter)}}
+                addRETSFilter(filterObject)
+            },
+            deleteQuery(selection){
+                const findItem = store.userFilters.customQuery.findIndex((index) => {
+                    return index === selection
+                    
+                })
+                store.userFilters.customQuery.splice(findItem,1)
+                this.$refs.combobox.blur()
+            },
+            selectQuery(selection){
+                store.customquery = selection
+                this.$refs.combobox.blur()
+            },
+            clearValue(){
+                appConstants.defaultUserValue[0].filters = null
+                const filterObject = {attributes: {OBJECTID : appConstants.defaultUserValue[0].objectid, FILTERS : null}}
+                addRETSFilter(filterObject)
+            },
+            appendField(field){
+                if (store.customquery === null){
+                    store.customquery = field
+                }
+                else{
+                    store.customquery = store.customquery + ' ' + field
+
+                }
+                document.getElementById("textarea").focus()
+            },
+            getFields(){
+                retsLayer.when(() => {
+                    this.fieldNames = retsLayer.fields.map(a => a.name)
+                })
+            },
+            runCustomQuery(){
+                // this.clearValue()
+                // return
+                if (store.customquery === ''){
+                    return
+                }
+
+                const query = {
+                    where: store.customquery
+                }
+
+                retsLayer.queryFeatures(query)
+                    .then((response) =>         
+                        {
+                            if (!response.features.length){
+                                this.validationMessage = "No features returned."
+                                return
+                            }
+                            retsLayer.definitionExpression = store.customquery
+                            store.getRetsLayer(store.loggedInUser,store.customquery, 'retsLayerLayerView', 'EDIT_DT DESC')
+                                retsLayer.queryExtent()
+                                    .then((resp) =>{
+                                        view.goTo(resp.extent)
+                                        if (store.customquery)
+                                            {
+                                                
+                                                store.userFilters.customQuery.push(store.customquery)
+                                                this.isDisabled = true
+                                                //store.isfilter = false
+                                                store.customquery = store.userFilters.customQuery.at(-1)
+                                                
+                                                
+
+        
+                                            }
+                                        
+                                    })
+                                   
+                                    
+                                    
+                                   
+                                    
+                                    
+                        })
+                        .catch((error) => {
+                            
+                            if (error.message === 'Unable to complete operation.'){
+                                this.validationMessage = "Invalid Query."
+                            }
+                        })
+                
+
+                
+            },
+            clearCustomQuery(){
+                store.customquery = ""
+                this.isDisabled = false
+                this.validationMessage = ""
+
+
+            },
             archiveFilter(){
                 store.archiveFilter = JSON.stringify({
                     createDt: store.CREATE_DT,
@@ -156,6 +334,20 @@
                 store.isAssignedTo = filterParse.isAssignedTo
 
                 store.isfilter = false
+                const filterObject = {
+                    createDt: store.CREATE_DT,
+                    jobType: store.JOB_TYPE,
+                    editDt: store.EDIT_DT,
+                    stat: store.STAT,
+                    actv: store.ACTV,
+                    distNM: store.DIST_NM,
+                    cntyNM: store.CNTY_NM,
+                    user: store.USER,
+                    isAssignedTo: store.isAssignedTo,
+                    customQuery: store.userFilters.customQuery
+
+                }
+                this.cancelsaveQuery(filterObject)
                 this.calcFilterDiff()
                 return
             },
@@ -169,10 +361,19 @@
                     distNM: store.DIST_NM,
                     cntyNM: store.CNTY_NM,
                     user: store.USER,
-                    isAssignedTo: store.isAssignedTo
+                    isAssignedTo: store.isAssignedTo,
+                    customQuery: store.userFilters.customQuery
+
                 }
+
+                if (store.customquery === retsLayer.definitionExpression){
+                    store.isfilter = false
+                    return
+                }
+                this.cancelsaveQuery(store.filter)
                 this.calcFilterDiff()
                 store.setFilterFeed()
+                
 
                 store.isfilter = false
                 return

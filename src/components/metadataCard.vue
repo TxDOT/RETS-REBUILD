@@ -62,7 +62,6 @@
                     
                 // }
                 if (store.retsObj.attributes.DIST_ANALYST.includes('   ')){
-                    console.log("cjecl")
                     this.$refs.dropdown.reset()
                     this.$refs.dropdown.blur()
                 }

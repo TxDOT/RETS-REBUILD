@@ -419,7 +419,6 @@
                     handleSelectTool() { 
                         if (store.isSelectEnabled === true ){
                             this.selectfunction = selecttool(store.isSelectEnabled, sketchWidgetselect, graphics);
-                            console.log(this.selectfunction)
                         }
                         else{
                             sketchWidgetselect.cancel()

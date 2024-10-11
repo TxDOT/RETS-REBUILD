@@ -99,19 +99,22 @@
         <span>
             &nbsp;&nbsp;
             <span :style="{ color: notStartedColor, width: '5ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsNotStartedCount }}</span>
-            <span :style="{ color: 'black'}">&nbsp;&nbsp; Not Started</span><br>
+            <span :style="{ color: 'lightgray'}">&nbsp;&nbsp; Not Started</span><br>
             
             &nbsp;&nbsp;
             <span :style="{ color: inProgressColor, width: '5ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsInProgressCount }}</span>
-            <span :style="{ color: 'black' }">&nbsp;&nbsp; In Progress</span><br>
-            
+            <span :style="{ color: 'lightgray' }">&nbsp;&nbsp; In Progress</span><br>
+           
             &nbsp;&nbsp;
             <span :style="{ color: completeColor, width: '5ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsCompleteCount }}</span>
-            <span :style="{ color: 'black' }">&nbsp;&nbsp; Complete</span><br>
+            <span :style="{ color: 'lightgray' }">&nbsp;&nbsp; Complete</span><br>
             
             &nbsp;&nbsp;
             <span :style="{ color: onHoldColor, width: '5ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsOnHoldCount }}</span>
-            <span :style="{ color: 'black' }">&nbsp;&nbsp; On Hold</span><br>
+            <span :style="{ color: 'lightgray' }">&nbsp;&nbsp; On Hold</span><br>
+
+             
+           
 
             
         </span>
@@ -700,16 +703,17 @@ export default{
         padding-left: 5px;
         font-size: 15px;
         cursor: default;
-        height: 20px;
+        white-space: nowrap;
+        font-weight: normal;
     }
     #countPopup{
         position: relative;
         height: 100px;
-        width: 160px;
-        left: 270px;
-        top: 50px;
-        background-color: lightgray;
-        opacity: .8;
+        width: 180px;
+        left: 220px;
+        top: 40px;
+        background-color: rgba(18, 18, 18, 255);
+        opacity: .95;
     }
     :deep(.v-switch__thumb){
         height: 16px !important;

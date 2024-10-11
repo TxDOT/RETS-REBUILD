@@ -1,4 +1,4 @@
-import {view, retsLayer, homeWidget, retsGraphicLayer, TxDOTRoadways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate, retsPointRenderer, texasExtent, retsPointRendererout} from './map-Init'
+import {view, retsLayer, homeWidget, retsGraphicLayer, TxDOTRoadways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate, retsPointRenderer, texasExtent, retsPointRendererout, retsRole} from './map-Init'
 import Query from "@arcgis/core/rest/support/Query.js";
 import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant.js";
@@ -220,7 +220,7 @@ export function outlineFeedCards(cards){
     //store.roadHighlightObj.add(objectcomparison)
     //zoom to card in feed
             
-    findCard.scrollIntoView({behavior: "smooth", block: "start", inline: "end"})
+    findCard.scrollIntoView({behavior: "smooth", block: "center", inline: "center"})
     // const zoomToCard = document.createElement('a')
     // zoomToCard.href = `#${objectcomparison}`
     // zoomToCard.click(preventHashUrl())
@@ -359,11 +359,11 @@ export async function filterMapActivityFeed(filterOpt){
         // }
         try{
             const filterMapPromise = new Promise((res, rej) => {
-                retsLayerView.layer.definitionExpression = store.savedFilter = `${newFilter}`
+                retsLayer.definitionExpression = store.savedFilter = `${newFilter}`
                 res(filterDef)
             })
 
-            retsLayerView.layer.queryExtent()
+            retsLayer.queryExtent()
             .then((resp) =>{
                 if(resp.count === 0){
                     view.goTo(texasExtent)
@@ -1520,4 +1520,36 @@ export function discardeditcopy(){
     store.isAlert = false
     outlineFeedCards(store.roadHighlightObj)
     return
+}
+
+export async function getUserOBJECTID(userId){
+    const query = {
+        where: `USERNAME = '${userId}'`,
+        outFields: ['*']
+    }
+
+    const returnUserAttributes = await retsRole.queryFeatures(query)
+
+    return returnUserAttributes.features[0].attributes
+}
+
+export function setFilterProperties(userFilterObject){
+    store.CREATE_DT = userFilterObject.createDt
+    store.JOB_TYPE = userFilterObject.jobType
+    store.EDIT_DT = userFilterObject.editDt
+    store.STAT = userFilterObject.stat
+    store.ACTV = userFilterObject.actv
+    store.DIST_NM = userFilterObject.distNM
+    store.CNTY_NM = userFilterObject.cntyNM
+    store.USER = userFilterObject.user
+    store.isAssignedTo = userFilterObject.isAssignedTo
+    // console.log(store.STAT)
+    // console.log(userFilterObject.stat)
+
+    // console.log(store.USER)
+    // console.log(userFilterObject.user)
+    return
+    
+
+
 }
