@@ -8,22 +8,23 @@
             ({{store.latlonstring}}) has been copied to clipboard.
         </v-banner>
         
-        <div>
-            <v-card id="cancelpopup" v-if="store.cancelpopup">
-            <v-card-title class="popupheader2" >
-                Discard unsaved changes?
-            </v-card-title>
-            <hr id="separator3" />
-            <v-card-subtitle class="popuptext2">
-                If you proceed, your changes will be discarded.
-            </v-card-subtitle>
-            <v-btn-group class="buttonpositioning2" density="compact">
-                <v-btn class="secondary-button"  @click="goBackActivity()">GO BACK</v-btn>
-                <v-btn class="main-button-style" @click="discardedits">DISCARD</v-btn>
-            </v-btn-group>
 
+            <v-card rounded="0" id="cancelpopup" v-if="store.cancelpopup">
+                
+                    <div class="banner-txt">
+                        Discard unsaved changes?
+                    </div>
+                    <hr/>
+                    <span class="popuptext2">
+                        If you proceed, your changes will be discarded.
+                    </span>
+                    <v-btn-toggle class="trigger-buttons" density="compact" style="position: relative; top: 23px;">
+                        <v-btn class="secondary-button"  @click="goBackActivity()" variant="plain" size="small" style="float: right;">GO BACK</v-btn>
+                        <v-btn class="main-button-style" @click="discardedits" variant="outlined" size="small" style="float: right;">DISCARD</v-btn>
+                    </v-btn-toggle>
+                
             </v-card>
-        </div>
+ 
         
     </div>
 
@@ -124,43 +125,36 @@ export default{
         border-radius: 0% !important;
     }
     #cancelpopup{
-    position: fixed;
-    border-radius: 5px;
-    width: 25rem;
-    height:20%; 
-    border-radius: 0;
-    left: 0%;
-    right:0;
-    top:0;
-    bottom: 0;
-    margin: auto;
-}
+        position: absolute;
+        width: 25rem;
+        height: 140px; 
+        border-radius: 0;
+        left: 50vh;
+        top: 30vh;
+        padding: 10px; 
+    }
 
-#separator3{
-    border: 0;
-    border-bottom: 1px solid ;
-    margin: 0 auto;
-    width: 22.5rem;
-    padding-top: 1px;
-    margin-bottom: 10px;
-}
+    #separator3{
+        border: 0;
+        border-bottom: 1px solid ;
+        margin: 0 auto;
+        width: 22.5rem;
+        padding-top: 1px;
+        margin-bottom: 0px;
+    }
 
-.popuptext2{
-    position: absolute;
-    left: 10px;
-}
-.popupheader2{
-    position: relative;
-    left: 10px;
-}
+    .buttonpositioning2{
+        position: absolute;
+        bottom: 14px;
+        width: 20rem;
+        right: 8px;
+        justify-content: end;
+    }
 
+    .popuptext2{
+        position: relative;
+        top: 10%;
+        font-size: 13px;
+    }
 
-
-.buttonpositioning2{
-    position: absolute;
-    bottom: 14px;
-    width: 20rem;
-    right: 8px;
-    justify-content: end;
-}
 </style>

@@ -72,49 +72,46 @@
                 <div style="position: relative; float: left; margin-left: 10px; font-size: 11px; display: flex; flex-wrap: wrap; top: 3px;">
                     <v-checkbox label="Asset Only Job" density="compact" class="checkbox-size" v-model="isAsset" @update:model-value="isAssetJob"></v-checkbox>
                 </div>
-                <v-btn-toggle id="trigger-buttons" density="compact">
-                    <v-btn @click="handlearchive" flat size="small" id = "djpbuttons" class="secondary-button" style="background-color: transparent;">Delete</v-btn>
+                <v-btn-toggle class="trigger-buttons" density="compact">
+                    <v-btn @click="handlearchive" variant="plain" size="small" class="secondary-button">Delete</v-btn>
                     <!-- <v-btn @click="handlearchive" variant="plain" flat size="small" class="secondary-button">Delete</v-btn> -->
-                    <v-btn @click="cancelDetailsMetadata" id = "djpbuttons" class="secondary-button"  size="small"  style="background-color: transparent;" :disabled="store.isCancelBtnDisable">Cancel</v-btn>
-                    <v-btn @click="sendToParent" variant="outlined" id = "djpbuttons" class="main-button-style" size="small" style="background-color: transparent;" :disabled="store.isSaveBtnDisable" :loading="store.isSaving">Save</v-btn>
+                    <v-btn @click="cancelDetailsMetadata" variant="plain" class="secondary-button" size="small" :disabled="store.isCancelBtnDisable">Cancel</v-btn>
+                    <v-btn @click="sendToParent" variant="outlined" class="main-button-style" size="small" :disabled="store.isSaveBtnDisable" :loading="store.isSaving">Save</v-btn>
                 </v-btn-toggle>
             </div>
         </div>
 
         <div id="commentDiv" v-if="editText">
-            <v-card style="position: relative; height: 100%; border-radius: 0%; left: 20%; bottom: 5%;" >
+            <v-card style="position: relative; height: 100%; border-radius: 0%;" >
                 <v-card-title style="padding-bottom: 30px;">History</v-card-title>
                 <div style="float: right; position: relative; bottom: 3.7rem;" >
                     <v-btn icon="mdi-close" variant="plain" density="compact" @click="editText = false" style="font-size: .9rem;"></v-btn>
                 </div>
                 <historyView/>
-                <div class="marginSetting" style="padding-top: 10px; position: absolute; width: 98%; bottom: 2rem;">
+                <div class="marginSetting" style="padding-top: 10px; position: relative; width: 98%; bottom: 0rem;">
                     <v-text-field label="Type a message" density="compact" tile v-model="addHistoryChat" style="margin-left: 0px; margin-right: 5px;" :error-messages= "initRules ? 'Write a note. Submit your thought to History!' : null" @update:modelValue="historyValue"></v-text-field>
                     <div style="float: left; bottom: 1rem; position: relative;">
                         <v-btn prepend-icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px !important; top: 10px;" @click="displayAttachments()">Add an Attachment</v-btn>
                     </div>
-                    <div> 
-                        <div style="position:relative; float: left; width:100%;">
-                            <v-chip v-for="(attach, index) in addAttach" color="#4472C4" closable density="compact" rounded="0" variant="flat" :text="attach.name" @click:close="removeAttachment(index)"></v-chip>
-                        </div>
-                    </div>
                     
-                    <div style="float:right; bottom: 2.7rem; position: relative; left: 7px;">
+                    <div style="float:right; bottom: 1.3rem; position: relative; left: 7px;">
                         <v-btn icon="mdi-close" variant="plain" density="compact" style="font-size: 15px !important;" @click="clearMessage"></v-btn>
                         <v-btn icon="mdi-check" variant="plain" density="compact" style="font-size: 15px !important;" @click="addHistoryNote('Expand')"></v-btn>
                     </div>
-                </div>
-                
-                <div style="position: absolute; width: 98%; bottom: 1rem;">
-                    <div style="position: relative; float: right; padding-top: .5rem; left: 20px;">
-                        <!-- <v-btn variant="plain" @click="deleteNote" class="secondary-button">Delete</v-btn>
-                        <v-btn variant="plain" @click="closeNote" class="secondary-button">Cancel</v-btn> -->
-                        <v-btn variant="outlined" class="main-button" density="compact" @click="saveNote('Expand')" style="margin-right: 15px;" :disabled="!this.addHistoryChat.length">Save & Close</v-btn>
+
+                    <div style="position:relative; float: left; width:100%; min-height: 35px; max-height: 35px; overflow-y: auto; bottom: 10px;">
+                        <v-chip style="margin: 2px;" v-for="(attach, index) in addAttach" color="#4472C4" closable density="compact" rounded="0" variant="flat" :text="attach.name" @click:close="removeAttachment(index)"></v-chip>
                     </div>
+    
+            
+                    <div style="float: right;">
+                        <v-btn variant="outlined" class="main-button-style" size="small" @click="saveNote('Expand')" :disabled="!this.addHistoryChat.length">Save & Close</v-btn>
+                    </div>
+      
                 </div>
             </v-card>
         </div>
-
+        
         <v-card id="archivepopup" v-if="isarchiveopen" >
             <v-card-title class="popupheader" >
                 Delete RETS {{deletedRETSID}}
@@ -334,7 +331,6 @@
                 store.isSaveBtnDisable = true
                 //store.updateRetsID()
                 //retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
-                console.log(store.retsObj.attributes.DIST_ANALYST)
                 return
             },
             cancelDetailsMetadata(){
@@ -540,9 +536,9 @@
 }
 
 #commentDiv{
-    position: absolute;
-    bottom: 20%; 
-    left: 55vh; 
+    position: relative;
+    bottom: 100%; 
+    left: 70vh; 
     width: 50rem;
     padding:0%;
     margin:0%;
@@ -751,9 +747,7 @@
     padding: 0px;
     margin-right: 0px;
 }
-#djpbuttons:hover{
-    background: rgba(220, 220, 220, .1) !important;
-}
+
 .popuptext{
     position: absolute;
     left: 10px;

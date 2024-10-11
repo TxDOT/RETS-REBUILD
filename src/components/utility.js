@@ -1043,7 +1043,7 @@ export async function createRoadGraphic(retsObj, onStartUp){
 }
 
 export async function queryRoads(field, value){
-    return await roadLayerView.layer.queryFeatures({
+    return await roadLayerView.queryFeatures({
         where: `${field} = ${value}`,
         returnM: true,
         returnGeometry: true,

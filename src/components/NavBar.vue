@@ -17,8 +17,8 @@
                             <template v-if="tool.name !== 'Multi-Select'" v-slot:activator="{ props }">
                                     <v-icon id="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
                             </template>
-                            <template v-if="tool.name === 'Multi-Select'"  v-slot:activator="{ props }">
-                                <v-badge location="top" floating color="#4472C4" :content="store.roadHighlightObj.size" id="badge">
+                            <template v-if="tool.name === 'Multi-Select'"  v-slot:activator="{ props }" >
+                                <v-badge location="top" floating color="#4472C4" :content="store.roadHighlightObj.size" id="badge"> 
                                     <v-icon id="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
                                 </v-badge>
                             </template>
@@ -79,8 +79,8 @@
 
    </v-card>
    <v-card id = "containersettings" height = "600" v-if = "settingsstatus">
-        <v-card-item id= "settingsheader" >
-            <v-card-title id="headerfont">Settings</v-card-title>            
+        <v-card-item>
+            <span class="banner-txt">Settings</span>            
         </v-card-item>
             <hr id = "separator"/>
         <v-card-item id = "darkmodeitem" >
@@ -107,16 +107,22 @@
         </v-card-item>
             <hr id = "separator" />
         <v-card-item id="bottomitems">
-            <v-btn-group density="compact">
-                <v-btn size="small" class="secondary-button"  prepend-icon="mdi-power" @click="logoutMethod()" >LOGOUT</v-btn>
-            </v-btn-group>
-            <v-btn-group id = "savebutton" density="compact">
-                <v-btn size="small" class="secondary-button"  @click="handleSettingsTool();handleactiveclass()">CANCEL</v-btn>
 
-                <v-btn size="small" class="main-button-style" @click="handleSettingsTool();handleactiveclass()">SAVE</v-btn>
+        <!-- <v-btn-toggle density="compact" id="trigger-buttons"> -->
+            <div style="width: 100%; position: relative; height: 100%;">
+                <div style="width: 100%; position: relative;">
+                    <v-btn variant="plain" size="small" class="secondary-button"  prepend-icon="mdi-power" @click="logoutMethod()" >LOGOUT</v-btn>
+                    <v-btn style="float: right;" variant="outlined" size="small" class="main-button-style" @click="handleSettingsTool(); handleactiveclass();">save</v-btn>
+                    <v-btn style="float: right;" variant="plain" size="small" class="secondary-button"  @click="handleSettingsTool();handleactiveclass();">CANCEL</v-btn>
+                    
+                    
+                </div>
+
+
+            </div>
             
-                
-            </v-btn-group>
+            
+        <!-- </v-btn-toggle> -->
             
 
         </v-card-item>
@@ -607,8 +613,6 @@
         left: 509px; 
         z-index: 9999;
         border-radius: 0px;
-        
-
     }
     #settingsheader{
         position: relative;
@@ -696,14 +700,7 @@
         bottom: 10px;
         width: 25rem;
     }
-    #logoutbutton{
-        position: absolute;
-        text-align: start;
-    }
-    #savebutton{
-        position: absolute;
-        right: 6px;
-    }
+    
     #darkmodeswitch{
         position: absolute;
         bottom: 2.3rem;
@@ -741,8 +738,10 @@
     }
     #badge {
         position: absolute;
-        top: 20px;
-        left: 20x;
+        bottom: 15px;
+        left: 0px;
+        min-width: 100% !important;  
+        max-height: 100% !important;
     }
  
 </style>

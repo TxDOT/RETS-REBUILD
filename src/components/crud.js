@@ -2,7 +2,6 @@ import { retsLayer, retsHistory, flagRetsColor, retsRole } from "./map-Init";
 import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant";
 import {store} from './store.js'
-import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 
 
 export async function addRETSPT(retsObj){
@@ -30,6 +29,10 @@ export async function updateRETSPT(retsObj){
 
     if(enable.attributes.RELATED_RETS){
         enable.attributes.RELATED_RETS = enable.attributes.RELATED_RETS.map(x => x.fullData ? x.fullData.RETS_ID : x).toString()
+    }
+    if(enable.attributes.STAT === 3){
+        let getUserInfo = appConstants.userRoles.find(user => user.value === enable.attributes.GIS_ANALYST)
+        sendWebhookEmail(enable.attributes.RETS_ID, getUserInfo.email)
     }
     //enable.attributes.DFO = Number(DFO)
     retsObj.attributes.flagColor.FLAG === "" ? null : postFlagColor(retsObj)
@@ -279,5 +282,13 @@ export function postFlagColor(rets){
         findFlag.FLAG = flagGraphic.attributes.FLAG
     })
     .catch(err => console.log(err)) 
+    return
+}
+
+function sendWebhookEmail(retsNum, gisUser){
+    fetch(`https://gis-batch-dev.txdot.gov/fmejobsubmitter/TPP-MB/RETS_Notify_DEV.fmw?Email=${gisUser}&RETSnumber=${retsNum}&opt_showresult=false&opt_servicemode=sync&token=0c12a2e7bd8784956b6b5750f763c0bf1b18323e`)
+    .then(res => console.log(res))
+    .catch(err => console.log(err))
+
     return
 }

@@ -24,14 +24,22 @@
   height: 24px !important;
   border-radius: 0% !important;
   outline: #4472C4;
-  
 }
 
 .main-button-style{
   border: 1px solid white !important;
   border-radius: 0% !important;
-  margin-right: 10px;
+  margin-right: 4px;
   margin-left: 10px;
+}
+
+.banner-txt{
+  position: relative;
+  bottom: 0px;
+  font-weight: normal;
+  font-size: 20px;
+  left: 0px;
+  width: 100%;
 }
 
 .secondary-button{
@@ -39,6 +47,10 @@
   margin-right: 10px;
   margin-left: 10px;
   opacity: 1 !important;
+}
+
+.secondary-button:hover{
+  background-color: rgba(255, 255,255, .1);
 }
 
 .secondary-button:disabled{
@@ -237,5 +249,14 @@
 }
 
 .v-badge__badge{
-  height: 17px !important;
+  height: 18px !important;
+  min-width: 17px !important;
 }   
+
+.trigger-buttons{
+  position: relative;
+  padding-top: .5rem;
+  position: relative;
+  float: right;
+  margin-bottom: 10px;
+}

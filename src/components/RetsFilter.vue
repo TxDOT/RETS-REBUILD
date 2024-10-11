@@ -64,7 +64,7 @@
             
         
             <div style="position: relative; float: right;">
-                <v-btn-toggle id="trigger-buttons" density="compact">
+                <v-btn-toggle class="trigger-buttons" density="compact">
                     <v-btn @click="cancelFilter()" class="secondary-button" variant="plain" size="small">Cancel</v-btn>
                     <v-btn @click="setFilterNumber()" class="main-button-style" variant="outlined" size="small">Save</v-btn>
                 </v-btn-toggle>
@@ -126,6 +126,7 @@
         },
         mounted(){
             this.archiveFilter()
+
         },
         methods:{
             archiveFilter(){

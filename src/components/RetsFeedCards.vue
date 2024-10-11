@@ -606,7 +606,7 @@ export default{
         top: 4px;
         font-size: 20px;
         font-weight: bold; 
-        padding-left: 20px;
+        padding-left: 9px;
     }
     #activity-header{
         position: relative;
@@ -617,14 +617,7 @@ export default{
     .banner-btn{
         position: relative;
     }
-    .banner-txt{
-        position: relative;
-        bottom: 0px;
-        font-weight: normal;
-        font-size: 20px;
-        left: 0px;
-        width: 100%;
-    }
+
     .retsSubtitleTxt{
         position: relative;
         font-size: 20px; 

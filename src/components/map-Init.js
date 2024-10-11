@@ -278,7 +278,6 @@ export const TxDOTRoadwayscopy = new FeatureLayer ({
   returnM: true,
   hasM: true,
   definitionExpression: "",
-  visible:false
 })
 
 //Rets Layer construction
