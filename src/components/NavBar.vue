@@ -12,7 +12,7 @@
         </v-list>
         <v-list id="icons-bottom" class="iconList">
             <v-list-item id="popoutitems" class="iconList-item" v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" :active="tool.isActive" :active-class="tool.name !== 'Jump To' || tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
-                <template v-if="tool.name !== 'Basemaps' || tool.name !== 'Jump To'">
+                <template v-if="tool.name !== 'Basemaps' && tool.name !== 'Jump To'">
                     <v-tooltip location="right" :text="tool.name">
                             <template v-if="tool.name !== 'Multi-Select'" v-slot:activator="{ props }">
                                     <v-icon id="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>

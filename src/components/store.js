@@ -88,7 +88,7 @@ export const store = reactive({
         archiveFilter:{},
         CREATE_DT: {title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"},
         //JOB_TYPE:[],
-        JOB_TYPE:appConstants.jobTypeDomainValues,
+        JOB_TYPE: appConstants.defaultJobtypeValues,
         EDIT_DT: null,
         STAT:appConstants.defaultStatValues,
         ACTV:[],

@@ -152,7 +152,7 @@
                 filterUser: appConstants.userRoles,
                 filterActivity: appConstants.activityList,
                 numFilters: 0,
-                defaultFilter: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, "JOB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
+                defaultFilter: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, "JOB_TYPE": appConstants.defaultJobtypeValues, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
                          "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, 
                          "filterTotal": 2},
                 isDate: false,
@@ -180,25 +180,15 @@
         },
         mounted(){
             this.archiveFilter(),
-            this.getFields(),
-            this.testmethod()
+            this.getFields()
             
 
-            
-        },
-        computed: {
             
         },
         methods:{
             clearValidation(){
                 if ((store.customquery === null || store.customquery === "") && (this.validationMessage != null || this.validationMessage != "" ) ){
                     this.validationMessage = ''
-                }
-            },
-            testmethod(){
-                if (store.customquery === retsLayer.definitionExpression){
-                    
-                    return
                 }
             },
             cancelsaveQuery(filter){
@@ -380,7 +370,7 @@
             },
             restoreDefault(){
                 store.CREATE_DT = {title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"}
-                store.JOB_TYPE.length = 0
+                store.JOB_TYPE = appConstants.defaultJobtypeValues
                 store.EDIT_DT = null
                 store.STAT = appConstants.defaultStatValues
                 store.ACTV.length = 0
