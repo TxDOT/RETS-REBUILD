@@ -4,7 +4,7 @@
             <v-list-item class="iconList-item"  id="popoutitems" v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" active-class="btn-left-brder" :active="store.toggleFeed === tool.value" :disabled="tool.disabled">    
                 <v-tooltip location="right bottom" :text=tool.name >
                     <template v-slot:activator="{ props}">
-                        <v-icon id="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
+                        <v-icon class="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
                     </template>
                 </v-tooltip>
                 
@@ -15,17 +15,17 @@
                 <template v-if="tool.name !== 'Basemaps' || tool.name !== 'Jump To'">
                     <v-tooltip location="right" :text="tool.name">
                             <template v-if="tool.name !== 'Multi-Select'" v-slot:activator="{ props }">
-                                    <v-icon id="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
+                                    <v-icon class="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
                             </template>
-                            <template v-if="tool.name === 'Multi-Select'"  v-slot:activator="{ props }" >
-                                <v-badge location="top" floating color="#4472C4" :content="store.roadHighlightObj.size" id="badge"> 
-                                    <v-icon id="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
+                            <template v-else  v-slot:activator="{ props }">           
+                                <v-badge location="end" color="#4472C4" :content="store.roadHighlightObj.size" id="badge"> 
+                                    <v-icon class="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
                                 </v-badge>
                             </template>
                     </v-tooltip>
                 </template>
                 <template v-else>
-                        <v-icon id="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
+                        <v-icon class="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
                 </template>
             </v-list-item>
         </v-list>
@@ -518,11 +518,11 @@
     .btn-left-brder i {
         position: absolute;
         top: 35%;
-        left: 28% !important;
+        left: 29% !important;
         transform: translate(-25%, -25%);
     }
 
-    #topIcon{
+    .topIcon{
         position: absolute;
         top: 35%;
         left: 40%;
@@ -535,7 +535,7 @@
     }
     #popoutitems{
        bottom: 0px;
-       margin-bottom: 0px !important;
+       margin: 0px !important;
        min-height: 39px !important;
     }
     #iconcontent  {
@@ -737,10 +737,15 @@
     }
     #badge {
         position: absolute;
-        bottom: 15px;
-        left: 0px;
-        min-width: 100% !important;  
-        max-height: 100% !important;
+        top: 15px;
+        right: 25px;
+        height: 100% !important;
     }
- 
+
+    #badge .v-badge__badge{
+        position: absolute;
+        top: -4px !important;
+        left: 6px !important;
+        margin-right: 14px;
+    }
 </style>

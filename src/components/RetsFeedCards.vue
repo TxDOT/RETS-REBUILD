@@ -44,8 +44,8 @@
 
                     <div style="flex: auto;">
                         <v-btn class="banner-btn" @click="store.isfilter = !store.isfilter" density="compact" variant="flat" flat size="20">
-                            <v-badge color="#4472C4" :content="store.filterTotal" location="top end"> 
-                                <v-icon size="20" style="position: relative; right: 4px;" >mdi-filter</v-icon>
+                            <v-badge color="#4472C4" :content="store.filterTotal" location="top" style="padding-left: 5px;">
+                                <v-icon size="20" style="position: relative; right: 4px;">mdi-filter</v-icon>
                             </v-badge>
                         </v-btn>
                     </div>
@@ -98,19 +98,19 @@
     <v-card id="countPopup" v-if="countPopupStatus">
         <span>
             &nbsp;&nbsp;
-            <span :style="{ color: notStartedColor, width: '5ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsNotStartedCount }}</span>
+            <span :style="{ color: notStartedColor, width: '5ch', display: 'inline-block', textAlign: 'left', fontWeight: 'bold'  }">{{ retsNotStartedCount }}</span>
             <span :style="{ color: 'lightgray'}">&nbsp;&nbsp; Not Started</span><br>
             
             &nbsp;&nbsp;
-            <span :style="{ color: inProgressColor, width: '5ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsInProgressCount }}</span>
+            <span :style="{ color: inProgressColor, width: '5ch', display: 'inline-block', textAlign: 'left', fontWeight: 'bold'  }">{{ retsInProgressCount }}</span>
             <span :style="{ color: 'lightgray' }">&nbsp;&nbsp; In Progress</span><br>
            
             &nbsp;&nbsp;
-            <span :style="{ color: completeColor, width: '5ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsCompleteCount }}</span>
+            <span :style="{ color: completeColor, width: '5ch', display: 'inline-block', textAlign: 'left', fontWeight: 'bold'  }">{{ retsCompleteCount }}</span>
             <span :style="{ color: 'lightgray' }">&nbsp;&nbsp; Complete</span><br>
             
             &nbsp;&nbsp;
-            <span :style="{ color: onHoldColor, width: '5ch', display: 'inline-block', textAlign: 'right', fontWeight: 'bold'  }">{{ retsOnHoldCount }}</span>
+            <span :style="{ color: onHoldColor, width: '5ch', display: 'inline-block', textAlign: 'left', fontWeight: 'bold'  }">{{ retsOnHoldCount }}</span>
             <span :style="{ color: 'lightgray' }">&nbsp;&nbsp; On Hold</span><br>
 
              
@@ -584,6 +584,7 @@ export default{
     .v-card{
         background-color: rgba(255,0,0,0);
     }
+  
     .mdi-menu-down{
         display: none;
     }
@@ -709,7 +710,7 @@ export default{
     #countPopup{
         position: absolute;
         height: 100px;
-        width: 180px;
+        width: 160px;
         left: 220px;
         top: 40px;
         background-color: rgba(18, 18, 18, 255);

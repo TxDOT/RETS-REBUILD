@@ -53,7 +53,7 @@ async function signIn(){
     getRetsLayerView()
     getTxDotRdWayLayerView()
     //getHistoryView()
-    home(true)
+    //home(true)
 
   })
 

@@ -1,8 +1,7 @@
 
 <template>
-    <hr></hr>
     <div style="width: 99%; margin-left: 10px; height: 100%; display: flex; flex-direction: column; gap: 2px;">
-        <div id="search" >
+        <div id="search">
             <div style="position: relative; display: flex; flex-direction: row;">
                 <v-text-field class="search-history" placeholder="Search..." flat rounded="0" prepend-inner-icon="mdi-magnify" density="compact" v-model="searchHistoryFilter" variant="solo-filled" elevation="0" >
                 <template v-slot:append-inner>
@@ -11,7 +10,7 @@
                 </v-text-field>
 
                 <div style="position: relative; flex: auto; width: 0%; padding-top: 5px; right: 2px;">
-                    <v-btn variant="plain" density="compact" style="font-size: 8px; float: right;" @click="queryAttachments" :disabled="store.numAttachments === 0" v-model="isAttachedActive" :active="isAttachedActive" active-class="active-button">
+                    <v-btn variant="plain" density="compact" style="font-size: 10px; float: right; text-transform: none;" @click="queryAttachments" :disabled="store.numAttachments === 0" v-model="isAttachedActive" :active="isAttachedActive" active-class="active-button">
                         <template v-slot:prepend>
                             <v-icon icon="mdi-filter"></v-icon>
                         </template>
@@ -36,11 +35,7 @@
                                     <p id="replyingToCmnt">Replying to "{{store.historyChat.find(x => x.OBJECTID === note.PARENT_ID)?.CMNT ?? "Referenced Note has been deleted"}}"</p>
                                 </span>
                           
-                          
                                 <v-textarea class="history-note" rows="1" auto-grow density="compact" variant="plain" :disabled="note.OBJECTID !== updateOID" v-model="note.CMNT" placeholder="Enter Comment" autofocus></v-textarea>
-                    
-                                    
-                            
                                 <span style="font-size: 10px; color: grey; padding-left: 2px; position: relative; bottom: 5px; padding: 0px;">{{ returnUserName(note.CMNT_NM) }} {{ returnDateFormat(note.CREATE_DT) }} <b v-if="note.CREATE_DT !== note.EDIT_DT && note.SYS_GEN === 0" class="main-color">{{ `Edited ${returnDateFormat(note.EDIT_DT)}` }}</b></span>
                             
                             <div style="position: relative; top: 0px;" v-if="note.attachments">
@@ -102,6 +97,9 @@
                 testOid: 0,
                 searchAttach: false,
             }
+        },
+        updated(){
+            document.querySelector('#displayHistory').scrollTop = document.querySelector('#displayHistory').scrollHeight - document.querySelector('#displayHistory').clientHeight
         },
         methods:{
             clearContent(){
@@ -284,6 +282,7 @@
         width: 95.7%;
         overflow-y: auto;
         padding-bottom: 30px;
+        margin-bottom: 4px;
     }
     #search{
         position: relative;
@@ -301,8 +300,8 @@
         background-color:#4472C4;
         height: .9rem;
         float: right;
-        top: 1.8rem;
-        left: 3.4rem;
+        bottom: 1.8rem;
+        right: 6.6rem;
         border-radius: 50%;
         z-index: 9999
     }

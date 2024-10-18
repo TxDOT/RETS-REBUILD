@@ -470,6 +470,7 @@ export function home(onrender){
                 view.goTo(resp.extent)
             }
         })
+        return
     }
     homeWidget.cancelGo()
     homeWidget.on("go", ()=>{
@@ -1043,7 +1044,7 @@ export async function createRoadGraphic(retsObj, onStartUp){
 }
 
 export async function queryRoads(field, value){
-    return await roadLayerView.queryFeatures({
+    return await roadLayerView.layer.queryFeatures({
         where: `${field} = ${value}`,
         returnM: true,
         returnGeometry: true,

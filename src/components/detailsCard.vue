@@ -84,7 +84,7 @@
             </v-row>
             <v-row no-gutters dense style="max-height: 30px; position: relative;">
                 <div style="display: flex; flex-direction: row; width: 100%;">
-                    <v-btn icon="mdi-plus" density="compact" variant="plain" @click="displayGemSearch" disabled color="white" style="top: 5px"></v-btn>
+                    <v-btn icon="mdi-plus" density="compact" variant="plain" @click="displayGemSearch" disabled color="white" id="addGemTaskBtn"></v-btn>
                     <div id="chips">
                         <v-chip 
                             v-for="i in gemTasks"
@@ -100,8 +100,8 @@
                         {{ i }}
                         </v-chip>
                     </div>
-                    <div style="position:relative; cursor: pointer !important; float: right; width: 100%;" @click="toggleVisibility()">
-                        <v-text-field prepend-icon="mdi-timer-outline" disabled density="compact" variant="plain" class="date-select"> {{ datePicker }}</v-text-field>
+                    <div style="position:relative; cursor: pointer !important;" @click="toggleVisibility()">
+                        <v-btn color="white" prepend-icon="mdi-timer-outline" disabled density="compact" variant="plain" class="date-select"> {{ datePicker }}</v-btn>
                     </div>
                 </div>
                 
@@ -145,7 +145,7 @@ import {store} from './store.js'
                 gemTasks: [],
                 isDatePicker: false,
                 datePicked: null,
-                datePicker: 'Pick a Date',
+                datePicker: 'Add a deadline',
                 disabledRoute: false,
                 disableSave: false,
                 detailsStat: appConstants.statDomainValues,
@@ -556,8 +556,12 @@ import {store} from './store.js'
 .date-select{
     position: relative;
     float: right;
-    font-size: 14px;
-    top: 0px;
+    font-size: 10px;
+    top: 5px;
+    padding: 0px;
+    margin: 0px;
+    text-transform: none;
+    
 }
 
 #deadline-div .v-btn{
@@ -589,6 +593,11 @@ import {store} from './store.js'
     height: 22px;
 }
 
-
+#addGemTaskBtn{
+    font-size: 13px;
+    position: relative;
+    top: 3px;
+    right: 8px;
+}
 
 </style>

@@ -13,7 +13,7 @@
                 <v-icon style="font-size: 13.5px;" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" ></v-icon>
             </div>
 
-            <v-lazy :options="{'threshold': 0}" transition="expand-transition" height="100">
+            <v-lazy :options="{'threshold': 0}" transition="expand-transition" height="100" width="439">
                 <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `5px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="checkhighlight(String(rd.attributes.RETS_ID)) ?? 'card-rets'"  @dblclick="double(rd, road);" @click="zoomToRetsPt(rd)">
                     <!-- <div class="boundary-rets-card"> -->
 
@@ -44,7 +44,7 @@
                     </div>
                     
                     <div class="bottomCardText">
-                        <div style="position:relative; float:right; font-size: 11px; top: 45px; left: 175px;" >
+                        <div style="position:relative; float:right; font-size: 11px; top: 45px; left: 190px;" >
                             <v-tooltip text="Assigned to you" location="top">
                                 <template v-slot:activator="{props}">
                                     <v-icon icon="mdi-account-multiple-check" color="white" v-if="rd.attributes.mdiaccountmultiplecheck === true" class="cardPRIO" v-bind="props"></v-icon>
@@ -243,9 +243,9 @@ export default{
 .rets-card-row{
     position: relative;
     bottom: 1.5rem;
-    right: 23px;
+    right: 40px;
     width: 100% !important;
-    padding: 0% 5% 5% 0%;
+    padding: 0% 0% 0% 0%;
     height: 70px;
     opacity: 1;
     /* transform: translateX(30px);
@@ -261,7 +261,7 @@ export default{
 .flag-btn{
     font-size: 10px;
     top: 21.2px;
-    left: 450px;
+    left: 460px;
     z-index: 999;
     width: 1px !important;
     padding: 0px !important;

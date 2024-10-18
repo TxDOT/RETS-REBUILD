@@ -249,9 +249,13 @@
 }
 
 .v-badge__badge{
-  height: 18px !important;
-  min-width: 17px !important;
-}   
+  position: relative;
+  bottom: 12px !important;
+  left: 13px !important;
+  height: 15px !important;
+  min-width: 15px !important;
+  max-width: 15px !important;
+}    
 
 .trigger-buttons{
   position: relative;

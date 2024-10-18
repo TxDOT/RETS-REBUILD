@@ -4,7 +4,7 @@
         <div id="detailsHeaderIcon">
             <v-btn density="compact" flat @click="changeColor(store.retsObj.attributes.RETS_ID);" id="flagBtnDetails">
                 <template v-slot:prepend>
-                    <v-icon size="20px" :id="`${store.retsObj.attributes.RETS_ID}Icon`" :color="store.retsObj.attributes.flagColor.FLAG" :icon="store.retsObj.attributes.flagColor.FLAG ? changeFlagIcon(store.retsObj.attributes.flagColor.FLAG) : 'mdi-flag-outline' " style="position: absolute; bottom: 2px; left: 6px;"></v-icon>
+                    <v-icon size="20px" :id="`${store.retsObj.attributes.RETS_ID}Icon`" :color="store.retsObj.attributes.flagColor.FLAG" :icon="store.retsObj.attributes.flagColor.FLAG ? changeFlagIcon(store.retsObj.attributes.flagColor.FLAG) : 'mdi-flag-outline' " style="position: relative; left: 6px;"></v-icon>
                 </template>
             </v-btn>
             <div class="details-color-picker" v-if="flagClickedId === store.retsObj.attributes.RETS_ID" v-click-outside="closeFlagDiv">
@@ -14,120 +14,122 @@
                 <v-btn icon="mdi-exclamation" density="compact" style="color: #d9d9d9; opacity: 1; font-size: 15px;" selected-class="toggle-exclamation" variant="plain" active></v-btn>
             </v-btn-toggle>   
         </div>
-        <div style="height: 100%; width: 100%; ">
-        <div class="container-div">
-            <div class="details-div">
-                <v-card class="details-page">
-                    <v-btn-toggle selected-class="active-button" variant="plain" mandatory v-model="isBtnSet" id="retsDetailMeta">
-                        <v-btn flat class="retsMetaBtn" @click="this.isDetails = true; this.isMetadata = false" density="compact">Details</v-btn>
-                        <v-btn flat class="retsMetaBtn" @click="this.isMetadata = true; this.isDetails = false" density="compact">Metadata</v-btn>
-                    </v-btn-toggle>
-                    <DetailsCard v-if="isDetails"/>
-                    <MetadataCard v-if="isMetadata"/>
-                </v-card>
-                <div class="gem-search" >
-                    <v-icon icon="mdi-magnify" id="gem-search-icon"></v-icon>
-                    <input type="text" id="gem-id">
-                    <span id="show-gem-tasks" v-for="i in gemTask">
-                        <span class="gem-task" @click="addGemChip(i)">{{ i }}</span>
-                    </span>
+        <div style="height: 100%; width: 100%;">
+            <div class="container-div">
+                <div class="details-div">
+                    <v-card class="details-page">
+                        <v-btn-toggle selected-class="active-button" variant="plain" mandatory v-model="isBtnSet" id="retsDetailMeta">
+                            <v-btn flat class="retsMetaBtn" @click="this.isDetails = true; this.isMetadata = false" density="compact">Details</v-btn>
+                            <v-btn flat class="retsMetaBtn" @click="this.isMetadata = true; this.isDetails = false" density="compact">Metadata</v-btn>
+                        </v-btn-toggle>
+                        <DetailsCard v-if="isDetails"/>
+                        <MetadataCard v-if="isMetadata"/>
+                    </v-card>
+                    <div class="gem-search" >
+                        <v-icon icon="mdi-magnify" id="gem-search-icon"></v-icon>
+                        <input type="text" id="gem-id">
+                        <span id="show-gem-tasks" v-for="i in gemTask">
+                            <span class="gem-task" @click="addGemChip(i)">{{ i }}</span>
+                        </span>
+                    </div>
                 </div>
-            </div>
 
-            <!-- history section -->
-            <div class="history-div">
-                <div style="display: flex; flex-direction: column; height: 100%;">
-                    <v-card class="flex" style="display: flex; flex-direction: column; position: relative; border-radius: 0%; gap: 0px;">
-                        <div style="max-height: 30px; display: flex; flex-direction: row;">
-                            <v-card-title style="font-size: 15px; position: relative; bottom: 8px;" class="flex">
-                                <span style="position: relative;">History</span>
-                                <v-btn icon="mdi-arrow-expand" variant="plain" density="compact" @click="expandChatHistory" style="font-size: .6rem; float: right; position: relative; left: 20px;"></v-btn>
-                            </v-card-title>
-                        </div>
-                        <div class="flex">
-                            <historyViewSmall/>
-                        </div>
-                        <div style="max-height: 200px; padding-top: 0px; padding-bottom: 4px;">
-                            <div>
-                                <v-text-field label="Type a message" density="compact" tile v-model="addHistoryChat" :error-messages= "initRules ? 'Write a note. Submit your thought to History!' : null" @update:modelValue="historyValue"></v-text-field>
+                <!-- history section -->
+                <div class="history-div">
+                    <div style="display: flex; flex-direction: column; height: 100%;">
+                        <v-card class="flex" style="display: flex; flex-direction: column; position: relative; border-radius: 0%; gap: 0px;">
+                            <div style="max-height: 30px; display: flex; flex-direction: row;">
+                                <v-card-title style="font-size: 15px; position: relative;" class="flex">
+                                    <span style="position: relative; bottom: 10px !important;">History</span>
+                                    <v-btn icon="mdi-arrow-expand" variant="plain" density="compact" @click="expandChatHistory" style="font-size: .6rem; float: right; position: relative; left: 20px; bottom: 10px;"></v-btn>
+                                </v-card-title>
                             </div>
-                            
-                            <div style="float: left; bottom: 0rem; position: relative;" class="flex">
-                                <v-btn prepend-icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 9px !important;" @click="displayAttachments()">Add an Attachment</v-btn>
+                            <div class="flex">
+                                <historyViewSmall/>
                             </div>
-                            <div style="float:right; bottom: 1.2rem; position: relative; right: 0px" class="flex">
-                                <v-btn icon="mdi-close" variant="plain" density="compact" style="font-size: 15px !important;" @click="clearMessage"></v-btn>
-                                <v-btn icon="mdi-check" variant="plain" density="compact" style="font-size: 15px !important;" @click="addHistoryNote('Small')"></v-btn>
-                            </div>
-                            <div class="flex" style="right: 20px; bottom: 0px; position: relative; display: flex; flex-direction: column; max-width: 400px; min-height: 10px; max-height: 30px; overflow-y: auto; overflow-x: hidden; "> 
-                                <div style="flex: auto;">
-                                    <v-chip v-for="(attach, index) in addAttach" color="#4472C4" closable density="compact" rounded="0" variant="flat" :text="attach.name" @click:close="removeAttachment(index)" style="margin: 1px; width: fit-content"></v-chip>
+                            <div style="max-height: 200px; padding-top: 0px; padding-bottom: 4px; ">
+                                <div style="margin-left: 10px; margin-right: 10px;">
+                                    <v-text-field label="Type a message" density="compact" tile v-model="addHistoryChat" :error-messages= "initRules ? 'Write a note. Submit your thought to History!' : null" @update:modelValue="historyValue"></v-text-field>
+                                </div>
+                                
+                                <div style="float: left; bottom: 0rem; position: relative;" class="flex">
+                                    <v-btn prepend-icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px !important; text-transform: none;" @click="displayAttachments()">Add an attachment</v-btn>
+                                </div>
+                                <div style="float:right; bottom: 1.2rem; position: relative; width: 80px; left: 10px;" class="flex">
+                                    <v-btn icon="mdi-close" variant="plain" density="compact" style="font-size: 10px !important; left: 10px;" @click="clearMessage"></v-btn>
+                                    <v-btn icon="mdi-check" variant="plain" density="compact" style="font-size: 10px !important;" @click="addHistoryNote('Small')"></v-btn>
+                                </div>
+                                <div class="flex" style="right: 20px; bottom: 0px; position: relative; display: flex; flex-direction: column; max-width: 400px; min-height: 10px; max-height: 30px; overflow-y: auto; overflow-x: hidden; "> 
+                                    <div style="flex: auto;">
+                                        <v-chip v-for="(attach, index) in addAttach" color="#4472C4" closable density="compact" rounded="0" variant="flat" :text="attach.name" @click:close="removeAttachment(index)" style="margin: 1px; width: fit-content"></v-chip>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </v-card>
+                        </v-card>
+                    </div>
+                </div>
+                <div style="position: relative; min-height:40px; max-height:40px; padding-bottom: 120px; width: 100%; flex: auto; z-index: 9999;">
+                    <div style="position: relative; float: left; font-size: 11px; display: flex; flex-wrap: wrap; top: 3px; left: 6px;">
+                        <v-checkbox label="Asset Only Job" density="compact" class="checkbox-size" v-model="isAsset" @update:model-value="isAssetJob"></v-checkbox>
+                    </div>
+                    <v-btn-toggle class="trigger-buttons" density="compact">
+                        <v-btn @click="handlearchive()" variant="plain" size="small" class="secondary-button">Delete</v-btn>
+                        <!-- <v-btn @click="handlearchive" variant="plain" flat size="small" class="secondary-button">Delete</v-btn> -->
+                        <v-btn @click="cancelDetailsMetadata()" variant="plain" class="secondary-button" size="small" :disabled="store.isCancelBtnDisable">Cancel</v-btn>
+                        <v-btn @click="sendToParent()" variant="outlined" class="main-button-style" size="small" :disabled="store.isSaveBtnDisable" :loading="store.isSaving">Save</v-btn>
+                    </v-btn-toggle>
                 </div>
             </div>
-            <div style="position: relative; max-height:40px; padding-bottom: 120px; left: 6px; width: 99%; flex: auto; z-index: 9999;">
-                <div style="position: relative; float: left; margin-left: 10px; font-size: 11px; display: flex; flex-wrap: wrap; top: 3px;">
-                    <v-checkbox label="Asset Only Job" density="compact" class="checkbox-size" v-model="isAsset" @update:model-value="isAssetJob"></v-checkbox>
+
+            <div id="commentDiv" v-if="editText">
+                <v-card style="position: relative; height: 100%; border-radius: 0%;" >
+                    <v-card-title style="padding-bottom: 30px;">History</v-card-title>
+                    <div style="float: right; position: relative; bottom: 3.7rem;" >
+                        <v-btn icon="mdi-close" variant="plain" density="compact" @click="editText = false" style="font-size: .9rem;"></v-btn>
+                    </div>
+                    <historyView/>
+                    <div class="marginSetting" style="padding-top: 10px; position: relative; width: 98%; bottom: 0rem;">
+                        <v-text-field label="Type a message" density="compact" tile v-model="addHistoryChat" style="margin-left: 0px; margin-right: 5px;" :error-messages= "initRules ? 'Write a note. Submit your thought to History!' : null" @update:modelValue="historyValue"></v-text-field>
+                        <div style="float: left; bottom: 1rem; position: relative;">
+                            <v-btn prepend-icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px !important; top: 10px;" @click="displayAttachments()">Add an Attachment</v-btn>
+                        </div>
+                        
+                        <div style="float:right; bottom: 1.3rem; position: relative; left: 7px;">
+                            <v-btn icon="mdi-close" variant="plain" density="compact" style="font-size: 15px !important;" @click="clearMessage"></v-btn>
+                            <v-btn icon="mdi-check" variant="plain" density="compact" style="font-size: 15px !important;" @click="addHistoryNote('Expand')"></v-btn>
+                        </div>
+
+                        <div style="position:relative; float: left; width:100%; min-height: 35px; max-height: 35px; overflow-y: auto; bottom: 10px;">
+                            <v-chip style="margin: 2px;" v-for="(attach, index) in addAttach" color="#4472C4" closable density="compact" rounded="0" variant="flat" :text="attach.name" @click:close="removeAttachment(index)"></v-chip>
+                        </div>
+        
+                
+                        <div style="float: right;">
+                            <v-btn variant="outlined" class="main-button-style" size="small" @click="saveNote('Expand')" :disabled="!this.addHistoryChat.length">Save & Close</v-btn>
+                        </div>
+        
+                    </div>
+                </v-card>
+            </div>
+        </div> 
+
+        <v-card v-if="isarchiveopen" id="archivepopup" height="130">
+            <div style="height: 100%; margin: 10px;">
+                <div style="padding: 0px; bottom: 8px;" class="banner-txt">
+                    Delete RETS {{deletedRETSID}}
+                    <hr/>
                 </div>
-                <v-btn-toggle class="trigger-buttons" density="compact">
-                    <v-btn @click="handlearchive" variant="plain" size="small" class="secondary-button">Delete</v-btn>
-                    <!-- <v-btn @click="handlearchive" variant="plain" flat size="small" class="secondary-button">Delete</v-btn> -->
-                    <v-btn @click="cancelDetailsMetadata" variant="plain" class="secondary-button" size="small" :disabled="store.isCancelBtnDisable">Cancel</v-btn>
-                    <v-btn @click="sendToParent" variant="outlined" class="main-button-style" size="small" :disabled="store.isSaveBtnDisable" :loading="store.isSaving">Save</v-btn>
+                
+                <v-card-subtitle class="popuptext">
+                    Deleting this RETS will move it to the archive table.
+                </v-card-subtitle>
+                    
+                <v-btn-toggle class="trigger-buttons" density="compact" style="position: relative; top: 20px; left: 11px;">
+                    <v-btn variant="plain" size="small" class="secondary-button"  @click="handlearchive">CANCEL</v-btn>
+                    <v-btn class="main-button-style" variant="outlined" size="small" @click="deleteRets()">DELETE</v-btn>
                 </v-btn-toggle>
             </div>
-        </div>
-
-        <div id="commentDiv" v-if="editText">
-            <v-card style="position: relative; height: 100%; border-radius: 0%;" >
-                <v-card-title style="padding-bottom: 30px;">History</v-card-title>
-                <div style="float: right; position: relative; bottom: 3.7rem;" >
-                    <v-btn icon="mdi-close" variant="plain" density="compact" @click="editText = false" style="font-size: .9rem;"></v-btn>
-                </div>
-                <historyView/>
-                <div class="marginSetting" style="padding-top: 10px; position: relative; width: 98%; bottom: 0rem;">
-                    <v-text-field label="Type a message" density="compact" tile v-model="addHistoryChat" style="margin-left: 0px; margin-right: 5px;" :error-messages= "initRules ? 'Write a note. Submit your thought to History!' : null" @update:modelValue="historyValue"></v-text-field>
-                    <div style="float: left; bottom: 1rem; position: relative;">
-                        <v-btn prepend-icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px !important; top: 10px;" @click="displayAttachments()">Add an Attachment</v-btn>
-                    </div>
-                    
-                    <div style="float:right; bottom: 1.3rem; position: relative; left: 7px;">
-                        <v-btn icon="mdi-close" variant="plain" density="compact" style="font-size: 15px !important;" @click="clearMessage"></v-btn>
-                        <v-btn icon="mdi-check" variant="plain" density="compact" style="font-size: 15px !important;" @click="addHistoryNote('Expand')"></v-btn>
-                    </div>
-
-                    <div style="position:relative; float: left; width:100%; min-height: 35px; max-height: 35px; overflow-y: auto; bottom: 10px;">
-                        <v-chip style="margin: 2px;" v-for="(attach, index) in addAttach" color="#4472C4" closable density="compact" rounded="0" variant="flat" :text="attach.name" @click:close="removeAttachment(index)"></v-chip>
-                    </div>
-    
-            
-                    <div style="float: right;">
-                        <v-btn variant="outlined" class="main-button-style" size="small" @click="saveNote('Expand')" :disabled="!this.addHistoryChat.length">Save & Close</v-btn>
-                    </div>
-      
-                </div>
-            </v-card>
-        </div>
-        
-        <v-card id="archivepopup" v-if="isarchiveopen" >
-            <v-card-title class="popupheader" >
-                Delete RETS {{deletedRETSID}}
-            </v-card-title>
-            <hr id="separator3" />
-            <v-card-subtitle class="popuptext">
-                Deleting this RETS will move it to the archive table.
-            </v-card-subtitle>
-                
-            <v-btn-group class="buttonpositioning" density="compact">
-                <v-btn class="secondary-button"  @click="handlearchive">CANCEL</v-btn>
-                <v-btn class="main-button-style" @click="deleteRets">DELETE</v-btn>
-            </v-btn-group>
         </v-card>  
-    </div> 
-    
 
 </template>
 
@@ -468,7 +470,7 @@
             },
             handlearchive(){
                 this.isarchiveopen = !this.isarchiveopen
-                this.deletedRETSID = store.retsObj.attributes.OBJECTID       
+                this.deletedRETSID = store.retsObj.attributes.OBJECTID
             },
 
 
@@ -477,64 +479,28 @@
 </script>
 
 <style scoped>
+#archivepopup{
+    position: absolute;
+    border-radius: 5px;
+    width: 25rem;
+    border-radius: 0;
+    left: 185% !important;
+    top: 30% !important;
+    padding-bottom: 20px;
+}
+
 .flex{
     flex: auto;
 }
 
-#archivepopup{
-    position: fixed;
-    border-radius: 5px;
-    width: 25rem;
-    height:20%; 
-    border-radius: 0;
-    left: 567px;
-    right:0;
-    top:0;
-    bottom: 0;
-    margin: auto;
-
-}
-
-#archiveheader{
-    position: absolute;
-    top: 2%;
-    left: 2%;
-    font-size: 18px;  
-}
-
-#separator2{
-    border: 0;
-    border-bottom: 1px solid ;
-    margin: 0 auto;
-    width: 22.5rem;
-    padding-top: 1px;
-}
-
-
-
-#archivetext{
-    position: absolute;
-    top: 25%;
-    left: 2%;
-}
-
-#archivebuttons{
-    position: absolute;
-    bottom: 14px;
-    width: 20rem;
-    right: 8px;
-    justify-content: end;
-}
-
 #flagBtnDetails{
     position: relative;
-    flex: auto;
-    float: right;
-    top: 5px !important;
+    top: 0px !important;
     margin: 0px !important;
-    margin-right: 15px !important;
-    max-width: 5px !important;
-    min-width: 5px !important;
+    margin-right: 0px !important;
+    max-width: 0px !important;
+    min-width: 0px !important;
+    height: 100%;
 }
 
 #commentDiv{
@@ -575,7 +541,6 @@
     width: 100%;
     height: 100vh;
     bottom: 78px !important;
-    background-color: #4472C4;
     gap: 4px;
 }
 
@@ -601,8 +566,9 @@
 #trigger-buttons{
     padding-top: .5rem;
     position: relative;
-    float: right;
     margin-right: 10px;
+    border: 2px solid green;
+    left: 520px;
 }
 
 .v-btn{
@@ -704,8 +670,9 @@
     flex-direction: row;
     position: relative;
     bottom: 64px;
-    left: 23.5rem;
-    width: 16%;
+    left: 24.5rem;
+    width: 15%;
+    padding-right: 10px;
 }
 
 .details-color-picker{
@@ -716,7 +683,7 @@
     display: flex;
     flex-direction: column;
     margin: 0px;
-    left: 5px;
+    left: 8px;
     width: fit-content;
     background-color: black;
 }
@@ -751,15 +718,11 @@
 }
 
 .popuptext{
-    position: absolute;
-    left: 10px;
-}
-.popupheader{
     position: relative;
-    left: 10px;
+    left: 0px;
+    padding: 0px;
+    padding-top: 0px;
 }
-
-
 
 .buttonpositioning{
     position: absolute;
@@ -768,4 +731,5 @@
     right: 8px;
     justify-content: end;
 }
+
 </style>
