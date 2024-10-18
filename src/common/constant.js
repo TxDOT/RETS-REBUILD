@@ -61,6 +61,18 @@ export const appConstants = {
         },
         5 : (uName, date) => {
             return `Point moved by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
+        },
+        6 : (uName, date) => {
+            return `Editor changed by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
+        },
+        7 : (uName, date) => {
+            return `District editor by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
+        },
+        8 : (uName, date) => {
+            return `New deadline added by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
+        },
+        9 : (uName, date) => {
+            return `Deadline changed by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
         }
     }
 }

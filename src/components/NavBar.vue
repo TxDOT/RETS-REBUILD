@@ -748,6 +748,6 @@
         left: 6px !important;
         margin-right: 14px;
         padding-right: 5px !important;
-        padding-bottom: 5px !important;
+        padding-bottom: 4px !important;
     }
 </style>
