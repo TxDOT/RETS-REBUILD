@@ -251,6 +251,8 @@
 .v-badge__badge{
   position: relative;
   bottom: 12px !important;
+  padding-right: 3px !important;
+  padding-bottom: 2px !important;
   left: 13px !important;
   height: 15px !important;
   min-width: 15px !important;
