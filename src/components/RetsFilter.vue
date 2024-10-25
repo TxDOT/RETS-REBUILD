@@ -143,7 +143,7 @@
 </template>
 
 <script>
-    import {filterMapActivityFeed, home} from './utility.js'
+    import {filterMapActivityFeed} from './utility.js'
     import {appConstants} from '../common/constant.js'
     import { store } from './store'
     import {addRETSFilter} from './crud.js'
@@ -178,12 +178,6 @@
                 districtSearch: "",
                 actvSearch: "",
                 customquery: "",
-                itemsTest: [
-                    { title: 'Click Me 1' },
-                    { title: 'Click Me 2' },
-                    { title: 'Click Me 3' },
-                    { title: 'Click Me 4 ' },
-                ],
                 fieldNames : [],
                 selected:"",
                 validationMessage: "",
@@ -196,9 +190,6 @@
         mounted(){
             this.archiveFilter(),
             this.getFields()
-            
-
-            
         },
         methods:{
             clearValidation(){

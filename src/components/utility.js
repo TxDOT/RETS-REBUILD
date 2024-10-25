@@ -281,14 +281,14 @@ export async function filterMapActivityFeed(filterOpt){
                             GRID_ANALYST.push(`'${value[a].value}'`)
                         }
                         if(value[a].type === 3){
-                            DIST_ANALYST.push(`'${value[a].value}'`)
+                            DIST_ANALYST.push(`'%${value[a].value}%'`)
                         }
                     }
                     //(GIS_ANALYST in () and GIS_ANALYST in () and DIST_ANALYST in () OR ASSIGNED_TO in ()) AND STAT (1,2,4) 
                     //[GIS_ANALYST in () , GIS_ANALYST in () , DIST_ANALYST in ()]
                     GIS_ANALYST.length ? ANALYST.push(`GIS_ANALYST in (${GIS_ANALYST.join(" , ")})`) : null
                     GRID_ANALYST.length ? ANALYST.push(`GRID_ANALYST in (${GRID_ANALYST.join(" , ")})`) : null
-                    DIST_ANALYST.length ? ANALYST.push(`DIST_ANALYST in (${DIST_ANALYST.join(" , ")})`) : null
+                    DIST_ANALYST.length ? ANALYST.push(`DIST_ANALYST like ${DIST_ANALYST.join(" or DIST_ANALYST like ")}`) : null
                     let mapAnalyst = ANALYST.map((analyst, index) =>{
                         
                         if(index === 0){
@@ -1329,6 +1329,7 @@ export function checkhighlightfunction(retsid){
 }
 
 export function openDetails(road){
+    console.log(road)
     clearGraphicsLayer()
     store.toggleFeed = 2
     store.isSaving = false
