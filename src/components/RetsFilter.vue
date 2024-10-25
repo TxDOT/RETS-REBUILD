@@ -85,43 +85,42 @@
                                                     </v-tooltip>
     
 
-                                                </template>
-                                                <v-list id="fieldsList" value = "selected" max-height="800">
-                                                    <v-list-item v-for="(item,index) in fieldNames" :key="index" density="compact">
-                                                    <v-list-item-title @click="appendField(item)" density="compact"> {{ item }}</v-list-item-title>
-                                                    </v-list-item>
-                                                </v-list>
-                                            </v-menu>
-                                        </template>
-                                    </v-combobox> 
-                                    <span style="color: red; font-size: 12px; margin-left: 10px;">{{validationMessage}}</span>
-                                        <div style="float:right; position: relative; left: 29px;">
-                                            <v-btn-toggle class="trigger-buttons" density="compact">
-                                                <v-btn variant="plain" @click="clearCustomQuery">Clear</v-btn>
-                                                <v-btn variant="outlined" class="main-button-style" @click="runCustomQuery" :disabled="store.customquery?.length > 5 ? false : true">Run</v-btn>
-                                            </v-btn-toggle>
-                                        </div>
-                                </v-expansion-panel-text>
-                        </v-expansion-panel>
-                    </v-expansion-panels>
-                    
-                    <hr class="popup-title-border" style="position: relative; width: 100%; position: relative; bottom: 0px;"></hr>
-                    <div style="position: relative; float: right;">
-                        <v-btn-toggle class="trigger-buttons" density="compact">
-                            <v-btn @click="cancelFilter()" class="secondary-button" variant="plain" size="small">Cancel</v-btn>
-                            <v-btn @click="setFilterNumber()" class="main-button-style" variant="outlined" size="small">Save</v-btn>
-                        </v-btn-toggle>
-                    </div>
-                    <div>
-                        <div style="float: left;">
-                            <v-btn id="restoreDefault" variant="plain" @click="restoreDefault()">Restore Default</v-btn>
-                        </div>
-                    </div>    
+                                            </template>
+                                            <v-list id="fieldsList" value = "selected" max-height="800">
+                                                <v-list-item v-for="(item,index) in fieldNames" :key="index" density="compact">
+                                                <v-list-item-title @click="appendField(item)" density="compact"> {{ item }}</v-list-item-title>
+                                                </v-list-item>
+                                            </v-list>
+                                        </v-menu>
+                                    </template>
+                                </v-combobox> 
+                                <span :style="{color: validationMessageColor, fontSize: '12px', marginLeft: '10px'}">{{validationMessage}}</span>
+                                    <div style="float:right; bottom: 1rem; position: relative; margin-right:10px;">
+                                        <v-btn variant="plain" @click="clearCustomQuery">Clear</v-btn>
+                                        <v-btn variant="outlined" class="main-button-style" @click="runCustomQuery" :disabled="store.customquery?.length > 5 ? false : true">Run</v-btn>
+                                    </div>
+                            </v-expansion-panel-text>
+                    </v-expansion-panel>
+                </v-expansion-panels>
+            </div>
+            <div>
+                <hr class="popup-title-border" style="position: relative; width: 100%; position: relative; bottom: 0px;"></hr>
+                <div style="float: right; position: relative;" >     
+                    <v-btn-toggle class="trigger-buttons" density="compact">
+                        <v-btn @click="cancelFilter()" class="secondary-button" variant="plain" size="small">Cancel</v-btn>
+                        <v-btn @click="setFilterNumber()" class="main-button-style" variant="outlined" size="small">Save</v-btn>
+                    </v-btn-toggle>
                 </div>
-            
-            </v-card>
-        </div>
-        <div style="position: absolute; left: 890px; top: 100px;" v-if="isDate">
+                <div>
+                    <div style="float: left;">
+                        <v-btn id="restoreDefault" variant="plain" @click="restoreDefault()">Restore Default</v-btn>
+                    </div>
+                </div>   
+            </div>
+        </v-card>
+    </div>
+    <div style="position: absolute; left: 890px; top: 100px;" v-if="isDate">
+
             <v-date-picker class="date" multiple hide-header v-model="selectDate" @update:modelValue="selectDates()" tile width="300" :disabled="selectDate.length === 2"></v-date-picker>
             <div style="position: relative; bottom: 3.3rem; ">
                 <v-checkbox label="Current Year" style="position: relative; z-index: 9999; float: right; margin-bottom: 15px; margin-right: 15px" v-model="currentYear"></v-checkbox>
@@ -166,7 +165,7 @@
                 filterUser: appConstants.userRoles,
                 filterActivity: appConstants.activityList,
                 numFilters: 0,
-                defaultFilter: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, "JOB_TYPE": appConstants.defaultJobtypeValues, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
+                defaultFilter: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, "JOB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
                          "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, 
                          "filterTotal": 2},
                 isDate: false,
@@ -184,6 +183,7 @@
                 isDisabled: store.customquery ? true : false,
                 customqueryArray: [],
                 fieldDiv: false,
+                validationMessageColor: "red",
                 isExpandCustomQuery: true
             }
         },
@@ -193,7 +193,7 @@
         },
         methods:{
             clearValidation(){
-                if ((store.customquery === null || store.customquery === "") && (this.validationMessage != null || this.validationMessage != "" ) ){
+                if ((this.validationMessage != null || this.validationMessage != "" ) ){
                     this.validationMessage = ''
                 }
             },
@@ -248,6 +248,7 @@
                     .then((response) =>         
                         {
                             if (!response.features.length){
+                                this.validationMessageColor = "red"
                                 this.validationMessage = "No features returned."
                                 return
                             }
@@ -255,6 +256,8 @@
                             store.getRetsLayer(store.loggedInUser,store.customquery, 'retsLayerLayerView', 'EDIT_DT DESC')
                                 retsLayer.queryExtent()
                                     .then((resp) =>{
+                                        this.validationMessageColor = "green"
+                                        this.validationMessage = "Query was successful"
                                         view.goTo(resp.extent)
                                         if (store.customquery)
                                             {
@@ -275,7 +278,9 @@
                         .catch((error) => {
                             
                             if (error.message === 'Unable to complete operation.'){
+                                this.validationMessageColor = "red"
                                 this.validationMessage = "Invalid Query."
+
                             }
                         })
                 
@@ -363,7 +368,7 @@
             },
             restoreDefault(){
                 store.CREATE_DT = {title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"}
-                store.JOB_TYPE = appConstants.defaultJobtypeValues
+                store.JOB_TYPE.length = 0
                 store.EDIT_DT = null
                 store.STAT = appConstants.defaultStatValues
                 store.ACTV.length = 0
