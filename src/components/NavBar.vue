@@ -231,7 +231,6 @@
                                {title:"Select", icon: 'mdi-select-multiple', color: "#D9D9D9", name: "Multi-Select", isActive: false,
                                action: () =>{
                                 store.isSelectEnabled = !store.isSelectEnabled
-                                console.log(this.retsToolsBottom[0].isActive)
                                 this.retsToolsBottom[0].isActive = !this.retsToolsBottom[0].isActive
                                 this.handleSelectTool();
                                },

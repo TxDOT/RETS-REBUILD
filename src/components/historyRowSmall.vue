@@ -247,7 +247,6 @@
                 handler: function(a,b){
                     if(a.length === 0){
                         this.isHistNotesEmpty = true
-                        console.log(this.isHistNotesEmpty)
                         return
                     }
                     this.orderList

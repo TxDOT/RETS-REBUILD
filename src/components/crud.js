@@ -27,14 +27,14 @@ export async function updateRETSPT(retsObj){
     enable.attributes.CREATE_NM = appConstants.userRoles.find(usr => usr.name === retsObj.attributes.CREATE_NM)?.value ?? retsObj.attributes.CREATE_NM
     enable.attributes.NO_RTE = enable.attributes.NO_RTE === true ? 1 : 0
     enable.attributes.DIST_ANALYST = enable.attributes.DIST_ANALYST.toString()
-    
+
     if(enable.attributes.RELATED_RETS){
         enable.attributes.RELATED_RETS = enable.attributes.RELATED_RETS.map(x => x.fullData ? x.fullData.RETS_ID : x).toString()
     }
-    if(enable.attributes.STAT === 3){
-        let getUserInfo = appConstants.userRoles.find(user => user.value === enable.attributes.GIS_ANALYST)
-        sendWebhookEmail(enable.attributes.RETS_ID, getUserInfo.email)
-    }
+    // if(enable.attributes.STAT === 3){
+    //     let getUserInfo = appConstants.userRoles.find(user => user.value === enable.attributes.GIS_ANALYST)
+    //     sendWebhookEmail(enable.attributes.RETS_ID, getUserInfo.email)
+    // }
     //enable.attributes.DFO = Number(DFO)
     retsObj.attributes.flagColor.FLAG === "" ? null : postFlagColor(retsObj)
     delete enable.attributes?.retsPt
@@ -56,7 +56,6 @@ export async function updateRETSPT(retsObj){
     esriUpdateGraphic.geometry = createGeo
 
     try{
-        console.log(enable)
         await retsLayer.applyEdits({
             updateFeatures: [esriUpdateGraphic]
         })
@@ -180,10 +179,10 @@ export async function addRETSFilter(customQuery){
     }
 }
 
-function sendWebhookEmail(retsNum, gisUser){
-    fetch(`https://gis-batch-dev.txdot.gov/fmejobsubmitter/TPP-MB/RETS_Notify_DEV.fmw?Email=${gisUser}&RETSnumber=${retsNum}&opt_showresult=false&opt_servicemode=sync&token=0c12a2e7bd8784956b6b5750f763c0bf1b18323e`)
-    .then(res => console.log(res))
-    .catch(err => console.log(err))
+// function sendWebhookEmail(retsNum, gisUser){
+//     fetch(`https://gis-batch-dev.txdot.gov/fmejobsubmitter/TPP-MB/RETS_Notify_DEV.fmw?Email=${gisUser}&RETSnumber=${retsNum}&opt_showresult=false&opt_servicemode=sync&token=0c12a2e7bd8784956b6b5750f763c0bf1b18323e`)
+//     .then(res => console.log(res))
+//     .catch(err => console.log(err))
 
-    return
-}
+//     return
+// }
