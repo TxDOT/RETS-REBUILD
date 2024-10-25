@@ -368,7 +368,6 @@ export default{
             return
         },  
         calcFilterDiff(){
-            console.log(store)
             const typeField = [store.JOB_TYPE.length, store.STAT.length, store.ACTV.length, store.DIST_NM.length, store.CNTY_NM.length, store.USER.length, store.isAssignedTo]
             store.filterTotal = typeField.filter(x => x).length
             return
@@ -385,16 +384,6 @@ export default{
             store.isAssignedTo = false
             store.customquery =  null
             store.defaultFilterSetup()
-            // this.defaultFilter.loggedInUser = appConstants.defaultUserValue[0].value
-            // this.filter.CREATE_DT = this.defaultFilter.CREATE_DT
-            // this.filter.JOB_TYPE = this.defaultFilter.JOB_TYPE
-            // this.filter.EDIT_DT = this.defaultFilter.EDIT_DT
-            // this.filter.STAT = this.defaultFilter.STAT
-            // this.filter.ACTV = this.defaultFilter.ACTV
-            // this.filter.DIST_NM = this.defaultFilter.DIST_NM
-            // this.filter.CNTY_NM = this.defaultFilter.CNTY_NM
-            // this.filter[appConstants.userQueryField] = appConstants.defaultUserValue
-            // this.filter.filterTotal = this.defaultFilter.filterTotal
             
             filterMapActivityFeed(store.filter)
             this.setFilterNumber()

@@ -9,7 +9,7 @@
             <div class="add-new-btn">
                 <div style="float:right;">
                     <v-btn v-for="(tool, i) in addbutton" :key="i" :value="tool" @click="tool.action()" :prepend-icon="buttonIcon" color="#4472C4" rounded="0" id="add-new-btn"  class="main-button" v-if="!store.isDetailsPage">
-                        <p class="text-btn" id="addbtn">{{addbtntext}}</p>
+                        <span class="text-btn">{{addbtntext}}</span>
                     </v-btn>
                 </div>
             </div>
@@ -543,11 +543,6 @@ export default{
         padding-left: 10px;
         font-weight: bold;
     }
-    #addbtn{
-        position: relative;
-        left: 0%;
-        top: 10%;
-    }
     #retSubText{
         position: relative;
         right: 15px;
@@ -633,9 +628,6 @@ export default{
         text-align: center;
     }
     .text-btn{
-        position: relative;
-        padding-top: .2rem;
-        right: .3rem;
         font-size: 13px;
     }
 

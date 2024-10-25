@@ -1329,7 +1329,6 @@ export function checkhighlightfunction(retsid){
 }
 
 export function openDetails(road){
-    console.log(road)
     clearGraphicsLayer()
     store.toggleFeed = 2
     store.isSaving = false

@@ -35,7 +35,7 @@ export async function updateRETSPT(retsObj){
     //     let getUserInfo = appConstants.userRoles.find(user => user.value === enable.attributes.GIS_ANALYST)
     //     sendWebhookEmail(enable.attributes.RETS_ID, getUserInfo.email)
     // }
-    //enable.attributes.DFO = Number(DFO)
+    
     retsObj.attributes.flagColor.FLAG === "" ? null : postFlagColor(retsObj)
     delete enable.attributes?.retsPt
     delete enable.attributes?.STATUS
