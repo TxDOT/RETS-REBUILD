@@ -338,7 +338,7 @@ export const graphics = new GraphicsLayer({});
         
 //Dark Vector Tile construction
 export const darkVectorTile = new VectorTileLayer({
-  url: "https://www.arcgis.com/sharing/rest/content/items/4bd376c56f314bc5a36446630db604a6/resources/styles/root.json"
+  url: "https://www.arcgis.com/sharing/rest/content/items/ad6336fd90cb43c091d46b479332e83c/resources/styles/root.json"
 })
 
 //Add Vector Tile as a basemap

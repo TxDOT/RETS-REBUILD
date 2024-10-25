@@ -16,7 +16,6 @@
             <v-lazy :options="{'threshold': 0}" transition="expand-transition" height="100" width="439">
                 <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `5px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="checkhighlight(String(rd.attributes.RETS_ID)) ?? 'card-rets'"  @dblclick="double(rd, road);" @click="zoomToRetsPt(rd)">
                     <!-- <div class="boundary-rets-card"> -->
-
                     <div style="top: 0px; max-height: 0px; position: relative;">
                         <div style="position: relative;">
                             <v-card-text id="retsId">
@@ -212,7 +211,6 @@ export default{
             if(!store.isSaveBtnDisable){
                 clearTimeout(this.timer)
                 store.cancelpopup = true
-                store.nextRoadObj = road
                 return
             }
             openDetails(road)

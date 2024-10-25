@@ -74,8 +74,8 @@ const setDefExpRets = async (userId) => {
     store.USER = [appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value)]
     return
   }
-  const parsedUSEROBJECTID = JSON.parse(userOBJECTID.FILTERS)
 
+  const parsedUSEROBJECTID = JSON.parse(userOBJECTID.FILTERS)
   store.userFilters = parsedUSEROBJECTID
   filterMapActivityFeed(parsedUSEROBJECTID)
   setFilterProperties(parsedUSEROBJECTID)

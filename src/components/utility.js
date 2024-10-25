@@ -598,7 +598,7 @@ export function getHistoryView(retsid){
     .then((res) => {
         let retCard = store.roadObj.find(ret => ret.attributes.RETS_ID === Number(retsid))
         if(!res.features[0]){
-            retCard.attributes.historyUpdate = "Heyyyyy Champ! When was the last time we chatted?"
+            retCard.attributes.historyUpdate = "Champ, there's no history for the RETS."
             return
         }
 

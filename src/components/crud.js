@@ -66,128 +66,7 @@ export async function updateRETSPT(retsObj){
     console.log(`${retsObj.attributes.OBJECTID} updated`)
 }
 
-export async function updateRETSROLE(username, filterString) {
-    const query = retsRole.createQuery();
-    query.where = `USERNAME = '${username}'`; 
-    query.returnGeometry = false;             
-    query.outFields = ["OBJECTID", "FILTERS"]; 
 
-    try {
-        const result = await retsRole.queryFeatures(query);
-
-        if (result.features.length === 0) {
-            console.log(`No record found for USERNAME: ${username}`);
-            return;
-        }
-
-        let featureToUpdate = result.features[0];
-        let objectId = featureToUpdate.attributes.OBJECTID;
-
-        let currentFilters = featureToUpdate.attributes.FILTERS || '';  
-        let filterArray = currentFilters.split(',').map(filter => filter.trim()); 
-
-        let trimmedFilterString = filterString.trim();
-        
-        filterArray = filterArray.filter(filter => filter !== trimmedFilterString);
-
-        filterArray.push(trimmedFilterString);
-
-        let updatedFilters = filterArray.join(','); 
-
-        const esriUpdateGraphic = {
-            attributes: {
-                OBJECTID: objectId,       
-                FILTERS: updatedFilters    
-            }
-        };
-
-        const response = await retsRole.applyEdits({
-            updateFeatures: [esriUpdateGraphic]
-        });
-
-        if (response.updateFeatureResults.length > 0 && response.updateFeatureResults[0].error) {
-            console.error('Error updating feature:', response.updateFeatureResults[0].error);
-        } else {
-            console.log(`Record with USERNAME: ${username} successfully updated.`);
-        }
-
-    } catch (err) {
-        console.error('Error querying or updating the feature:', err);
-    }
-}
-
-export async function getFilterItems(username) {
-    const query = retsRole.createQuery();
-    query.where = `USERNAME = '${username}'`; 
-    query.returnGeometry = false;             
-    query.outFields = ["FILTERS"]; 
-
-    try {
-        const result = await retsRole.queryFeatures(query);
-
-        if (result.features.length === 0) {
-            console.log(`No record found for USERNAME: ${username}`);
-            return [];
-        }
-
-        let feature = result.features[0];
-        let filtersString = feature.attributes.FILTERS || ''; 
-
-        return filtersString.split(',').map(item => item.trim()).filter(item => item.length > 0);
-
-    } catch (err) {
-        console.error('Error querying the feature:', err);
-        return [];
-    }
-}
-
-export async function deleteCustomQuery(username, filterToRemove) {
-    
-    const query = retsRole.createQuery();
-    query.where = `USERNAME = '${username}'`; 
-    query.returnGeometry = false;             
-    query.outFields = ["OBJECTID", "FILTERS"]; 
-
-    try {
-        const result = await retsRole.queryFeatures(query);
-
-        if (result.features.length === 0) {
-            console.log(`No record found for USERNAME: ${username}`);
-            return;
-        }
-
-        let featureToUpdate = result.features[0];
-        let objectId = featureToUpdate.attributes.OBJECTID;
-
-        let currentFilters = featureToUpdate.attributes.FILTERS || '';  
-
-        let updatedFilters = currentFilters
-            .split(',')
-            .filter(filter => !filter.includes(filterToRemove))
-            .join(',');
-
-        const esriUpdateGraphic = {
-            attributes: {
-                OBJECTID: objectId,        
-                FILTERS: updatedFilters   
-            }
-        };
-
-        const response = await retsRole.applyEdits({
-            updateFeatures: [esriUpdateGraphic]
-        });
-
-        if (response.updateFeatureResults.length > 0 && response.updateFeatureResults[0].error) {
-            console.error('Error updating feature:', response.updateFeatureResults[0].error);
-        } else {
-            console.log(`Record with USERNAME: ${username} successfully updated.`);
-        }
-
-    } catch (err) {
-        console.error('Error querying or updating the feature:', err);
-    }
-    
-}
 export async function deleteRETSPT(retsObj){
     if(retsObj.attributes.RELATED_RETS){
         retsObj.attributes.RELATED_RETS = retsObj.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID).toString()
@@ -200,7 +79,6 @@ export async function deleteRETSPT(retsObj){
     console.log(`${retsObj.attributes.OBJECTID} deleted`)
 
 }
-
 
 function createGraphic(retsObj){
     delete retsObj?.attributes?.index
@@ -287,8 +165,6 @@ export function postFlagColor(rets){
 
 
 export async function addRETSFilter(customQuery){
-    
-    
     let esriUpdateGraphic = createGraphic(customQuery)
 
     try{
@@ -300,8 +176,6 @@ export async function addRETSFilter(customQuery){
     catch(err){
         console.log(err)
     }
-
-   
 }
 
 function sendWebhookEmail(retsNum, gisUser){

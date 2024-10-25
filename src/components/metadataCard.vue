@@ -46,6 +46,8 @@
         mounted(){
             this.createName = store.retsObj.attributes.CREATE_NM
             this.createDate = store.retsObj.attributes.CREATE_DT.split(",")[0]
+            //store.retsObj.attributes.DIST_ANALYST = store.retsObj.attributes.DIST_ANALYST.split(",")
+            //store.retsObj.attributes.GRID_ANALYST = store.retsObj.attributes.GRID_ANALYST.toUpperCase()
         },
         methods:{
             onDropDownChange(){
