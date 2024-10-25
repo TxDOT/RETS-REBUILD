@@ -36,7 +36,6 @@ export const appConstants = {
     jobTypeDomainValues:[],
     defaultStatValues: [{ name: "Not Started", value: 1 },{ name: "In Progress", value: 2 }, { name: "On Hold", value: 4 }],
     defaultUserValue:[],
-    defaultJobtypeValues: [{ name: "Geometry", value: 1 },{ name: "Asset", value: 2 }],
     activityList: [],
     userRoles: [],
     defaultQuery : (userId) => {

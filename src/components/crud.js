@@ -27,7 +27,7 @@ export async function updateRETSPT(retsObj){
     enable.attributes.EDIT_NM = appConstants.userRoles.find(usr => usr.name === retsObj.attributes.EDIT_NM)?.value ?? retsObj.attributes.EDIT_NM
     enable.attributes.CREATE_NM = appConstants.userRoles.find(usr => usr.name === retsObj.attributes.CREATE_NM)?.value ?? retsObj.attributes.CREATE_NM
     enable.attributes.NO_RTE = enable.attributes.NO_RTE === true ? 1 : 0
-
+    enable.attributes.DIST_ANALYST = enable.attributes.DIST_ANALYST.toString() 
     if(enable.attributes.RELATED_RETS){
         enable.attributes.RELATED_RETS = enable.attributes.RELATED_RETS.map(x => x.fullData ? x.fullData.RETS_ID : x).toString()
     }

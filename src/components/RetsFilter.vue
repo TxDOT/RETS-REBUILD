@@ -93,7 +93,7 @@
                                         </v-menu>
                                     </template>
                                 </v-combobox> 
-                                <span style="color: red; font-size: 12px; margin-left: 10px;">{{validationMessage}}</span>
+                                <span :style="{color: validationMessageColor, fontSize: '12px', marginLeft: '10px'}">{{validationMessage}}</span>
                                     <div style="float:right; bottom: 1rem; position: relative; margin-right:10px;">
                                         <v-btn variant="plain" @click="clearCustomQuery">Clear</v-btn>
                                         <v-btn variant="outlined" class="main-button-style" @click="runCustomQuery">Run</v-btn>
@@ -152,7 +152,7 @@
                 filterUser: appConstants.userRoles,
                 filterActivity: appConstants.activityList,
                 numFilters: 0,
-                defaultFilter: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, "JOB_TYPE": appConstants.defaultJobtypeValues, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
+                defaultFilter: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, "JOB_TYPE": null, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
                          "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, 
                          "filterTotal": 2},
                 isDate: false,
@@ -175,7 +175,8 @@
                 validationMessage: "",
                 isDisabled: store.customquery ? true : false,
                 customqueryArray: [],
-                fieldDiv: false
+                fieldDiv: false,
+                validationMessageColor: "red"
             }
         },
         mounted(){
@@ -187,7 +188,7 @@
         },
         methods:{
             clearValidation(){
-                if ((store.customquery === null || store.customquery === "") && (this.validationMessage != null || this.validationMessage != "" ) ){
+                if ((this.validationMessage != null || this.validationMessage != "" ) ){
                     this.validationMessage = ''
                 }
             },
@@ -242,6 +243,7 @@
                     .then((response) =>         
                         {
                             if (!response.features.length){
+                                this.validationMessageColor = "red"
                                 this.validationMessage = "No features returned."
                                 return
                             }
@@ -249,6 +251,8 @@
                             store.getRetsLayer(store.loggedInUser,store.customquery, 'retsLayerLayerView', 'EDIT_DT DESC')
                                 retsLayer.queryExtent()
                                     .then((resp) =>{
+                                        this.validationMessageColor = "green"
+                                        this.validationMessage = "Query was successful"
                                         view.goTo(resp.extent)
                                         if (store.customquery)
                                             {
@@ -274,7 +278,9 @@
                         .catch((error) => {
                             
                             if (error.message === 'Unable to complete operation.'){
+                                this.validationMessageColor = "red"
                                 this.validationMessage = "Invalid Query."
+
                             }
                         })
                 
@@ -370,7 +376,7 @@
             },
             restoreDefault(){
                 store.CREATE_DT = {title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"}
-                store.JOB_TYPE = appConstants.defaultJobtypeValues
+                store.JOB_TYPE.length = 0
                 store.EDIT_DT = null
                 store.STAT = appConstants.defaultStatValues
                 store.ACTV.length = 0
