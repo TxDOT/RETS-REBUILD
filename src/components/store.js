@@ -87,8 +87,7 @@ export const store = reactive({
         logDfo: 0,
         archiveFilter:{},
         CREATE_DT: {title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"},
-        //JOB_TYPE:[],
-        JOB_TYPE: appConstants.defaultJobtypeValues,
+        JOB_TYPE:[],
         EDIT_DT: null,
         STAT:appConstants.defaultStatValues,
         ACTV:[],
@@ -311,7 +310,6 @@ export const store = reactive({
                                 const orderField = `${this.filter.createDt.filter} ${this.filter.createDt.sortType}`
                                  
                                 this.getRetsLayer(store.loggedInUser, query.whereString, query.queryLayer, orderField)
-                                
                                 this.isDetailsPage = false
                                 this.isNoRets = true
                                 return

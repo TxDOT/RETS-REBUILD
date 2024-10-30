@@ -3,7 +3,7 @@
         <div style="display: flex; flex-direction: column; gap: 2px; position: relative; top: 0px; height: 100%; padding-top: 3px; margin-left: 10px; margin-right: 10px; margin-bottom: 10px;">
             <v-row no-gutters dense style="max-height: 40px;">
                 <v-col cols="8" offset="0">
-                    <v-autocomplete id="actDiv" :items="activityList" label="Activity" variant="underlined" density="compact" item-title="value" item-value="name" flat v-model="store.retsObj.attributes.ACTV" @update:model-value="completeDataSearch()">
+                    <v-autocomplete id="actDiv" :items="activityList" label="Activity" variant="underlined" density="compact" item-title="value" flat v-model="store.retsObj.attributes.ACTV" @update:model-value="completeDataSearch()">
                     </v-autocomplete>
                 </v-col>
                 <v-col cols="0" offset="1">
@@ -22,7 +22,7 @@
             </v-row>
             <v-row no-gutters dense style="max-height: 40px;">
                 <v-col cols="8" offset="0" >
-                    <v-text-field :disabled="store.retsObj.attributes.NO_RTE === false" label="Route" density="compact" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required, valueRequired.limitCharacter] : []" id="route" @update:model-value="!store.retsObj.attributes.NO_RTE ? completeDataSearch() : store.isSaveBtnDisable = false" maxlength="17"></v-text-field>
+                    <v-text-field :disabled="store.retsObj.attributes.NO_RTE === farlse" label="Route" density="compact" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required, valueRequired.limitCharacter] : []" id="route" @update:model-value="!store.retsObj.attributes.NO_RTE ? completeDataSearch() : store.isSaveBtnDisable = false" maxlength="17"></v-text-field>
                 </v-col>
                 <v-col cols="0" offset="1">
                     <v-text-field label="DFO" density="compact" variant="underlined" :error-messages="(!store.retsObj.attributes.DFO || store.outOfRange) && !store.retsObj.attributes.NO_RTE ? returnErrMsg(store.retsObj.attributes.DFO, store.outOfRange) : null" v-model="store.retsObj.attributes.DFO" :rules="!store.retsObj.attributes.NO_RTE ? [onlyNumbers.required, onlyNumbers.numbers]: []" @update:model-value="!store.retsObj.attributes.NO_RTE ? manuallyUpdateDFO(store.retsObj.attributes.DFO) : null">
@@ -40,7 +40,10 @@
             </v-row>
             <v-row no-gutters dense>
                 <v-col cols="8" offset="0">
-                    <v-autocomplete label="Related RETS" density="compact" chips closable-chips multiple no-filter variant="underlined" v-model="store.retsObj.attributes.RELATED_RETS" :items="RETSData" item-title="RETS_ID" item-value="RETS_ID" return-object @update:search="gimmeRETS($event)">
+                    <v-autocomplete label="Related RETS" density="compact" multiple no-filter variant="underlined" v-model="store.retsObj.attributes.RELATED_RETS" :items="RETSData" item-title="RETS_ID" item-value="RETS_ID" return-object @update:search="gimmeRETS($event)">
+                        <template v-slot:chip="{item}">
+                            <v-chip closable @click="zoomToRelateRet(item)">{{ item.title }}</v-chip>
+                        </template>
                     </v-autocomplete>
                 </v-col>
                 <v-col cols="1" offset="2">
@@ -104,9 +107,6 @@
                         <v-btn color="white" prepend-icon="mdi-timer-outline" disabled density="compact" variant="plain" class="date-select"> {{ datePicker }}</v-btn>
                     </div>
                 </div>
-                
-                        
-
 
                 <div class="date-picker" v-if="isDatePicker" v-click-outside="toggleVisibility" >
                     <v-date-picker v-model="datePicked" class="date" hide-header @update:modelValue="selectDates()">
@@ -172,7 +172,7 @@ import {store} from './store.js'
             }
         },
         beforeMount(){
-            // let splitString = splitAndAddRelatedRets(store.retsObj.attributes.RELATED_RETS)
+            this.splitAndAddRelatedRets(store.retsObj.attributes.RELATED_RETS)
             // splitString.map((ret)=>{
             //     this.gimmeRETS(ret, `RETS_ID = ${ret}`)
             // })
@@ -235,6 +235,7 @@ import {store} from './store.js'
                 return `${month}/${day}/${year}`
             },
             zoomToRelateRet(ret){
+                
                 let query = {"whereString" : `RETS_ID = ${Number(ret.title)}`, "queryLayer": "retsLayer"}
                 getQueryLayer(query, 'RETS_ID', 5)
                 .then((ret) => {
@@ -244,22 +245,22 @@ import {store} from './store.js'
                 })
                 //this.gimmeRETS(ret.title, `RETS_ID = ${Number(ret.title)}`)
             },
-            // splitAndAddRelatedRets(relatedRets){
-            //     console.log(relatedRets)
-            //     if(typeof relatedRets === "object" || !relatedRets.length){
-            //         // relatedRets.map((ret)=>{
-            //         //     this.gimmeRETS(ret, `RETS_ID = ${ret}`)
-            //         // })
-            //         return
-            //     }
+            splitAndAddRelatedRets(relatedRets){
+                console.log(relatedRets)
+                if(typeof relatedRets === "object" || !relatedRets.length){
+                    // relatedRets.map((ret)=>{
+                    //     this.gimmeRETS(ret, `RETS_ID = ${ret}`)
+                    // })
+                    return
+                }
                 
-            //     const splitString = relatedRets.split(",")
-            //     store.retsObj.attributes.RELATED_RETS = []
-            //     splitString.map((ret)=>{
-            //         this.gimmeRETS(ret, `RETS_ID = ${ret}`)
-            //     })
-            //     return this.RETSData
-            // },
+                const splitString = relatedRets.split(",")
+                store.retsObj.attributes.RELATED_RETS = []
+                splitString.map((ret)=>{
+                    this.gimmeRETS(ret, `RETS_ID = ${ret}`)
+                })
+                return this.RETSData
+            },
             completeDataSearch(){
                 store.checkDetailsForComplete()
             },

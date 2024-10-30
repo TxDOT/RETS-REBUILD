@@ -36,11 +36,10 @@ export const appConstants = {
     jobTypeDomainValues:[],
     defaultStatValues: [{ name: "Not Started", value: 1 },{ name: "In Progress", value: 2 }, { name: "On Hold", value: 4 }],
     defaultUserValue:[],
-    defaultJobtypeValues: [{ name: "Geometry", value: 1 },{ name: "Asset", value: 2 }],
     activityList: [],
     userRoles: [],
     defaultQuery : (userId) => {
-        return `(${appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]} = '${userId}' OR ASSIGNED_TO = '${userId}') AND (STAT = 1 OR STAT = 2 or STAT = 4) AND (JOB_TYPE = 1 OR JOB_TYPE = 2)`
+        return `(${appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]} like '%${userId}%' OR ASSIGNED_TO = '${userId}') AND (STAT = 1 OR STAT = 2 or STAT = 4) AND (JOB_TYPE = 1 OR JOB_TYPE = 2)`
     },
     userQueryField: [],
     defineCMNT: {
@@ -63,10 +62,10 @@ export const appConstants = {
             return `Point moved by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
         },
         6 : (uName, date) => {
-            return `Editor changed by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
+            return `Asset Editor changed by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
         },
         7 : (uName, date) => {
-            return `District editor by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
+            return `District editor changed by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
         },
         8 : (uName, date) => {
             return `New deadline added by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
