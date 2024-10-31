@@ -39,7 +39,7 @@ export const appConstants = {
     activityList: [],
     userRoles: [],
     defaultQuery : (userId) => {
-        return `(${appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]} = '${userId}' OR ASSIGNED_TO = '${userId}') AND (STAT = 1 OR STAT = 2 or STAT = 4) AND (JOB_TYPE = 1 OR JOB_TYPE = 2)`
+        return `(${appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]} like '%${userId}%' OR ASSIGNED_TO = '${userId}') AND (STAT = 1 OR STAT = 2 or STAT = 4) AND (JOB_TYPE = 1 OR JOB_TYPE = 2)`
     },
     userQueryField: [],
     defineCMNT: {
@@ -60,6 +60,18 @@ export const appConstants = {
         },
         5 : (uName, date) => {
             return `Point moved by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
+        },
+        6 : (uName, date) => {
+            return `Asset Editor changed by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
+        },
+        7 : (uName, date) => {
+            return `District editor changed by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
+        },
+        8 : (uName, date) => {
+            return `New deadline added by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
+        },
+        9 : (uName, date) => {
+            return `Deadline changed by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
         }
     }
 }

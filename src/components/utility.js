@@ -281,14 +281,14 @@ export async function filterMapActivityFeed(filterOpt){
                             GRID_ANALYST.push(`'${value[a].value}'`)
                         }
                         if(value[a].type === 3){
-                            DIST_ANALYST.push(`'${value[a].value}'`)
+                            DIST_ANALYST.push(`'%${value[a].value}%'`)
                         }
                     }
                     //(GIS_ANALYST in () and GIS_ANALYST in () and DIST_ANALYST in () OR ASSIGNED_TO in ()) AND STAT (1,2,4) 
                     //[GIS_ANALYST in () , GIS_ANALYST in () , DIST_ANALYST in ()]
                     GIS_ANALYST.length ? ANALYST.push(`GIS_ANALYST in (${GIS_ANALYST.join(" , ")})`) : null
                     GRID_ANALYST.length ? ANALYST.push(`GRID_ANALYST in (${GRID_ANALYST.join(" , ")})`) : null
-                    DIST_ANALYST.length ? ANALYST.push(`DIST_ANALYST in (${DIST_ANALYST.join(" , ")})`) : null
+                    DIST_ANALYST.length ? ANALYST.push(`DIST_ANALYST like ${DIST_ANALYST.join(" or DIST_ANALYST like ")}`) : null
                     let mapAnalyst = ANALYST.map((analyst, index) =>{
                         
                         if(index === 0){
@@ -470,6 +470,7 @@ export function home(onrender){
                 view.goTo(resp.extent)
             }
         })
+        return
     }
     homeWidget.cancelGo()
     homeWidget.on("go", ()=>{
@@ -597,7 +598,7 @@ export function getHistoryView(retsid){
     .then((res) => {
         let retCard = store.roadObj.find(ret => ret.attributes.RETS_ID === Number(retsid))
         if(!res.features[0]){
-            retCard.attributes.historyUpdate = "Heyyyyy Champ! When was the last time we chatted?"
+            retCard.attributes.historyUpdate = "Champ, there's no history for the RETS."
             return
         }
 

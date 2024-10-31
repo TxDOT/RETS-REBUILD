@@ -310,7 +310,6 @@ export const store = reactive({
                                 const orderField = `${this.filter.createDt.filter} ${this.filter.createDt.sortType}`
                                  
                                 this.getRetsLayer(store.loggedInUser, query.whereString, query.queryLayer, orderField)
-                                
                                 this.isDetailsPage = false
                                 this.isNoRets = true
                                 return

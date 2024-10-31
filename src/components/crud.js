@@ -2,7 +2,6 @@ import { retsLayer, retsHistory, flagRetsColor, retsRole } from "./map-Init";
 import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant";
 import {store} from './store.js'
-import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 
 
 export async function addRETSPT(retsObj){
@@ -27,11 +26,16 @@ export async function updateRETSPT(retsObj){
     enable.attributes.EDIT_NM = appConstants.userRoles.find(usr => usr.name === retsObj.attributes.EDIT_NM)?.value ?? retsObj.attributes.EDIT_NM
     enable.attributes.CREATE_NM = appConstants.userRoles.find(usr => usr.name === retsObj.attributes.CREATE_NM)?.value ?? retsObj.attributes.CREATE_NM
     enable.attributes.NO_RTE = enable.attributes.NO_RTE === true ? 1 : 0
-    enable.attributes.DIST_ANALYST = enable.attributes.DIST_ANALYST.toString() 
+    enable.attributes.DIST_ANALYST = enable.attributes.DIST_ANALYST.toString()
+
     if(enable.attributes.RELATED_RETS){
         enable.attributes.RELATED_RETS = enable.attributes.RELATED_RETS.map(x => x.fullData ? x.fullData.RETS_ID : x).toString()
     }
-    //enable.attributes.DFO = Number(DFO)
+    // if(enable.attributes.STAT === 3){
+    //     let getUserInfo = appConstants.userRoles.find(user => user.value === enable.attributes.GIS_ANALYST)
+    //     sendWebhookEmail(enable.attributes.RETS_ID, getUserInfo.email)
+    // }
+    
     retsObj.attributes.flagColor.FLAG === "" ? null : postFlagColor(retsObj)
     delete enable.attributes?.retsPt
     delete enable.attributes?.STATUS
@@ -63,128 +67,7 @@ export async function updateRETSPT(retsObj){
     console.log(`${retsObj.attributes.OBJECTID} updated`)
 }
 
-export async function updateRETSROLE(username, filterString) {
-    const query = retsRole.createQuery();
-    query.where = `USERNAME = '${username}'`; 
-    query.returnGeometry = false;             
-    query.outFields = ["OBJECTID", "FILTERS"]; 
 
-    try {
-        const result = await retsRole.queryFeatures(query);
-
-        if (result.features.length === 0) {
-            console.log(`No record found for USERNAME: ${username}`);
-            return;
-        }
-
-        let featureToUpdate = result.features[0];
-        let objectId = featureToUpdate.attributes.OBJECTID;
-
-        let currentFilters = featureToUpdate.attributes.FILTERS || '';  
-        let filterArray = currentFilters.split(',').map(filter => filter.trim()); 
-
-        let trimmedFilterString = filterString.trim();
-        
-        filterArray = filterArray.filter(filter => filter !== trimmedFilterString);
-
-        filterArray.push(trimmedFilterString);
-
-        let updatedFilters = filterArray.join(','); 
-
-        const esriUpdateGraphic = {
-            attributes: {
-                OBJECTID: objectId,       
-                FILTERS: updatedFilters    
-            }
-        };
-
-        const response = await retsRole.applyEdits({
-            updateFeatures: [esriUpdateGraphic]
-        });
-
-        if (response.updateFeatureResults.length > 0 && response.updateFeatureResults[0].error) {
-            console.error('Error updating feature:', response.updateFeatureResults[0].error);
-        } else {
-            console.log(`Record with USERNAME: ${username} successfully updated.`);
-        }
-
-    } catch (err) {
-        console.error('Error querying or updating the feature:', err);
-    }
-}
-
-export async function getFilterItems(username) {
-    const query = retsRole.createQuery();
-    query.where = `USERNAME = '${username}'`; 
-    query.returnGeometry = false;             
-    query.outFields = ["FILTERS"]; 
-
-    try {
-        const result = await retsRole.queryFeatures(query);
-
-        if (result.features.length === 0) {
-            console.log(`No record found for USERNAME: ${username}`);
-            return [];
-        }
-
-        let feature = result.features[0];
-        let filtersString = feature.attributes.FILTERS || ''; 
-
-        return filtersString.split(',').map(item => item.trim()).filter(item => item.length > 0);
-
-    } catch (err) {
-        console.error('Error querying the feature:', err);
-        return [];
-    }
-}
-
-export async function deleteCustomQuery(username, filterToRemove) {
-    
-    const query = retsRole.createQuery();
-    query.where = `USERNAME = '${username}'`; 
-    query.returnGeometry = false;             
-    query.outFields = ["OBJECTID", "FILTERS"]; 
-
-    try {
-        const result = await retsRole.queryFeatures(query);
-
-        if (result.features.length === 0) {
-            console.log(`No record found for USERNAME: ${username}`);
-            return;
-        }
-
-        let featureToUpdate = result.features[0];
-        let objectId = featureToUpdate.attributes.OBJECTID;
-
-        let currentFilters = featureToUpdate.attributes.FILTERS || '';  
-
-        let updatedFilters = currentFilters
-            .split(',')
-            .filter(filter => !filter.includes(filterToRemove))
-            .join(',');
-
-        const esriUpdateGraphic = {
-            attributes: {
-                OBJECTID: objectId,        
-                FILTERS: updatedFilters   
-            }
-        };
-
-        const response = await retsRole.applyEdits({
-            updateFeatures: [esriUpdateGraphic]
-        });
-
-        if (response.updateFeatureResults.length > 0 && response.updateFeatureResults[0].error) {
-            console.error('Error updating feature:', response.updateFeatureResults[0].error);
-        } else {
-            console.log(`Record with USERNAME: ${username} successfully updated.`);
-        }
-
-    } catch (err) {
-        console.error('Error querying or updating the feature:', err);
-    }
-    
-}
 export async function deleteRETSPT(retsObj){
     if(retsObj.attributes.RELATED_RETS){
         retsObj.attributes.RELATED_RETS = retsObj.attributes.RELATED_RETS.map(x => x.fullData.RETS_ID).toString()
@@ -197,7 +80,6 @@ export async function deleteRETSPT(retsObj){
     console.log(`${retsObj.attributes.OBJECTID} deleted`)
 
 }
-
 
 function createGraphic(retsObj){
     delete retsObj?.attributes?.index
@@ -284,8 +166,6 @@ export function postFlagColor(rets){
 
 
 export async function addRETSFilter(customQuery){
-    
-    
     let esriUpdateGraphic = createGraphic(customQuery)
 
     try{
@@ -297,6 +177,12 @@ export async function addRETSFilter(customQuery){
     catch(err){
         console.log(err)
     }
-
-   
 }
+
+// function sendWebhookEmail(retsNum, gisUser){
+//     fetch(`https://gis-batch-dev.txdot.gov/fmejobsubmitter/TPP-MB/RETS_Notify_DEV.fmw?Email=${gisUser}&RETSnumber=${retsNum}&opt_showresult=false&opt_servicemode=sync&token=0c12a2e7bd8784956b6b5750f763c0bf1b18323e`)
+//     .then(res => console.log(res))
+//     .catch(err => console.log(err))
+
+//     return
+// }

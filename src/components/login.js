@@ -53,7 +53,7 @@ async function signIn(){
     getRetsLayerView()
     getTxDotRdWayLayerView()
     //getHistoryView()
-    home(true)
+    //home(true)
 
   })
 
@@ -74,8 +74,8 @@ const setDefExpRets = async (userId) => {
     store.USER = [appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value)]
     return
   }
-  const parsedUSEROBJECTID = JSON.parse(userOBJECTID.FILTERS)
 
+  const parsedUSEROBJECTID = JSON.parse(userOBJECTID.FILTERS)
   store.userFilters = parsedUSEROBJECTID
   filterMapActivityFeed(parsedUSEROBJECTID)
   setFilterProperties(parsedUSEROBJECTID)
@@ -84,7 +84,7 @@ const setDefExpRets = async (userId) => {
 }
 
 export async function getUserId(){
-  console.warn(`VERSION: 2.0.19 -- dev status: ${store.devStatus}`)
+  console.warn(`VERSION: 2.0.22 -- dev status: ${store.devStatus}`)
   const user = await esriId.getCredential(`${authen.portalUrl}/sharing/rest`,{
     oAuthPopupConfirmation: false,
   })
