@@ -65,10 +65,10 @@ export default{
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
                 let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
                 updateRetsObj(findItem, archiveRets)
-                openDetails(store.nextRoadObj)
                 store.cancelpopup = false
-                store.toggleFeed = 2
-                view.goTo(store.nextRoadObj.geometry)
+                window.document.title = 'RETS Application'
+                store.activityBanner = "Activity Feed"
+                store.toggleFeed = 1
                 return
             }
             

@@ -57,7 +57,7 @@
         <div id="search-feed" v-if="!store.isDetailsPage">
             <v-text-field class="search" density="compact" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" v-model="actvFeedSearch" variant="solo-filled">
                 <template v-slot:append-inner>
-                    <v-icon icon="mdi-close" v-if="actvFeedSearch.length" @click="clearContent"></v-icon>
+                    <v-icon icon="mdi-close" v-if="actvFeedSearch.length ? (true, store.isSearch = true) : false" @click="clearContent"></v-icon>
                 </template>
             </v-text-field>
         </div>
@@ -81,20 +81,6 @@
     </v-card>
     <Filter v-if="store.isfilter"/>
 
-    <!-- <v-card style="position: absolute; float: center; width: 25%; left: 40%; top: 30%; margin: 15px; border-radius: 0%;" color="#212121" v-if="unsavedChanges">
-        <v-card-title>Discard unsaved changes?</v-card-title>
-        <v-divider style="margin-left: 15px; margin-right: 15px; color:white;"></v-divider>
-        <v-card-text>
-            If you proceed your changes will be discarded.
-        </v-card-text>
-        <div style="margin: 15px;">
-            <div style="float: right; margin-bottom: 15px;">
-                <v-btn variant="plain" @click="cancelReturn">Cancel & Return</v-btn>
-                <v-btn variant="outlined" style="border-radius: 0%;" @click="proceed">Proceeed</v-btn>
-            </div>
-        </div>
-    </v-card> -->
- <!-- <div class="count-div"> -->
     <v-card id="countPopup" v-if="countPopupStatus">
         <span>
             &nbsp;&nbsp;
@@ -175,8 +161,6 @@ export default{
             count: 0,
             store,
             stageData: 0,
-            showChanges: false,
-            showChanges: false,
             addNewPtEvent: false,
             isCreateEnabled: true,
             addbutton: [
@@ -201,7 +185,6 @@ export default{
         doubleClickRetsPoint()
     },
     mounted(){
-        this.showChanges = true
         reactiveUtils.on(() => view.popup, "trigger-action",
             async (event) => {
                 if (event.action.id === "open-details") {
@@ -229,8 +212,11 @@ export default{
         retsSubtitleUpdate(a){
             store.checkDetailsForComplete()    
         },
-        clearContent(){
+        async clearContent(){
+            store.isSearch = false
             this.actvFeedSearch = ""
+            await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+            store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
         },
         async processAddPt(newPointGraphic){
             try{
@@ -405,7 +391,6 @@ export default{
         actvFeedSearch:{
             handler: function(a){
                 try{
-                    this.noSearch = false
                     if(!a.length || !a){
                         store.updateRetsSearch = !store.isShowSelected ? store.roadObj.slice().sort((a,b) => b.EDIT_DT - a.EDIT_DT) : store.roadHighlightObj
                         outlineFeedCards(store.roadHighlightObj)
@@ -428,9 +413,7 @@ export default{
                             }
                         } 
                     }
-                    if(!acceptedObj.length){
-                        this.noSearch = true
-                    }
+
                     store.updateRetsSearch = acceptedObj.sort((a,b) => b.EDIT_DT - a.EDIT_DT)
                 }
                 catch(a){

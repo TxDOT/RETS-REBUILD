@@ -69,6 +69,7 @@ export const store = reactive({
                 }
         },
         updateRetsSearch:[],
+        isSearch: false,
         updatedRetsPtName: "",
         loggedInUser:"",
         isAttachedActive: false,
@@ -345,6 +346,7 @@ export const store = reactive({
                                 updateItem.attributes.mdicheckdecagramoutline = this.isComplete(obj.features[0].attributes.STAT)
                                 updateItem.attributes.mditimersand = this.isNoActivity(obj.features[0].attributes.STAT, obj.features[0].attributes.EDIT_DT)
                                 updateItem.attributes.mdiexclamation = this.isPrio(obj.features[0].attributes.PRIO)
+                                x.attributes.mdipaperclip = this.retsHasAttachment(x.attributes.OBJECTID)
                                 updateItem.attributes.historyUpdate = "Loading"
                                 //this.retsObj = updateItem
                                 //const retsIndex = this.roadObj.findIndex(x => x.attributes.RETS_ID === obj.features[0].attributes.RETS_ID)

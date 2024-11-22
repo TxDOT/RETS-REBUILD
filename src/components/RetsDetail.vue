@@ -262,8 +262,7 @@
                 this.saveDisable = bool
                 return
             },
-            returnToFeed(){
-                //store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+            async returnToFeed(){
                 if(store.cancelEvent){
                     store.cancelEvent.remove()
                     cancelSketchPt()
@@ -282,7 +281,10 @@
                     // if (store.roadHighlightObj.size === 0){
                     removeHighlight(store.retsObj)
                     store.roadHighlightObj.clear()
-
+                    if(!store.isSearch){
+                        await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                        store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+                    }
                     // }
                     
                     // if (store.roadHighlightObj.size === 1){
@@ -292,7 +294,6 @@
 
                     // }
                     //store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
-
                     return
                 }
                 return
@@ -306,6 +307,8 @@
                 deleteRetsGraphic()
                 this.returnToFeed()
                 window.document.title = 'RETS Application'
+                store.activityBanner = "Activity Feed"
+                store.toggleFeed = 1
                 return
             },
 
@@ -323,8 +326,7 @@
                 
                 await updateRETSPT(store.retsObj)
                 
-                store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
-                this.returnToFeed()
+                await this.returnToFeed()
                 store.isShowSelected = false
                 deleteRetsGraphic()
                 retsLayerView.layer.definitionExpression = store.savedFilter
@@ -333,16 +335,15 @@
                 //retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
                 return
             },
-            cancelDetailsMetadata(){
+            async cancelDetailsMetadata(){
                 if(!store.isSaveBtnDisable){
                     store.clickStatus = false
                     store.cancelpopup = true
                     return
                 }
-                //store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
                 this.replaceArchiveContent(archiveRets)
-                this.returnToFeed()
+                await this.returnToFeed()
                 retsLayerView.layer.definitionExpression = store.savedFilter
                 store.toggleFeed = 1
                 store.cancelpopup = false
@@ -350,11 +351,11 @@
                     outlineFeedCards(store.roadHighlightObj)
                 }, 1000);
                 window.document.title = `RETS Application`
-                //store.preserveHighlightCards()
-                // retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
+                store.activityBanner = "Activity Feed"
+                store.toggleFeed = 1
                 return
             },
-            disgardEdits(){
+            async disgardEdits(){
                 if(store.clickStatus){
                     const archiveRets = JSON.parse(store.archiveRetsDataString)
                     let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
@@ -374,7 +375,7 @@
                 }
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
                 this.replaceArchiveContent(archiveRets)
-                this.returnToFeed()
+                await this.returnToFeed()
                 retsLayerView.layer.definitionExpression = store.savedFilter
                 store.isCard = true
                 store.toggleFeed = 1
@@ -382,9 +383,9 @@
                 outlineFeedCards(store.roadHighlightObj)
                 return
             },
-            replaceArchiveContent(old){
+            async replaceArchiveContent(old){
                 const filter = !store.isShowSelected ? store.updateRetsSearch : [...store.roadHighlightObj]
-                const currDate = filter?.find(x => x.attributes.RETS_ID === old.attributes.RETS_ID)?.attributes?.EDIT_DT ?? this.returnToFeed()
+                const currDate = filter?.find(x => x.attributes.RETS_ID === old.attributes.RETS_ID)?.attributes?.EDIT_DT ?? await this.returnToFeed()
                 const rd = filter.findIndex(x => x.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
                 if(currDate !== old.attributes.EDIT_DT){
                     old.attributes.EDIT_DT === currDate
