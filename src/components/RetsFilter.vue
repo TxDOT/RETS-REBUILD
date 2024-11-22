@@ -2,9 +2,9 @@
     <div id="filterFeed">
         <v-card>
             <div style="margin: 10px;">
-                <div style="position: relative; bottom:0rem; font-weight: normal; font-size: 20px; flex: auto;">Filter Activity Feed</div>
+                <div style="position: relative; bottom:0rem; font-weight: normal; font-size: 20px; flex: auto; padding-bottom: 8px;">Filter Activity Feed</div>
                 <hr></hr>
-                <div class="container" @click="isDisabled = false; store.customquery = null">
+                <div class="container" style="padding-top: 8px;" @click="isDisabled = false; store.customquery = null">
                     <div no-gutters class="item">
                         <v-select :disabled="isDisabled" :items="filterSort" item-title="title" return-object density="compact" label="Sort" variant="underlined" v-model="store.CREATE_DT" style="">
                         </v-select>
@@ -47,10 +47,12 @@
                     
                     
                 <v-expansion-panels flat variant="accordion">
-                    <v-expansion-panel elevation="0" tile>
+                    <v-expansion-panel elevation="0" tile >
                         <v-expansion-panel-title expand-icon="mdi-menu-down" collapse-icon="mdi-menu-up" static > Custom SQL Query</v-expansion-panel-title>
-                            <v-expansion-panel-text>
-                                <v-combobox style="position: relative; right: 25px; width: 115.5% !important;" ref="combobox" @input="clearValidation" v-model="store.customquery" :items="store.userFilters.customQuery" rounded="0" flat density="compact" variant="outlined">
+                            <v-expansion-panel-text id="customQueryBackground">
+                                <div id="expansionPanelItems">
+                                    
+                                <v-combobox style="position: relative; right: 24px; width: 115.5% !important;" ref="combobox" @input="clearValidation" v-model="store.customquery" :items="store.userFilters.customQuery" rounded="0" flat density="compact" variant="outlined">
                                     <template #item="{ item }">
                                         <v-list-item :title="item.value" @click="selectQuery(item.value)">
                                              <template v-slot:append>
@@ -69,7 +71,7 @@
                                         </v-list-item>
                                     </template>
                                     <template #append style="border: 2px solid red">
-                                        <v-menu open-on-click v-model="fieldDiv" style=" width: 300px; left:910px ;position: absolute; ">
+                                        <v-menu open-on-click v-model="fieldDiv" style=" width: 125px; left:890px ;position: absolute; top: 36px; max-height: 80%; overflow-y: auto; ">
                                             <template v-slot:activator="{ props }">
                                                 <v-tooltip text="Field Names" location="top">
                                                     <template v-slot:activator="{ props }">
@@ -79,6 +81,7 @@
                                                             flat
                                                             @click="fieldDiv = true"
                                                             size="small"
+                                                            style="background-color: transparent;"
                                                             >
                                                         </v-btn>
                                                     </template>
@@ -94,20 +97,23 @@
                                         </v-menu>
                                     </template>
                                 </v-combobox> 
+
                                 <span :style="{color: validationMessageColor, fontSize: '12px', marginLeft: '10px'}">{{validationMessage}}</span>
                                     <div style="float:right; position: relative; left: 29px;">
                                         <v-btn-toggle class="trigger-buttons" density="compact">
-                                            <v-btn variant="plain" @click="clearCustomQuery">Clear</v-btn>
-                                            <v-btn variant="outlined" class="main-button-style" @click="runCustomQuery" :disabled="store.customquery?.length > 5 ? false : true">Run</v-btn>
+                                            <v-btn variant="plain" size="small" @click="clearCustomQuery">Clear</v-btn>
+                                            <v-btn variant="outlined" class="main-button-style" size="small" @click="runCustomQuery" :disabled="store.customquery?.length > 5 ? false : true">Run</v-btn>
                                         </v-btn-toggle>
                                     </div>
+                                </div>
+
                             </v-expansion-panel-text>
                     </v-expansion-panel>
                 </v-expansion-panels>
                 
                 <hr class="popup-title-border" style="position: relative; width: 100%; position: relative; bottom: 0px;"></hr>
                 <div style="position: relative; float: right;">
-                    <v-btn-toggle class="trigger-buttons" density="compact">
+                    <v-btn-toggle class="trigger-buttons" density="compact" style="margin-top: 10px;margin-bottom: 20px;">
                         <v-btn @click="cancelFilter()" class="secondary-button" variant="plain" size="small">Cancel</v-btn>
                         <v-btn @click="setFilterNumber()" class="main-button-style" variant="outlined" size="small">Save</v-btn>
                     </v-btn-toggle>
@@ -444,7 +450,7 @@ export default{
 }
 #filterFeed{
     position: relative;
-    top: 39px;
+    top: 36px;
     width: 400px;
     left: calc(59px + 429px);
     border-radius: 0%;
@@ -452,12 +458,24 @@ export default{
     max-height: 80%;
     overflow-y: auto;
 }
+#customQueryBackground{
+    background-color: #3c3c3c;
+    height: 120px;
+}
+#expansionPanelItems{
+    margin-top: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 0px;
 
+
+}
 #restoreDefault{
     font-size: 8px;
     text-decoration: underline;
     color: #4472C4;
     right: 1rem;
+    margin-top: 10px;
 }
 .adjustRow{
     position: relative !important;

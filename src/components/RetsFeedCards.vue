@@ -22,7 +22,7 @@
                         {{store.activityBanner}}
                     </div>
                     <div style="width: fit-content; position: relative; top: 2px; height: fit-content; max-width: 100px; min-width: 33px;">
-                        <span id="headerCount" :style="{ color: countHeaderColor }" @mouseover="countPopupStatus = true; countHeaderColor = 'lightgray'" @mouseout="countPopupStatus = false; countHeaderColor = 'gray'">[{{ store.updateRetsSearch.length }}]</span>
+                        <span v-if="!store.isDetailsPage" id="headerCount" :style="{ color: countHeaderColor }" @mouseover="countPopupStatus = true; countHeaderColor = 'lightgray'" @mouseout="countPopupStatus = false; countHeaderColor = 'gray'">[{{ store.updateRetsSearch.length }}]</span>
                     </div>
 
                     <div class="retsSubtitle">
@@ -123,7 +123,7 @@
 </template>
 
 <script>
-import {clickRetsPoint, getQueryLayer, returnHistory, getHighlightGraphic, removeHighlight, createtool, highlightRETSPoint, toggleRelatedRets, zoomTo, changeCursor, outlineFeedCards, openDetails} from './utility.js'
+import {clickRetsPoint, getQueryLayer, returnHistory, getHighlightGraphic, removeHighlight, createtool, highlightRETSPoint, toggleRelatedRets, zoomTo, changeCursor, outlineFeedCards, openDetails, doubleClickRetsPoint} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import {store} from './store.js'
@@ -197,7 +197,8 @@ export default{
         }
     },
     beforeMount(){
-        clickRetsPoint()
+        clickRetsPoint(),
+        doubleClickRetsPoint()
     },
     mounted(){
         this.showChanges = true
