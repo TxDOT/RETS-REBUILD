@@ -9,23 +9,23 @@
         </v-banner>
         
 
-            <v-card rounded="0" id="cancelpopup" v-if="store.cancelpopup">
-                
-                    <div class="banner-txt">
-                        Discard unsaved changes?
-                    </div>
-                    <hr/>
-                    <span class="popuptext2">
-                        If you proceed, your changes will be discarded.
-                    </span>
-                    <v-btn-toggle class="trigger-buttons" density="compact" style="position: relative; top: 23px;">
-                        <v-btn class="secondary-button"  @click="goBackActivity()" variant="plain" size="small" style="float: right;">GO BACK</v-btn>
-                        <v-btn class="main-button-style" @click="discardedits" variant="outlined" size="small" style="float: right;">DISCARD</v-btn>
-                    </v-btn-toggle>
-                
-            </v-card>
- 
-        
+        <v-card rounded="0" id="cancelpopup" v-if="store.cancelpopup">
+            
+                <div class="banner-txt">
+                    Discard unsaved changes?
+                </div>
+                <hr/>
+                <span class="popuptext2">
+                    If you proceed, your changes will be discarded.
+                </span>
+                <v-btn-toggle class="trigger-buttons" density="compact" style="position: relative; top: 23px;">
+                    <v-btn class="secondary-button"  @click="goBackActivity()" variant="plain" size="small" style="float: right;">GO BACK</v-btn>
+                    <v-btn class="main-button-style" @click="discardedits" variant="outlined" size="small" style="float: right;">DISCARD</v-btn>
+                </v-btn-toggle>
+            
+        </v-card>
+
+    
     </div>
 
     

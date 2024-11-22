@@ -1,91 +1,75 @@
 <template>
     <div style="height: 90%; width: 100%; display: flex; flex-direction: column;">
-        <div style="display: flex; flex-direction: column; gap: 2px; position: relative; top: 0px; height: 100%; padding-top: 3px; margin-left: 10px; margin-right: 10px; margin-bottom: 10px;">
-            <v-row no-gutters dense style="max-height: 40px;">
-                <v-col cols="8" offset="0">
-                    <v-autocomplete id="actDiv" :items="activityList" label="Activity" variant="underlined" density="compact" item-title="value" flat v-model="store.retsObj.attributes.ACTV" @update:model-value="completeDataSearch()">
-                    </v-autocomplete>
-                </v-col>
-                <v-col cols="0" offset="1">
-                    <v-text-field label="Number" density="compact" variant="underlined" :disabled="disableACTVNum(store.retsObj.attributes.ACTV)" v-model="store.retsObj.attributes.ACTV_NBR" @update:model-value="actvNbrUpdate(store.retsObj.attributes.ACTV_NBR)">
-                        <template v-slot:append-inner >
-                            <v-tooltip text="Find Minute Order/TxDOT Connect" location="top">
+        <div style="display: flex; flex-direction: column; gap: 0px; position: relative; top: 0px; height: 100%; padding-top: 3px; margin-left: 10px; margin-right: 10px; margin-bottom: 10px;">
+            <div no-gutters dense class="item" style="height: 40px;">
+                <v-autocomplete class="actDiv" :items="activityList" label="Activity" variant="underlined" density="compact" item-title="value" flat v-model="store.retsObj.attributes.ACTV" @update:model-value="completeDataSearch()"></v-autocomplete>
+            
+                <v-text-field class="actNum" label="Number" density="compact" variant="underlined" :disabled="disableACTVNum(store.retsObj.attributes.ACTV)" v-model="store.retsObj.attributes.ACTV_NBR" @update:model-value="actvNbrUpdate(store.retsObj.attributes.ACTV_NBR)">
+                    <template v-slot:append-inner >
+                        <v-tooltip text="Find Minute Order/TxDOT Connect" location="top">
+                            <template v-slot:activator="{props}">
+                                <div v-bind="props">
+                                    <v-icon icon="mdi-link" small class="number-field-icon" @click="paperClipFunc" ></v-icon>
+                                </div>
+                            </template>
+                        </v-tooltip>
+                    </template>
+                </v-text-field>
+            </div>
+            <div no-gutters dense class="item" style="height: 40px;">
+                <v-text-field class="routeNum" :disabled="store.retsObj.attributes.NO_RTE === false" label="Route" density="compact" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required, valueRequired.limitCharacter] : []" id="route" @update:model-value="!store.retsObj.attributes.NO_RTE ? completeDataSearch() : store.isSaveBtnDisable = false" maxlength="17"></v-text-field>
+        
+                <v-text-field class="routeDFO" label="DFO" density="compact" variant="underlined" :error-messages="(!store.retsObj.attributes.DFO || store.outOfRange) && !store.retsObj.attributes.NO_RTE ? returnErrMsg(store.retsObj.attributes.DFO, store.outOfRange) : null" v-model="store.retsObj.attributes.DFO" :rules="!store.retsObj.attributes.NO_RTE ? [onlyNumbers.required, onlyNumbers.numbers]: []" @update:model-value="!store.retsObj.attributes.NO_RTE ? manuallyUpdateDFO(store.retsObj.attributes.DFO) : null">
+                        <template v-slot:append-inner>
+                            <v-tooltip :text="store.zoomInText" location="top">
                                 <template v-slot:activator="{props}">
                                     <div v-bind="props">
-                                        <v-icon icon="mdi-link" small class="number-field-icon" @click="paperClipFunc" ></v-icon>
+                                        <v-btn id="dfoCrosshair"  variant="plain" density="compact" v-model="isCrossHair" @click="crossHairFunc" :disabled="store.zoomInToEnable"><v-icon :icon="!store.isMoveRetsPt ? 'mdi-drag-variant' : 'mdi-close'" small ></v-icon></v-btn>
                                     </div>
                                 </template>
                             </v-tooltip>
                         </template>
-                    </v-text-field>
-                </v-col>
-            </v-row>
-            <v-row no-gutters dense style="max-height: 40px;">
-                <v-col cols="8" offset="0" >
-                    <v-text-field :disabled="store.retsObj.attributes.NO_RTE === farlse" label="Route" density="compact" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required, valueRequired.limitCharacter] : []" id="route" @update:model-value="!store.retsObj.attributes.NO_RTE ? completeDataSearch() : store.isSaveBtnDisable = false" maxlength="17"></v-text-field>
-                </v-col>
-                <v-col cols="0" offset="1">
-                    <v-text-field label="DFO" density="compact" variant="underlined" :error-messages="(!store.retsObj.attributes.DFO || store.outOfRange) && !store.retsObj.attributes.NO_RTE ? returnErrMsg(store.retsObj.attributes.DFO, store.outOfRange) : null" v-model="store.retsObj.attributes.DFO" :rules="!store.retsObj.attributes.NO_RTE ? [onlyNumbers.required, onlyNumbers.numbers]: []" @update:model-value="!store.retsObj.attributes.NO_RTE ? manuallyUpdateDFO(store.retsObj.attributes.DFO) : null">
-                            <template v-slot:append-inner>
-                                <v-tooltip :text="store.zoomInText" location="top">
-                                    <template v-slot:activator="{props}">
-                                        <div v-bind="props">
-                                            <v-btn id="dfoCrosshair"  variant="plain" density="compact" v-model="isCrossHair" @click="crossHairFunc" :disabled="store.zoomInToEnable"><v-icon :icon="!store.isMoveRetsPt ? 'mdi-drag-variant' : 'mdi-close'" small ></v-icon></v-btn>
-                                        </div>
-                                    </template>
-                                </v-tooltip>
-                            </template>
-                    </v-text-field>
-                </v-col>
-            </v-row>
-            <v-row no-gutters dense>
-                <v-col cols="8" offset="0">
-                    <v-autocomplete label="Related RETS" density="compact" multiple no-filter variant="underlined" v-model="store.retsObj.attributes.RELATED_RETS" :items="RETSData" item-title="RETS_ID" item-value="RETS_ID" return-object @update:search="gimmeRETS($event)">
+                </v-text-field>
+            </div>
+
+            <div no-gutters dense class="item" style="display: flex; flex-direction: row; max-width: 500px; height: 40px;">
+                <div class="item">
+                    <v-autocomplete clear-on-select label="Related RETS" density="compact" multiple no-filter variant="underlined" v-model="store.retsObj.attributes.RELATED_RETS" :items="RETSData" item-title="RETS_ID" item-value="RETS_ID" return-object @update:search="gimmeRETS($event)">
                         <template v-slot:chip="{item}">
                             <v-chip closable @click="zoomToRelateRet(item)">{{ item.title }}</v-chip>
                         </template>
                     </v-autocomplete>
-                </v-col>
-                <v-col cols="1" offset="2">
+                </div>
+                <div class="item zoomToRelRets" style="height: 40px;">
                     <v-tooltip text="Zoom to Related Rets" location="top">
                         <template v-slot:activator="{props}">
                             <div v-bind="props">
-                                <v-btn variant="plain" icon="mdi-magnify-plus-outline" @click="zoomToRETS" style="font-size: 14px; color:white;" ></v-btn>
+                                <v-btn variant="plain" icon="mdi-magnify-plus-outline" @click="zoomToRETS"></v-btn>
                             </div>
                         </template>
                     </v-tooltip>
-                </v-col>
-                <v-col cols="1" offset="0">
-                    <!-- <v-tooltip text="help" location="top" >
-                        <template v-slot:activator="{props}"> -->
-                            <!-- <div v-bind="props" > -->
-                                <v-btn variant="plain" icon="mdi-cursor-default" disabled style="font-size: 14px; color:white;" ></v-btn>
-                            <!-- </div> -->
-                        <!-- </template> -->
-                    <!-- </v-tooltip> -->
-                    
-                </v-col>
-            </v-row>
+                    <div class="selectBtn" style="height: 40px;">
+                        <v-btn variant="plain" icon="mdi-cursor-default" disabled></v-btn>
+                    </div>
+                </div>
+            </div>
 
-            <v-row no-gutters dense>
+            <div no-gutters dense class="item" style="height: 20px;" >
                 <v-checkbox density="compact" class="checkbox-size" v-model="store.retsObj.attributes.NO_RTE" @update:model-value="noRTECheck(store.retsObj.attributes.RTE_NM)">
                     <template v-slot:label>
                         <v-label class="main-color" id="newProposedText" text="New, Proposed, or Unspecified"></v-label>
                     </template>
                 </v-checkbox>
-            </v-row>  
-            <v-row no-gutters dense style="max-height: 40px; position: relative; bottom: 18px;">
-                <v-col cols="12" offset="0">
-                    <v-select label="Status" variant="underlined" density="compact" class="rets-status" :items="detailsStat" item-title="name" item-value="value" v-model="store.retsObj.attributes.STAT" @update:modelValue="completeDataSearch()">
-                    </v-select>
-                </v-col>
-            </v-row>
-            <v-row no-gutters dense style="position: relative; bottom: 15px;">
-                <v-col cols="12" offset="0">
-                    <v-textarea rows="2" :error-messages="(!store.retsObj.attributes.DESC_ || !store.retsObj.attributes.DESC_.length) ? 'Fill out description' : null" density="compact" label="Description" variant="underlined" v-model="store.retsObj.attributes.DESC_"  no-resize @update:model-value="descCheck(store.retsObj.attributes.DESC_)" @keydown.space="preventSpace"></v-textarea>
-                </v-col>
-            </v-row>
-            <v-row no-gutters dense style="max-height: 30px; position: relative;">
+            </div>  
+            <div no-gutters dense class="item" style="height: 40px;">
+                <v-select label="Status" variant="underlined" density="compact" class="rets-status" :items="detailsStat" item-title="name" item-value="value" v-model="store.retsObj.attributes.STAT" @update:modelValue="completeDataSearch()">
+                </v-select>
+            </div>
+            <div no-gutters dense class="item" style="height: 50px;">
+                <v-textarea :rules=[descRequired.required] rows="2" density="compact" :label="this.descLabel" variant="underlined" v-model="store.retsObj.attributes.DESC_" no-resize @update:model-value="descCheck(store.retsObj.attributes.DESC_)" @keydown.space="preventSpace">
+                </v-textarea>
+            </div>
+            <div no-gutters dense class="item">
                 <div style="display: flex; flex-direction: row; width: 100%;">
                     <v-btn icon="mdi-plus" density="compact" variant="plain" @click="displayGemSearch" disabled color="white" id="addGemTaskBtn"></v-btn>
                     <div id="chips">
@@ -109,9 +93,9 @@
                 </div>
 
                 <div class="date-picker" v-if="isDatePicker" v-click-outside="toggleVisibility" >
-                    <v-date-picker v-model="datePicked" class="date" hide-header @update:modelValue="selectDates()">
+                    <v-date-picker v-model="datePicked" class="date" hide-header @update:modelValue="selectDates()" @update:viewMode="hideDateBtns($event);">
                     </v-date-picker>
-                    <div class="cleardate">
+                    <div class="cleardate" v-if="this.dateBtns">
                         <v-tooltip location="bottom" text="Close Calendar Pane">
                             <template v-slot:activator="{ props }">
                                 <v-btn flat v-bind="props" @click="toggleVisibility">CLOSE</v-btn>
@@ -125,7 +109,7 @@
                         
                     </div>
                 </div>
-            </v-row>
+            </div>
         </div>
     </div>
 </template>
@@ -145,7 +129,9 @@ import {store} from './store.js'
                 gemTasks: [],
                 isDatePicker: false,
                 datePicked: null,
+                dateBtns: true,
                 datePicker: 'Add a deadline',
+                descLabel: "Description",
                 disabledRoute: false,
                 disableSave: false,
                 detailsStat: appConstants.statDomainValues,
@@ -166,7 +152,7 @@ import {store} from './store.js'
                     limitCharacter: value => value.length <= 10|| 'Max limit reached',
                 },
                 descRequired:{
-                    required: value => !!value || "Description is empty."
+                    required: value => !!value || ""
                 },
                 outOfRange: false
             }
@@ -267,11 +253,13 @@ import {store} from './store.js'
             descCheck(){
                 const isLettersOrNum = /\S/g
                 if(!store.retsObj.attributes.DESC_.length || !isLettersOrNum.test(store.retsObj.attributes.DESC_)){
+                    this.descLabel = 'Description - Description is empty'
                     store.isSaveBtnDisable = true
-                    return
+                    return true
                 }
+                this.descLabel = 'Description'
                 this.completeDataSearch()
-                return
+                return false
             },
             preventSpace(e){
                 if (!e.target.value) return e.preventDefault();
@@ -404,6 +392,14 @@ import {store} from './store.js'
             },
             closeRelatedRetsChip(ret){
                 removeRelatedRetsFromMap(ret.raw?.name)
+            },
+            hideDateBtns(i){
+                if(i === 'month'){
+                    this.dateBtns = true
+                    return
+                }
+                this.dateBtns = false
+                return
             },
             selectDates(){
                 this.datePicker = this.returnDateFormat(this.datePicked)
@@ -601,4 +597,60 @@ import {store} from './store.js'
     right: 8px;
 }
 
+.actDiv{
+    position: relative;
+    width: 220px !important;
+}
+
+.actNum{
+    position: relative;
+    float: right;
+    width: 150px;
+    bottom: 53px;
+}
+
+.routeNum{
+    position: relative;
+    width: 220px;
+}
+
+.routeDFO{
+    position: relative;
+    width: 150px;
+    bottom: 54px;
+    float: right;
+}
+.relatedRETS{
+    position: relative;
+    width: 300px;
+    border: 2px solid blue;
+    height: 35px;
+}
+.zoomToRelRets{
+    position: relative;
+    font-size: 14px;
+    color:white;
+    bottom: 2px;
+    left: 0px; 
+    float: right;
+    max-width: 75px;
+    min-width: 75px;
+    min-height: 40px;
+    max-height: 40px;
+}
+.selectBtn{
+    position: relative;
+    bottom: 48px;
+    float: right;
+    left: 30px;
+    font-size: 14px;
+    color:white;
+}
+:deep(.v-date-picker-month__days){
+  row-gap: 0px !important;
+}
+:deep(.v-date-picker-month__day){
+  height: 40px !important;
+  width: 40px !important;
+}
 </style>

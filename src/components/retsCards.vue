@@ -85,7 +85,14 @@
                                     <v-icon icon="mdi-exclamation" color="red" v-if="rd.attributes.mdiexclamation === true" class="cardPRIO" v-bind="props"></v-icon>
                                 </template>
                             </v-tooltip>
+
+                            <v-tooltip text="Has Attachments" location="top">
+                                <template v-slot:activator="{props}">
+                                    <v-icon icon="mdi-paperclip" color="" v-if="rd.attributes.mdipaperclip === true" class="cardPRIO" v-bind="props"></v-icon>
+                                </template>
+                            </v-tooltip>
                         </div>
+                        
                     
                                 <!-- <div style="position: relative; float: right; padding-top: 0px; bottom: 20px; left: 5px; right: 10px; ">
                                     <v-tooltip v-for="i in alertIcons" :text="i.popup" >
