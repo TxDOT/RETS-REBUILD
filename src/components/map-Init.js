@@ -464,6 +464,21 @@ export const searchWidget = new Search({
       outFields: ["*"],
     },
     {
+      name: "Bridge",
+      layer: new FeatureLayer({
+        url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Bridges/FeatureServer/0",
+        orderBy:[{
+          field: ["BRDG_ID"],
+          order: "ascending"
+        }]  
+      }), 
+      placeholder: "Bridge",
+      searchFields: ["BRDG_ID"],
+      displayField: "BRDG_ID", 
+      exactMatch: false,
+      outFields: ["*"],
+    },
+    {
       name: "Minute Order",
       layer: retsLayer, 
       maxSuggestions:3,
