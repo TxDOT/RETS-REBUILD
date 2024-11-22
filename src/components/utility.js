@@ -1,4 +1,4 @@
-import {view, retsLayer, homeWidget, retsGraphicLayer, TxDOTRoadways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate, retsPointRenderer, texasExtent, retsPointRendererout, retsRole} from './map-Init'
+import {view, retsLayer, homeWidget, retsGraphicLayer, TxDOTRoadways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate, retsPointRenderer, texasExtent, retsPointRendererout, retsRole, TxDOTRoadwayscopy, highlightLayer, map} from './map-Init'
 import Query from "@arcgis/core/rest/support/Query.js";
 import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant.js";
@@ -76,7 +76,7 @@ export async function getTxDotRdWayLayerView(){
 export function clickRetsPoint(){
     try{
         view.on("click", (event)=>{
-            view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt) =>{
+            view.hitTest(event, {include: [retsLayer, retsGraphicLayer, roadLayerView.layer]}).then((evt) =>{
                 store.clickevent = event
                 store.clickStatus = true
                 if (event.button === 2){
@@ -92,12 +92,25 @@ export function clickRetsPoint(){
                       }, 3000);
                 }
                 else{
+                    highlightLayer.removeAll()
                     if(!evt.results.length){
                         removeOutline()
                         removeHighlight("a", true)
                         clearRoadHighlightObj()
                         store.isDetailsPage ? canceldetailsfunction() : null
                         return
+                    }
+                    if (evt.results[0].layer.title ==="TxDOT Roadways" && map.basemap.title != "Hybrid"){
+                        highlightLayer.add({
+                            geometry: evt.results[0].graphic.geometry,
+                            symbol: {
+                                type: "simple-line",
+                                color: "cyan",
+                                width: 3
+                            }
+                        })
+                        return
+
                     }
                     const retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
                    
@@ -131,6 +144,24 @@ export function clickRetsPoint(){
         console.log(err)
     }
 
+}
+
+export function doubleClickRetsPoint(){
+    try{
+        view.on("double-click", (event)=> {
+            event.stopPropagation()
+            view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt)=>{
+                if (evt.results.length){
+                    openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID))
+
+                }
+            })
+        })
+    }
+    catch(err){
+        console.log(err)
+    }
+    
 }
 
 

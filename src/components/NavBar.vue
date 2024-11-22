@@ -34,32 +34,37 @@
     <v-card id="basemaptoggle" max-width="400" hover @mouseleave="mouseleavebasemap" v-if = "basemapcard" >
        
         <v-card-item >
-            <v-btn @click="toggledarkgrey">
+            <v-btn @click="toggledarkgrey" flat>
                 <v-card-title id="basemapfont" > Dark Grey </v-card-title>
             </v-btn>
         </v-card-item>
         <v-card-item>
-            <v-btn @click="togglelightgrey">
+            <v-btn @click="togglelightgrey" flat>
                 <v-card-title id="basemapfont"> Light Grey </v-card-title>
             </v-btn>
         </v-card-item>
         <v-card-item >
-            <v-btn @click="togglestandard">
+            <v-btn @click="togglestandard" flat>
                 <v-card-title id="basemapfont"> Standard TxDOT </v-card-title>
             </v-btn>
         </v-card-item>
         <v-card-item >
-            <v-btn @click="toggleimagery">
+            <v-btn @click="toggleimagery" flat>
                 <v-card-title id="basemapfont"> Imagery </v-card-title>
             </v-btn>
         </v-card-item>
         <v-card-item >
-            <v-btn @click="togglegoogle">
+            <v-btn @click="togglehybrid" flat>
+                <v-card-title id="basemapfont"> Hybrid </v-card-title>
+            </v-btn>
+        </v-card-item>
+        <v-card-item >
+            <v-btn @click="togglegoogle" flat>
                 <v-card-title id="basemapfont"> Google </v-card-title>
             </v-btn>
         </v-card-item>
         <v-card-item >
-            <v-btn @click="toggleosm">
+            <v-btn @click="toggleosm" flat>
                 <v-card-title id="basemapfont"> OSM </v-card-title>
             </v-btn>
         </v-card-item>
@@ -78,7 +83,7 @@
        </v-card-item>
 
    </v-card>
-   <v-card id = "containersettings" height = "600" v-if = "settingsstatus">
+   <v-card id = "containersettings" height = "585" v-if = "settingsstatus">
         <v-card-item>
             <span class="banner-txt">Settings</span>            
         </v-card-item>
@@ -128,6 +133,15 @@
         </v-card-item>
 
     </v-card>
+    <v-card id="suggestionsSection" height="375" width="350" style="border-radius: 0;" v-if="false">
+        <v-card-title>Provide Feedback</v-card-title>
+        <hr id = "separator" style="width: 320px !important; " />
+        <v-card text tile flat style="margin-left: 15px; margin-right: 15px; height: 20%;">
+            We appreciate your feedback, let us know what you think.
+        </v-card text>
+        <v-text-field  variant="outlined" style="width: 325px; height: 200px; margin: auto; left: 0; right: 0;"></v-text-field>
+        <v-select></v-select>
+    </v-card>
 
  
     
@@ -136,7 +150,7 @@
 
 <script>
 
-    import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass, roadwaysRenderer} from '../components/map-Init.js';
+    import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass, roadwaysRenderer, TxDOTRoadways, hybridBasemap} from '../components/map-Init.js';
     import { createtool, selecttool, togglemenu, logoutUser } from '../components/utility.js';
     import { vuetify } from '../main.js';
     import { store } from './store';
@@ -282,7 +296,7 @@
                                {title:"Test", icon: 'mdi-cog', color: "#D9D9D9", name: "Settings",
                                action: () =>{
                                 this.handleSettingsTool();
-                                this.retsToolsBottom[3].isActive = !this.retsToolsBottom[3].isActive
+                                this.retsToolsBottom[4].isActive = !this.retsToolsBottom[4].isActive
                                },
                                hover:(i) => 
                                     {
@@ -464,6 +478,10 @@
                         this.basemapcard = false;
                         retsLabelclass.symbol.color = "white"
                         retsLabelclass.symbol.haloSize = 0
+                        TxDOTRoadways.labelsVisible = false
+                        TxDOTRoadways.renderer.symbol.width = 0
+                        this.basemapcard = false;
+
                     },
                     togglelightgrey(){
                         map.basemap = lightVTBasemap
@@ -471,6 +489,10 @@
                         this.basemapcard = false;
                         retsLabelclass.symbol.color = "black"                        
                         retsLabelclass.symbol.haloSize = 0
+                        TxDOTRoadways.labelsVisible = false,
+                        TxDOTRoadways.renderer.symbol.width = 0
+                        this.basemapcard = false;
+
 
                     },
                     togglestandard(){
@@ -478,6 +500,9 @@
                         this.basemapcard = false;
                         retsLabelclass.symbol.color = "black"
                         retsLabelclass.symbol.haloSize = 0
+                        TxDOTRoadways.labelsVisible = false,
+                        TxDOTRoadways.renderer.symbol.width = 0
+                        this.basemapcard = false;
 
                     },  
                     toggleimagery(){
@@ -485,18 +510,33 @@
                         retsLabelclass.symbol.color = "black"
                         retsLabelclass.symbol.haloColor = "gray"
                         retsLabelclass.symbol.haloSize = 1
+                        TxDOTRoadways.labelsVisible = false,
+                        TxDOTRoadways.renderer.symbol.width = 0
+                        this.basemapcard = false;
+                    },
+                    togglehybrid(){
+                        map.basemap = hybridBasemap;
+                        retsLabelclass.symbol.color = "black"
+                        retsLabelclass.symbol.haloColor = "gray"
+                        retsLabelclass.symbol.haloSize = 1
+                        TxDOTRoadways.labelsVisible = true,
+                        TxDOTRoadways.renderer.symbol.width = 8
                         this.basemapcard = false;
                     },
                     togglegoogle(){
                         map.basemap = googleVTBasemap;
                         retsLabelclass.symbol.color = "black"
                         retsLabelclass.symbol.haloSize = 0
+                        TxDOTRoadways.labelsVisible = false,
+                        TxDOTRoadways.renderer.symbol.width = 0
                         this.basemapcard = false;
                     },
                     toggleosm(){
                         map.basemap = OSMVTBasemap;
                         retsLabelclass.symbol.color = "black"
                         retsLabelclass.symbol.haloSize = 0
+                        TxDOTRoadways.labelsVisible = false,
+                        TxDOTRoadways.renderer.symbol.width = 0
                         this.basemapcard = false;
                     },
 
@@ -573,7 +613,7 @@
         width: 165px;
         height: 330px;
         bottom: 5%;
-        left: 58px;
+        left: 38px;
         z-index: 9999;
         border-radius: 0px;
 
@@ -586,7 +626,7 @@
         width: 165px;
         height: 120px;
         bottom: 15.5%;
-        left: 58px;
+        left: 38px;
         z-index: 9999;
         border-radius: 0px;
     }
@@ -748,5 +788,13 @@
         margin-right: 14px;
         padding-right: 5px !important;
         padding-bottom: 4px !important;
+    }
+
+    #suggestionsSection{
+        margin: auto;
+        left: 200px;
+        right: 0;
+        top: 100px;
+        bottom: 0;
     }
 </style>

@@ -206,9 +206,24 @@ export let roadwaysRenderer = {
   symbol: {
     type: "simple-line",
     width: 0,
-    color: "rgba(65, 66, 66, 0)"
-  }
+    color: [105,105,105,.6],
+  },
+  visualVariables: [
+    {
+        type: "size",
+        valueExpression: "$view.scale",
+        stops: [
+          { size: 8, value: 8499 },
+          { size: 0.01, value: 8500 },
+         
+        ]
+    }
+]
+
 }
+
+
+
 
 export const polygonsymbol = {
   type: "simple-fill",  // autocasts as new SimpleFillSymbol()
@@ -259,6 +274,37 @@ export const texasCities = new FeatureLayer({
   visible: false,
 })
 
+const popupTemplateRoadways = {
+  title: "Texas Roadways",
+  content: [
+    {
+      type: "fields",
+      fieldInfos: [
+        {
+          fieldName: "RTE_NM",
+          label: "Route Name"
+        },
+        {
+          fieldName: "ROAD_TYPE",
+          label: "Roadbed Type"
+        },
+        {
+          fieldName: "RTE_NBR",
+          label: "Name/Number"
+        },
+        {
+          fieldName: "BEGIN_DFO",
+          label: "Begin DFO"
+        },
+        {
+          fieldName: "END_DFO",
+          label: "End DFO"
+        }
+      ]
+    }
+  ]
+}
+
 //TxDOTRoadways Layer construction
 export const TxDOTRoadways = new FeatureLayer ({
   url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Roadways/FeatureServer/0",
@@ -267,7 +313,9 @@ export const TxDOTRoadways = new FeatureLayer ({
   outFields: ["*"],
   returnM: true,
   hasM: true,
-  definitionExpression: `RTE_PRFX = 'IH'`
+  definitionExpression: `RTE_PRFX = 'IH'`,
+  popupTemplate: popupTemplateRoadways,
+  labelsVisible: false,
 })
 
 export const TxDOTRoadwayscopy = new FeatureLayer ({
@@ -327,8 +375,25 @@ export const retsLabelclass = new LabelClass({
   minScale: 200000,
 })
 
+export const roadwaysLabelClass = new LabelClass({
+  labelExpressionInfo : {expression: "$feature.RTE_NM"},
+  symbol: {
+    type: "text",
+    color: "white",
+    font: {
+      size: 8
+    },
+    haloColor: "black",
+    haloSize: 1
+  },
+  // labelPlacement: "above-right",
+  minScale: 8000,
+  repeatLabel: 200
+})
+
 //Applies label class to rets layer
 retsLayer.labelingInfo = [retsLabelclass];
+TxDOTRoadways.labelingInfo = [roadwaysLabelClass];
 
 export const retsGraphicLayer = new GraphicsLayer({});
 
@@ -366,9 +431,15 @@ export const imageryTxdot = new WMTSLayer({
   url: "https://txgi.tnris.org/login/path/bucket-armada-virtual-lobby/wmts/1.0.0/WMTSCapabilities.xml",
 })
 
+export const hybridBasemap = new Basemap({
+  baseLayers: [imageryTxdot],
+  title: "Hybrid"
+})
+
 //Created imagery basemap
 export const imageryBasemap = new Basemap({
-  baseLayers: [imageryTxdot]
+  baseLayers: [imageryTxdot],
+  title: "Imagery"
 })
 
 //add  basemap to the map
@@ -422,6 +493,70 @@ export const searchWidget = new Search({
       displayField: "RETS_ID",
       exactMatch: false,
       outFields: ["*"],
+      getSuggestions: async function(params){
+        if(isNaN(params.suggestTerm)){
+          return []
+        }
+        let currquery = retsLayer.definitionExpression 
+        if (currquery != ""){
+          currquery = currquery + ' AND '
+        }
+        const query = {
+          where: `${currquery}  RETS_ID = ${params.suggestTerm}`,
+          outFields: ["*"],
+          returnGeometry: false,
+          orderByFields: ["RETS_ID"],          
+        };
+       const feats = await retsLayer.queryFeatures(query)
+       const featuresArray = feats.features.slice(0,3)
+
+       return featuresArray.map((feature) => {
+        return {
+            key: `${feature.attributes.RETS_ID}`,
+            text: `${feature.attributes.RETS_ID}`,
+            sourceIndex: 0,
+        }
+       })
+      },
+      getResults: async function (params){
+        const query = {
+          where: `RETS_ID = ${params.suggestResult.key}`,
+          returnGeometry: true,
+          outFields: ["*"],
+
+        }
+
+        const feats = await retsLayer.queryFeatures(query)
+        const feature = feats.features[0]
+
+        view.goTo({
+          target: feats.features[0].geometry,
+          zoom: 16
+          
+        })
+        highlightLayer.add({
+          geometry: feats.features[0].geometry,
+          symbol: pointsymbol
+        })
+
+
+        const retsidnum = String(feature.attributes.OBJECTID).concat('-',feature.attributes.RETS_ID)
+        removeOutline()
+        outlineFeedCards([feature])
+
+        setTimeout(() => {
+
+          const element = document.getElementById(retsidnum);
+
+          if (element){
+            element.classList.add("highlight-card")
+          }
+        }, 1000);
+        setTimeout(() => {
+          searchWidget.activeMenu = "none"
+
+        }, 10);
+      }
      
     },
     {
@@ -709,6 +844,9 @@ document.addEventListener('click', function(event) {
       }
 });
 
+view.on("double-click", function(event){
+  event.stopPropagation()
+})
 
 
 homeWidget.on("go", function() {
