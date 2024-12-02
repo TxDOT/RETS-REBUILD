@@ -2,6 +2,7 @@ import { reactive } from 'vue';
 import { appConstants } from '../common/constant';
 import {sendChatHistory} from './crud.js'
 import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapActivityFeed} from './utility.js'
+import { retsHistory } from './map-Init.js';
 
 export const store = reactive({
         devStatus: "dev",
@@ -68,6 +69,7 @@ export const store = reactive({
                 }
         },
         updateRetsSearch:[],
+        isSearch: false,
         updatedRetsPtName: "",
         loggedInUser:"",
         isAttachedActive: false,
@@ -275,6 +277,7 @@ export const store = reactive({
                                                         x.attributes.mdicheckdecagramoutline = this.isComplete(x.attributes.STAT)
                                                         x.attributes.mditimersand = this.isNoActivity(x.attributes.STAT, x.attributes.EDIT_DT)
                                                         x.attributes.mdiexclamation = this.isPrio(x.attributes.PRIO)
+                                                        x.attributes.mdipaperclip = this.retsHasAttachment(x.attributes.OBJECTID)
                                                         x.attributes.DFO = x.attributes.DFO ? x.attributes.DFO.toFixed(3) : x.attributes.DFO
                                                         x.attributes.historyUpdate = "Loading"
                                                         this.roadObj.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
@@ -343,6 +346,7 @@ export const store = reactive({
                                 updateItem.attributes.mdicheckdecagramoutline = this.isComplete(obj.features[0].attributes.STAT)
                                 updateItem.attributes.mditimersand = this.isNoActivity(obj.features[0].attributes.STAT, obj.features[0].attributes.EDIT_DT)
                                 updateItem.attributes.mdiexclamation = this.isPrio(obj.features[0].attributes.PRIO)
+                                x.attributes.mdipaperclip = this.retsHasAttachment(x.attributes.OBJECTID)
                                 updateItem.attributes.historyUpdate = "Loading"
                                 //this.retsObj = updateItem
                                 //const retsIndex = this.roadObj.findIndex(x => x.attributes.RETS_ID === obj.features[0].attributes.RETS_ID)
@@ -447,7 +451,20 @@ export const store = reactive({
                 }
                 return false
         },
-
+        retsHasAttachment(oid){
+                retsHistory.queryAttachments({
+                        where: `RETS_ID = ${oid}`
+                }).then((res) => {
+                        let findItem = this.roadObj.find(road => road.attributes.OBJECTID === oid)
+                        if(JSON.stringify(res).length > 2){
+                                findItem.attributes.mdipaperclip = true
+                                return
+                        }
+                        findItem.attributes.mdipaperclip = false
+                        return
+                })
+                return true
+        },
         checkDetailsForComplete(){
                 let item = [this.retsObj.attributes.RTE_NM, this.retsObj.attributes.DFO, this.retsObj.attributes.STAT, this.retsObj.attributes.DESC_].filter(x => !x)
                 

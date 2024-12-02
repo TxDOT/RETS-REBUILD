@@ -1,6 +1,6 @@
 <template>
-    <v-alert v-model="store.isAlert" border="start" :border-color="store.alertTextInfo.color" id="detailsAlert" :color="store.alertTextInfo.color" closable variant="tonal" :type="store.alertTextInfo.type">
-        <p style="position: relative; display: flex; justify-content: left; padding-bottom: 0px; font-size: 15px;">{{ store.alertTextInfo.text }}</p>
+    <v-alert max-width="550" v-model="store.isAlert" border="start" :border-color="store.alertTextInfo.color" id="detailsAlert" :color="store.alertTextInfo.color" closable variant="tonal" :type="store.alertTextInfo.type">
+        <span style="position: relative; display: flex; justify-content: left; padding-bottom: 0px; font-size: 15px;">{{ store.alertTextInfo.text }}</span>
     </v-alert>
 </template>
 

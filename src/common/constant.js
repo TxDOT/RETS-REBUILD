@@ -62,7 +62,7 @@ export const appConstants = {
             return `Point moved by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
         },
         6 : (uName, date) => {
-            return `Asset Editor changed by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
+            return `GIS Editor changed by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
         },
         7 : (uName, date) => {
             return `District editor changed by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
@@ -72,6 +72,9 @@ export const appConstants = {
         },
         9 : (uName, date) => {
             return `Deadline changed by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
-        }
+        },
+        10 : (uName, date) => {
+            return `Asset Editor changed by ${appConstants?.userRoles?.find(name => name?.value === uName)?.name ?? uName} ${new Date(date).toLocaleString('en-US')} `         
+        },
     }
 }

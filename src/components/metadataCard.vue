@@ -1,24 +1,24 @@
 <template>
-    <div style="display: flex; flex-direction: column; position: relative; height: 90%; gap: 40px; padding-top: 15px;"> 
-        <v-row>
+    <div style="display: flex; flex-direction: column; position: relative; height: 90%; gap: 0px; padding-left: 15px; padding-right: 15px;"> 
+        <div class="item">
             <v-autocomplete :items="userRole" item-title="name" item-value="value" label="Assigned To" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.ASSIGNED_TO" @update:modelValue="onDropDownChange(store.retsObj.attributes.ASSIGNED_TO)"></v-autocomplete>
-        </v-row>
-        <v-row>
+        </div>
+        <div class="item">
             <v-autocomplete :items="userRole" item-title="name" item-value="value" label="GIS Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.GIS_ANALYST" @update:modelValue="onDropDownChange()" :rules="[emptyRow.required]"></v-autocomplete>
-        </v-row>
-        <v-row>
+        </div>
+        <div class="item">
             <v-autocomplete :items="userRole" item-title="name" item-value="value" label="Asset Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.GRID_ANALYST" @update:modelValue="onDropDownChange(store.retsObj.attributes.GRID_ANALYST)" :rules="[emptyRow.required]"> </v-autocomplete>
-        </v-row>
-        <v-row>
+        </div>
+        <div class="item">
             <v-autocomplete multiple ref="dropdown" :items="['Clear All', ...userRole]" item-title="name" item-value="value" label="District Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.DIST_ANALYST" @update:modelValue="onDropDownChange(store.retsObj.attributes.DIST_ANALYST);" :rules="[emptyRow.required]"></v-autocomplete>
-        </v-row>
-        <v-row>
+        </div>
+        <div class="item" >
             <v-autocomplete :items="districtMetadata" item-title="name" item-value="value" label="District" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.DIST_NM" @update:modelValue="onDropDownChange(store.retsObj.attributes.DIST_NM)" :rules="[emptyRow.required]"></v-autocomplete>
-        </v-row>
-        <v-row>
+        </div>
+        <div class="item">
             <v-autocomplete :items="countyMetadata" item-title="name" item-value="value" label="County" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.CNTY_NM" @update:modelValue="onDropDownChange(store.retsObj.attributes.CNTY_NM)" :rules="[emptyRow.required]"></v-autocomplete>
-        </v-row>
-        <div style="position: relative; top: 12px; margin-left: 10px; flex: auto;">
+        </div>
+        <div class="item">
             <v-text-field variant="plain" disabled density="compact">Created {{ createDate }} by {{createName}}</v-text-field>
         </div>
     </div>
@@ -83,13 +83,13 @@
 </script>
 
 <style scoped>
-.v-row{
-    margin-right: 10px;
-    margin-left: 10px;
-    flex: auto;
-}
-
 .v-autocomplete{
     background-color: rgba(0,0,0,0) !important;
+}
+:deep(.v-input__details){
+    min-height: 1px !important;
+}
+:deep(.v-messages){
+    min-height: 1px !important;
 }
 </style>

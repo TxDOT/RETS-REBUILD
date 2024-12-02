@@ -9,23 +9,23 @@
         </v-banner>
         
 
-            <v-card rounded="0" id="cancelpopup" v-if="store.cancelpopup">
-                
-                    <div class="banner-txt">
-                        Discard unsaved changes?
-                    </div>
-                    <hr/>
-                    <span class="popuptext2">
-                        If you proceed, your changes will be discarded.
-                    </span>
-                    <v-btn-toggle class="trigger-buttons" density="compact" style="position: relative; top: 23px;">
-                        <v-btn class="secondary-button"  @click="goBackActivity()" variant="plain" size="small" style="float: right;">GO BACK</v-btn>
-                        <v-btn class="main-button-style" @click="discardedits" variant="outlined" size="small" style="float: right;">DISCARD</v-btn>
-                    </v-btn-toggle>
-                
-            </v-card>
- 
-        
+        <v-card rounded="0" id="cancelpopup" v-if="store.cancelpopup">
+            
+                <div class="banner-txt">
+                    Discard unsaved changes?
+                </div>
+                <hr/>
+                <span class="popuptext2">
+                    If you proceed, your changes will be discarded.
+                </span>
+                <v-btn-toggle class="trigger-buttons" density="compact" style="position: relative; top: 23px;">
+                    <v-btn class="secondary-button"  @click="goBackActivity()" variant="plain" size="small" style="float: right;">GO BACK</v-btn>
+                    <v-btn class="main-button-style" @click="discardedits" variant="outlined" size="small" style="float: right;">DISCARD</v-btn>
+                </v-btn-toggle>
+            
+        </v-card>
+
+    
     </div>
 
     
@@ -65,10 +65,10 @@ export default{
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
                 let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
                 updateRetsObj(findItem, archiveRets)
-                openDetails(store.nextRoadObj)
                 store.cancelpopup = false
-                store.toggleFeed = 2
-                view.goTo(store.nextRoadObj.geometry)
+                window.document.title = 'RETS Application'
+                store.activityBanner = "Activity Feed"
+                store.toggleFeed = 1
                 return
             }
             

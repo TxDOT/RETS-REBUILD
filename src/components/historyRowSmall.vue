@@ -26,31 +26,35 @@
         <div v-if="isHistNotesEmpty" style="flex: auto;">
             <v-text-field disabled variant="plain">No History for this RETS</v-text-field>
         </div>
-        <div id="displayHistory" v-if="!this.isHistNotesEmpty" style="flex: auto;">
-            <div v-for="(note, i) in histNotes" :key="note.OBJECTID" track-by="OBJECTID" id="notesDiv">
-                <v-banner :id="`${note.OBJECTID}Small`" v-model="note[i]" density="compact" height="100" style="padding: 0px; padding-left: 5px; border-left: 3px solid #4472C4 !important; margin-bottom: 0px;">
-                    <v-banner-text>
-                         
-                                <span v-if="note.PARENT_ID" style="margin:0% !important;">
-                                    <p id="replyingToCmnt">Replying to "{{store.historyChat.find(x => x.OBJECTID === note.PARENT_ID)?.CMNT ?? "Referenced Note has been deleted"}}"</p>
-                                </span>
+        <div id="displayHistory" v-if="!this.isHistNotesEmpty">
+            <div v-for="(note, i) in histNotes" :key="note.OBJECTID" track-by="OBJECTID">
+                <v-banner :id="`${note.OBJECTID}Small`" v-model="note[i]" density="compact" class="note">
+                    <div style="width: 100%;">
+                        <span v-if="note.PARENT_ID" style="margin:0% !important;">
+                            <p id="replyingToCmnt">Replying to "{{store.historyChat.find(x => x.OBJECTID === note.PARENT_ID)?.CMNT ?? "Referenced Note has been deleted"}}"</p>
+                        </span>
                           
-                                <v-textarea class="history-note" rows="1" auto-grow density="compact" variant="plain" :disabled="note.OBJECTID !== updateOID" v-model="note.CMNT" placeholder="Enter Comment" autofocus></v-textarea>
-                                <span style="font-size: 10px; color: grey; padding-left: 2px; position: relative; bottom: 5px; padding: 0px;">{{ returnUserName(note.CMNT_NM) }} {{ returnDateFormat(note.CREATE_DT) }} <b v-if="note.CREATE_DT !== note.EDIT_DT && note.SYS_GEN === 0" class="main-color">{{ `Edited ${returnDateFormat(note.EDIT_DT)}` }}</b></span>
-                            
-                            <div style="position: relative; top: 0px;" v-if="note.attachments">
-                                <span v-for="attach in note.attachments" style="padding-right: 3px;">
-                                    <v-chip :text="attach.name" color="#4472C4" class="" :closable="editContent && updateOID === note.OBJECTID ? true: false" density="compact" rounded="0" variant="flat" @click="openAttachement(attach.url)" @click:close="deleteAttach(note.OBJECTID, attach.name)"></v-chip>
-                                </span>
-                            </div>
-                    </v-banner-text>
-
-                    <div v-if="note.SYS_GEN === 0" style="width: 16%; position: relative; right: 50px;">
-                        <div style="position: relative; float: right; bottom: 5px; right: 15px;" v-if="note.SYS_GEN === 0">
-                            <v-btn variant="plain" density="compact" icon="mdi-pencil-outline" style="font-size: 13px; bottom: 15px;" @click="openNote(note.CMNT, note.OBJECTID)" :disabled="note.CMNT_NM !== loggedInUserName"></v-btn>
-                            <v-btn variant="plain" density="compact" icon="mdi-reply" style="font-size: 13px; bottom: 15px;" @click="replyNote(note)"></v-btn>
+                        <v-textarea class="history-note" rows="1" max-rows="3" auto-grow density="compact" variant="plain" :disabled="note.OBJECTID !== updateOID" v-model="note.CMNT" placeholder="Enter Comment" autofocus></v-textarea>
+                        <div style="flex: auto; position: relative; top: 00px; width: 100%;">
+                            <span style="font-size: 10px; color: grey; padding-left: 2px; position: relative; bottom: 0px; padding: 0px;">{{ returnUserName(note.CMNT_NM) }} {{ returnDateFormat(note.CREATE_DT) }} <b v-if="note.CREATE_DT !== note.EDIT_DT && note.SYS_GEN === 0" class="main-color">{{ `Edited ${returnDateFormat(note.EDIT_DT)}` }}</b></span>
+                        </div>
+                        <div style="position: relative; top: 0px;" v-if="note.attachments">
+                            <span v-for="attach in note.attachments" style="padding-right: 3px;">
+                                <v-chip :text="attach.name" color="#4472C4" :closable="editContent && updateOID === note.OBJECTID ? true: false" density="compact" rounded="0" variant="flat" @click="openAttachement(attach.url)" @click:close="deleteAttach(note.OBJECTID, attach.name)"></v-chip>
+                            </span>
                         </div>
                     </div>
+                    <div v-if="note.SYS_GEN === 0" style="position: relative; flex: auto;">
+                        <div style="position: relative; float: right; width: 60px;">
+                            <v-btn variant="plain" density="compact" icon="mdi-pencil-outline" style="font-size: 10px;" @click="openNote(note.CMNT, note.OBJECTID)" :disabled="note.CMNT_NM !== loggedInUserName"></v-btn>
+                            <v-btn variant="plain" density="compact" icon="mdi-reply" style="font-size: 10px;" @click="replyNote(note)"></v-btn>
+                        </div>
+                    </div>
+
+                    
+                            
+
+
                 </v-banner>
                     <span v-if="updateOID === note.OBJECTID && note.SYS_GEN === 0" :id="note.OBJECTID">
                         <div style="position: relative; float: right; top: 15px; margin: 0% !important; padding: 0% !important; padding-right: 5px;">                           
@@ -199,8 +203,15 @@
                 window.open(url, "_blank")
             },
             deleteAttach(noteOid, attachName){
+                // const returnHistObj = this.histNotes.find(note => note.OBJECTID === noteOid)
+                // const returnAttchIndex = returnHistObj.attachments.findIndex(att => att.name === attachName)
+                // console.log(returnAttchIndex)
+                // console.log(JSON.stringify(returnHistObj.attachments))
+                // returnHistObj.attachments.splice(returnAttchIndex, 1)
+                // console.log(returnHistObj)
+                // console.log(this.histNotes.at(-1).attachments)
                 deleteAttachment(noteOid, attachName)
-                
+                console.log(noteOid, attachName)
             }   
         },
         watch:{
@@ -282,6 +293,15 @@
         overflow-y: auto;
         padding-bottom: 30px;
         margin-bottom: 4px;
+        flex: auto;
+    }
+    .note{
+        display: flex;
+        flex-direction: column;
+        padding: 0px;
+        padding-left: 5px;
+        border-left: 3px solid #4472C4 !important; 
+        margin-bottom: 0px;
     }
     #search{
         position: relative;
@@ -320,10 +340,6 @@
         /* padding: 0px !important; */
     }
 
-    .history-notes{
-        border-color: red;
-        background-color: #4472C4;
-    }
     #addCommentBtnSmall{
         position: relative;
         float: right;
@@ -333,9 +349,12 @@
         bottom: 2px;
     }
     .history-note{
-        width: 320px;
-        position: relative;
-
+        /* width: 320px;
+        position: relative; */
+        /* min-height: 20px !important;
+        max-height: 59px !important;
+        flex: auto;
+        overflow-y: auto; */
         /* position: relative; 
         width: 380px;
         position: relative;
@@ -347,4 +366,8 @@
         overflow: hidden; */
     }
 
+    :deep(.v-input__details){
+        min-height: 0px !important;
+        padding-top: 0px !important;
+    }
 </style>

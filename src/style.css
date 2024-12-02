@@ -120,7 +120,7 @@
 }
 
 .date-picker{
-  bottom: 17vh !important;
+  bottom: 29vh !important;
   left: 485px !important;
   z-index: 999 !important;
   position: fixed;
@@ -177,6 +177,7 @@
   padding-inline-end: 0px !important;
   row-gap: 0px !important;
   justify-content: left !important;
+  width: 8px;
 }
 
 .date :deep(.v-date-picker-controls){
@@ -190,19 +191,12 @@
   padding: 0px 0px 0px !important;
 }
 
-.date :deep(.v-date-picker-month) .v-date-picker-month__days{
+:deep(.v-date-picker-month__days){
   row-gap: 0px !important;
-
 }
-
-.history-card{
-  /* position: relative; 
-  height: 18rem; 
-  top: 1rem; 
-  border-radius: 0%; 
-  overflow-y: auto;
-  margin-right: 10px;
-  margin-left: 10px; */
+:deep(.v-date-picker-month__day){
+  height: 40px !important;
+  width: 40px !important;
 }
 
 .marginSetting{
@@ -265,4 +259,8 @@
   position: relative;
   float: right;
   margin-bottom: 10px;
+}
+
+.item{
+  flex: auto;
 }

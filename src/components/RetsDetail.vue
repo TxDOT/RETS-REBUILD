@@ -36,7 +36,7 @@
 
                 <!-- history section -->
                 <div class="history-div">
-                    <div style="display: flex; flex-direction: column; height: 100%;">
+                    <div style="display: flex; flex-direction: column; height: calc(100% + 9px);">
                         <v-card class="flex" style="display: flex; flex-direction: column; position: relative; border-radius: 0%; gap: 0px;">
                             <div style="max-height: 30px; display: flex; flex-direction: row;">
                                 <v-card-title style="font-size: 15px; position: relative;" class="flex">
@@ -74,7 +74,6 @@
                     </div>
                     <v-btn-toggle class="trigger-buttons" density="compact">
                         <v-btn @click="handlearchive()" variant="plain" size="small" class="secondary-button">Delete</v-btn>
-                        <!-- <v-btn @click="handlearchive" variant="plain" flat size="small" class="secondary-button">Delete</v-btn> -->
                         <v-btn @click="cancelDetailsMetadata()" variant="plain" class="secondary-button" size="small" :disabled="store.isCancelBtnDisable">Cancel</v-btn>
                         <v-btn @click="sendToParent()" variant="outlined" class="main-button-style" size="small" :disabled="store.isSaveBtnDisable" :loading="store.isSaving">Save</v-btn>
                     </v-btn-toggle>
@@ -91,7 +90,7 @@
                     <div class="marginSetting" style="padding-top: 10px; position: relative; width: 98%; bottom: 0rem;">
                         <v-text-field label="Type a message" density="compact" tile v-model="addHistoryChat" style="margin-left: 0px; margin-right: 5px;" :error-messages= "initRules ? 'Write a note. Submit your thought to History!' : null" @update:modelValue="historyValue"></v-text-field>
                         <div style="float: left; bottom: 1rem; position: relative;">
-                            <v-btn prepend-icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px !important; top: 10px;" @click="displayAttachments()">Add an Attachment</v-btn>
+                            <v-btn prepend-icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px !important; top: 10px; text-transform: none;" @click="displayAttachments()">Add an Attachment</v-btn>
                         </div>
                         
                         <div style="float:right; bottom: 1.3rem; position: relative; left: 7px;">
@@ -102,12 +101,11 @@
                         <div style="position:relative; float: left; width:100%; min-height: 35px; max-height: 35px; overflow-y: auto; bottom: 10px;">
                             <v-chip style="margin: 2px;" v-for="(attach, index) in addAttach" color="#4472C4" closable density="compact" rounded="0" variant="flat" :text="attach.name" @click:close="removeAttachment(index)"></v-chip>
                         </div>
-        
                 
                         <div style="float: right;">
                             <v-btn variant="outlined" class="main-button-style" size="small" @click="saveNote('Expand')" :disabled="!this.addHistoryChat.length">Save & Close</v-btn>
                         </div>
-        
+
                     </div>
                 </v-card>
             </div>
@@ -125,7 +123,7 @@
                 </v-card-subtitle>
                     
                 <v-btn-toggle class="trigger-buttons" density="compact" style="position: relative; top: 20px; left: 11px;">
-                    <v-btn variant="plain" size="small" class="secondary-button"  @click="handlearchive">CANCEL</v-btn>
+                    <v-btn variant="plain" size="small" class="secondary-button"  @click="handlearchive()">CANCEL</v-btn>
                     <v-btn class="main-button-style" variant="outlined" size="small" @click="deleteRets()">DELETE</v-btn>
                 </v-btn-toggle>
             </div>
@@ -205,13 +203,16 @@
             })
             //this.getHistoryStore
             this.isAsset = store.retsObj.attributes.JOB_TYPE === 2 ?  true : false
+            return
         },
         methods:{
             historyValue(){
                 this.initRules = false
+                return
             },
             updatePRIO(){
                 store.checkDetailsForComplete()
+                return
             },
             removeAttachment(index){
                 store.attachment.splice(index, 1)
@@ -251,6 +252,7 @@
                 this.flagClickedId = ""
                 this.flagClickedId = id
                 this.isColorPicked = true;
+                return
             },
             disableSave(bool){
                 if(store.isDisableValidations){
@@ -258,9 +260,9 @@
                     return
                 }
                 this.saveDisable = bool
+                return
             },
-            returnToFeed(){
-                store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+            async returnToFeed(){
                 if(store.cancelEvent){
                     store.cancelEvent.remove()
                     cancelSketchPt()
@@ -276,26 +278,22 @@
                 store.isSaveBtnDisable = true
                 //store.roadHighlightObj.clear()
                 if (store.roadHighlightObj.size <= 1 && store.isSelectEnabled === false){
-                    if (store.roadHighlightObj.size === 0){
-                        removeHighlight(store.retsObj)
-                        store.roadHighlightObj.clear()
-
+                    // if (store.roadHighlightObj.size === 0){
+                    removeHighlight(store.retsObj)
+                    store.roadHighlightObj.clear()
+                    if(!store.isSearch){
+                        await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                        store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                     }
+                    // }
                     
-                    //const b = store.roadObj.find(rd => rd.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
-                    //store.roadHighlightObj.delete(b)
+                    // if (store.roadHighlightObj.size === 1){
+                    //     highlightRETSPoint(store.retsObj)
+                    //     store.roadHighlightObj.clear()
+                    //     store.roadHighlightObj.add(store.retsObj)
 
-                    //store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
-                    if (store.roadHighlightObj.size === 1){
-                        //removeHighlight(store.retsObj)
-                        //store.roadHighlightObj.clear()
-                        highlightRETSPoint(store.retsObj)
-                        store.roadHighlightObj.clear()
-                        store.roadHighlightObj.add(store.retsObj)
-
-                    }
-                    store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
-
+                    // }
+                    //store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                     return
                 }
                 return
@@ -308,6 +306,9 @@
                 store.deleteRetsID()
                 deleteRetsGraphic()
                 this.returnToFeed()
+                window.document.title = 'RETS Application'
+                store.activityBanner = "Activity Feed"
+                store.toggleFeed = 1
                 return
             },
 
@@ -325,8 +326,7 @@
                 
                 await updateRETSPT(store.retsObj)
                 
-                store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
-                this.returnToFeed()
+                await this.returnToFeed()
                 store.isShowSelected = false
                 deleteRetsGraphic()
                 retsLayerView.layer.definitionExpression = store.savedFilter
@@ -335,28 +335,27 @@
                 //retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
                 return
             },
-            cancelDetailsMetadata(){
+            async cancelDetailsMetadata(){
                 if(!store.isSaveBtnDisable){
                     store.clickStatus = false
                     store.cancelpopup = true
                     return
                 }
-                //store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
                 this.replaceArchiveContent(archiveRets)
-                this.returnToFeed()
+                await this.returnToFeed()
                 retsLayerView.layer.definitionExpression = store.savedFilter
                 store.toggleFeed = 1
                 store.cancelpopup = false
                 setTimeout(() => {
                     outlineFeedCards(store.roadHighlightObj)
                 }, 1000);
-
-                //store.preserveHighlightCards()
-                // retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
+                window.document.title = `RETS Application`
+                store.activityBanner = "Activity Feed"
+                store.toggleFeed = 1
                 return
             },
-            disgardEdits(){
+            async disgardEdits(){
                 if(store.clickStatus){
                     const archiveRets = JSON.parse(store.archiveRetsDataString)
                     let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
@@ -368,7 +367,7 @@
                             highlightRETSPoint(entry.attributes)
                             outlineFeedCards(store.roadHighlightObj)
                         }
-                        });                                           
+                    });                                           
                     store.clickStatus = false
                     store.cancelpopup = false
                     store.isSaveBtnDisable = true
@@ -376,7 +375,7 @@
                 }
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
                 this.replaceArchiveContent(archiveRets)
-                this.returnToFeed()
+                await this.returnToFeed()
                 retsLayerView.layer.definitionExpression = store.savedFilter
                 store.isCard = true
                 store.toggleFeed = 1
@@ -384,9 +383,9 @@
                 outlineFeedCards(store.roadHighlightObj)
                 return
             },
-            replaceArchiveContent(old){
+            async replaceArchiveContent(old){
                 const filter = !store.isShowSelected ? store.updateRetsSearch : [...store.roadHighlightObj]
-                const currDate = filter?.find(x => x.attributes.RETS_ID === old.attributes.RETS_ID)?.attributes?.EDIT_DT ?? this.returnToFeed()
+                const currDate = filter?.find(x => x.attributes.RETS_ID === old.attributes.RETS_ID)?.attributes?.EDIT_DT ?? await this.returnToFeed()
                 const rd = filter.findIndex(x => x.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
                 if(currDate !== old.attributes.EDIT_DT){
                     old.attributes.EDIT_DT === currDate
@@ -399,9 +398,11 @@
                 this.editText = true
                 this.editNotes = note
                 this.noteIndex = index
+                return
             },
             closeNote(){
                 this.editText = false
+                return
             },
             saveNote(size){
                 this.addHistoryNote(size)
@@ -411,29 +412,36 @@
                 setTimeout(()=>{
                     store.isAlert = false
                 },2000)
+                return
             },
             deleteNote(){
                 this.histNotes.splice(this.noteIndex, 1)
                 this.editText = false
+                return
             },
             proccessGEMTasks(){
                 const returnGEMTasks = getGEMTasks()
                 //returns array
                 this.gemTask = []
                 returnGEMTasks.forEach(gem => this.gemTask.push(gem))
+                return
             },
             addGemChip(gemId){
                 this.sendGemTaskNum = gemId
+                return
             },
             isAssetJob(){
                 store.checkDetailsForComplete()
+                return
             },
             closeGEMTask(){
                 document.querySelectorAll(".gem-search")[0].style.display = "none"
+                return
             },
             expandChatHistory(){
                 this.editText = true
                 this.sendHistory = ""
+                return
             },
             async addHistoryNote(size){
                 if(!this.addHistoryChat.length){
@@ -449,6 +457,7 @@
             },
             clearMessage(){
                 this.addHistoryChat = ""
+                return
             },
 
             displayAttachments(oid){
@@ -464,13 +473,16 @@
                 })
 
                 input.remove()
+                return
             },
             removeRetsGraphics(){
                 removeretsgraphic();
+                return
             },
             handlearchive(){
                 this.isarchiveopen = !this.isarchiveopen
                 this.deletedRETSID = store.retsObj.attributes.OBJECTID
+                return
             },
 
 

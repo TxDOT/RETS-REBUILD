@@ -954,8 +954,17 @@ export function addAttachments(oid, files, flag){
         flag ? null : store.attachToNote(oid, arr)
     })
     .then(() => console.log(`${store.loggedInUser} added an attachment!`))
-    .catch(err => console.log(err))
+    .catch((err) => {
+        store.alertTextInfo.type = "error"
+        store.alertTextInfo.color = 'red'
+        store.alertTextInfo.text = 'Error Uploading attachment. File Size or Type issue. Try a smaller or different file type.'
+        store.isAlert = true
+        console.log(err)
+    })
 }
+
+
+
 
 export function deleteAttachment(oid, attachName){
     const attachGraphic = new Graphic({
@@ -968,19 +977,18 @@ export function deleteAttachment(oid, attachName){
         objectIds: [oid]
     })
     .then((x) => {
-        x[oid].forEach((attach) => {
-            if(attach.name === attachName){
-                retsHistory.deleteAttachments(attachGraphic, [attach.id])
-                    .then((y) => {
-                        const chat = store.historyChat.find(z => z.OBJECTID === attach.parentObjectId)
-                        const index = chat.attachments.findIndex(att => att.name === attach.name)
-                        chat.attachments.splice(index, 1)
-                        store.numAttachments -= 1
-                    })
-                
-                    .catch(err => console.log(err))
-            }
-        })
+        let getAttachment = x[oid].find((attach) => attach.name === attachName) 
+            retsHistory.deleteAttachments(attachGraphic, [getAttachment.id])
+                .then((y) => {
+                    const chat = store.historyChat.find(z => z.OBJECTID === getAttachment.parentObjectId)
+                    const index = chat.attachments.findIndex(att => att.name === getAttachment.name)
+                    chat.attachments.splice(index, 1)
+                    store.numAttachments -= 1
+                })
+            
+                .catch(err => console.log(err))
+
+        
         
     })
     return 
@@ -1379,6 +1387,7 @@ export function openDetails(road){
     //removeHighlight("a", true)
     highlightRETSPoint(road.attributes)
     toggleRelatedRets(JSON.stringify(road))
+    window.document.title = `RETSID: ${road.attributes.OBJECTID}`
     return
 }
 

@@ -448,9 +448,7 @@ export default{
     margin-top: 10px;
     gap: 0px;
 }
-.item{
-    flex: auto;
-}
+
 .v-input{
     padding: 0px;
 }
