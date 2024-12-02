@@ -1,6 +1,6 @@
 <template>
     <div id="filterFeed">
-        <v-card>
+        <v-card style="border-radius: 0;" >
             <div style="margin: 10px;">
                 <div style="position: relative; bottom:0rem; font-weight: normal; font-size: 20px; flex: auto; padding-bottom: 8px;">Filter Activity Feed</div>
                 <hr></hr>
@@ -48,7 +48,11 @@
                     
                 <v-expansion-panels flat variant="accordion">
                     <v-expansion-panel elevation="0" tile >
-                        <v-expansion-panel-title expand-icon="mdi-menu-down" collapse-icon="mdi-menu-up" static > Custom SQL Query</v-expansion-panel-title>
+                        <v-expansion-panel-title expand-icon="mdi-menu-down" collapse-icon="mdi-menu-up" static >
+                            <p style="margin-left: -12px;">
+                                Custom SQL Query
+                            </p>    
+                        </v-expansion-panel-title>
                             <v-expansion-panel-text id="customQueryBackground">
                                 <div id="expansionPanelItems">
                                     
@@ -98,7 +102,7 @@
                                     </template>
                                 </v-combobox> 
 
-                                <span :style="{color: validationMessageColor, fontSize: '12px', marginLeft: '10px'}">{{validationMessage}}</span>
+                                <span :style="{color: validationMessageColor, fontSize: '12px', marginLeft: '-23px'}">{{validationMessage}}</span>
                                     <div style="float:right; position: relative; left: 29px;">
                                         <v-btn-toggle class="trigger-buttons" density="compact">
                                             <v-btn variant="plain" size="small" @click="clearCustomQuery">Clear</v-btn>
@@ -112,8 +116,8 @@
                 </v-expansion-panels>
                 
                 <hr class="popup-title-border" style="position: relative; width: 100%; position: relative; bottom: 0px;"></hr>
-                <div style="position: relative; float: right;">
-                    <v-btn-toggle class="trigger-buttons" density="compact" style="margin-top: 10px;margin-bottom: 20px;">
+                <div style="position: relative; float: right; height: auto;">
+                    <v-btn-toggle class="trigger-buttons" density="compact" style="margin-top: 10px;margin-bottom: 16px;">
                         <v-btn @click="cancelFilter()" class="secondary-button" variant="plain" size="small">Cancel</v-btn>
                         <v-btn @click="setFilterNumber()" class="main-button-style" variant="outlined" size="small">Save</v-btn>
                     </v-btn-toggle>
@@ -128,7 +132,7 @@
         </v-card>
     </div>
     <div style="position: absolute; left: 890px; top: 100px;" v-if="isDate">
-        <v-date-picker class="date" multiple hide-header v-model="selectDate" @update:modelValue="selectDates()" tile width="300" :disabled="selectDate.length === 2"></v-date-picker>
+        <v-date-picker class="date" multiple hide-header v-model="selectDate" @update:modelValue="selectDates()" tile  :disabled="selectDate.length === 2" style=""></v-date-picker>
         <div style="position: relative; bottom: 3.3rem; ">
             <v-checkbox label="Current Year" style="position: relative; z-index: 9999; float: right; margin-bottom: 15px; margin-right: 15px" v-model="currentYear"></v-checkbox>
         </div>
@@ -455,7 +459,7 @@ export default{
     top: 36px;
     width: 400px;
     left: calc(59px + 429px);
-    border-radius: 0%;
+    border-radius: 1px;
     min-height: 53%;
     max-height: 80%;
     overflow-y: auto;
