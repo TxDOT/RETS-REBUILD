@@ -1,4 +1,5 @@
 <template>
+    <v-alert v-if="feedbackAlert" width="250px" tile density="compact" color="success" style="margin: auto; left: 250px;">Thank you for your feeedback!</v-alert>
     <v-navigation-drawer permanent color="black" rail width="10">
         <v-list height="95%" id="icons-top" class="iconList">
             <v-list-item class="iconList-item"  id="popoutitems" v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" active-class="btn-left-brder" :active="store.toggleFeed === tool.value" :disabled="tool.disabled">    
@@ -87,14 +88,19 @@
         <v-card-item>
             <span class="banner-txt">Settings</span>            
         </v-card-item>
-            <hr id = "separator"/>
+        <hr id = "separator"/>
         <v-card-item id = "darkmodeitem" >
             <div id = "darkmodeswitch">
                 <v-switch  v-model="switchValueDark" label="Dark Mode" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn" disabled></v-switch>
             </div>
-             
+            
+
         </v-card-item>
-            <hr id = "separator" />
+       
+        <hr id = "separator" />
+            <v-btn @click ="activateFeedback()" color="#4472C4" rounded  style="position: absolute; right: 25px; top: 96px;">
+                <span style="font-weight: 100;">Feedback</span>
+            </v-btn>
         <v-card-item id = "notificationsitems" >
             <v-card-title id="notificationsfont">Notifications</v-card-title>
             <v-card-subtitle id = "notificationssub">
@@ -117,8 +123,8 @@
             <div style="width: 100%; position: relative; height: 100%;">
                 <div style="width: 100%; position: relative;">
                     <v-btn variant="plain" size="small" class="secondary-button"  prepend-icon="mdi-power" @click="logoutMethod()" >LOGOUT</v-btn>
-                    <v-btn style="float: right;" variant="outlined" size="small" class="main-button-style" @click="handleSettingsTool(); handleactiveclass();">save</v-btn>
-                    <v-btn style="float: right;" variant="plain" size="small" class="secondary-button"  @click="handleSettingsTool();handleactiveclass();">CANCEL</v-btn>
+                    <v-btn style="float: right;" variant="outlined" size="small" class="main-button-style" @click=" handleactiveclass();">save</v-btn>
+                    <v-btn style="float: right;" variant="plain" size="small" class="secondary-button"  @click="handleactiveclass();">CANCEL</v-btn>
                     
                     
                 </div>
@@ -133,14 +139,30 @@
         </v-card-item>
 
     </v-card>
-    <v-card id="suggestionsSection" height="375" width="350" style="border-radius: 0;" v-if="false">
+    <v-card id="suggestionsSection" height="370px" width="350" style="border-radius: 0;" v-if="feedbackStatus">
         <v-card-title>Provide Feedback</v-card-title>
         <hr id = "separator" style="width: 320px !important; " />
-        <v-card text tile flat style="margin-left: 15px; margin-right: 15px; height: 20%;">
+        <v-card-text >
             We appreciate your feedback, let us know what you think.
-        </v-card text>
-        <v-text-field  variant="outlined" style="width: 325px; height: 200px; margin: auto; left: 0; right: 0;"></v-text-field>
-        <v-select></v-select>
+        </v-card-text>
+        <v-textarea v-model="feedbackText" class="feedbackTextbox" no-resize variant="outlined"  maxlength="1000" placeholder="Spill your guts...">
+            <template #counter>
+                <span >
+                    {{ feedbackText.length }} / 1000
+                </span>
+            </template>
+        </v-textarea>
+        <!-- <v-combobox variant="underlined" clearable label="Name" v-model="feedbackName" :items=this.userNames :disabled="isAnonymous" style="width: 320px; margin: auto; left: 0; right: 0; margin-top: -20px !important;" ></v-combobox> -->
+        <v-checkbox class="small-checkbox" label="I prefer to remain anonymous" v-model="isAnonymous" style="margin-left: -40px; margin-top: -20px;"></v-checkbox>
+        <div style="margin-right: 10px;">
+            <v-btn style="float: right;" variant="outlined" size="small" class="main-button-style" @click="submitFeedback" :disabled=feedbackSubmitStatus >SUBMIT</v-btn>
+            <v-btn style="float: right;" variant="plain" size="small" class="secondary-button" @click="cancelFeedback" >CANCEL</v-btn>
+
+        </div>
+                    
+                    
+
+
     </v-card>
 
  
@@ -150,7 +172,8 @@
 
 <script>
 
-    import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass, roadwaysRenderer, TxDOTRoadways, hybridBasemap} from '../components/map-Init.js';
+    import { appConstants } from '../common/constant.js';
+import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass, roadwaysRenderer, TxDOTRoadways, hybridBasemap} from '../components/map-Init.js';
     import { createtool, selecttool, togglemenu, logoutUser } from '../components/utility.js';
     import { vuetify } from '../main.js';
     import { store } from './store';
@@ -180,6 +203,13 @@
                 isCreateEnabled: true,
                 settingsstatus: false,
                 shiftKey: false,
+                userNames: Array.from(appConstants.userRoles, user => user.name),
+                isAnonymous: false,
+                feedbackStatus: false,
+                feedbackText: "",
+                feedbackSubmitStatus: true,
+                feedbackAlert: false,
+                feedbackName: "",
                 switches: [
                             { label: "RETS I Create", value: false, fontColor: "#D9D9D9" },
                             { label: "RETS I'm tagged in", value: false, fontColor: "#D9D9D9" },
@@ -293,7 +323,7 @@
                                         }
                                     }
                                 },
-                               {title:"Test", icon: 'mdi-cog', color: "#D9D9D9", name: "Settings",
+                               {title:"Settings", icon: 'mdi-cog', color: "#D9D9D9", name: "Settings",
                                action: () =>{
                                 this.handleSettingsTool();
                                 this.retsToolsBottom[4].isActive = !this.retsToolsBottom[4].isActive
@@ -333,6 +363,23 @@
                         return
                     },
                     immediate: true
+                   },
+                   'feedbackText':{
+                    handler: function(){
+                        if (this.feedbackText.length){
+                            this.feedbackSubmitStatus = false
+                        }
+                        else{
+                            this.feedbackSubmitStatus = true
+                        }
+                    }
+                   },
+                   'isAnonymous':{
+                    handler: function(){
+                        if (this.isAnonymous){
+                            this.feedbackName = ""
+                        }
+                    }
                    }
                 },
                 mounted() {
@@ -354,22 +401,18 @@
                     },
                     newSwitchTurnedOn() {
                         if (this.switchValue) {
-                            // New switch is turned on, do something
                             this.fontColor = '#FFFFFF';
                             
                         } else {
-                            // New switch is turned off, do something else
                             this.fontColor = "#D9D9D9";
                         }
                     },
                     switchTurnedOn(index) {
       
                             if (this.switches[index].value) {
-                                // Switch is turned on, change font color to green
                                 this.switches[index].fontColor = '#FFFFFF';
                             } 
                             else {
-                                // Switch is turned off, change font color to red
                                 this.switches[index].fontColor = '#D9D9D9';
                             }
                         
@@ -378,25 +421,8 @@
                         return { color: fontColor };
                     },
                     handleactiveclass(){
-                        if (this.settingsstatus = true){
-                            
-                            const classList = document.querySelectorAll('.btn-left-brder');
-                            classList.forEach(element => {
-                            element.classList.toggle('btn-left-brder'); // Remove each element individually
-                            });
-
-                        const classList2 = document.querySelectorAll('.v-list-item__overlay');
-                            classList2.forEach(element => {
-                            element.classList.remove('v-list-item__overlay'); // Remove each element individually
-                            });
-
-                            this.settingsstatus = false
-                        }
-                       
-                        //this.settingsstatus != this.settingsstatus
-                        
-                       
-
+                        this.settingsstatus = false
+                        this.retsToolsBottom[4].isActive = false
                     },
                     logoutMethod(){
                         logoutUser();
@@ -543,6 +569,35 @@
                     toggledarkmode(){
                         vuetify.theme.defaultTheme = 'light';
 
+                    },
+                    cancelFeedback(){
+                        this.feedbackStatus = false
+                        this.settingsstatus = true
+                        this.feedbackText = ""
+                        this.isAnonymous = false
+
+                    },
+                    activateFeedback(){
+                        this.feedbackStatus = true
+                        this.settingsstatus = false
+                    },
+                    submitFeedback(){
+                        if (!this.isAnonymous){
+                            console.log(this.feedbackText , "\n from: ", store.loggedInUser)
+                        }
+                        else{
+                            console.log(this.feedbackText , "\n from: Anonymous ")
+                        }
+                        this.feedbackStatus = false
+                        this.settingsstatus = true
+                        this.feedbackAlert = true
+                        this.feedbackText = ""
+                        this.isAnonymous = false
+
+                        setTimeout(() => {
+                            this.feedbackAlert = false
+
+                        }, 2500);
                     }
 
                     
@@ -791,10 +846,29 @@
     }
 
     #suggestionsSection{
+        position:absolute;
         margin: auto;
-        left: 200px;
+        left: 500px;
         right: 0;
-        top: 100px;
+        top: 0;
         bottom: 0;
     }
+    .feedbackTextbox{
+        margin:auto;
+        left: 0;
+        right:0;
+        width: 320px;
+        height: 150px;
+    }
+    .feedbackTextbox .v-field {
+        border-radius: 0 ;
+    }
+    .small-checkbox {
+        transform: scale(0.75); 
+    }
+    .small-checkbox .v-label {
+        font-size: 15px !important; 
+    }
+    
+    
 </style>

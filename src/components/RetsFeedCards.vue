@@ -531,7 +531,7 @@ export default{
         position: relative;
         right: 15px;
         padding: 0px;
-        margin-left: 10px;
+        margin-left: -20px;
         max-width: 310px;
         min-width: 20px;
         bottom: 12px
@@ -600,7 +600,6 @@ export default{
     .banner-btn{
         position: relative;
     }
-
     .retsSubtitleTxt{
         position: relative;
         font-size: 20px; 
