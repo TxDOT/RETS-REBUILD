@@ -4,7 +4,7 @@
             <div style="margin: 10px;">
                 <div style="position: relative; bottom:0rem; font-weight: normal; font-size: 20px; flex: auto; padding-bottom: 8px;">Filter Activity Feed</div>
                 <hr></hr>
-                <div class="container" style="padding-top: 8px;" @click="isDisabled = false; store.customquery = null">
+                <div class="container" style="padding-top: 8px;" @click="isDisabled = false; ">
                     <div no-gutters class="item">
                         <v-select :disabled="isDisabled" :items="filterSort" item-title="title" return-object density="compact" label="Sort" variant="underlined" v-model="store.CREATE_DT" style="">
                         </v-select>
@@ -132,7 +132,7 @@
         </v-card>
     </div>
     <div style="position: absolute; left: 890px; top: 100px;" v-if="isDate">
-        <v-date-picker class="date" multiple hide-header v-model="selectDate" @update:modelValue="selectDates()" tile  :disabled="selectDate.length === 2" style=""></v-date-picker>
+        <v-date-picker class="date" multiple hide-header v-model="selectDate" @update:modelValue="selectDates()" tile  :disabled="selectDate.length === 2" style="border-radius: 0;"></v-date-picker>
         <div style="position: relative; bottom: 3.3rem; ">
             <v-checkbox label="Current Year" style="position: relative; z-index: 9999; float: right; margin-bottom: 15px; margin-right: 15px" v-model="currentYear"></v-checkbox>
         </div>
@@ -276,9 +276,9 @@ export default{
                                     this.validationMessageColor = "green"
                                     this.validationMessage = "Query was successful"
                                     view.goTo(resp.extent)
-                                    if (store.customquery)
+                                    if (store.customquery && !store.userFilters.customQuery.includes(store.customquery))
                                         {
-                                            
+                                            console.log(store.userFilters.customQuery)
                                             store.userFilters.customQuery.push(store.customquery)
                                             this.isDisabled = true
                                             store.customquery = store.userFilters.customQuery.at(-1)
@@ -367,6 +367,7 @@ export default{
                 customQuery: store.userFilters.customQuery
 
             }
+            store.customquery = null
             this.calcFilterDiff()
             store.setFilterFeed()
             store.isfilter = false
@@ -501,4 +502,12 @@ export default{
 :deep(.v-messages){
     min-height: 1px !important;
 }
+:deep(.v-date-picker-month__days){
+  row-gap: 0px !important;
+}
+:deep(.v-date-picker-month__day){
+  height: 40px !important;
+  width: 40px !important;
+}
+
 </style>

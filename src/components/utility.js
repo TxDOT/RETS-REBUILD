@@ -151,7 +151,7 @@ export function doubleClickRetsPoint(){
         view.on("double-click", (event)=> {
             event.stopPropagation()
             view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt)=>{
-                if (evt.results.length){
+                if (evt.results.length && !store.isDetailsPage){
                     openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID))
 
                 }
