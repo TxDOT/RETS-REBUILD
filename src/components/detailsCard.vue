@@ -240,7 +240,6 @@ import {store} from './store.js'
                 //this.gimmeRETS(ret.title, `RETS_ID = ${Number(ret.title)}`)
             },
             splitAndAddRelatedRets(relatedRets){
-                console.log(relatedRets)
                 if(typeof relatedRets === "object" || !relatedRets.length){
                     // relatedRets.map((ret)=>{
                     //     this.gimmeRETS(ret, `RETS_ID = ${ret}`)

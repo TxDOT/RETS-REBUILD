@@ -588,9 +588,7 @@ export function removeRelatedRetsFromMap(retsoid, retsID){
     }
     let retsIndex = store.retsObj.attributes.RELATED_RETS.findIndex(ret => ret.RETS_ID === retsID)
     store.retsObj.attributes.RELATED_RETS.splice(retsIndex,1)
-    console.log(retsGraphicLayer)
     const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === Number(retsoid))
-    console.log(findGraphic)
     retsGraphicLayer.removeMany(findGraphic)
     return
 }
@@ -1352,7 +1350,6 @@ export function hitTestMoveRETS(){
 }
 
 export async function isRoadExist(){
-    console.log(store.retsObj.attributes.RTE_NM)
     const exist = await roadLayerView.queryFeatures({
         where: `RTE_NM = '${store.retsObj.attributes.RTE_NM}'`
     })
@@ -1593,11 +1590,6 @@ export function setFilterProperties(userFilterObject){
     store.CNTY_NM = userFilterObject.cntyNM
     store.USER = userFilterObject.user
     store.isAssignedTo = userFilterObject.isAssignedTo
-    // console.log(store.STAT)
-    // console.log(userFilterObject.stat)
-
-    // console.log(store.USER)
-    // console.log(userFilterObject.user)
     return
     
 

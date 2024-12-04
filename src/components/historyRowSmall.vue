@@ -210,7 +210,6 @@
                 // console.log(returnHistObj)
                 // console.log(this.histNotes.at(-1).attachments)
                 deleteAttachment(noteOid, attachName)
-                console.log(noteOid, attachName)
             }   
         },
         watch:{

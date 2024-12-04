@@ -195,8 +195,6 @@ export const store = reactive({
                                 }
                                 
                         })
-                        let test = new Set([...this.roadHighlightObj].sort((a,b) => new Date(a.attributes.EDIT_DT) - new Date(b.attributes.EDIT_DT)))
-                        console.log(test)
                 }
                 const findItem = this.historyChat.find(note => note.OBJECTID === oid)
                 findItem.EDIT_DT = modDate
@@ -245,15 +243,7 @@ export const store = reactive({
                 
                 return retsFlag ?? defaultValue
         },
-        // preserveHighlightCards(){
-        //         if(this.isShowSelected){
-        //                 console.log(this.roadHighlightObj)
-        //                 this.updateRetsSearch = [...this.roadHighlightObj]
-        //                 console.log(this.updateRetsSearch)
-        //                 return
-        //         }
-        //         return
-        // },
+
         async getRetsLayer(userid, where, layer, orderFields){ //////////////////////////remove userid from here
                 this.loggedInUser = userid
                 const queryString = {"whereString": where, "queryLayer": layer}
@@ -373,8 +363,6 @@ export const store = reactive({
         },
         deleteRetsID(){
                 const findIndex = this.roadObj.findIndex(ret => ret.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
-                console.log(findIndex)
-                console.log(this.updateRetsSearch)
                 this.updateRetsSearch.splice(findIndex, 1)
 
                 const cloneRets = [...this.roadObj]
@@ -476,7 +464,7 @@ export const store = reactive({
                 
                 !this.retsObj.attributes.NO_RTE ? fieldsToCheck.push(this.retsObj.attributes.DFO) : null    
                 const metadataIsUpdate = fieldsToCheck.some(x => !x)
-                console.log(metadataIsUpdate)
+                
                 if(item.length && !this.retsObj.attributes.NO_RTE){
                     this.isSaveBtnDisable = true
                     return

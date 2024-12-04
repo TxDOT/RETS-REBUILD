@@ -467,7 +467,8 @@
 
                 input.addEventListener("change", (event)=>{
                     this.addAttach.push({name: [...event.target.files].at(-1).name})
-                    store.attachment = event.target.files
+                    
+                    store.attachment = [...event.target.files]
                     //addAttaevent.target.fileschments(oid, attach, event.target.files)
                 })
 
@@ -579,7 +580,6 @@
     padding-top: .5rem;
     position: relative;
     margin-right: 10px;
-    border: 2px solid green;
     left: 520px;
 }
 
@@ -587,6 +587,9 @@
     margin-right: 10px;
 }
 
+.v-btn:hover{
+    background-color: rgba(84,84,84,.3)
+}
 .new-proposed-route{
     font-size: 10px !important;
     position: relative;
