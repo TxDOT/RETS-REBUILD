@@ -1,4 +1,3 @@
-
 <template>
     <div style="width: 99%; margin-left: 10px; height: 100%; display: flex; flex-direction: column; gap: 2px;">
         <div id="search">

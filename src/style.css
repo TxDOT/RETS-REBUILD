@@ -33,6 +33,12 @@
   margin-left: 10px;
 }
 
+.v-btn:hover{
+  background-color: grey !important;
+  border-radius: 0% !important;
+}
+
+
 .banner-txt{
   position: relative;
   bottom: 0px;
@@ -121,7 +127,7 @@
 
 .date-picker{
   bottom: 29vh !important;
-  left: 485px !important;
+  left: 488px !important;
   z-index: 999 !important;
   position: fixed;
 }

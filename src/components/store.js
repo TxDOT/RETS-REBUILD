@@ -467,7 +467,7 @@ export const store = reactive({
         },
         checkDetailsForComplete(){
                 let item = [this.retsObj.attributes.RTE_NM, this.retsObj.attributes.DFO, this.retsObj.attributes.STAT, this.retsObj.attributes.DESC_].filter(x => !x)
-                
+
                 const fieldsToCheck = [
                         this.retsObj.attributes.GIS_ANALYST, this.retsObj.attributes.GRID_ANALYST, 
                         this.retsObj.attributes.DIST_ANALYST, this.retsObj.attributes.DIST_NM, 
@@ -476,8 +476,8 @@ export const store = reactive({
                 
                 !this.retsObj.attributes.NO_RTE ? fieldsToCheck.push(this.retsObj.attributes.DFO) : null    
                 const metadataIsUpdate = fieldsToCheck.some(x => !x)
-
-                if(item.length && !this.retsObj.attributes.NO_RTE && this.isAlert){
+                console.log(metadataIsUpdate)
+                if(item.length && !this.retsObj.attributes.NO_RTE){
                     this.isSaveBtnDisable = true
                     return
                 }

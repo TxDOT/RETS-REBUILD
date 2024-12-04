@@ -61,12 +61,12 @@ export default{
     },
     methods:{
         discardedits(){
+            window.document.title = 'RETS Application'
             if(!store.isDetailsPage){
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
                 let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
                 updateRetsObj(findItem, archiveRets)
                 store.cancelpopup = false
-                window.document.title = 'RETS Application'
                 store.activityBanner = "Activity Feed"
                 store.toggleFeed = 1
                 return

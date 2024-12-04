@@ -18,7 +18,7 @@
             <div class="container-div">
                 <div class="details-div">
                     <v-card class="details-page">
-                        <v-btn-toggle selected-class="active-button" variant="plain" mandatory v-model="isBtnSet" id="retsDetailMeta">
+                        <v-btn-toggle selected-class="active-button" variant="plain" mandatory v-model="isBtnSet" id="retsDetailMeta" density="compact">
                             <v-btn flat class="retsMetaBtn" @click="this.isDetails = true; this.isMetadata = false" density="compact">Details</v-btn>
                             <v-btn flat class="retsMetaBtn" @click="this.isMetadata = true; this.isDetails = false" density="compact">Metadata</v-btn>
                         </v-btn-toggle>
@@ -37,17 +37,17 @@
                 <!-- history section -->
                 <div class="history-div">
                     <div style="display: flex; flex-direction: column; height: calc(100% + 9px);">
-                        <v-card class="flex" style="display: flex; flex-direction: column; position: relative; border-radius: 0%; gap: 0px;">
+                        <v-card class="flex" style="display: flex; flex-direction: column; position: relative; border-radius: 0%; gap: 0px; overflow-y: auto;">
                             <div style="max-height: 30px; display: flex; flex-direction: row;">
                                 <v-card-title style="font-size: 15px; position: relative;" class="flex">
                                     <span style="position: relative; bottom: 10px !important;">History</span>
                                     <v-btn icon="mdi-arrow-expand" variant="plain" density="compact" @click="expandChatHistory" style="font-size: .6rem; float: right; position: relative; left: 20px; bottom: 10px;"></v-btn>
                                 </v-card-title>
                             </div>
-                            <div class="flex">
+                            <div style="flex: 5;">
                                 <historyViewSmall/>
                             </div>
-                            <div style="max-height: 200px; padding-top: 0px; padding-bottom: 4px; ">
+                            <div style="max-height: 200px; padding-top: 0px; padding-bottom: 4px;">
                                 <div style="margin-left: 10px; margin-right: 10px;">
                                     <v-text-field label="Type a message" density="compact" tile v-model="addHistoryChat" :error-messages= "initRules ? 'Write a note. Submit your thought to History!' : null" @update:modelValue="historyValue"></v-text-field>
                                 </div>
@@ -272,6 +272,7 @@
                 store.isDetailsPage = false
                 store.isCancelBtnDisable = false
                 store.activityBanner = "Activity Feed"
+                window.document.title = 'RETS Application'
                 store.isMoveRetsPt = false
                 store.isCard = true
                 store.historyChat.length = 0
@@ -306,8 +307,6 @@
                 store.deleteRetsID()
                 deleteRetsGraphic()
                 this.returnToFeed()
-                window.document.title = 'RETS Application'
-                store.activityBanner = "Activity Feed"
                 store.toggleFeed = 1
                 return
             },
@@ -554,6 +553,7 @@
     height: 100vh;
     bottom: 78px !important;
     gap: 4px;
+    overflow-y: auto;
 }
 
 .number-field{
@@ -708,9 +708,9 @@
     position: relative;
     top: 0px; 
     padding-left: 0px;
-    margin-bottom: 0px;
+    margin-bottom: 3px;
     text-transform: capitalize !important;
-    height: 30px;
+    height: 23px;
     color: white;
     width: 100%;
     opacity: 1 !important

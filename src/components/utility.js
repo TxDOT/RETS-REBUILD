@@ -582,8 +582,15 @@ export function turnAllVisibleGraphicsOff(){
     isVisible.forEach(vis => vis.visible = false)
     return
 }
-export function removeRelatedRetsFromMap(retsoid){
-    const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === retsoid)
+export function removeRelatedRetsFromMap(retsoid, retsID){
+    if(!store.retsObj.attributes.RELATED_RETS){
+        return
+    }
+    let retsIndex = store.retsObj.attributes.RELATED_RETS.findIndex(ret => ret.RETS_ID === retsID)
+    store.retsObj.attributes.RELATED_RETS.splice(retsIndex,1)
+    console.log(retsGraphicLayer)
+    const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === Number(retsoid))
+    console.log(findGraphic)
     retsGraphicLayer.removeMany(findGraphic)
     return
 }
@@ -747,7 +754,7 @@ export function createtool(sketchWidgetcreate, createretssym) {
                             store.alertTextInfo = {"text": `No Route has been detected`, "color": "yellow", "type":"info", "toggle": true}
                             store.isMoveRetsPt = false
                             completeMovePtSketch()
-                            store.checkDetailsForComplete()
+                            // store.checkDetailsForComplete()
                             return
                         }
                         store.retsObj.attributes.NO_RTE = false
@@ -1218,7 +1225,7 @@ export function getRoadInformation(){
                             completeMovePtSketch()
                             store.cancelEvent.remove()
                             getNewPoint.remove()
-                            store.checkDetailsForComplete()
+                            //store.checkDetailsForComplete()
                             store.isSaveBtnDisable = false
                             return
                         }
@@ -1345,6 +1352,7 @@ export function hitTestMoveRETS(){
 }
 
 export async function isRoadExist(){
+    console.log(store.retsObj.attributes.RTE_NM)
     const exist = await roadLayerView.queryFeatures({
         where: `RTE_NM = '${store.retsObj.attributes.RTE_NM}'`
     })
@@ -1439,6 +1447,7 @@ export function returnToFeedFunction(){
     store.isDetailsPage = false
     store.isCancelBtnDisable = false
     store.activityBanner = "Activity Feed"
+    window.document.title = 'RETS Application'
     store.isMoveRetsPt = false
     store.isCard = true
     store.historyChat.length = 0
