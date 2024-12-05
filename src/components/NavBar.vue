@@ -152,28 +152,19 @@
                 </span>
             </template>
         </v-textarea>
-        <!-- <v-combobox variant="underlined" clearable label="Name" v-model="feedbackName" :items=this.userNames :disabled="isAnonymous" style="width: 320px; margin: auto; left: 0; right: 0; margin-top: -20px !important;" ></v-combobox> -->
+        
         <v-checkbox class="small-checkbox" label="I prefer to remain anonymous" v-model="isAnonymous" style="margin-left: -40px; margin-top: -20px;"></v-checkbox>
         <div style="margin-right: 10px;">
             <v-btn style="float: right;" variant="outlined" size="small" class="main-button-style" @click="submitFeedback" :disabled=feedbackSubmitStatus >SUBMIT</v-btn>
             <v-btn style="float: right;" variant="plain" size="small" class="secondary-button" @click="cancelFeedback" >CANCEL</v-btn>
-
         </div>
-                    
-                    
-
-
     </v-card>
-
- 
-    
-
 </template>
 
 <script>
 
     import { appConstants } from '../common/constant.js';
-import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass, roadwaysRenderer, TxDOTRoadways, hybridBasemap} from '../components/map-Init.js';
+    import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass, roadwaysRenderer, TxDOTRoadways, hybridBasemap} from '../components/map-Init.js';
     import { createtool, selecttool, togglemenu, logoutUser } from '../components/utility.js';
     import { vuetify } from '../main.js';
     import { store } from './store';

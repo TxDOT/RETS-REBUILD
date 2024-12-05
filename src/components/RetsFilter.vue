@@ -278,7 +278,6 @@ export default{
                                     view.goTo(resp.extent)
                                     if (store.customquery && !store.userFilters.customQuery.includes(store.customquery))
                                         {
-                                            console.log(store.userFilters.customQuery)
                                             store.userFilters.customQuery.push(store.customquery)
                                             this.isDisabled = true
                                             store.customquery = store.userFilters.customQuery.at(-1)

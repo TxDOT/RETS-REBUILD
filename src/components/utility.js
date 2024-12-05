@@ -18,11 +18,13 @@ export let retsHistoryView;
 
 export async function getRetsLayerView (){
         const retLayerView = await view.whenLayerView(retsLayer)
-        reactiveUtils.when(
-            () => !retLayerView.dataUpdating,
-            async () => {
+        await reactiveUtils.once(
+            () => !retLayerView.dataUpdating);
+            // .then(() => {
                 try{
                     retsLayerView = retLayerView
+                    console.log('ready')
+                    //need to find items that are currently in view not everything for belwo
                     
                     if(retsLayerView.view.zoom < 12){
                         store.zoomInText = "Zoom in to enable"
@@ -36,9 +38,7 @@ export async function getRetsLayerView (){
                 catch(err){
                     console.log(err)
                 }
-            },
-        )
-
+            // })
     return
 }
 
@@ -582,8 +582,13 @@ export function turnAllVisibleGraphicsOff(){
     isVisible.forEach(vis => vis.visible = false)
     return
 }
-export function removeRelatedRetsFromMap(retsoid){
-    const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === retsoid)
+export function removeRelatedRetsFromMap(retsoid, retsID){
+    if(!store.retsObj.attributes.RELATED_RETS){
+        return
+    }
+    let retsIndex = store.retsObj.attributes.RELATED_RETS.findIndex(ret => ret.RETS_ID === retsID)
+    store.retsObj.attributes.RELATED_RETS.splice(retsIndex,1)
+    const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === Number(retsoid))
     retsGraphicLayer.removeMany(findGraphic)
     return
 }
@@ -747,7 +752,7 @@ export function createtool(sketchWidgetcreate, createretssym) {
                             store.alertTextInfo = {"text": `No Route has been detected`, "color": "yellow", "type":"info", "toggle": true}
                             store.isMoveRetsPt = false
                             completeMovePtSketch()
-                            store.checkDetailsForComplete()
+                            // store.checkDetailsForComplete()
                             return
                         }
                         store.retsObj.attributes.NO_RTE = false
@@ -1218,7 +1223,7 @@ export function getRoadInformation(){
                             completeMovePtSketch()
                             store.cancelEvent.remove()
                             getNewPoint.remove()
-                            store.checkDetailsForComplete()
+                            //store.checkDetailsForComplete()
                             store.isSaveBtnDisable = false
                             return
                         }
@@ -1396,6 +1401,7 @@ export function loadData(){
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if(entry.isIntersecting){
+                store.retsHasAttachment(Number(entry.target.id))
                 getHistoryView(entry.target.id)
             }
             entry.target.classList.toggle("show", entry.isIntersecting)
@@ -1439,6 +1445,7 @@ export function returnToFeedFunction(){
     store.isDetailsPage = false
     store.isCancelBtnDisable = false
     store.activityBanner = "Activity Feed"
+    window.document.title = 'RETS Application'
     store.isMoveRetsPt = false
     store.isCard = true
     store.historyChat.length = 0
@@ -1584,11 +1591,6 @@ export function setFilterProperties(userFilterObject){
     store.CNTY_NM = userFilterObject.cntyNM
     store.USER = userFilterObject.user
     store.isAssignedTo = userFilterObject.isAssignedTo
-    // console.log(store.STAT)
-    // console.log(userFilterObject.stat)
-
-    // console.log(store.USER)
-    // console.log(userFilterObject.user)
     return
     
 

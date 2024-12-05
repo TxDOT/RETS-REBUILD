@@ -195,8 +195,6 @@ export const store = reactive({
                                 }
                                 
                         })
-                        let test = new Set([...this.roadHighlightObj].sort((a,b) => new Date(a.attributes.EDIT_DT) - new Date(b.attributes.EDIT_DT)))
-                        console.log(test)
                 }
                 const findItem = this.historyChat.find(note => note.OBJECTID === oid)
                 findItem.EDIT_DT = modDate
@@ -245,16 +243,8 @@ export const store = reactive({
                 
                 return retsFlag ?? defaultValue
         },
-        // preserveHighlightCards(){
-        //         if(this.isShowSelected){
-        //                 console.log(this.roadHighlightObj)
-        //                 this.updateRetsSearch = [...this.roadHighlightObj]
-        //                 console.log(this.updateRetsSearch)
-        //                 return
-        //         }
-        //         return
-        // },
-        async getRetsLayer(userid, where, layer, orderFields){ //////////////////////////remove userid from here
+
+        getRetsLayer(userid, where, layer, orderFields){ //////////////////////////remove userid from here
                 this.loggedInUser = userid
                 const queryString = {"whereString": where, "queryLayer": layer}
                 //const orderField = "EDIT_DT DESC, PRIO"
@@ -277,7 +267,7 @@ export const store = reactive({
                                                         x.attributes.mdicheckdecagramoutline = this.isComplete(x.attributes.STAT)
                                                         x.attributes.mditimersand = this.isNoActivity(x.attributes.STAT, x.attributes.EDIT_DT)
                                                         x.attributes.mdiexclamation = this.isPrio(x.attributes.PRIO)
-                                                        x.attributes.mdipaperclip = this.retsHasAttachment(x.attributes.OBJECTID)
+                                                        x.attributes.mdipaperclip = false
                                                         x.attributes.DFO = x.attributes.DFO ? x.attributes.DFO.toFixed(3) : x.attributes.DFO
                                                         x.attributes.historyUpdate = "Loading"
                                                         this.roadObj.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
@@ -346,7 +336,7 @@ export const store = reactive({
                                 updateItem.attributes.mdicheckdecagramoutline = this.isComplete(obj.features[0].attributes.STAT)
                                 updateItem.attributes.mditimersand = this.isNoActivity(obj.features[0].attributes.STAT, obj.features[0].attributes.EDIT_DT)
                                 updateItem.attributes.mdiexclamation = this.isPrio(obj.features[0].attributes.PRIO)
-                                x.attributes.mdipaperclip = this.retsHasAttachment(x.attributes.OBJECTID)
+                                updateItem.attributes.mdipaperclip = this.retsHasAttachment(x.attributes.OBJECTID)
                                 updateItem.attributes.historyUpdate = "Loading"
                                 //this.retsObj = updateItem
                                 //const retsIndex = this.roadObj.findIndex(x => x.attributes.RETS_ID === obj.features[0].attributes.RETS_ID)
@@ -373,8 +363,6 @@ export const store = reactive({
         },
         deleteRetsID(){
                 const findIndex = this.roadObj.findIndex(ret => ret.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
-                console.log(findIndex)
-                console.log(this.updateRetsSearch)
                 this.updateRetsSearch.splice(findIndex, 1)
 
                 const cloneRets = [...this.roadObj]
@@ -455,19 +443,21 @@ export const store = reactive({
                 retsHistory.queryAttachments({
                         where: `RETS_ID = ${oid}`
                 }).then((res) => {
+
                         let findItem = this.roadObj.find(road => road.attributes.OBJECTID === oid)
-                        if(JSON.stringify(res).length > 2){
-                                findItem.attributes.mdipaperclip = true
+                        
+                        if(JSON.stringify(res) === '{}'){
+                                findItem.attributes.mdipaperclip = false
                                 return
                         }
-                        findItem.attributes.mdipaperclip = false
+                        findItem ? findItem.attributes.mdipaperclip = true : null
                         return
                 })
                 return true
         },
         checkDetailsForComplete(){
                 let item = [this.retsObj.attributes.RTE_NM, this.retsObj.attributes.DFO, this.retsObj.attributes.STAT, this.retsObj.attributes.DESC_].filter(x => !x)
-                
+
                 const fieldsToCheck = [
                         this.retsObj.attributes.GIS_ANALYST, this.retsObj.attributes.GRID_ANALYST, 
                         this.retsObj.attributes.DIST_ANALYST, this.retsObj.attributes.DIST_NM, 
@@ -476,8 +466,8 @@ export const store = reactive({
                 
                 !this.retsObj.attributes.NO_RTE ? fieldsToCheck.push(this.retsObj.attributes.DFO) : null    
                 const metadataIsUpdate = fieldsToCheck.some(x => !x)
-
-                if(item.length && !this.retsObj.attributes.NO_RTE && this.isAlert){
+                
+                if(item.length && !this.retsObj.attributes.NO_RTE){
                     this.isSaveBtnDisable = true
                     return
                 }

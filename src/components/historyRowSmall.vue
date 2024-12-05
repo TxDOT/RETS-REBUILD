@@ -1,4 +1,3 @@
-
 <template>
     <div style="width: 99%; margin-left: 10px; height: 100%; display: flex; flex-direction: column; gap: 2px;">
         <div id="search">
@@ -211,7 +210,6 @@
                 // console.log(returnHistObj)
                 // console.log(this.histNotes.at(-1).attachments)
                 deleteAttachment(noteOid, attachName)
-                console.log(noteOid, attachName)
             }   
         },
         watch:{

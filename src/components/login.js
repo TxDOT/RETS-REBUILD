@@ -33,8 +33,9 @@ async function signIn(){
   await getUniqueQueryValues(retsUserRole, appConstants.userRoles)
   const userId = await getUserId()
   await queryFlags(userId)
-  await setDefExpRets(userId)
+  setDefExpRets(userId)
   store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+  
   appConstants.userQueryField = appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]
   //needs to be worked on//
   router.push({name: "Map"})
@@ -65,26 +66,29 @@ function alreadySignedIn(){
 }
 
 
-const setDefExpRets = async (userId) => {
+const setDefExpRets = (userId) => {
   if(appConstants.defaultUserValue.length) return
-  const userOBJECTID = await getUserOBJECTID(userId)
-  appConstants.defaultUserValue.push({"name": "Username", "value": `${userId}`, "objectid" : userOBJECTID.OBJECTID, "webhook" : userOBJECTID.WEBHOOK, "email" : userOBJECTID.EMAIL, "filters" : userOBJECTID.FILTERS})
-  if (userOBJECTID.FILTERS === null){
-    retsLayer.definitionExpression = store.savedFilter = appConstants['defaultQuery'](userId)
-    store.USER = [appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value)]
-    return
-  }
-
-  const parsedUSEROBJECTID = JSON.parse(userOBJECTID.FILTERS)
-  store.userFilters = parsedUSEROBJECTID
-  filterMapActivityFeed(parsedUSEROBJECTID)
-  setFilterProperties(parsedUSEROBJECTID)
+  getUserOBJECTID(userId)
+    .then((userOBJECTID) => {
+      appConstants.defaultUserValue.push({"name": "Username", "value": `${userId}`, "objectid" : userOBJECTID.OBJECTID, "webhook" : userOBJECTID.WEBHOOK, "email" : userOBJECTID.EMAIL, "filters" : userOBJECTID.FILTERS})
+      if (userOBJECTID.FILTERS === null){
+        retsLayer.definitionExpression = store.savedFilter = appConstants['defaultQuery'](userId)
+        store.USER = [appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value)]
+        return
+      }
+    
+      const parsedUSEROBJECTID = JSON.parse(userOBJECTID.FILTERS)
+      store.userFilters = parsedUSEROBJECTID
+      filterMapActivityFeed(parsedUSEROBJECTID)
+      setFilterProperties(parsedUSEROBJECTID)
+    })
+  
 
   return
 }
 
 export async function getUserId(){
-  console.warn(`VERSION: 2.0.23 -- dev status: ${store.devStatus}`)
+  console.warn(`VERSION: 2.0.24 -- dev status: ${store.devStatus}`)
   const user = await esriId.getCredential(`${authen.portalUrl}/sharing/rest`,{
     oAuthPopupConfirmation: false,
   })
