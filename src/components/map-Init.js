@@ -274,7 +274,7 @@ export const texasCities = new FeatureLayer({
   visible: false,
 })
 
-const popupTemplateRoadways = {
+export const popupTemplateRoadways = {
   title: "Texas Roadways",
   content: [
     {
@@ -848,6 +848,13 @@ view.on("double-click", function(event){
   event.stopPropagation()
 })
 
+view.popup.dockEnabled = true
+
+view.popup.dockOptions = {
+  buttonEnabled: true, // Allow toggling docking
+  breakpoint: false,   // Disable automatic docking on small screens
+  position: "bottom-right" 
+}
 
 homeWidget.on("go", function() {
   home();

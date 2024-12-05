@@ -76,6 +76,11 @@ export async function getTxDotRdWayLayerView(){
 export function clickRetsPoint(){
     try{
         view.on("click", (event)=>{
+            if (view.popup.visible === true){
+                view.closePopup()
+                removeHighlight
+            }
+            event.stopPropagation()
             view.hitTest(event, {include: [retsLayer, retsGraphicLayer, roadLayerView.layer]}).then((evt) =>{
                 store.clickevent = event
                 store.clickStatus = true
@@ -99,6 +104,18 @@ export function clickRetsPoint(){
                         clearRoadHighlightObj()
                         store.isDetailsPage ? canceldetailsfunction() : null
                         return
+                    }
+                    if (evt.results.length >=1 && evt.results[0].layer.title === "TxDOT Roadways"){
+                        if (evt.results.length === 1){
+                            view.openPopup({
+                                fetchFeatures: true,
+                                location: event.mapPoint
+                            });
+                        }
+                       
+                        
+                        
+    
                     }
                     if (evt.results[0].layer.title ==="TxDOT Roadways" && map.basemap.title != "Hybrid"){
                         highlightLayer.add({
