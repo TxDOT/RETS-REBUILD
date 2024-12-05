@@ -152,7 +152,7 @@ import {store} from './store.js'
                 retsRouteArchive: {},
                 removeListner: {},
                 onlyNumbers: {
-                    required: value => !!value || "",
+                    required: value => !!value || null,
                     numbers: value => /[\d]/.test(Number(value)) || `Whoa! Numbers are more my vibe!`,
                 },
                 valueRequired:{
@@ -190,7 +190,8 @@ import {store} from './store.js'
         },
         methods:{
             returnErrMsg(dfo, isOutOfRange){
-                return this.dfoLabel = isOutOfRange ? "DFO is out of Range" : "I'm blank!"
+                this.dfoLabel = isOutOfRange ? "DFO is out of Range" : "I'm blank!"
+                return true
             },
             handleCleardate(){
                 if (this.datePicked != store.retsObj.attributes.DEADLINE){
@@ -279,6 +280,7 @@ import {store} from './store.js'
                 if(store.retsObj.attributes.NO_RTE){
                     store.isAlert = false
                     store.isSaveBtnDisable = false
+                    this.dfoLabel = 'DFO'
                     return
                 }
                 if(!store.retsObj.attributes.DESC_ || !roadDFO){ 
