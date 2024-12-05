@@ -244,7 +244,7 @@ export const store = reactive({
                 return retsFlag ?? defaultValue
         },
 
-        async getRetsLayer(userid, where, layer, orderFields){ //////////////////////////remove userid from here
+        getRetsLayer(userid, where, layer, orderFields){ //////////////////////////remove userid from here
                 this.loggedInUser = userid
                 const queryString = {"whereString": where, "queryLayer": layer}
                 //const orderField = "EDIT_DT DESC, PRIO"
@@ -267,7 +267,7 @@ export const store = reactive({
                                                         x.attributes.mdicheckdecagramoutline = this.isComplete(x.attributes.STAT)
                                                         x.attributes.mditimersand = this.isNoActivity(x.attributes.STAT, x.attributes.EDIT_DT)
                                                         x.attributes.mdiexclamation = this.isPrio(x.attributes.PRIO)
-                                                        x.attributes.mdipaperclip = this.retsHasAttachment(x.attributes.OBJECTID)
+                                                        x.attributes.mdipaperclip = false
                                                         x.attributes.DFO = x.attributes.DFO ? x.attributes.DFO.toFixed(3) : x.attributes.DFO
                                                         x.attributes.historyUpdate = "Loading"
                                                         this.roadObj.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
@@ -336,7 +336,7 @@ export const store = reactive({
                                 updateItem.attributes.mdicheckdecagramoutline = this.isComplete(obj.features[0].attributes.STAT)
                                 updateItem.attributes.mditimersand = this.isNoActivity(obj.features[0].attributes.STAT, obj.features[0].attributes.EDIT_DT)
                                 updateItem.attributes.mdiexclamation = this.isPrio(obj.features[0].attributes.PRIO)
-                                x.attributes.mdipaperclip = this.retsHasAttachment(x.attributes.OBJECTID)
+                                updateItem.attributes.mdipaperclip = this.retsHasAttachment(x.attributes.OBJECTID)
                                 updateItem.attributes.historyUpdate = "Loading"
                                 //this.retsObj = updateItem
                                 //const retsIndex = this.roadObj.findIndex(x => x.attributes.RETS_ID === obj.features[0].attributes.RETS_ID)
@@ -443,12 +443,14 @@ export const store = reactive({
                 retsHistory.queryAttachments({
                         where: `RETS_ID = ${oid}`
                 }).then((res) => {
+
                         let findItem = this.roadObj.find(road => road.attributes.OBJECTID === oid)
-                        if(JSON.stringify(res).length > 2){
-                                findItem.attributes.mdipaperclip = true
+                        
+                        if(JSON.stringify(res) === '{}'){
+                                findItem.attributes.mdipaperclip = false
                                 return
                         }
-                        findItem.attributes.mdipaperclip = false
+                        findItem ? findItem.attributes.mdipaperclip = true : null
                         return
                 })
                 return true

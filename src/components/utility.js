@@ -18,11 +18,13 @@ export let retsHistoryView;
 
 export async function getRetsLayerView (){
         const retLayerView = await view.whenLayerView(retsLayer)
-        reactiveUtils.when(
-            () => !retLayerView.dataUpdating,
-            async () => {
+        await reactiveUtils.once(
+            () => !retLayerView.dataUpdating);
+            // .then(() => {
                 try{
                     retsLayerView = retLayerView
+                    console.log('ready')
+                    //need to find items that are currently in view not everything for belwo
                     
                     if(retsLayerView.view.zoom < 12){
                         store.zoomInText = "Zoom in to enable"
@@ -36,9 +38,7 @@ export async function getRetsLayerView (){
                 catch(err){
                     console.log(err)
                 }
-            },
-        )
-
+            // })
     return
 }
 
@@ -1401,6 +1401,7 @@ export function loadData(){
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if(entry.isIntersecting){
+                store.retsHasAttachment(Number(entry.target.id))
                 getHistoryView(entry.target.id)
             }
             entry.target.classList.toggle("show", entry.isIntersecting)
