@@ -496,6 +496,11 @@ import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, g
                      },
 
                      handleSettingsTool(){
+                        if (this.feedbackStatus){
+                            this.feedbackStatus = false
+                            this.settingsstatus = false
+                            return
+                        }
                         this.settingsstatus = !this.settingsstatus;
 
                      },
@@ -580,6 +585,7 @@ import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, g
                     activateFeedback(){
                         this.feedbackStatus = true
                         this.settingsstatus = false
+                        
                     },
                     submitFeedback(){
                         if (!this.isAnonymous){
