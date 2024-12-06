@@ -19,6 +19,7 @@ export const store = reactive({
                 customQuery: []
 
         },
+        layerName : "",
         customquery:"",
         currFilter: "",
         lastQuery : "",

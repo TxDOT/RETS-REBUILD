@@ -105,6 +105,12 @@ export function clickRetsPoint(){
                         store.isDetailsPage ? canceldetailsfunction() : null
                         return
                     }
+                    if (evt.results[0].layer.title === "TxDOT Roadways"){
+                        store.layerName = "TxDOT Roadways"
+                    }
+                    else{
+                        store.layerName = ""
+                    }
                     if (evt.results.length >=1 && evt.results[0].layer.title === "TxDOT Roadways"){
                         if (evt.results.length === 1){
                             view.openPopup({

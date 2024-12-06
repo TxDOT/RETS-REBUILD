@@ -1,5 +1,5 @@
 <template>
-    <v-alert v-if="feedbackAlert" width="250px" tile density="compact" color="success" style="margin: auto; left: 250px;">Thank you for your feeedback!</v-alert>
+    <v-alert v-if="feedbackAlert" width="250px" tile density="compact" color="success" style="margin: auto; left: 250px; border-radius: 0;">Thank you for your feeedback!</v-alert>
     <v-navigation-drawer permanent color="black" rail width="10">
         <v-list height="95%" id="icons-top" class="iconList">
             <v-list-item class="iconList-item"  id="popoutitems" v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" active-class="btn-left-brder" :active="store.toggleFeed === tool.value" :disabled="tool.disabled">    
