@@ -578,23 +578,34 @@
                         this.settingsstatus = false
                         
                     },
+                    async sendWebhookRequest(feedbackString, user){
+
+                        let url = `https://gis-batch-dev.txdot.gov/fmejobsubmitter/TPP/TPP_DEV_RETS_Emailer.fmw?FEEDBACK=${feedbackString}&USERNAME=${user}&opt_showresult=false&opt_servicemode=sync&token=27a9777b0f14467fcfc09b854466559d14c24e43`
+                        try{
+                            const response = await fetch(url)
+                            if (!response.ok){
+                                return
+                            }
+                            else{
+                                this.feedbackStatus = false
+                                this.settingsstatus = true
+                                this.feedbackAlert = true
+                                this.feedbackText = ""
+                                this.isAnonymous = false
+
+                                setTimeout(() => {
+                                    this.feedbackAlert = false
+
+                                }, 2500);
+                            }
+                        }
+                        catch(error){
+                            console.log(error)
+                        }
+                    },
                     submitFeedback(){
-                        if (!this.isAnonymous){
-                            console.log(this.feedbackText , "\n from: ", store.loggedInUser)
-                        }
-                        else{
-                            console.log(this.feedbackText , "\n from: Anonymous ")
-                        }
-                        this.feedbackStatus = false
-                        this.settingsstatus = true
-                        this.feedbackAlert = true
-                        this.feedbackText = ""
-                        this.isAnonymous = false
-
-                        setTimeout(() => {
-                            this.feedbackAlert = false
-
-                        }, 2500);
+                        this.isAnonymous ? this.sendWebhookRequest(this.feedbackText, 'Anonymous') : this.sendWebhookRequest(this.feedbackText, store.loggedInUser)
+                       
                     }
 
                     
