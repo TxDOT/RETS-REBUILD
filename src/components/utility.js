@@ -1280,7 +1280,9 @@ export function buildDFOLines(rd, retsPt, dist){
     })
 
     const distance = geometryEngine.intersects(constructLineA.geometry, retsPt.coordinate) ? rd.at(retsPt.vertexIndex)[2] + dist : rd.at(retsPt.vertexIndex)[2] - dist
-
+    console.log(constructLineA)
+    console.log(retsPt)
+    console.log(distance)
     return distance
 }
 
@@ -1293,6 +1295,7 @@ export function hideRetsPt(retsID){
 async function findDFOLocation(convertMapPts, gid){
     try{
         const road = await queryRoads("GID", gid)
+        console.log(road, gid)
         store.retsObj.attributes.RTE_NM = road.features[0].attributes.RTE_NM
     
         const roadConvertToGeo = webMercatorUtils.webMercatorToGeographic(road.features[0].geometry)
@@ -1308,12 +1311,17 @@ async function findDFOLocation(convertMapPts, gid){
                 wkid: 4326
             }
         })
+        
         const {distance} = geodesicUtils.geodesicDistance(returnCoord.coordinate, neareastVertexPoint.geometry, "miles")
         //store.isMoveRetsPt = false
+        console.log(roadConvertToGeo)
+        console.log(returnCoord)
+        console.log(distance)
         const newDFO = buildDFOLines(roadConvertToGeo.paths[0], returnCoord, distance) //roadConvertToGeo.paths[0].at(vertexIndex)[2] + distance
         store.retsObj.geometry = [returnCoord.coordinate.x, returnCoord.coordinate.y]
         store.retsObj.attributes.DFO = newDFO.toFixed(3)
         store.checkDetailsForComplete()
+        console.log(newDFO)
         return newDFO
     }
     catch(err){

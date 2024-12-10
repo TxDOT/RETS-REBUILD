@@ -313,7 +313,7 @@ export const TxDOTRoadways = new FeatureLayer ({
   outFields: ["*"],
   returnM: true,
   hasM: true,
-  definitionExpression: `RTE_PRFX = 'IH'`,
+  // definitionExpression: `RTE_PRFX = 'IH'`,
   popupTemplate: popupTemplateRoadways,
   labelsVisible: false,
 })
