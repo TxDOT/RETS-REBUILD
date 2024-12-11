@@ -35,7 +35,7 @@ export async function updateRETSPT(retsObj){
     }
     if(enable.attributes.STAT === 3){
         let getUserInfo = appConstants.userRoles.find(user => user.value === enable.attributes.GIS_ANALYST)
-        sendWebhookEmail(enable.attributes.RETS_ID, getUserInfo.email)
+        store.devStatus === "dev" ? sendWebhookEmail(enable.attributes.RETS_ID, getUserInfo.email) : null
     }
     
     retsObj.attributes.flagColor.FLAG === "" ? null : postFlagColor(retsObj)
@@ -176,6 +176,7 @@ export async function addRETSFilter(customQuery){
             updateFeatures: [esriUpdateGraphic]
         })
         console.log(`RETSROLE updated`)
+        return
     }
     catch(err){
         console.log(err)

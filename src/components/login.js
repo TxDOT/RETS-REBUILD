@@ -33,6 +33,7 @@ async function signIn(){
   await getUniqueQueryValues(retsUserRole, appConstants.userRoles)
   const userId = await getUserId()
   await queryFlags(userId)
+  getTxDotRdWayLayerView()
   await setDefExpRets(userId)
   store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
   appConstants.userQueryField = appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]
@@ -51,7 +52,7 @@ async function signIn(){
 
     getDistinctAttributeValues('ACTV')
     getRetsLayerView()
-    getTxDotRdWayLayerView()
+    
     //getHistoryView()
     //home(true)
 
@@ -84,7 +85,7 @@ const setDefExpRets = async (userId) => {
 }
 
 export async function getUserId(){
-  console.warn(`VERSION: 2.0.24 -- dev status: ${store.devStatus}`)
+  console.warn(`VERSION: 2.0.25 -- dev status: ${store.devStatus}`)
   const user = await esriId.getCredential(`${authen.portalUrl}/sharing/rest`,{
     oAuthPopupConfirmation: false,
   })

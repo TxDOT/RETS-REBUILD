@@ -18,12 +18,10 @@ export let retsHistoryView;
 
 export async function getRetsLayerView (){
         const retLayerView = await view.whenLayerView(retsLayer)
-        await reactiveUtils.once(
-            () => !retLayerView.dataUpdating);
-            // .then(() => {
+        reactiveUtils.once(() => !retLayerView.dataUpdating)
+            .then(() => {
                 try{
                     retsLayerView = retLayerView
-                    console.log('ready')
                     //need to find items that are currently in view not everything for belwo
                     
                     if(retsLayerView.view.zoom < 12){
@@ -38,7 +36,7 @@ export async function getRetsLayerView (){
                 catch(err){
                     console.log(err)
                 }
-            // })
+            })
     return
 }
 
@@ -50,26 +48,25 @@ export async function getTxDotRdWayLayerView(){
         haloOpacity: 0.8,
         fillOpacity: 0.3
       };
-    reactiveUtils.when(
-        () => !rdLayerView.dataUpdating,
-        async () => {
-            try{
-                if( rdLayerView.view.zoom > 9 ){
-                    if(TxDOTRoadways.definitionExpression === "") return
-                    rdLayerView.layer.definitionExpression = ""
-                }
-                if(rdLayerView.view.zoom < 10 ){
-                    if(TxDOTRoadways.definitionExpression === "RTE_PRFX = 'IH'") return
-                    rdLayerView.layer.definitionExpression = "RTE_PRFX = 'IH'"
-                }
-                roadLayerView = rdLayerView
-                sketchWidgetcreate.snappingOptions.featureSources.push({layer: roadLayerView.layer, enable: true})
-            }
-            catch(err){
-                console.log(err)
-            }
+    reactiveUtils.once(() => !rdLayerView.dataUpdating)
+      .then(() => {
+        try{
+            console.log("roads ready")
+            // if( rdLayerView.view.zoom > 9 ){
+            //     if(TxDOTRoadways.definitionExpression === "") return
+            //     rdLayerView.layer.definitionExpression = ""
+            // }
+            // if(rdLayerView.view.zoom < 10 ){
+            //     if(TxDOTRoadways.definitionExpression === "RTE_PRFX = 'IH'") return
+            //     rdLayerView.layer.definitionExpression = "RTE_PRFX = 'IH'"
+            // }
+            roadLayerView = rdLayerView
+            sketchWidgetcreate.snappingOptions.featureSources.push({layer: roadLayerView.layer, enable: true})
         }
-    )
+        catch(err){
+            console.log(err)
+        }
+      })
     return
 }
 
@@ -118,10 +115,6 @@ export function clickRetsPoint(){
                                 location: event.mapPoint
                             });
                         }
-                       
-                        
-                        
-    
                     }
                     if (evt.results[0].layer.title ==="TxDOT Roadways" && map.basemap.title != "Hybrid"){
                         highlightLayer.add({
@@ -789,10 +782,11 @@ export function createtool(sketchWidgetcreate, createretssym) {
                     
                 event.graphic.symbol = createretssym;
                 resolve(newPointGraphic);
+                return
             }
             if(event.state === "cancel"){
                 reject("cancelled")
-                return
+                return 4
             }
         });
     });
@@ -1303,9 +1297,6 @@ export function buildDFOLines(rd, retsPt, dist){
     })
 
     const distance = geometryEngine.intersects(constructLineA.geometry, retsPt.coordinate) ? rd.at(retsPt.vertexIndex)[2] + dist : rd.at(retsPt.vertexIndex)[2] - dist
-    console.log(constructLineA)
-    console.log(retsPt)
-    console.log(distance)
     return distance
 }
 
@@ -1318,7 +1309,6 @@ export function hideRetsPt(retsID){
 async function findDFOLocation(convertMapPts, gid){
     try{
         const road = await queryRoads("GID", gid)
-        console.log(road, gid)
         store.retsObj.attributes.RTE_NM = road.features[0].attributes.RTE_NM
     
         const roadConvertToGeo = webMercatorUtils.webMercatorToGeographic(road.features[0].geometry)
@@ -1337,14 +1327,10 @@ async function findDFOLocation(convertMapPts, gid){
         
         const {distance} = geodesicUtils.geodesicDistance(returnCoord.coordinate, neareastVertexPoint.geometry, "miles")
         //store.isMoveRetsPt = false
-        console.log(roadConvertToGeo)
-        console.log(returnCoord)
-        console.log(distance)
         const newDFO = buildDFOLines(roadConvertToGeo.paths[0], returnCoord, distance) //roadConvertToGeo.paths[0].at(vertexIndex)[2] + distance
         store.retsObj.geometry = [returnCoord.coordinate.x, returnCoord.coordinate.y]
         store.retsObj.attributes.DFO = newDFO.toFixed(3)
         store.checkDetailsForComplete()
-        console.log(newDFO)
         return newDFO
     }
     catch(err){
