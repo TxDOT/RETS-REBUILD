@@ -246,7 +246,7 @@ export const store = reactive({
                 return retsFlag ?? defaultValue
         },
 
-        getRetsLayer(userid, where, layer, orderFields){ //////////////////////////remove userid from here
+        async getRetsLayer(userid, where, layer, orderFields){ //////////////////////////remove userid from here
                 this.loggedInUser = userid
                 const queryString = {"whereString": where, "queryLayer": layer}
                 //const orderField = "EDIT_DT DESC, PRIO"
@@ -254,8 +254,8 @@ export const store = reactive({
                         this.roadObj.length = 0
                         this.retsIDList.length = 0
                         this.updateRetsSearch.length = 0
-                        getQueryLayer(queryString, orderFields)
-                                .then((obj) => {
+                        let obj = await getQueryLayer(queryString, orderFields)
+                                //.then((obj) => {
                                         if(obj.features.length){
                                                 obj.features.forEach((x, i) => {
                                                         x.attributes.flagColor = this.setFlagColor(x.attributes)
@@ -286,7 +286,7 @@ export const store = reactive({
                                         }
 
                                         
-                                })
+                                //})
 
 
 

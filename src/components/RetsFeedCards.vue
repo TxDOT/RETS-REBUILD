@@ -177,7 +177,8 @@ export default{
             ],
 
             isShowSelected: false,
-            isSwitchDisabled: false
+            isSwitchDisabled: false,
+            timer: null
         }
     },
     beforeMount(){
@@ -215,8 +216,9 @@ export default{
         async clearContent(){
             store.isSearch = false
             this.actvFeedSearch = ""
-            await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
-            store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+            //await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+            //store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+            console.log('reset')
         },
         async processAddPt(newPointGraphic){
             try{
@@ -387,42 +389,49 @@ export default{
             
             return
         },
-
     },
     watch:{
         actvFeedSearch:{
             handler: async function(a){
                 try{
-                    if(!a.length || !a){
-                        store.updateRetsSearch = !store.isShowSelected ? store.roadObj.slice().sort((a,b) => b.EDIT_DT - a.EDIT_DT) : store.roadHighlightObj
-                        outlineFeedCards(store.roadHighlightObj)
-                        return
+
+                    if(this.timer){
+                        console.log(this.timer)
+                        clearTimeout(this.timer)
                     }
-                    const searchString = a.toLowerCase()
-                    let s;
+                    this.timer = setTimeout(async () => {
+                        if(!a.length || !a){
+                            store.updateRetsSearch = !store.isShowSelected ? store.roadObj.slice().sort((a,b) => b.EDIT_DT - a.EDIT_DT) : store.roadHighlightObj
+                            outlineFeedCards(store.roadHighlightObj)
+                            return
+                        }
+                        const searchString = a.toLowerCase()
+                        let s;
 
-                    //search for history items
-                    //apply it card metadata
-                    let returnHist = await getQueryLayer({"whereString": `CMNT like '%${a}%' and SYS_GEN = 0`, "queryLayer": "retsHistory"}, "CREATE_DT DESC")
-
-                    const acceptedObj = []
-                    for(s of !store.isShowSelected ? store.roadObj : store.roadHighlightObj){
-                        s.attributes.Hist = returnHist.features.find(hist => hist.attributes.RETS_ID === s.attributes.RETS_ID)?.attributes?.CMNT ?? ""
-                        // const createObjKey = Object.values(s.attributes)
-                        for(const [key, value] of Object.entries(s.attributes)){
-                            if(key === "RETS_ID" || key === "RETS_NM" || key === "DESC_" || key === "RTE_NM" || key === "ACTV" || key === "ACTV_NBR" || key === "Hist"){
-                                if(String(value).toLowerCase().includes(searchString) && (acceptedObj.findIndex(oid => oid.attributes.OBJECTID === s.attributes.OBJECTID) === -1)){
-                                    if(acceptedObj.length === 10){
-                                        store.updateRetsSearch = acceptedObj.sort((a,b) => b.EDIT_DT - a.EDIT_DT)
-                                        return
+                        //search for history items
+                        //apply it card metadata
+                        let returnHist = await getQueryLayer({"whereString": `Lower(CMNT) like '%${searchString}%' and SYS_GEN = 0`, "queryLayer": "retsHistory"}, "CREATE_DT DESC")
+                        
+                        const acceptedObj = []
+                        console.log(searchString)
+                        for(s of !store.isShowSelected ? store.roadObj : store.roadHighlightObj){
+                            s.attributes.Hist = returnHist.features.find(hist => hist.attributes.RETS_ID === s.attributes.RETS_ID)?.attributes?.CMNT ?? ""
+                            // const createObjKey = Object.values(s.attributes)
+                            for(const [key, value] of Object.entries(s.attributes)){
+                                if(key === "RETS_ID" || key === "RETS_NM" || key === "DESC_" || key === "RTE_NM" || key === "ACTV" || key === "ACTV_NBR" || key === "Hist"){
+                                    if(String(value).toLowerCase().includes(searchString) && (acceptedObj.findIndex(oid => oid.attributes.OBJECTID === s.attributes.OBJECTID) === -1)){
+                                        // if(acceptedObj.length === 10){
+                                        //     store.updateRetsSearch = acceptedObj.sort((a,b) => b.EDIT_DT - a.EDIT_DT)
+                                        //     return
+                                        // }
+                                        acceptedObj.push(s)
                                     }
-                                    acceptedObj.push(s)
                                 }
-                            }
-                        } 
-                    }
-
-                    store.updateRetsSearch = acceptedObj.sort((a,b) => b.EDIT_DT - a.EDIT_DT)
+                            } 
+                        }
+                        console.log(searchString)
+                        store.updateRetsSearch = acceptedObj.sort((a,b) => b.EDIT_DT - a.EDIT_DT)
+                    },300)
                 }
                 catch(a){
                     console.log(a)
@@ -458,13 +467,13 @@ export default{
             immediate: true
         },
         'store.clickevent': {
-        handler: function(newVal) {
-           if (!store.isSaveBtnDisable && store.isDetailsPage  && store.layerName != "TxDOT Roadways" ){
-            store.cancelpopup = true
-            return
-           }
-        },
-        immediate: true // Runs the watcher immediately upon creation
+            handler: function(newVal) {
+                if (!store.isSaveBtnDisable && store.isDetailsPage  && store.layerName != "TxDOT Roadways" ){
+                    store.cancelpopup = true
+                    return
+                }
+            },
+            immediate: true // Runs the watcher immediately upon creation
     
 
         },

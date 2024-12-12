@@ -1,5 +1,5 @@
 <template>
-    <v-alert max-width="550" v-model="store.isAlert" border="start" :border-color="store.alertTextInfo.color" id="detailsAlert" :color="store.alertTextInfo.color" closable variant="tonal" :type="store.alertTextInfo.type">
+    <v-alert max-width="550" v-model="store.isAlert" border="start" :border-color="store.alertTextInfo.color" class="detailsAlert" :color="store.alertTextInfo.color" closable variant="tonal" :type="store.alertTextInfo.type">
         <span style="position: relative; display: flex; justify-content: left; padding-bottom: 0px; font-size: 15px;">{{ store.alertTextInfo.text }}</span>
     </v-alert>
 </template>
@@ -19,13 +19,12 @@
 </script>
 
 <style scoped>
-    #detailsAlert{
-        position: absolute;
-        top:6.2rem;
-        z-index: 9999;
-        opacity: 1 !important;
-        height: 44px;
-        margin: 10px;
-        width: 95.5%;
+    .detailsAlert{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: left;
+        min-height: fit-content;
+        right: 50vh;
     }
 </style>

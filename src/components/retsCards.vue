@@ -164,6 +164,7 @@ export default{
         this.setLayer
         loadData()
         store.toggleFeed = 1
+        console.log(store.updateRetsSearch)
         // store.activityBanner = "Activity Feed"
     },
 
