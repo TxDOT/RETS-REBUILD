@@ -178,7 +178,7 @@ export default{
 
             isShowSelected: false,
             isSwitchDisabled: false,
-            timer: null
+            searchTimer: null
         }
     },
     beforeMount(){
@@ -218,7 +218,6 @@ export default{
             this.actvFeedSearch = ""
             //await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
             //store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
-            console.log('reset')
         },
         async processAddPt(newPointGraphic){
             try{
@@ -269,8 +268,8 @@ export default{
             store.historyRetsId = road.attributes.RETS_ID
             
             returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
-            clearTimeout(this.timer)
-            this.timer=""
+            clearTimeout(this.searchTimer)
+            this.searchTimer=""
             store.isCard = false
             store.isDetailsPage = true
             store.activityBanner = `${road.attributes.RETS_ID}`
@@ -280,9 +279,9 @@ export default{
             return
         },
         zoomToRetsPt(rets){
-            clearTimeout(this.timer)
-            this.timer = ""
-            this.timer = setTimeout(()=>{
+            clearTimeout(this.searchTimer)
+            this.searchTimer = ""
+            this.searchTimer = setTimeout(()=>{
                 const zoomToRETS = rets.geometry
                 highlightRETSPoint(rets.attributes)
                 zoomTo(zoomToRETS)
@@ -395,11 +394,10 @@ export default{
             handler: async function(a){
                 try{
 
-                    if(this.timer){
-                        console.log(this.timer)
-                        clearTimeout(this.timer)
+                    if(this.searchTimer){
+                        clearTimeout(this.searchTimer)
                     }
-                    this.timer = setTimeout(async () => {
+                    this.searchTimer = setTimeout(async () => {
                         if(!a.length || !a){
                             store.updateRetsSearch = !store.isShowSelected ? store.roadObj.slice().sort((a,b) => b.EDIT_DT - a.EDIT_DT) : store.roadHighlightObj
                             outlineFeedCards(store.roadHighlightObj)
@@ -413,7 +411,6 @@ export default{
                         let returnHist = await getQueryLayer({"whereString": `Lower(CMNT) like '%${searchString}%' and SYS_GEN = 0`, "queryLayer": "retsHistory"}, "CREATE_DT DESC")
                         
                         const acceptedObj = []
-                        console.log(searchString)
                         for(s of !store.isShowSelected ? store.roadObj : store.roadHighlightObj){
                             s.attributes.Hist = returnHist.features.find(hist => hist.attributes.RETS_ID === s.attributes.RETS_ID)?.attributes?.CMNT ?? ""
                             // const createObjKey = Object.values(s.attributes)
@@ -429,7 +426,6 @@ export default{
                                 }
                             } 
                         }
-                        console.log(searchString)
                         store.updateRetsSearch = acceptedObj.sort((a,b) => b.EDIT_DT - a.EDIT_DT)
                     },300)
                 }

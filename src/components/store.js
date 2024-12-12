@@ -246,16 +246,17 @@ export const store = reactive({
                 return retsFlag ?? defaultValue
         },
 
-        async getRetsLayer(userid, where, layer, orderFields){ //////////////////////////remove userid from here
+        getRetsLayer(userid, where, layer, orderFields){ //////////////////////////remove userid from here
                 this.loggedInUser = userid
                 const queryString = {"whereString": where, "queryLayer": layer}
                 //const orderField = "EDIT_DT DESC, PRIO"
+                console.log(where)
                 try{
                         this.roadObj.length = 0
                         this.retsIDList.length = 0
                         this.updateRetsSearch.length = 0
-                        let obj = await getQueryLayer(queryString, orderFields)
-                                //.then((obj) => {
+                        getQueryLayer(queryString, orderFields)
+                                .then((obj) => {
                                         if(obj.features.length){
                                                 obj.features.forEach((x, i) => {
                                                         x.attributes.flagColor = this.setFlagColor(x.attributes)
@@ -284,10 +285,9 @@ export const store = reactive({
                                                 this.RetsCardStatus = "Bummer or lucky?? No Rets for you!"
                                                 return 
                                         }
-
-                                        
-                                //})
-
+                                        console.log(this.roadObj)
+                                })
+                        
 
 
                         this.isDetailsPage = false

@@ -17,27 +17,29 @@ export let roadLayerView;
 export let retsHistoryView;
 
 export async function getRetsLayerView (){
-        const retLayerView = await view.whenLayerView(retsLayer)
-        reactiveUtils.once(() => !retLayerView.dataUpdating)
-            .then(() => {
-                try{
-                    retsLayerView = retLayerView
-                    //need to find items that are currently in view not everything for belwo
-                    
-                    if(retsLayerView.view.zoom < 12){
-                        store.zoomInText = "Zoom in to enable"
-                        store.zoomInToEnable = true
-                        return
-                    }
-                    store.zoomInText = "Move RETS Point"
-                    store.zoomInToEnable = false
+    const retLayerView = await view.whenLayerView(retsLayer)
+    reactiveUtils.when(
+        () => !retLayerView.dataUpdating,
+        async () => {
+            try{
+                retsLayerView = retLayerView
+                
+                if(retsLayerView.view.zoom < 12){
+                    store.zoomInText = "Zoom in to enable"
+                    store.zoomInToEnable = true
                     return
                 }
-                catch(err){
-                    console.log(err)
-                }
-            })
-    return
+                store.zoomInText = "Move RETS Point"
+                store.zoomInToEnable = false
+                return
+            }
+            catch(err){
+                console.log(err)
+            }
+        },
+    )
+
+return
 }
 
 export async function getTxDotRdWayLayerView(){

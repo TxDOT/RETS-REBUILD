@@ -10,9 +10,14 @@
             <v-autocomplete :items="userRole" item-title="name" item-value="value" label="Asset Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.GRID_ANALYST" @update:modelValue="onDropDownChange(store.retsObj.attributes.GRID_ANALYST)" :rules="[emptyRow.required]"> </v-autocomplete>
         </div>
         <div class="item">
-            <v-autocomplete multiple ref="dropdown" :items="['Clear All', ...userRole]" item-title="name" item-value="value" label="District Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.DIST_ANALYST" @update:modelValue="onDropDownChange(store.retsObj.attributes.DIST_ANALYST);" :rules="[emptyRow.required]"></v-autocomplete>
+            <v-autocomplete multiple ref="dropdown" :items="['Clear All', ...userRole]" item-title="name" item-value="value" label="District Editor" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.DIST_ANALYST" @update:modelValue="onDropDownChange(store.retsObj.attributes.DIST_ANALYST);" :rules="[emptyRow.required]">
+                <template v-slot:selection="{ item, index }">
+                    <span v-if="index < 3">{{ item.title }},</span>
+                    <span v-if="index === 3"> +{{ store.retsObj.attributes.DIST_ANALYST.length }}</span>
+                </template>
+            </v-autocomplete>
         </div>
-        <div class="item" >
+        <div class="item">
             <v-autocomplete :items="districtMetadata" item-title="name" item-value="value" label="District" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.DIST_NM" @update:modelValue="onDropDownChange(store.retsObj.attributes.DIST_NM)" :rules="[emptyRow.required]"></v-autocomplete>
         </div>
         <div class="item">
@@ -91,5 +96,11 @@
 }
 :deep(.v-messages){
     min-height: 1px !important;
+}
+.districtEditors{
+    position: relative;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 </style>

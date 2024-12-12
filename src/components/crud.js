@@ -27,8 +27,7 @@ export async function updateRETSPT(retsObj){
     enable.attributes.CREATE_NM = appConstants.userRoles.find(usr => usr.name === retsObj.attributes.CREATE_NM)?.value ?? retsObj.attributes.CREATE_NM
     enable.attributes.NO_RTE = enable.attributes.NO_RTE === true ? 1 : 0
     enable.attributes.DIST_ANALYST = enable.attributes.DIST_ANALYST.toString()
-    enable.attributes.DFO = enable.attributes.DFO.length ? enable.attributes.DFO : null
-
+    enable.attributes.DFO = enable.attributes.DFO.length ? Number(enable.attributes.DFO) : null
 
     if(enable.attributes.RELATED_RETS){
         enable.attributes.RELATED_RETS = enable.attributes.RELATED_RETS.map(x => x.fullData ? x.fullData.RETS_ID : x).toString()
@@ -39,6 +38,7 @@ export async function updateRETSPT(retsObj){
     }
     
     retsObj.attributes.flagColor.FLAG === "" ? null : postFlagColor(retsObj)
+    
     delete enable.attributes?.retsPt
     delete enable.attributes?.STATUS
     delete enable.attributes?.index
@@ -53,10 +53,10 @@ export async function updateRETSPT(retsObj){
     delete enable.attributes?.mdiaccountmultiplecheck
     delete enable.attributes?.mdiexclamation
     delete enable.attributes?.historyUpdate 
+    delete enable.attributes?.mdipaperclip
 
     let esriUpdateGraphic = createGraphic(enable)
     esriUpdateGraphic.geometry = createGeo
-    console.log(esriUpdateGraphic)
 
     try{
         await retsLayer.applyEdits({
