@@ -90,10 +90,14 @@ export function clickRetsPoint(){
                     let coordinate = lon + ", " + lat
                     
                     navigator.clipboard.writeText(coordinate);
-                    store.coordinatenotification = true
                     store.latlonstring = coordinate
+                    store.alertTextInfo = {"text": ` ${coordinate} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
+                    store.isAlert = true
+
                     setTimeout(() => {
-                        store.coordinatenotification = false
+                        //store.coordinatenotification = false
+                        store.isAlert = false
+
                       }, 3000);
                 }
                 else{

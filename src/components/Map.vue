@@ -4,9 +4,6 @@
         <v-banner v-if="store.devStatus === 'dev'" lines="one" class="" style="position: absolute; width: fit-content; top: 0px; left: 0; right:1030px; margin: auto; justify-content: center; display: flex;" bg-color="warning">
             <p>You are in the TEST enviornment. Using UAT data.</p>
         </v-banner>
-        <v-banner v-if="store.coordinatenotification" lines="one"  style="position: absolute; width: fit-content; left: 0; right: 0; margin: auto; justify-content: center; display: flex;" bg-color="success">
-            ({{store.latlonstring}}) has been copied to clipboard.
-        </v-banner>
         
 
         <v-card rounded="0" id="cancelpopup" v-if="store.cancelpopup">
