@@ -87,11 +87,14 @@ export function clickRetsPoint(){
                     let coordinate = lon + ", " + lat
                     
                     navigator.clipboard.writeText(coordinate);
-                    store.coordinatenotification = true
                     store.latlonstring = coordinate
+                    store.alertTextInfo = {"text": ` ${coordinate} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
+                    store.isAlert = true
+
                     setTimeout(() => {
-                        store.coordinatenotification = false
-                      }, 3000);
+                        store.isAlert = false
+
+                      }, 10000);
                 }
                 else{
                     highlightLayer.removeAll()

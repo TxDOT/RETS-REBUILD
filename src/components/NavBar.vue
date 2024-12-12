@@ -1,5 +1,4 @@
 <template>
-    <v-alert v-if="feedbackAlert" width="250px" tile density="compact" color="success" style="margin: auto; left: 250px; border-radius: 0;">Thank you for your feeedback!</v-alert>
     <v-navigation-drawer permanent color="black" rail width="10">
         <v-list height="95%" id="icons-top" class="iconList">
             <v-list-item class="iconList-item"  id="popoutitems" v-for="(tool, i) in retsToolsTop" :key="i" :value="tool" @click="tool.action()" active-class="btn-left-brder" :active="store.toggleFeed === tool.value" :disabled="tool.disabled">    
@@ -174,6 +173,7 @@
         name: "NavBar",
         components:{
             RetsDetailPage: defineAsyncComponent(()=>import('./RetsDetail.vue')),
+            detailsAlert: defineAsyncComponent(()=>import('./detailsAlert.vue'))
         },
         data(){
             return{
@@ -199,7 +199,6 @@
                 feedbackStatus: false,
                 feedbackText: "",
                 feedbackSubmitStatus: true,
-                feedbackAlert: false,
                 feedbackName: "",
                 switches: [
                             { label: "RETS I Create", value: false, fontColor: "#D9D9D9" },
@@ -383,10 +382,10 @@
                         const viewSurface = document.querySelector('.esri-view');
                         viewSurface.classList.toggle('translateX-500px');
                         const settingspopup = document.querySelector('#containersettings')
-                        if(settingspopup){
-                            settingspopup.classList.toggle('translatesettings')
+                        // if(settingspopup){
+                        //     settingspopup.classList.toggle('translatesettings')
 
-                        }
+                        // }
                         
 
                     },
@@ -579,24 +578,24 @@
                         
                     },
                     async sendWebhookRequest(feedbackString, user){
-
                         let url = `https://gis-batch-dev.txdot.gov/fmejobsubmitter/TPP/TPP_DEV_RETS_Emailer.fmw?FEEDBACK=${feedbackString}&USERNAME=${user}&opt_showresult=false&opt_servicemode=sync&token=27a9777b0f14467fcfc09b854466559d14c24e43`
                         try{
                             const response = await fetch(url)
                             if (!response.ok){
-                                return
+                               return
                             }
                             else{
                                 this.feedbackStatus = false
                                 this.settingsstatus = true
-                                this.feedbackAlert = true
                                 this.feedbackText = ""
                                 this.isAnonymous = false
+                                store.alertTextInfo = {"text": "Thank you for your feedback!", "color": "#70ad47", "type":"success", "toggle": true}
+                                store.isAlert = true
 
                                 setTimeout(() => {
-                                    this.feedbackAlert = false
+                                    store.isAlert = false
 
-                                }, 2500);
+                                }, 10000);
                             }
                         }
                         catch(error){
@@ -711,7 +710,6 @@
         left: 0;;
         right: 0;
         width: 400px;
-        left: 509px; 
         z-index: 9999;
         border-radius: 0px;
     }
@@ -856,7 +854,7 @@
     #suggestionsSection{
         position:absolute;
         margin: auto;
-        left: 500px;
+        left: 0;
         right: 0;
         top: 0;
         bottom: 0;
@@ -877,6 +875,10 @@
     .small-checkbox .v-label {
         font-size: 15px !important; 
     }
-    
+    #showAlert{
+        position: absolute;
+        left: 37%;
+        border-radius: 0% !important;
+    }
     
 </style>

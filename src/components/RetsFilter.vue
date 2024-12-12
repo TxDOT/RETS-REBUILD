@@ -6,12 +6,12 @@
                 <hr></hr>
                 <div class="container" style="padding-top: 8px;" @click="isDisabled = false; ">
                     <div no-gutters class="item">
-                        <v-select :disabled="isDisabled" :items="filterSort" item-title="title" return-object density="compact" label="Sort" variant="underlined" v-model="store.CREATE_DT" style="">
+                        <v-select :disabled="isDisabled" :items="filterSort" item-title="title" return-object density="compact" label="Sort" variant="underlined" v-model="store.CREATE_DT" >
                         </v-select>
                     </div>
 
                     <div no-gutters dense class="item">
-                        <v-select :disabled="isDisabled" :items="filterJobType" item-title="name" item-value="value" return-object multiple chips closable-chips density="compact" label="Job Type" variant="underlined" v-model="store.JOB_TYPE">
+                        <v-select :disabled="isDisabled" :items="filterJobType" item-title="name" item-value="value" return-object multiple chips closable-chips density="compact" label="Job Type" variant="underlined" v-model="store.JOB_TYPE" class="filterFields">
                         </v-select>
                     </div>
 
@@ -23,22 +23,22 @@
                         </v-select>
                     </div>
                     
-                    <div no-gutters dense class="item">
-                        <v-select :disabled="isDisabled" :items="filterStatus" item-title="name" item-value="value" label="Status" return-object chips closable-chips multiple variant="underlined" density="compact" v-model="store.STAT"></v-select>
+                    <div dense class="item">
+                        <v-select :disabled="isDisabled" :items="filterStatus" item-title="name" item-value="value" label="Status" return-object chips closable-chips multiple variant="underlined" density="compact" v-model="store.STAT" class="filterFields"></v-select>
                     </div>
 
                     <div no-gutters dense class="item">
-                        <v-autocomplete :disabled="isDisabled" :items="filterActivity" item-title="value" item-value="value" return-object multiple label="Activity" chips closable-chips variant="underlined" density="compact" v-model="store.ACTV" @update:modelValue="actvSearch = ''" :search="actvSearch" @update:search="this.actvSearch = $event" @update:menu="actvSearch = ''"></v-autocomplete>
+                        <v-autocomplete :disabled="isDisabled" :items="filterActivity" item-title="value" item-value="value" return-object multiple label="Activity" chips closable-chips variant="underlined" density="compact" v-model="store.ACTV" class="filterFields" @update:modelValue="actvSearch = ''" :search="actvSearch" @update:search="this.actvSearch = $event" @update:menu="actvSearch = ''"></v-autocomplete>
                     </div>
 
                     <div no-gutters dense class="item"> 
-                        <v-autocomplete :disabled="isDisabled" :items="filterDistrict" item-title="name" item-value="value" return-object multiple label="District" chips closable-chips variant="underlined" density="compact" v-model="store.DIST_NM" @update:modelValue="this.districtSearch = ''" :search="this.districtSearch" @update:search="this.districtSearch = $event" @update:menu="districtSearch = ''"></v-autocomplete>
+                        <v-autocomplete :disabled="isDisabled" :items="filterDistrict" item-title="name" item-value="value" return-object multiple label="District" chips closable-chips variant="underlined" density="compact" v-model="store.DIST_NM" class="filterFields" @update:modelValue="this.districtSearch = ''" :search="this.districtSearch" @update:search="this.districtSearch = $event" @update:menu="districtSearch = ''"></v-autocomplete>
                     </div>
                     <div no-gutters dense class="item">
-                        <v-autocomplete :disabled="isDisabled" :items="filterCounty" item-title="name" item-value="value" return-object multiple label="County" chips closable-chips variant="underlined" density="compact" v-model="store.CNTY_NM" @update:modelValue="countySearch = ''" :search="countySearch" @update:search="countySearch = $event" @update:menu="countySearch = ''"></v-autocomplete>
+                        <v-autocomplete :disabled="isDisabled" :items="filterCounty" item-title="name" item-value="value" return-object multiple label="County" chips closable-chips variant="underlined" density="compact" v-model="store.CNTY_NM" class="filterFields" @update:modelValue="countySearch = ''" :search="countySearch" @update:search="countySearch = $event" @update:menu="countySearch = ''"></v-autocomplete>
                     </div>
                     <div no-gutters dense class="item"> 
-                        <v-autocomplete :items="filterUser" item-title="name" item-value="value" return-object label="Users" multiple chips closable-chips variant="underlined" density="compact" v-model="store.USER" :disabled="store.isAssignedTo || isDisabled" @update:modelValue="userSearch = ''" :search="userSearch" @update:search="userSearch = $event" @update:menu="userSearch = ''"></v-autocomplete>
+                        <v-autocomplete :items="filterUser" item-title="name" item-value="value" return-object label="Users" multiple chips closable-chips variant="underlined" density="compact" v-model="store.USER" class="filterFields" :disabled="store.isAssignedTo || isDisabled" @update:modelValue="userSearch = ''" :search="userSearch" @update:search="userSearch = $event" @update:menu="userSearch = ''"></v-autocomplete>
                     </div>
                     <div style="position: relative; float: left; max-height: 40px !important; font-size: 11px; display: flex; flex-wrap: wrap; bottom: 0rem;" class="item">
                         <v-checkbox :disabled="isDisabled" label="RETS Assigned to Me" density="compact" class="checkbox-size" v-model="store.isAssignedTo"></v-checkbox>
@@ -494,7 +494,9 @@ export default{
     margin-right: 0px;
     left: 10px; 
 }
-
+.filterFields :deep(.v-field__input){
+    margin-top:5px !important;
+}
 :deep(.v-input__details){
     min-height: 1px !important;
 }
