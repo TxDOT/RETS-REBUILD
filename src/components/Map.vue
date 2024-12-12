@@ -1,12 +1,14 @@
 <template>
     <div id="viewDiv">
-        <detailsAlert v-if="store.isAlert" id="showAlert"/>
+        <Teleport to="body">
+            <detailsAlert v-if="store.isAlert" id="showAlert"/>
+        </Teleport>
         <v-banner v-if="store.devStatus === 'dev'" lines="one" class="" style="position: absolute; width: fit-content; top: 0px; left: 0; right:1030px; margin: auto; justify-content: center; display: flex;" bg-color="warning">
             <p>You are in the TEST enviornment. Using UAT data.</p>
         </v-banner>
         
-
-        <v-card rounded="0" id="cancelpopup" v-if="store.cancelpopup">
+        <Teleport to="body">
+            <v-card rounded="0" id="cancelpopup" v-if="store.cancelpopup">
             
                 <div class="banner-txt">
                     Discard unsaved changes?
@@ -19,9 +21,11 @@
                     <v-btn class="secondary-button"  @click="goBackActivity()" variant="plain" size="small" style="float: right;">GO BACK</v-btn>
                     <v-btn class="main-button-style" @click="discardedits" variant="outlined" size="small" style="float: right;">DISCARD</v-btn>
                 </v-btn-toggle>
-            
-        </v-card>
+        
+            </v-card>
 
+        </Teleport>
+        
     
     </div>
 
@@ -118,7 +122,9 @@ export default{
 
     #showAlert{
         position: absolute;
-        left: 37%;
+        top: 0;
+        left: 50% !important; 
+        transform: translateX(-50%); 
         border-radius: 0% !important;
     }
     #cancelpopup{
@@ -126,8 +132,12 @@ export default{
         width: 25rem;
         height: 140px; 
         border-radius: 0;
-        left: 50vh;
-        top: 30vh;
+        margin: auto;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+ 
         padding: 10px; 
     }
 

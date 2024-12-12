@@ -382,10 +382,10 @@
                         const viewSurface = document.querySelector('.esri-view');
                         viewSurface.classList.toggle('translateX-500px');
                         const settingspopup = document.querySelector('#containersettings')
-                        if(settingspopup){
-                            settingspopup.classList.toggle('translatesettings')
+                        // if(settingspopup){
+                        //     settingspopup.classList.toggle('translatesettings')
 
-                        }
+                        // }
                         
 
                     },
@@ -578,7 +578,6 @@
                         
                     },
                     async sendWebhookRequest(feedbackString, user){
-
                         let url = `https://gis-batch-dev.txdot.gov/fmejobsubmitter/TPP/TPP_DEV_RETS_Emailer.fmw?FEEDBACK=${feedbackString}&USERNAME=${user}&opt_showresult=false&opt_servicemode=sync&token=27a9777b0f14467fcfc09b854466559d14c24e43`
                         try{
                             const response = await fetch(url)
@@ -596,7 +595,7 @@
                                 setTimeout(() => {
                                     store.isAlert = false
 
-                                }, 2500);
+                                }, 10000);
                             }
                         }
                         catch(error){
@@ -711,7 +710,6 @@
         left: 0;;
         right: 0;
         width: 400px;
-        left: 509px; 
         z-index: 9999;
         border-radius: 0px;
     }
@@ -856,7 +854,7 @@
     #suggestionsSection{
         position:absolute;
         margin: auto;
-        left: 500px;
+        left: 0;
         right: 0;
         top: 0;
         bottom: 0;

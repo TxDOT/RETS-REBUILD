@@ -496,8 +496,11 @@
     border-radius: 5px;
     width: 25rem;
     border-radius: 0;
-    left: 185% !important;
-    top: 30% !important;
+    margin: auto;
+    left: 520px;
+    right: 0;
+    top: 0;
+    bottom: 0;
     padding-bottom: 20px;
 }
 

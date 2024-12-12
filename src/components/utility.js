@@ -92,10 +92,9 @@ export function clickRetsPoint(){
                     store.isAlert = true
 
                     setTimeout(() => {
-                        //store.coordinatenotification = false
                         store.isAlert = false
 
-                      }, 3000);
+                      }, 10000);
                 }
                 else{
                     highlightLayer.removeAll()
