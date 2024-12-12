@@ -158,7 +158,6 @@ export default{
         store.isSaving = false
         loadData()
         //outlineFeedCards(store.roadHighlightObj)
-
     },
 
     updated(){

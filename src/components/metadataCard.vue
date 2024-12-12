@@ -1,5 +1,5 @@
 <template>
-    <div style="display: flex; flex-direction: column; position: relative; height: 90%; gap: 0px; padding-left: 15px; padding-right: 15px;"> 
+    <div style="display: flex; flex-direction: column; position: relative; height: 90%; gap: 0px; padding-left: 10px; padding-right: 10px;"> 
         <div class="item">
             <v-autocomplete :items="userRole" item-title="name" item-value="value" label="Assigned To" flat variant="underlined" density="compact" rounded="0" v-model="store.retsObj.attributes.ASSIGNED_TO" @update:modelValue="onDropDownChange(store.retsObj.attributes.ASSIGNED_TO)"></v-autocomplete>
         </div>

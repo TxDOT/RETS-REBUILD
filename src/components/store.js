@@ -69,6 +69,7 @@ export const store = reactive({
                         DFO: 0
                 }
         },
+        retsIDList: [],
         updateRetsSearch:[],
         isSearch: false,
         updatedRetsPtName: "",
@@ -251,6 +252,7 @@ export const store = reactive({
                 //const orderField = "EDIT_DT DESC, PRIO"
                 try{
                         this.roadObj.length = 0
+                        this.retsIDList.length = 0
                         this.updateRetsSearch.length = 0
                         getQueryLayer(queryString, orderFields)
                                 .then((obj) => {
@@ -272,16 +274,18 @@ export const store = reactive({
                                                         x.attributes.DFO = x.attributes.DFO ? x.attributes.DFO.toFixed(3) : x.attributes.DFO
                                                         x.attributes.historyUpdate = "Loading"
                                                         this.roadObj.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
+                                                        this.retsIDList.push(x.attributes.RETS_ID)
                                                         //store.archiveRetsData.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                                                 })
-                                                
-                                                
+
                                                 return
                                         }
                                         if(!obj.features.length){
                                                 this.RetsCardStatus = "Bummer or lucky?? No Rets for you!"
                                                 return 
                                         }
+
+                                        
                                 })
 
 
@@ -446,12 +450,14 @@ export const store = reactive({
                 }).then((res) => {
 
                         let findItem = this.roadObj.find(road => road.attributes.OBJECTID === oid)
-                        
+                        if(!findItem){
+                                return
+                        }
                         if(JSON.stringify(res) === '{}'){
                                 findItem.attributes.mdipaperclip = false
                                 return
                         }
-                        findItem ? findItem.attributes.mdipaperclip = true : null
+                        findItem.attributes.mdipaperclip = true
                         return
                 })
                 return true

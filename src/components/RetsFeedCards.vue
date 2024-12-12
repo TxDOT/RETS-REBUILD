@@ -359,6 +359,7 @@ export default{
                 this.isCreateEnabled = !this.isCreateEnabled;
                 this.addbtntext = "New"  
                 this.buttonIcon = "mdi-plus"
+                
                 return newPointGraphic
                             
                 } 
@@ -370,6 +371,7 @@ export default{
                 this.isCreateEnabled = !this.isCreateEnabled;
                 this.addbtntext = "New"
                 this.buttonIcon = "mdi-plus"
+                return
             }
         },
 
@@ -389,7 +391,7 @@ export default{
     },
     watch:{
         actvFeedSearch:{
-            handler: function(a){
+            handler: async function(a){
                 try{
                     if(!a.length || !a){
                         store.updateRetsSearch = !store.isShowSelected ? store.roadObj.slice().sort((a,b) => b.EDIT_DT - a.EDIT_DT) : store.roadHighlightObj
@@ -398,11 +400,17 @@ export default{
                     }
                     const searchString = a.toLowerCase()
                     let s;
+
+                    //search for history items
+                    //apply it card metadata
+                    let returnHist = await getQueryLayer({"whereString": `CMNT like '%${a}%' and SYS_GEN = 0`, "queryLayer": "retsHistory"}, "CREATE_DT DESC")
+
                     const acceptedObj = []
                     for(s of !store.isShowSelected ? store.roadObj : store.roadHighlightObj){
+                        s.attributes.Hist = returnHist.features.find(hist => hist.attributes.RETS_ID === s.attributes.RETS_ID)?.attributes?.CMNT ?? ""
                         // const createObjKey = Object.values(s.attributes)
                         for(const [key, value] of Object.entries(s.attributes)){
-                            if(key === "RETS_ID" || key === "RETS_NM" || key === "DESC_" || key === "RTE_NM" || key === "ACTV" || key === "ACTV_NBR"){
+                            if(key === "RETS_ID" || key === "RETS_NM" || key === "DESC_" || key === "RTE_NM" || key === "ACTV" || key === "ACTV_NBR" || key === "Hist"){
                                 if(String(value).toLowerCase().includes(searchString) && (acceptedObj.findIndex(oid => oid.attributes.OBJECTID === s.attributes.OBJECTID) === -1)){
                                     if(acceptedObj.length === 10){
                                         store.updateRetsSearch = acceptedObj.sort((a,b) => b.EDIT_DT - a.EDIT_DT)

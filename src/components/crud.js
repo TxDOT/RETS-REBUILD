@@ -27,13 +27,15 @@ export async function updateRETSPT(retsObj){
     enable.attributes.CREATE_NM = appConstants.userRoles.find(usr => usr.name === retsObj.attributes.CREATE_NM)?.value ?? retsObj.attributes.CREATE_NM
     enable.attributes.NO_RTE = enable.attributes.NO_RTE === true ? 1 : 0
     enable.attributes.DIST_ANALYST = enable.attributes.DIST_ANALYST.toString()
+    enable.attributes.DFO = enable.attributes.DFO.length ? enable.attributes.DFO : null
+
 
     if(enable.attributes.RELATED_RETS){
         enable.attributes.RELATED_RETS = enable.attributes.RELATED_RETS.map(x => x.fullData ? x.fullData.RETS_ID : x).toString()
     }
     if(enable.attributes.STAT === 3){
         let getUserInfo = appConstants.userRoles.find(user => user.value === enable.attributes.GIS_ANALYST)
-        sendWebhookEmail(enable.attributes.RETS_ID, getUserInfo.email)
+        store.devStatus === "dev" ? sendWebhookEmail(enable.attributes.RETS_ID, getUserInfo.email) : null
     }
     
     retsObj.attributes.flagColor.FLAG === "" ? null : postFlagColor(retsObj)
@@ -54,6 +56,7 @@ export async function updateRETSPT(retsObj){
 
     let esriUpdateGraphic = createGraphic(enable)
     esriUpdateGraphic.geometry = createGeo
+    console.log(esriUpdateGraphic)
 
     try{
         await retsLayer.applyEdits({
@@ -173,6 +176,7 @@ export async function addRETSFilter(customQuery){
             updateFeatures: [esriUpdateGraphic]
         })
         console.log(`RETSROLE updated`)
+        return
     }
     catch(err){
         console.log(err)

@@ -18,12 +18,10 @@ export let retsHistoryView;
 
 export async function getRetsLayerView (){
         const retLayerView = await view.whenLayerView(retsLayer)
-        await reactiveUtils.once(
-            () => !retLayerView.dataUpdating);
-            // .then(() => {
+        reactiveUtils.once(() => !retLayerView.dataUpdating)
+            .then(() => {
                 try{
                     retsLayerView = retLayerView
-                    console.log('ready')
                     //need to find items that are currently in view not everything for belwo
                     
                     if(retsLayerView.view.zoom < 12){
@@ -38,7 +36,7 @@ export async function getRetsLayerView (){
                 catch(err){
                     console.log(err)
                 }
-            // })
+            })
     return
 }
 
@@ -50,26 +48,25 @@ export async function getTxDotRdWayLayerView(){
         haloOpacity: 0.8,
         fillOpacity: 0.3
       };
-    reactiveUtils.when(
-        () => !rdLayerView.dataUpdating,
-        async () => {
-            try{
-                if( rdLayerView.view.zoom > 9 ){
-                    if(TxDOTRoadways.definitionExpression === "") return
-                    rdLayerView.layer.definitionExpression = ""
-                }
-                if(rdLayerView.view.zoom < 10 ){
-                    if(TxDOTRoadways.definitionExpression === "RTE_PRFX = 'IH'") return
-                    rdLayerView.layer.definitionExpression = "RTE_PRFX = 'IH'"
-                }
-                roadLayerView = rdLayerView
-                sketchWidgetcreate.snappingOptions.featureSources.push({layer: roadLayerView.layer, enable: true})
-            }
-            catch(err){
-                console.log(err)
-            }
+    reactiveUtils.once(() => !rdLayerView.dataUpdating)
+      .then(() => {
+        try{
+            console.log("roads ready")
+            // if( rdLayerView.view.zoom > 9 ){
+            //     if(TxDOTRoadways.definitionExpression === "") return
+            //     rdLayerView.layer.definitionExpression = ""
+            // }
+            // if(rdLayerView.view.zoom < 10 ){
+            //     if(TxDOTRoadways.definitionExpression === "RTE_PRFX = 'IH'") return
+            //     rdLayerView.layer.definitionExpression = "RTE_PRFX = 'IH'"
+            // }
+            roadLayerView = rdLayerView
+            sketchWidgetcreate.snappingOptions.featureSources.push({layer: roadLayerView.layer, enable: true})
         }
-    )
+        catch(err){
+            console.log(err)
+        }
+      })
     return
 }
 
@@ -122,10 +119,6 @@ export function clickRetsPoint(){
                                 location: event.mapPoint
                             });
                         }
-                       
-                        
-                        
-    
                     }
                     if (evt.results[0].layer.title ==="TxDOT Roadways" && map.basemap.title != "Hybrid"){
                         highlightLayer.add({
@@ -793,10 +786,11 @@ export function createtool(sketchWidgetcreate, createretssym) {
                     
                 event.graphic.symbol = createretssym;
                 resolve(newPointGraphic);
+                return
             }
             if(event.state === "cancel"){
                 reject("cancelled")
-                return
+                return 4
             }
         });
     });
@@ -1307,7 +1301,6 @@ export function buildDFOLines(rd, retsPt, dist){
     })
 
     const distance = geometryEngine.intersects(constructLineA.geometry, retsPt.coordinate) ? rd.at(retsPt.vertexIndex)[2] + dist : rd.at(retsPt.vertexIndex)[2] - dist
-
     return distance
 }
 
@@ -1335,6 +1328,7 @@ async function findDFOLocation(convertMapPts, gid){
                 wkid: 4326
             }
         })
+        
         const {distance} = geodesicUtils.geodesicDistance(returnCoord.coordinate, neareastVertexPoint.geometry, "miles")
         //store.isMoveRetsPt = false
         const newDFO = buildDFOLines(roadConvertToGeo.paths[0], returnCoord, distance) //roadConvertToGeo.paths[0].at(vertexIndex)[2] + distance

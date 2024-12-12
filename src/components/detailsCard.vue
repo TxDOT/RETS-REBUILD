@@ -25,10 +25,10 @@
             <div style="width: 30%; float: right;">
                 <v-text-field :label="this.dfoLabel" density="compact" variant="underlined" :error ="(!store.retsObj.attributes.DFO || store.outOfRange) && !store.retsObj.attributes.NO_RTE ? returnErrMsg(store.retsObj.attributes.DFO, store.outOfRange) : null" v-model="store.retsObj.attributes.DFO" :rules="!store.retsObj.attributes.NO_RTE ? [onlyNumbers.required, onlyNumbers.numbers]: []" @update:model-value="!store.retsObj.attributes.NO_RTE ? manuallyUpdateDFO(store.retsObj.attributes.DFO) : null">
                     <template v-slot:append-inner>
-                        <v-tooltip :text="store.zoomInText" location="top">
+                        <v-tooltip text="Move RETS Point" location="top">
                             <template v-slot:activator="{props}">
                                 <div v-bind="props">
-                                    <v-btn id="dfoCrosshair"  variant="plain" density="compact" v-model="isCrossHair" @click="crossHairFunc" :disabled="store.zoomInToEnable"><v-icon :icon="!store.isMoveRetsPt ? 'mdi-drag-variant' : 'mdi-close'" small ></v-icon></v-btn>
+                                    <v-btn id="dfoCrosshair"  variant="plain" density="compact" v-model="isCrossHair" @click="crossHairFunc"><v-icon :icon="!store.isMoveRetsPt ? 'mdi-drag-variant' : 'mdi-close'" small ></v-icon></v-btn>
                                 </div>
                             </template>
                         </v-tooltip>
@@ -124,7 +124,7 @@
 <script>
 import { appConstants } from '../common/constant'
 import {getQueryLayer, addRelatedRetsToMap, removeRelatedRetsFromMap, zoomToRelatedRets, zoomTo, 
-        createRoadGraphic, getRoadInformation, cancelSketchPt, hitTestMoveRETS, queryRoads, isDFOInRange} from './utility.js'
+        createRoadGraphic, getRoadInformation, cancelSketchPt, hitTestMoveRETS, queryRoads, isDFOInRange, changeCursor} from './utility.js'
 import {store} from './store.js'
 
     export default{
@@ -152,7 +152,7 @@ import {store} from './store.js'
                 retsRouteArchive: {},
                 removeListner: {},
                 onlyNumbers: {
-                    required: value => !!value || "",
+                    required: value => !!value || null,
                     numbers: value => /[\d]/.test(Number(value)) || `Whoa! Numbers are more my vibe!`,
                 },
                 valueRequired:{
@@ -190,7 +190,8 @@ import {store} from './store.js'
         },
         methods:{
             returnErrMsg(dfo, isOutOfRange){
-                return this.dfoLabel = isOutOfRange ? "DFO is out of Range" : "I'm blank!"
+                this.dfoLabel = isOutOfRange ? "DFO is out of Range" : "I'm blank!"
+                return true
             },
             handleCleardate(){
                 if (this.datePicked != store.retsObj.attributes.DEADLINE){
@@ -279,6 +280,7 @@ import {store} from './store.js'
                 if(store.retsObj.attributes.NO_RTE){
                     store.isAlert = false
                     store.isSaveBtnDisable = false
+                    this.dfoLabel = 'DFO'
                     return
                 }
                 if(!store.retsObj.attributes.DESC_ || !roadDFO){ 
@@ -330,8 +332,10 @@ import {store} from './store.js'
                 try{
                     store.isMoveRetsPt = !store.isMoveRetsPt
                     if(store.isMoveRetsPt){
+                        changeCursor("crosshair")
                         store.cancelEvent = hitTestMoveRETS()
                         getRoadInformation()
+                        changeCursor("default")
                         return
                     }
                     const ogRteNm = JSON.parse(store.archiveRetsDataString).attributes.RTE_NM
@@ -345,6 +349,7 @@ import {store} from './store.js'
                     if(store.cancelEvent){
                         store.isMoveRetsPt = false
                         store.cancelEvent.remove()
+                        changeCursor("default")
                     }
                     
                 }
@@ -658,7 +663,8 @@ import {store} from './store.js'
     color:white;
 }
 :deep(.v-date-picker){
-    width: 290px !important; 
+    width: 290px !important;
+    border-radius: 0% !important;
 }
 :deep(.v-date-picker-month){
     width: 290px !important;
