@@ -463,13 +463,13 @@ export default{
             immediate: true
         },
         'store.clickevent': {
-            handler: function(newVal) {
-                if (!store.isSaveBtnDisable && store.isDetailsPage  && store.layerName != "TxDOT Roadways" ){
-                    store.cancelpopup = true
-                    return
-                }
-            },
-            immediate: true // Runs the watcher immediately upon creation
+        handler: function(newVal) {
+           if (!store.isSaveBtnDisable && store.isDetailsPage  && store.layerName != "TxDOT Roadways" && store.clickevent.button === 0){
+            store.cancelpopup = true
+            return
+           }
+        },
+        immediate: true // Runs the watcher immediately upon creation
     
 
         },
