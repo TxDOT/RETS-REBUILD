@@ -459,7 +459,7 @@ export default{
         },
         'store.clickevent': {
         handler: function(newVal) {
-           if (!store.isSaveBtnDisable && store.isDetailsPage  && store.layerName != "TxDOT Roadways" ){
+           if (!store.isSaveBtnDisable && store.isDetailsPage  && store.layerName != "TxDOT Roadways" && store.clickevent.button === 0){
             store.cancelpopup = true
             return
            }
