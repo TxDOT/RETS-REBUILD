@@ -110,8 +110,8 @@
                 </v-card>
             </div>
         </div> 
-
-        <v-card v-if="isarchiveopen" id="archivepopup" height="130">
+        <Teleport to="body">
+            <v-card v-if="isarchiveopen" id="archivepopup" height="130">
             <div style="height: 100%; margin: 10px;">
                 <div style="padding: 0px; bottom: 8px;" class="banner-txt">
                     Delete RETS {{deletedRETSID}}
@@ -128,6 +128,8 @@
                 </v-btn-toggle>
             </div>
         </v-card>  
+        </Teleport>
+        
 
 </template>
 
@@ -497,7 +499,7 @@
     width: 25rem;
     border-radius: 0;
     margin: auto;
-    left: 520px;
+    left:0;
     right: 0;
     top: 0;
     bottom: 0;
