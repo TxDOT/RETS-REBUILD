@@ -442,7 +442,7 @@ export default{
         //     immediate: true
         // },
         'store.retsObj.attributes.RETS_NM':{
-            handler: function(a,b){
+            handler: function(b){
                 if(!b){
                     document.querySelector(".rets-subtitle-text-active")?.classList?.remove()
                     return
@@ -463,24 +463,16 @@ export default{
             immediate: true
         },
         'store.clickevent': {
-        handler: function(newVal) {
-           if (!store.isSaveBtnDisable && store.isDetailsPage  && store.layerName != "TxDOT Roadways" && store.clickevent.button === 0){
-            store.cancelpopup = true
-            return
-           }
-        },
-        immediate: true // Runs the watcher immediately upon creation
+            handler: function() {
+                if (!store.isSaveBtnDisable && store.isDetailsPage  && store.layerName != "TxDOT Roadways" && store.clickevent.button === 0){
+                    store.cancelpopup = true
+                    return
+                }
+            },
+            immediate: true // Runs the watcher immediately upon creation
     
 
         },
-        // 'store.isSelectEnabled':{
-        //     handler: function(){
-        //         store.roadHighlightObj.clear()
-        //         removeHighlight("a", removeAll); 
-        //         scrollToTopOfFeed(store.roadHighlightObj.size) 
-        //     },
-        //     immediate: true
-        // },
     },
     computed:{
         retsInProgressCount(){

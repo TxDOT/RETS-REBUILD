@@ -157,6 +157,7 @@ export default{
         this.setLayer
         store.isSaving = false
         loadData()
+        console.log('mounted')
         //outlineFeedCards(store.roadHighlightObj)
     },
 
@@ -164,6 +165,7 @@ export default{
         this.setLayer
         loadData()
         store.toggleFeed = 1
+        console.log('updated')
         //store.activityBanner = "Activity Feed"
     },
 
@@ -233,6 +235,7 @@ export default{
     computed: {
         setLayer: () => {                                              
             store.updateRetsSearch = store.roadObj
+            console.log(store.updateRetsSearch)
         } 
     }
 }

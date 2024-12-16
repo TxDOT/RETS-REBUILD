@@ -234,7 +234,7 @@ export const store = reactive({
                 const chat = this.historyChat.find(x => x.OBJECTID === oid)
                 if(!chat.attachments){
                         chat.attachments = []
-                }
+                }userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO"
                 // addAttachments(oid)
                 fileList.forEach(x => chat.attachments.push({name: x.name}))
                 return
@@ -246,7 +246,8 @@ export const store = reactive({
                 return retsFlag ?? defaultValue
         },
 
-        getRetsLayer(userid, where, layer, orderFields){ //////////////////////////remove userid from here
+        async getRetsLayer(userid, where, layer, orderFields){ //////////////////////////remove userid from here
+                console.log(userid, where, layer, orderFields)
                 this.loggedInUser = userid
                 const queryString = {"whereString": where, "queryLayer": layer}
                 //const orderField = "EDIT_DT DESC, PRIO"
@@ -255,8 +256,9 @@ export const store = reactive({
                         this.roadObj.length = 0
                         this.retsIDList.length = 0
                         this.updateRetsSearch.length = 0
-                        getQueryLayer(queryString, orderFields)
-                                .then((obj) => {
+                        let obj = await getQueryLayer(queryString, orderFields)
+                                //.then((obj) => {
+                                        console.log(obj)
                                         if(obj.features.length){
                                                 obj.features.forEach((x, i) => {
                                                         x.attributes.flagColor = this.setFlagColor(x.attributes)
@@ -278,15 +280,14 @@ export const store = reactive({
                                                         this.retsIDList.push(x.attributes.RETS_ID)
                                                         //store.archiveRetsData.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                                                 })
-
+                                                console.log(this.roadObj)
                                                 return
                                         }
                                         if(!obj.features.length){
                                                 this.RetsCardStatus = "Bummer or lucky?? No Rets for you!"
                                                 return 
                                         }
-                                        console.log(this.roadObj)
-                                })
+                                //})
                         
 
 

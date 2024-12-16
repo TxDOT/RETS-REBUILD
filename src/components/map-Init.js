@@ -210,16 +210,14 @@ export let roadwaysRenderer = {
   },
   visualVariables: [
     {
-        type: "size",
-        valueExpression: "$view.scale",
-        stops: [
-          { size: 8, value: 8499 },
-          { size: 0.01, value: 8500 },
-         
-        ]
+      type: "size",
+      valueExpression: "$view.scale",
+      stops: [
+        { size: 8, value: 8499 },
+        { size: 0.01, value: 8500 },
+      ] 
     }
-]
-
+  ]
 }
 
 
@@ -236,12 +234,12 @@ export const polygonsymbol = {
 
 export const pointsymbol = {
   type: "simple-marker",
-        color: "cyan",
-        size: 8,
-        outline:{
-            width:0,
-            color: "cyan"
-        }
+  color: "cyan",
+  size: 8,
+  outline:{
+    width:0,
+    color: "cyan"
+  }
 }
 
 //Highlight graphics layer construction

@@ -33,9 +33,9 @@ async function signIn(){
   await getUniqueQueryValues(retsUserRole, appConstants.userRoles)
   const userId = await getUserId()
   await queryFlags(userId)
-  
   await setDefExpRets(userId)
-  store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+  console.log(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+  await store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
   appConstants.userQueryField = appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]
   //needs to be worked on//
   router.push({name: "Map"})
