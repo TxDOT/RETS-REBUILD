@@ -235,8 +235,7 @@
                                 value: 1,
                                 action: ()=>{
                                     //open feed
-                                    console.log(store.isEmptyRow)
-                                    if (store.isEmptyRow != false){
+                                    if (store.isEmptyRow != false && store.isSaveBtnDisable){
                                         return
                                     }
                                     store.isCard = true

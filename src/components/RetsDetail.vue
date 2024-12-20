@@ -319,7 +319,7 @@
                     store.closeIsRoadExist = true
                     return
                 }
-
+                store.isEmptyRow = false
                 store.isSaving = true
                 store.retsObj.attributes.ACTV = !store.retsObj.attributes.ACTV ? null : store.retsObj.attributes.ACTV.value ?? store.retsObj.attributes.ACTV
                 store.retsObj.attributes.PRIO = store.retsObj.attributes.PRIO ?? 1
