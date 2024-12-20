@@ -86,7 +86,6 @@ export default{
                 store.toggleFeed = 1
                 return
             }
-            
             discardeditcopy();
             return
         },

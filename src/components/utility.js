@@ -23,8 +23,6 @@ export async function getRetsLayerView (){
         () => !retLayerView.dataUpdating,
         async (e) => {
             try{
-                console.log(e)
-                console.log("rets ready")
                 retsLayerView = retLayerView
                 
                 if(retsLayerView.view.zoom < 12){
