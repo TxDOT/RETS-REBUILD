@@ -256,7 +256,6 @@ export default{
                     return
                 }
             }
-            
             issue === 0 ? openDetails({attributes: this.stageData.attributes, geometry: [this.stageData.geometry.x, this.stageData.geometry.y]}, 1) : null
         },
         double(road){

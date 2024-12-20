@@ -65,8 +65,6 @@ export default{
             window.document.title = 'RETS Application'
             if(!store.isDetailsPage){
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
-                console.log(archiveRets)
-                console.log(store.openAfterDiscardRets)
                 if (archiveRets != store.openAfterDiscardRets){
                     openDetails(store.openAfterDiscardRets)
                     store.isCard = false
