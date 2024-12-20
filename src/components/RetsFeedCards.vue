@@ -57,7 +57,7 @@
         <div id="search-feed" v-if="!store.isDetailsPage">
             <v-text-field class="search" density="compact" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" v-model="actvFeedSearch" variant="solo-filled">
                 <template v-slot:append-inner>
-                    <v-icon icon="mdi-close" v-if="actvFeedSearch.length ? (true, store.isSearch = true) : false" @click="clearContent"></v-icon>
+                    <v-icon icon="mdi-close" v-if="actvFeedSearch.length ? (true, store.isSearch = true) : (false, store.isSearch = false)" @click="clearContent"></v-icon>
                 </template>
             </v-text-field>
         </div>
@@ -177,7 +177,8 @@ export default{
             ],
 
             isShowSelected: false,
-            isSwitchDisabled: false
+            isSwitchDisabled: false,
+            searchTimer: null
         }
     },
     beforeMount(){
@@ -215,8 +216,8 @@ export default{
         async clearContent(){
             store.isSearch = false
             this.actvFeedSearch = ""
-            await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
-            store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+            //await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+            //store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
         },
         async processAddPt(newPointGraphic){
             try{
@@ -266,8 +267,8 @@ export default{
             store.historyRetsId = road.attributes.RETS_ID
             
             returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
-            clearTimeout(this.timer)
-            this.timer=""
+            clearTimeout(this.searchTimer)
+            this.searchTimer=""
             store.isCard = false
             store.isDetailsPage = true
             store.activityBanner = `${road.attributes.RETS_ID}`
@@ -277,9 +278,9 @@ export default{
             return
         },
         zoomToRetsPt(rets){
-            clearTimeout(this.timer)
-            this.timer = ""
-            this.timer = setTimeout(()=>{
+            clearTimeout(this.searchTimer)
+            this.searchTimer = ""
+            this.searchTimer = setTimeout(()=>{
                 const zoomToRETS = rets.geometry
                 highlightRETSPoint(rets.attributes)
                 zoomTo(zoomToRETS)
@@ -386,42 +387,46 @@ export default{
             
             return
         },
-
     },
     watch:{
         actvFeedSearch:{
             handler: async function(a){
                 try{
-                    if(!a.length || !a){
-                        store.updateRetsSearch = !store.isShowSelected ? store.roadObj.slice().sort((a,b) => b.EDIT_DT - a.EDIT_DT) : store.roadHighlightObj
-                        outlineFeedCards(store.roadHighlightObj)
-                        return
+
+                    if(this.searchTimer){
+                        clearTimeout(this.searchTimer)
                     }
-                    const searchString = a.toLowerCase()
-                    let s;
+                    this.searchTimer = setTimeout(async () => {
+                        if(!a.length || !a){
+                            store.updateRetsSearch = !store.isShowSelected ? store.roadObj.slice().sort((a,b) => b.EDIT_DT - a.EDIT_DT) : store.roadHighlightObj
+                            outlineFeedCards(store.roadHighlightObj)
+                            return
+                        }
+                        const searchString = a.toLowerCase()
+                        let s;
 
-                    //search for history items
-                    //apply it card metadata
-                    let returnHist = await getQueryLayer({"whereString": `CMNT like '%${a}%' and SYS_GEN = 0`, "queryLayer": "retsHistory"}, "CREATE_DT DESC")
-
-                    const acceptedObj = []
-                    for(s of !store.isShowSelected ? store.roadObj : store.roadHighlightObj){
-                        s.attributes.Hist = returnHist.features.find(hist => hist.attributes.RETS_ID === s.attributes.RETS_ID)?.attributes?.CMNT ?? ""
-                        // const createObjKey = Object.values(s.attributes)
-                        for(const [key, value] of Object.entries(s.attributes)){
-                            if(key === "RETS_ID" || key === "RETS_NM" || key === "DESC_" || key === "RTE_NM" || key === "ACTV" || key === "ACTV_NBR" || key === "Hist"){
-                                if(String(value).toLowerCase().includes(searchString) && (acceptedObj.findIndex(oid => oid.attributes.OBJECTID === s.attributes.OBJECTID) === -1)){
-                                    if(acceptedObj.length === 10){
-                                        store.updateRetsSearch = acceptedObj.sort((a,b) => b.EDIT_DT - a.EDIT_DT)
-                                        return
+                        //search for history items
+                        //apply it card metadata
+                        let returnHist = await getQueryLayer({"whereString": `Lower(CMNT) like '%${searchString}%' and SYS_GEN = 0`, "queryLayer": "retsHistory"}, "CREATE_DT DESC")
+                        
+                        const acceptedObj = []
+                        for(s of !store.isShowSelected ? store.roadObj : store.roadHighlightObj){
+                            s.attributes.Hist = returnHist.features.find(hist => hist.attributes.RETS_ID === s.attributes.RETS_ID)?.attributes?.CMNT ?? ""
+                            // const createObjKey = Object.values(s.attributes)
+                            for(const [key, value] of Object.entries(s.attributes)){
+                                if(key === "RETS_ID" || key === "RETS_NM" || key === "DESC_" || key === "RTE_NM" || key === "ACTV" || key === "ACTV_NBR" || key === "Hist"){
+                                    if(String(value).toLowerCase().includes(searchString) && (acceptedObj.findIndex(oid => oid.attributes.OBJECTID === s.attributes.OBJECTID) === -1)){
+                                        // if(acceptedObj.length === 10){
+                                        //     store.updateRetsSearch = acceptedObj.sort((a,b) => b.EDIT_DT - a.EDIT_DT)
+                                        //     return
+                                        // }
+                                        acceptedObj.push(s)
                                     }
-                                    acceptedObj.push(s)
                                 }
-                            }
-                        } 
-                    }
-
-                    store.updateRetsSearch = acceptedObj.sort((a,b) => b.EDIT_DT - a.EDIT_DT)
+                            } 
+                        }
+                        store.updateRetsSearch = acceptedObj.sort((a,b) => b.EDIT_DT - a.EDIT_DT)
+                    },600)
                 }
                 catch(a){
                     console.log(a)
@@ -436,7 +441,7 @@ export default{
         //     immediate: true
         // },
         'store.retsObj.attributes.RETS_NM':{
-            handler: function(a,b){
+            handler: function(b){
                 if(!b){
                     document.querySelector(".rets-subtitle-text-active")?.classList?.remove()
                     return
@@ -457,24 +462,16 @@ export default{
             immediate: true
         },
         'store.clickevent': {
-        handler: function(newVal) {
-           if (!store.isSaveBtnDisable && store.isDetailsPage  && store.layerName != "TxDOT Roadways" && store.clickevent.button === 0){
-            store.cancelpopup = true
-            return
-           }
-        },
-        immediate: true // Runs the watcher immediately upon creation
+            handler: function() {
+                if (!store.isSaveBtnDisable && store.isDetailsPage  && store.layerName != "TxDOT Roadways" && store.clickevent.button === 0){
+                    store.cancelpopup = true
+                    return
+                }
+            },
+            immediate: true // Runs the watcher immediately upon creation
     
 
         },
-        // 'store.isSelectEnabled':{
-        //     handler: function(){
-        //         store.roadHighlightObj.clear()
-        //         removeHighlight("a", removeAll); 
-        //         scrollToTopOfFeed(store.roadHighlightObj.size) 
-        //     },
-        //     immediate: true
-        // },
     },
     computed:{
         retsInProgressCount(){

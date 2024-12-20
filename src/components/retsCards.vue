@@ -157,16 +157,25 @@ export default{
         this.setLayer
         store.isSaving = false
         loadData()
+        console.log('mounted')
+        return
         //outlineFeedCards(store.roadHighlightObj)
     },
 
     updated(){
+        store.toggleFeed = 1
+        if(store.isSearch){
+            loadData()
+            return
+        }
         this.setLayer
         loadData()
-        store.toggleFeed = 1
-        // store.activityBanner = "Activity Feed"
+        return
+        // loadData()
+        // store.toggleFeed = 1
+        // console.log('updated')
+        //store.activityBanner = "Activity Feed"
     },
-
     methods:{
         checkhighlight(retsid){
             return checkhighlightfunction(retsid)

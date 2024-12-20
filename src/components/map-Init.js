@@ -210,20 +210,15 @@ export let roadwaysRenderer = {
   },
   visualVariables: [
     {
-        type: "size",
-        valueExpression: "$view.scale",
-        stops: [
-          { size: 8, value: 8499 },
-          { size: 0.01, value: 8500 },
-         
-        ]
+      type: "size",
+      valueExpression: "$view.scale",
+      stops: [
+        { size: 8, value: 8499 },
+        { size: 0.01, value: 8500 },
+      ] 
     }
-]
-
+  ]
 }
-
-
-
 
 export const polygonsymbol = {
   type: "simple-fill",  // autocasts as new SimpleFillSymbol()
@@ -236,12 +231,12 @@ export const polygonsymbol = {
 
 export const pointsymbol = {
   type: "simple-marker",
-        color: "cyan",
-        size: 8,
-        outline:{
-            width:0,
-            color: "cyan"
-        }
+  color: "cyan",
+  size: 8,
+  outline:{
+    width:0,
+    color: "cyan"
+  }
 }
 
 //Highlight graphics layer construction
@@ -469,6 +464,7 @@ export const view = new MapView({
   },
   
 })
+
 export let featureSuggestions =  []  // To store the limited features
 
 //create search widget
@@ -815,13 +811,7 @@ searchWidget.on("select-result", function(event) {
     document.getElementById(retsidnum).classList.add("highlight-card")
     return
   }
-
-  
-
-
 });
-
-
 
 searchWidget.on("search-clear", function(event) {
   // Clear the highlight when the search is cleared

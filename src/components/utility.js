@@ -1,4 +1,5 @@
-import {view, retsLayer, homeWidget, retsGraphicLayer, TxDOTRoadways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate, retsPointRenderer, texasExtent, retsPointRendererout, retsRole, TxDOTRoadwayscopy, highlightLayer, map} from './map-Init'
+import {view, retsLayer, homeWidget, retsGraphicLayer, TxDOTRoadways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate, 
+        retsPointRenderer, texasExtent, retsPointRendererout, retsRole, highlightLayer, map, retsPointRendererout2} from './map-Init'
 import Query from "@arcgis/core/rest/support/Query.js";
 import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant.js";
@@ -17,27 +18,31 @@ export let roadLayerView;
 export let retsHistoryView;
 
 export async function getRetsLayerView (){
-        const retLayerView = await view.whenLayerView(retsLayer)
-        reactiveUtils.once(() => !retLayerView.dataUpdating)
-            .then(() => {
-                try{
-                    retsLayerView = retLayerView
-                    //need to find items that are currently in view not everything for belwo
-                    
-                    if(retsLayerView.view.zoom < 12){
-                        store.zoomInText = "Zoom in to enable"
-                        store.zoomInToEnable = true
-                        return
-                    }
-                    store.zoomInText = "Move RETS Point"
-                    store.zoomInToEnable = false
+    const retLayerView = await view.whenLayerView(retsLayer)
+    reactiveUtils.when(
+        () => !retLayerView.dataUpdating,
+        async (e) => {
+            try{
+                console.log(e)
+                console.log("rets ready")
+                retsLayerView = retLayerView
+                
+                if(retsLayerView.view.zoom < 12){
+                    store.zoomInText = "Zoom in to enable"
+                    store.zoomInToEnable = true
                     return
                 }
-                catch(err){
-                    console.log(err)
-                }
-            })
-    return
+                store.zoomInText = "Move RETS Point"
+                store.zoomInToEnable = false
+                return
+            }
+            catch(err){
+                console.log(err)
+            }
+        },
+    )
+
+return
 }
 
 export async function getTxDotRdWayLayerView(){
