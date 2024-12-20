@@ -214,6 +214,7 @@ export default{
             },250)
         },
         double(road, index){
+            store.openAfterDiscardRets = road
             if(!store.isSaveBtnDisable){
                 clearTimeout(this.timer)
                 store.cancelpopup = true
