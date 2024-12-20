@@ -65,7 +65,9 @@ export default{
             window.document.title = 'RETS Application'
             if(!store.isDetailsPage){
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
-                if (archiveRets != store.openAfterDiscardRets){
+                console.log(archiveRets.attributes.RETS_ID)
+                console.log(store.openAfterDiscardRets.attributes.RETS_ID)
+                if (archiveRets.attributes.RETS_ID != store.openAfterDiscardRets.attributes.RETS_ID){
                     openDetails(store.openAfterDiscardRets)
                     store.isCard = false
                     store.isDetailsPage = true
@@ -91,7 +93,7 @@ export default{
             return
         },
         goBackActivity(){
-            if(!store.isSaveBtnDisable){
+            if(!store.isSaveBtnDisable || (store.retsObj.attributes.GIS_ANALYST === null || store.retsObj.attributes.GRID_ANALYST === null || store.retsObj.attributes.DIST_ANALYST === null|| store.retsObj.attributes.DIST_NM === null || store.retsObj.attributes.CNTY_NM === null)){
                 removeOutline()
                 removeHighlight("a", true)
                 highlightRETSPoint(store.retsObj.attributes)
