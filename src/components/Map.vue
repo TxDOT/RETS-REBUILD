@@ -37,7 +37,7 @@
 //import functions
 //import {queryRetsTable} from './utility.js'
 import {view} from './map-Init.js'
-import {home, hoverRetsPoint, discardeditcopy, updateRetsObj, removeOutline, removeHighlight, highlightRETSPoint} from './utility.js'
+import {home, hoverRetsPoint, discardeditcopy, openDetails, updateRetsObj, removeOutline, removeHighlight, highlightRETSPoint, zoomTo} from './utility.js'
 import {store} from './store.js'
 
 // import ShowChanges from './showChanges.vue'
@@ -65,9 +65,22 @@ export default{
             window.document.title = 'RETS Application'
             if(!store.isDetailsPage){
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
+                if (archiveRets != store.openAfterDiscardRets){
+                    openDetails(store.openAfterDiscardRets)
+                    store.isCard = false
+                    store.isDetailsPage = true
+                    store.activityBanner = `${store.openAfterDiscardRets.attributes.RETS_ID}`
+                    //outlineFeedCards()
+                    zoomTo(store.openAfterDiscardRets.geometry)
+                    store.cancelpopup = false
+                    store.isSaveBtnDisable = true
+                    store.toggleFeed = 1
+                }
+
                 let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
                 updateRetsObj(findItem, archiveRets)
                 store.cancelpopup = false
+                store.isSaveBtnDisable = true
                 store.activityBanner = "Activity Feed"
                 store.toggleFeed = 1
                 return
