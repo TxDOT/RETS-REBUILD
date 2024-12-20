@@ -235,7 +235,9 @@
                                 value: 1,
                                 action: ()=>{
                                     //open feed
-
+                                    if (store.isEmptyRow != false && store.isSaveBtnDisable){
+                                        return
+                                    }
                                     store.isCard = true
                                     store.isDetailsPage = false
                                     this.toggle = 1

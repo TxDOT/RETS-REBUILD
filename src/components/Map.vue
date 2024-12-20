@@ -74,7 +74,8 @@ export default{
                     zoomTo(store.openAfterDiscardRets.geometry)
                     store.cancelpopup = false
                     store.isSaveBtnDisable = true
-                    store.toggleFeed = 1
+                    store.toggleFeed = 2
+                    return
                 }
 
                 let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
