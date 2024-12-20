@@ -37,7 +37,7 @@
 //import functions
 //import {queryRetsTable} from './utility.js'
 import {view} from './map-Init.js'
-import {home, hoverRetsPoint, discardeditcopy, openDetails, updateRetsObj, removeOutline, removeHighlight, highlightRETSPoint} from './utility.js'
+import {home, hoverRetsPoint, discardeditcopy, updateRetsObj, removeOutline, removeHighlight, highlightRETSPoint} from './utility.js'
 import {store} from './store.js'
 
 // import ShowChanges from './showChanges.vue'

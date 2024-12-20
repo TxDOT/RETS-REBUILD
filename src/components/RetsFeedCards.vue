@@ -57,7 +57,7 @@
         <div id="search-feed" v-if="!store.isDetailsPage">
             <v-text-field class="search" density="compact" placeholder="Search..." rounded="0" prepend-inner-icon="mdi-magnify" v-model="actvFeedSearch" variant="solo-filled">
                 <template v-slot:append-inner>
-                    <v-icon icon="mdi-close" v-if="actvFeedSearch.length ? (true, store.isSearch = true) : false" @click="clearContent"></v-icon>
+                    <v-icon icon="mdi-close" v-if="actvFeedSearch.length ? (true, store.isSearch = true) : (false, store.isSearch = false)" @click="clearContent"></v-icon>
                 </template>
             </v-text-field>
         </div>
@@ -427,7 +427,7 @@ export default{
                             } 
                         }
                         store.updateRetsSearch = acceptedObj.sort((a,b) => b.EDIT_DT - a.EDIT_DT)
-                    },300)
+                    },600)
                 }
                 catch(a){
                     console.log(a)

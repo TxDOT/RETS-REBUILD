@@ -220,9 +220,6 @@ export let roadwaysRenderer = {
   ]
 }
 
-
-
-
 export const polygonsymbol = {
   type: "simple-fill",  // autocasts as new SimpleFillSymbol()
   color: [224,224,224,.4],
@@ -467,6 +464,7 @@ export const view = new MapView({
   },
   
 })
+
 export let featureSuggestions =  []  // To store the limited features
 
 //create search widget
@@ -813,13 +811,7 @@ searchWidget.on("select-result", function(event) {
     document.getElementById(retsidnum).classList.add("highlight-card")
     return
   }
-
-  
-
-
 });
-
-
 
 searchWidget.on("search-clear", function(event) {
   // Clear the highlight when the search is cleared

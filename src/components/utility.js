@@ -1,4 +1,5 @@
-import {view, retsLayer, homeWidget, retsGraphicLayer, TxDOTRoadways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate, retsPointRenderer, texasExtent, retsPointRendererout, retsRole, TxDOTRoadwayscopy, highlightLayer, map} from './map-Init'
+import {view, retsLayer, homeWidget, retsGraphicLayer, TxDOTRoadways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate, 
+        retsPointRenderer, texasExtent, retsPointRendererout, retsRole, highlightLayer, map, retsPointRendererout2} from './map-Init'
 import Query from "@arcgis/core/rest/support/Query.js";
 import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant.js";
@@ -20,8 +21,10 @@ export async function getRetsLayerView (){
     const retLayerView = await view.whenLayerView(retsLayer)
     reactiveUtils.when(
         () => !retLayerView.dataUpdating,
-        async () => {
+        async (e) => {
             try{
+                console.log(e)
+                console.log("rets ready")
                 retsLayerView = retLayerView
                 
                 if(retsLayerView.view.zoom < 12){
