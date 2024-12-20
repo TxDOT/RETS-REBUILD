@@ -26,6 +26,7 @@ export const store = reactive({
         filterItems: [],
         filterquery: "",
         clickevent: "",
+        isEmptyRow: false,
         openAfterDiscardRets: null ,
         count: 0,
         isCloseDetail: false,
