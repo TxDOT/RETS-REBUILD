@@ -138,7 +138,7 @@ export function clickRetsPoint(){
                     }
                     const retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
                    
-                    if (store.isDetailsPage && store.isSaveBtnDisable){
+                    if (store.isDetailsPage && store.isSaveBtnDisable && !store.isEmptyRow){
                         //canceldetailsfunction()
                         openDetails(retsPt)
                     }
@@ -147,7 +147,7 @@ export function clickRetsPoint(){
                     store.roadHighlightObj.clear()
                     store.roadHighlightObj.add(retsPt)
 
-                    if (store.isSaveBtnDisable){
+                    if (store.isSaveBtnDisable && !store.isEmptyRow){
                         removeOutline()
                         removeHighlight("a", true)
                         //evt.results.forEach(rest => rest.graphic.layer.title ? highlightRETSPoint(rest.graphic.attributes) : highlightGraphicPt(rest.graphic.attributes))

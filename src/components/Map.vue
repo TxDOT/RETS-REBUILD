@@ -88,11 +88,18 @@ export default{
                 store.toggleFeed = 1
                 return
             }
-            
+            store.activityBanner = "Activity Feed"
+
+            removeHighlight("a", true)
+            removeOutline()
             discardeditcopy();
             return
         },
         goBackActivity(){
+            if(store.isDetailsPage){
+                store.cancelpopup = false;
+                return
+            }
             if(!store.isSaveBtnDisable || (store.retsObj.attributes.GIS_ANALYST === null || store.retsObj.attributes.GRID_ANALYST === null || store.retsObj.attributes.DIST_ANALYST === null|| store.retsObj.attributes.DIST_NM === null || store.retsObj.attributes.CNTY_NM === null)){
                 removeOutline()
                 removeHighlight("a", true)
