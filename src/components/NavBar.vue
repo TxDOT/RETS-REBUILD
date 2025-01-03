@@ -84,20 +84,27 @@
 
    </v-card>
    <v-card id = "containersettings" height = "585" v-if = "settingsstatus">
-        <v-card-item>
-            <span class="banner-txt">Settings</span>            
-        </v-card-item>
+    <v-card-item>
+        <span class="banner-txt">Settings</span>
+        <!-- &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+        <span id='releaseNotes' :style="{color: releaseNotesColor, fontSize: '13px'}" @mouseover="releaseNotesColor = 'white'" @mouseleave="releaseNotesColor = '#D9D9D9'" @click="isReleaseNotes = true">Version 2.1.7</span> -->
+    </v-card-item>
         <hr id = "separator"/>
         <v-card-item id = "darkmodeitem" >
             <div id = "darkmodeswitch">
                 <v-switch  v-model="switchValueDark" label="Dark Mode" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn" disabled></v-switch>
             </div>
             
-
         </v-card-item>
-       
+        <!-- <v-card-item id = "autozoomitem" >
+            <div id = "darkmodeswitch">
+                <v-switch  label="Automatically zoom when I change filters" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn" v-model="testVal"></v-switch>
+            </div>
+            
+        </v-card-item> -->
         <hr id = "separator" />
             <v-btn @click ="activateFeedback()" color="#4472C4" rounded  style="position: absolute; right: 25px; top: 96px;">
+                <!-- 140px -->
                 <span style="font-weight: 100;">Feedback</span>
             </v-btn>
         <v-card-item id = "notificationsitems" >
@@ -158,13 +165,34 @@
             <v-btn style="float: right;" variant="plain" size="small" class="secondary-button" @click="cancelFeedback" >CANCEL</v-btn>
         </div>
     </v-card>
+    <!-- <v-card id="releasenotesSection" v-if="isReleaseNotes" height="585" width="400" style="border-radius: 0;">
+        <v-card-title style="font-weight: 400;">Release Notes</v-card-title>
+        <hr id = "separator"  />
+        <div style="height: 479px; width: 370px; margin: auto; left: 0; right: 0; ">
+            <ul style="padding-left: 30px !important; padding-top: 8px; line-height: 30px;">
+                 ADD RELEASE NOTES HERE 
+                <li>Update 1</li>
+                <li>Update 2 example</li>
+                <li>Update 3 example</li>
+                <li>Update 4 example</li>
+                <li>Update 5 example</li>
+
+
+            </ul>
+
+        </div>
+        <hr id = "separator" style="margin-bottom: 15px;" />
+        <v-btn  style="float: right; margin-top: 0; margin-right: 20px;" variant="outlined" size="small" class="main-button-style" @click="isReleaseNotes = false">CLOSE</v-btn>
+
+
+    </v-card> -->
 </template>
 
 <script>
 
     import { appConstants } from '../common/constant.js';
-    import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass, roadwaysRenderer, TxDOTRoadways, hybridBasemap} from '../components/map-Init.js';
-    import { createtool, selecttool, togglemenu, logoutUser } from '../components/utility.js';
+    import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass, roadwaysRenderer, TxDOTRoadways, hybridBasemap, retsLayer} from '../components/map-Init.js';
+    import { createtool, selecttool, togglemenu, logoutUser, outlineFeedCards, retsLayerView } from '../components/utility.js';
     import { vuetify } from '../main.js';
     import { store } from './store';
     import { defineAsyncComponent } from 'vue'
@@ -178,12 +206,15 @@
         data(){
             return{
                 toggle: store.toggleFeed,
+                isReleaseNotes: false,
                 selectfunction : {},
                 store,
                 shiftmap: false,
                 fontColor: '#D9D9D9',
+                releaseNotesColor: '#D9D9D9',
                 switchValueDark: true,
                 switchValue : false,
+                testVal: true,
                 isActOpen: true,
                 shift: 200,
                 basemapcard: false,
@@ -239,6 +270,21 @@
                                     store.isDetailsPage = false
                                     this.toggle = 1
                                     store.toggleFeed = 1
+                                    store.activityBanner = "Activity Feed "
+                                    store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                                    view.whenLayerView(retsLayer).then((retsLayerView) => {
+                                        if (retsLayerView._highlightIds && retsLayerView._highlightIds.size > 0){
+                                            setTimeout(() => {
+                                                const elementId = String(store.retsObj.attributes.RETS_ID).concat('-', store.retsObj.attributes.OBJECTID);
+                                                const element = document.getElementById(elementId);
+                                                if (element) {
+                                                    element.classList.add('highlight-card');
+                                                } 
+
+                                            }, 800);
+                                        }
+                                    })
+                                    
                                 },
                                 disabled: false
                                },
@@ -255,6 +301,7 @@
                                     store.isCard = false
                                     this.toggle = 2
                                     store.toggleFeed = 2
+                                    store.activityBanner = store.retsObj.attributes.RETS_ID
                                 },
                                 disabled: true
                                }
@@ -289,17 +336,6 @@
                                             }
                                     }
                                 },
-                               {title:"Legend", icon: 'mdi-format-list-bulleted-type', color: "white", name: "Legend", 
-                               action: () =>{
-                                this.handleLegendTool();
-                                this.retsToolsBottom[2].isActive = !this.retsToolsBottom[2].isActive
-                               },
-                               hover:() => 
-                                    {
-                                        this.basemapcard = false;
-                                        this.jumptocard= false;
-                                    }
-                                },
                                {title:"Basemap", icon: 'mdi-map-legend', color: "#D9D9D9", name: "Basemaps", isActive: false,
                                action: () => {
                                 return
@@ -311,7 +347,21 @@
                                             this.basemapcard = true
                                         }
                                     }
+                                
                                 },
+                               {
+                                title:"Legend", icon: 'mdi-format-list-bulleted-type', color: "white", name: "Legend", 
+                               action: () =>{
+                                this.handleLegendTool();
+                                this.retsToolsBottom[2].isActive = !this.retsToolsBottom[2].isActive
+                               },
+                               hover:() => 
+                                    {
+                                        this.basemapcard = false;
+                                        this.jumptocard= false;
+                                    }
+                                
+                               },
                                {title:"Settings", icon: 'mdi-cog', color: "#D9D9D9", name: "Settings",
                                action: () =>{
                                 this.handleSettingsTool();
@@ -369,10 +419,21 @@
                             this.feedbackName = ""
                         }
                     }
-                   }
+                   },
+                //    'testVal':{
+                //     handler: function(){
+                //         localStorage.setItem('testVal',this.testVal)
+                //         console.log(this.testVal)
+
+                //     }
+                //    }
                 },
                 mounted() {
-                    
+                    // if (localStorage.getItem('testVal')){
+                    //     console.log(localStorage.getItem('testVal'))
+                    //     this.testVal = localStorage.getItem('testVal') === 'true';
+                    //     console.log(this.testVal)
+                    // }
 
                 },
                 
@@ -412,6 +473,7 @@
                     handleactiveclass(){
                         this.settingsstatus = false
                         this.retsToolsBottom[4].isActive = false
+
                     },
                     logoutMethod(){
                         logoutUser();
@@ -739,6 +801,14 @@
         height: 4rem;
         
     }
+    /* #autozoomitem{
+        position: relative;
+        bottom: 2px;
+        left: 25px;
+        font-size: 20px;
+        height: 4rem;
+        margin-top: -20px !important;
+    } */
     .font-class{
         color: aqua !important;
     }
@@ -753,7 +823,7 @@
         position: relative;
         left: 10px;
         font-size: 20px;
-        height: 25rem;
+        height: 23rem;
     }
     #notificationsfont{
         position: absolute;
@@ -765,7 +835,7 @@
         font-size: 14px;
         top: 40px;
         left: 18px;
-        height: 500px;
+        height: 350px;
     }
 
     #darkmodeswitch{
@@ -792,10 +862,11 @@
     #notiswitches{
         position: relative;
         left: -15px;
+        margin-top: -20px;
     }
     #bottomitems{
         position: absolute;
-        bottom: 10px;
+        bottom: 5px;
         width: 25rem;
     }
     
@@ -878,6 +949,18 @@
         position: absolute;
         left: 37%;
         border-radius: 0% !important;
+    }
+    #releaseNotes{
+        cursor: pointer;
+    }
+    #releasenotesSection{
+        position:absolute;
+        margin: auto;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 9999;
     }
     
 </style>

@@ -37,7 +37,7 @@
 //import functions
 //import {queryRetsTable} from './utility.js'
 import {view} from './map-Init.js'
-import {home, hoverRetsPoint, discardeditcopy, openDetails, updateRetsObj, removeOutline, removeHighlight, highlightRETSPoint, zoomTo} from './utility.js'
+import {home, hoverRetsPoint, discardeditcopy, openDetails, updateRetsObj, removeOutline, removeHighlight, highlightRETSPoint, zoomTo, canceldetailsfunction} from './utility.js'
 import {store} from './store.js'
 
 // import ShowChanges from './showChanges.vue'
@@ -65,8 +65,7 @@ export default{
             window.document.title = 'RETS Application'
             if(!store.isDetailsPage){
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
-                console.log(archiveRets.attributes.RETS_ID)
-                console.log(store.openAfterDiscardRets.attributes.RETS_ID)
+
                 if (archiveRets.attributes.RETS_ID != store.openAfterDiscardRets.attributes.RETS_ID){
                     openDetails(store.openAfterDiscardRets)
                     store.isCard = false
@@ -88,11 +87,27 @@ export default{
                 store.toggleFeed = 1
                 return
             }
-            store.activityBanner = "Activity Feed"
+            if (store.clickStatus && store.clickeventresult === "TPP RETS"){
+                const retsPt = Array.from(store.roadHighlightObj)[0]
+                removeHighlight(store.openAfterDiscardRets)
+                openDetails(retsPt)
+                store.isCard = false
+                store.isDetailsPage = true
+                store.activityBanner = `${retsPt.attributes.RETS_ID}`
+                store.cancelpopup = false
+                store.toggleFeed = 2
+                store.isSaveBtnDisable = true
 
+                return
+
+            }
+            store.activityBanner = "Activity Feed"
+            store.toggleFeed = 1
             removeHighlight("a", true)
             removeOutline()
             discardeditcopy();
+            store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+
             return
         },
         goBackActivity(){

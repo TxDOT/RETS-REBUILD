@@ -104,6 +104,10 @@ export function clickRetsPoint(){
                 else{
                     highlightLayer.removeAll()
                     if(!evt.results.length){
+                        if (!store.isSaveBtnDisable){
+                            store.cancelpopup = true
+                            return
+                        }
                         removeOutline()
                         removeHighlight("a", true)
                         clearRoadHighlightObj()
@@ -135,6 +139,10 @@ export function clickRetsPoint(){
                         })
                         return
 
+                    }
+                    if (evt.results[0].layer.title){
+                        store.clickeventresult = evt.results[0].layer.title
+    
                     }
                     const retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
                    
@@ -1401,7 +1409,7 @@ export function openDetails(road){
     clearGraphicsLayer()
     store.toggleFeed = 2
     store.isSaving = false
-    store.isSaveBtnDisable = true
+    //store.isSaveBtnDisable = true
     store.archiveRetsDataString = JSON.stringify(road)
     store.retsObj = road
     store.historyRetsId = road.attributes.RETS_ID

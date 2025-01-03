@@ -222,8 +222,16 @@ export default{
                 zoomTo(zoomToRETS)
             },250)
         },
-        double(road, index){
+        double(road, index){         
             store.openAfterDiscardRets = road
+            if (store.archiveRetsDataString.length){
+                const archiveRets = JSON.parse(store.archiveRetsDataString)
+                if (archiveRets.attributes.RETS_ID === road.attributes.RETS_ID ){
+                    openDetails(road)
+                    return
+                }
+
+            }   
             if(!store.isSaveBtnDisable || (store.retsObj.attributes.GIS_ANALYST === null || store.retsObj.attributes.GRID_ANALYST === null || store.retsObj.attributes.DIST_ANALYST === null|| store.retsObj.attributes.DIST_NM === null || store.retsObj.attributes.CNTY_NM === null)){
                 clearTimeout(this.timer)
                 store.cancelpopup = true
