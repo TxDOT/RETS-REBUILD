@@ -75,7 +75,7 @@
             checkMetadatFields(){
                 const fieldsToCheck = [
                     store.retsObj.attributes.GIS_ANALYST, store.retsObj.attributes.GRID_ANALYST, 
-                    store.retsObj.attributes.DIST_ANALYST, store.retsObj.attributes.DIST_NM, 
+                    store.retsObj.attributes.DIST_ANALYST.length || null, store.retsObj.attributes.DIST_NM, 
                     store.retsObj.attributes.CNTY_NM
                 ]
 
@@ -83,6 +83,7 @@
                    const pushItemsToCheckArr = [store.retsObj.attributes.DFO, store.retsObj.attributes.RTE_NM, store.retsObj.attributes.STAT, store.retsObj.attributes.DESC_]
                    fieldsToCheck.push(...pushItemsToCheckArr)
                 }
+
                 const isLength = fieldsToCheck.some((x) => !x)
                 return isLength
             }

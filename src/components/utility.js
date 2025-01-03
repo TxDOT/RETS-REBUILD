@@ -1415,7 +1415,7 @@ export function openDetails(road){
     //removeHighlight("a", true)
     highlightRETSPoint(road.attributes)
     toggleRelatedRets(JSON.stringify(road))
-    window.document.title = `RETSID: ${road.attributes.OBJECTID}`
+    window.document.title = `RETS: ${road.attributes.OBJECTID}`
     return
 }
 
