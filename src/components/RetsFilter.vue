@@ -134,7 +134,7 @@
     <div style="position: absolute; left: 890px; top: 100px;" v-if="isDate">
         <v-date-picker class="date" multiple hide-header v-model="selectDate" @update:modelValue="selectDates()" tile  :disabled="selectDate.length === 2" style="border-radius: 0;"></v-date-picker>
         <div style="position: relative; bottom: 3.3rem; ">
-            <v-checkbox label="Current Year" style="position: relative; z-index: 9999; float: right; margin-bottom: 15px; margin-right: 15px" v-model="currentYear"></v-checkbox>
+            <v-checkbox label="Current Year" style="position: relative; z-index: 9999; float: right; margin-bottom: 15px; margin-right: 15px;" v-model="currentYear"></v-checkbox>
         </div>
         <div style="position: relative; bottom: 3.3rem; height: 50px; width: 98px;">
             <v-btn style="float: left; margin-left: 10px; top: 12px;" @click="isDate = false" flat>CLOSE</v-btn>
@@ -510,5 +510,11 @@ export default{
   height: 40px !important;
   width: 40px !important;
 }
+/* .date :deep(.v-date-picker-months__content){
+    height: 275px;
+}
+.date :deep(.v-date-picker-months){
+    overflow: hidden;
+} */
 
 </style>

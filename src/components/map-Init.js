@@ -368,6 +368,8 @@ export const retsLabelclass = new LabelClass({
   },
   labelPlacement: "above-right",
   minScale: 200000,
+  //minScale: 300000,
+
 })
 
 export const roadwaysLabelClass = new LabelClass({
