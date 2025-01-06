@@ -270,7 +270,6 @@
                                     store.isDetailsPage = false
                                     this.toggle = 1
                                     store.toggleFeed = 1
-                                    store.activityBanner = "Activity Feed "
                                     store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
                                     view.whenLayerView(retsLayer).then((retsLayerView) => {
                                         if (retsLayerView._highlightIds && retsLayerView._highlightIds.size > 0){
@@ -301,7 +300,6 @@
                                     store.isCard = false
                                     this.toggle = 2
                                     store.toggleFeed = 2
-                                    store.activityBanner = store.retsObj.attributes.RETS_ID
                                 },
                                 disabled: true
                                }
