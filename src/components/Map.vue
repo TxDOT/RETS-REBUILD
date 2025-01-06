@@ -72,6 +72,8 @@ export default{
                     store.isDetailsPage = true
                     store.activityBanner = `${store.openAfterDiscardRets.attributes.RETS_ID}`
                     //outlineFeedCards()
+                    let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
+                    updateRetsObj(findItem, archiveRets)
                     zoomTo(store.openAfterDiscardRets.geometry)
                     store.cancelpopup = false
                     store.isSaveBtnDisable = true
@@ -89,6 +91,9 @@ export default{
             }
             if (store.clickStatus && store.clickeventresult === "TPP RETS"){
                 const retsPt = Array.from(store.roadHighlightObj)[0]
+                 const archiveRets = JSON.parse(store.archiveRetsDataString)
+                let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
+                updateRetsObj(findItem, archiveRets)
                 removeHighlight(store.openAfterDiscardRets)
                 openDetails(retsPt)
                 store.isCard = false
