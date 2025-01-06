@@ -108,6 +108,7 @@ export function clickRetsPoint(){
                             store.cancelpopup = true
                             return
                         }
+                        store.activityBanner = "Activity Feed"
                         removeOutline()
                         removeHighlight("a", true)
                         clearRoadHighlightObj()
