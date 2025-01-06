@@ -269,20 +269,7 @@
                                     store.isCard = true
                                     store.isDetailsPage = false
                                     this.toggle = 1
-                                    store.toggleFeed = 1
-                                    store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
-                                    view.whenLayerView(retsLayer).then((retsLayerView) => {
-                                        if (retsLayerView._highlightIds && retsLayerView._highlightIds.size > 0){
-                                            setTimeout(() => {
-                                                const elementId = String(store.retsObj.attributes.RETS_ID).concat('-', store.retsObj.attributes.OBJECTID);
-                                                const element = document.getElementById(elementId);
-                                                if (element) {
-                                                    element.classList.add('highlight-card');
-                                                } 
-
-                                            }, 800);
-                                        }
-                                    })
+                                    store.toggleFeed = 1                                    
                                     
                                 },
                                 disabled: false
