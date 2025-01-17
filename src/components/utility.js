@@ -297,6 +297,7 @@ export const clearRoadHighlightObj = () => store.roadHighlightObj.clear()
 export const zoomTo = (geom) => view.goTo({center: [geom[0], geom[1]], zoom: 16}) 
 
 export function getGEMTasks(){
+    
     return [4516, 89, 1789]
     //getGemTasks when user types in #gem-search
 }

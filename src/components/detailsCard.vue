@@ -78,30 +78,19 @@
             </v-textarea>
         </div>
         <div class="item" style="position: relative; top: 32px; width: 100%;">
-            <div style="position: relative; top: 0px; width: 30%; float: left;">
-                <v-btn icon="mdi-plus" density="compact" variant="plain" @click="displayGemSearch" disabled color="white" id="addGemTaskBtn"></v-btn>
-                <div id="chips">
-                    <v-chip 
-                        v-for="i in gemTasks"
-                        closable
-                        color="#4472C4"
-                        density="compact"
-                        variant="elevated" 
-                        rounded="0"
-                        pill
-                        size="default"
-                        class="gem-chip"
-                    >
+            <v-btn icon="mdi-plus" density="compact" variant="plain" @click="displayGemSearch" color="white" id="addGemTaskBtn"></v-btn>
+            <div id="chips">
+                <v-chip v-for="i in gemTasks" closable color="#4472C4" density="compact" variant="elevated" rounded="0" pill size="default" class="gem-chip">
                     {{ i }}
-                    </v-chip>
-                </div>
+                </v-chip>
             </div>
+    
             <div style="position:relative; cursor: pointer !important;" @click="toggleVisibility()">
                 <v-btn color="white" prepend-icon="mdi-timer-outline" density="compact" variant="plain" class="date-select"> {{ datePicker }}</v-btn>
             </div>
         </div>
 
-        <div class="date-picker" v-if="isDatePicker" v-click-outside="toggleVisibility" >
+        <div class="date-picker" v-if="isDatePicker" v-click-outside="toggleVisibility">
             <v-date-picker v-model="datePicked" class="date" hide-header @update:modelValue="selectDates()" @update:viewMode="hideDateBtns($event);">
             </v-date-picker>
             <div class="cleardate" v-if="this.dateBtns">
@@ -133,7 +122,7 @@ import {store} from './store.js'
             return{
                 counter: 0,
                 activityList: appConstants.activityList,
-                gemTasks: [],
+                gemTasks: store.taskGem,
                 isDatePicker: false,
                 datePicked: null,
                 dateBtns: true,
@@ -580,7 +569,7 @@ import {store} from './store.js'
     position: relative;
     float: right;
     font-size: 10px;
-    top: 5px;
+    bottom: 18px;
     padding: 0px;
     margin: 0px;
     text-transform: none;
@@ -599,27 +588,28 @@ import {store} from './store.js'
 }
 
 #chips{
-    position: relative;
-    bottom: 0rem;
-    left: 3rem;
-    width: 130%;
+    position: absolute;
+    left: 1.5rem;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     overflow-y: auto;
+    max-height: 30px;
+    top: .5rem;
+    width: 300px;
+    border: 2px solid green;
 }
 
 .gem-chip{
-    margin: 0px;
     border-radius: 1 !important;
-    width: 100%;
     height: 22px;
+    margin: 0px 5px 5px 0px;
 }
 
 #addGemTaskBtn{
     font-size: 13px;
     position: relative;
-    top: 3px;
+    top: 9px;
     right: 8px;
 }
 

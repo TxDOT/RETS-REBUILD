@@ -31,7 +31,7 @@ export const store = reactive({
         count: 0,
         isCloseDetail: false,
         clickStatus: false,
-        taskGem: 0,
+        taskGem: [],
         clickedGraphic: 0,
         isDetailsPage: false,
         cancelpopup: false,
@@ -455,7 +455,6 @@ export const store = reactive({
                                 return
                         }
                         if(JSON.stringify(res) === '{}'){
-                                findItem.attributes.mdipaperclip = false
                                 return
                         }
                         findItem.attributes.mdipaperclip = true

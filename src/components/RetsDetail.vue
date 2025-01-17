@@ -149,12 +149,6 @@
                      historyView: defineAsyncComponent(()=> import('./historyRow.vue')),
                      historyViewSmall: defineAsyncComponent(()=> import('./historyRowSmall.vue'))
                     },
-        props: {
-            taskGem: Number,
-            alertInfo: Object,
-            historyString: String,
-        },
-        emits:['close-detail'],
         data(){
             return{
                 deletedRETSID: null,
@@ -428,7 +422,7 @@
                 return
             },
             addGemChip(gemId){
-                this.sendGemTaskNum = gemId
+                store.taskGem.push(gemId)
                 return
             },
             isAssetJob(){
@@ -674,6 +668,7 @@
 #gem-search-icon{
     top: 0.2rem;
     margin-left: 5px;
+    padding-bottom: 10px;
     position: absolute;
     font-size: 18px;
 }

@@ -127,16 +127,16 @@
 }
 
 .gem-search{
-  top: 36rem;
+  position: absolute;
+  bottom: -2.5rem;
   min-height: 4rem;
   max-height: 9rem;
-  position: fixed;
   display: flex;
-  left: 5.2rem;
+  left: 2rem;
   width: 5rem;
   background-color: #404040;
   display: none;
-  z-index: 999;
+  z-index: 9999;
 }
 
 .gem-task{
@@ -144,6 +144,7 @@
   margin: 1px;
   padding-left: 5px;
   display: block;
+  font-size: 12px;
 }
 
 .gem-task:hover{
