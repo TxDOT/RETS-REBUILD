@@ -45,8 +45,10 @@ async function signIn(){
          appConstants[layer.prop].push({"name" : x.name, "value": x.code})
       })
     })
+    ///////////////INSERT HERE/////////////////////////////////
     appConstants.districtDomainValues.sort((a,b) => a.name.localeCompare(b.name))
     appConstants.userRoles.sort((a,b) => a.name.localeCompare(b.name))
+    console.log(appConstants.defaultUserValue)
 
     getDistinctAttributeValues('ACTV')
     getRetsLayerView()
@@ -67,7 +69,7 @@ function alreadySignedIn(){
 const setDefExpRets = async (userId) => {
   if(appConstants.defaultUserValue.length) return
   const userOBJECTID = await getUserOBJECTID(userId)
-  appConstants.defaultUserValue.push({"name": "Username", "value": `${userId}`, "objectid" : userOBJECTID.OBJECTID, "webhook" : userOBJECTID.WEBHOOK, "email" : userOBJECTID.EMAIL, "filters" : userOBJECTID.FILTERS})
+  appConstants.defaultUserValue.push({"name": "Username", "value": `${userId}`, "objectid" : userOBJECTID.OBJECTID, "webhook" : userOBJECTID.WEBHOOK, "email" : userOBJECTID.EMAIL, "filters" : userOBJECTID.FILTERS, "settings" : userOBJECTID.SETTINGS})
   if (userOBJECTID.FILTERS === null){
     retsLayer.definitionExpression = store.savedFilter = appConstants['defaultQuery'](userId)
     store.USER = [appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value)]

@@ -510,11 +510,11 @@ export default{
   height: 40px !important;
   width: 40px !important;
 }
-/* .date :deep(.v-date-picker-months__content){
+.date :deep(.v-date-picker-months__content){
     height: 275px;
 }
 .date :deep(.v-date-picker-months){
     overflow: hidden;
-} */
+}
 
 </style>

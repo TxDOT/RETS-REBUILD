@@ -37,7 +37,7 @@
 //import functions
 //import {queryRetsTable} from './utility.js'
 import {view} from './map-Init.js'
-import {home, hoverRetsPoint, discardeditcopy, openDetails, updateRetsObj, removeOutline, removeHighlight, highlightRETSPoint, zoomTo, canceldetailsfunction} from './utility.js'
+import {home, hoverRetsPoint, discardeditcopy, openDetails, updateRetsObj, removeOutline, removeHighlight, highlightRETSPoint, zoomTo, canceldetailsfunction, setBasemap} from './utility.js'
 import {store} from './store.js'
 
 // import ShowChanges from './showChanges.vue'
@@ -55,6 +55,7 @@ export default{
             //1.Check to see if user is signed in. If not sign them in without using the popup
             //2. If user is signed in, get username and set retLayer definition and load map
             view.container = this.$el
+            setBasemap();
             home();
             hoverRetsPoint();
 
@@ -72,6 +73,8 @@ export default{
                     store.isDetailsPage = true
                     store.activityBanner = `${store.openAfterDiscardRets.attributes.RETS_ID}`
                     //outlineFeedCards()
+                    let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
+                    updateRetsObj(findItem, archiveRets)
                     zoomTo(store.openAfterDiscardRets.geometry)
                     store.cancelpopup = false
                     store.isSaveBtnDisable = true
@@ -89,6 +92,9 @@ export default{
             }
             if (store.clickStatus && store.clickeventresult === "TPP RETS"){
                 const retsPt = Array.from(store.roadHighlightObj)[0]
+                const archiveRets = JSON.parse(store.archiveRetsDataString)
+                let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
+                updateRetsObj(findItem, archiveRets)
                 removeHighlight(store.openAfterDiscardRets)
                 openDetails(retsPt)
                 store.isCard = false
@@ -114,7 +120,7 @@ export default{
             if(store.isDetailsPage){
                 store.cancelpopup = false;
                 return
-            }
+            } 
             if(!store.isSaveBtnDisable || (store.retsObj.attributes.GIS_ANALYST === null || store.retsObj.attributes.GRID_ANALYST === null || store.retsObj.attributes.DIST_ANALYST === null|| store.retsObj.attributes.DIST_NM === null || store.retsObj.attributes.CNTY_NM === null)){
                 removeOutline()
                 removeHighlight("a", true)

@@ -33,78 +33,84 @@
     </v-navigation-drawer>
     <v-card id="basemaptoggle" max-width="400" hover @mouseleave="mouseleavebasemap" v-if = "basemapcard" >
        
-        <v-card-item >
-            <v-btn @click="toggledarkgrey" flat>
+        <v-card-item  style="height: 50px;">
+            <v-btn @click="toggledarkgrey(); basemapcard = false" flat density="compact" style="height: 100%;">
                 <v-card-title id="basemapfont" > Dark Grey </v-card-title>
             </v-btn>
         </v-card-item>
-        <v-card-item>
-            <v-btn @click="togglelightgrey" flat>
+        <v-card-item style="height: 45px;">
+            <v-btn @click="togglelightgrey(); basemapcard = false" flat density="compact" style="height: 100%;">
                 <v-card-title id="basemapfont"> Light Grey </v-card-title>
             </v-btn>
         </v-card-item>
-        <v-card-item >
-            <v-btn @click="togglestandard" flat>
+        <v-card-item style="height: 45px;">
+            <v-btn @click="togglestandard(); basemapcard = false" flat density="compact" style="height: 100%;">
                 <v-card-title id="basemapfont"> Standard TxDOT </v-card-title>
             </v-btn>
         </v-card-item>
-        <v-card-item >
-            <v-btn @click="toggleimagery" flat>
-                <v-card-title id="basemapfont"> Imagery </v-card-title>
+        <v-card-item style="height: 45px;">
+            <v-btn @click="toggleosm(); basemapcard = false" flat density="compact" style="height: 100%;">
+                <v-card-title id="basemapfont"> OSM </v-card-title>
             </v-btn>
         </v-card-item>
-        <v-card-item >
-            <v-btn @click="togglehybrid" flat>
-                <v-card-title id="basemapfont"> Hybrid </v-card-title>
-            </v-btn>
-        </v-card-item>
-        <v-card-item >
-            <v-btn @click="togglegoogle" flat>
+        <v-card-item style="height: 45px;">
+            <v-btn @click="togglegoogle(); basemapcard = false" flat density="compact" style="height: 100%;">
                 <v-card-title id="basemapfont"> Google </v-card-title>
             </v-btn>
         </v-card-item>
-        <v-card-item >
-            <v-btn @click="toggleosm" flat>
-                <v-card-title id="basemapfont"> OSM </v-card-title>
+        <v-card-item style="height: 45px;">
+            <v-btn @click="togglehybrid(); basemapcard = false" flat density="compact" style="height: 100%;">
+                <v-card-title id="basemapfont"> Hybrid </v-card-title>
+            </v-btn>
+        </v-card-item>
+        <v-card-item style="height: 45px;">
+            <v-btn @click="toggleimagery(); basemapcard = false" flat density="compact" style="height: 100%;">
+                <v-card-title id="basemapfont"> Imagery </v-card-title>
             </v-btn>
         </v-card-item>
     </v-card>
     <v-card id="jumptotoggle" max-width="400" hover @mouseleave="mouseleavejumpto" v-if = "jumptocard" >
        
-       <v-card-item >
-           <v-btn @click="handleJumpToToolGoogle()">
+       <v-card-item style="height: 45px;">
+           <v-btn @click="handleJumpToToolGoogle()" density="compact" style="height: 100%;">
                <v-card-title id="jumptofont" > Jump to Google </v-card-title>
            </v-btn>
        </v-card-item>
-       <v-card-item>
-           <v-btn @click="handleJumpToToolSPM()">
+       <v-card-item style="height: 45px;">
+           <v-btn @click="handleJumpToToolSPM()" density="compact" style="height: 100%;">
                <v-card-title id="jumptofont"> Jump to SPM </v-card-title>
            </v-btn>
        </v-card-item>
 
    </v-card>
-   <v-card id = "containersettings" height = "585" v-if = "settingsstatus">
+   <v-card id = "containersettings" height = "615" v-show = "settingsstatus">
     <v-card-item>
         <span class="banner-txt">Settings</span>
-        <!-- &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
-        <span id='releaseNotes' :style="{color: releaseNotesColor, fontSize: '13px'}" @mouseover="releaseNotesColor = 'white'" @mouseleave="releaseNotesColor = '#D9D9D9'" @click="isReleaseNotes = true">Version 2.1.7</span> -->
+        &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+        <span id='releaseNotes' :style="{color: releaseNotesColor, fontSize: '13px'}" @mouseover="releaseNotesColor = 'white'" @mouseleave="releaseNotesColor = '#D9D9D9'" @click="isReleaseNotes = true">Version 2.1.7</span>
     </v-card-item>
         <hr id = "separator"/>
-        <v-card-item id = "darkmodeitem" >
+        <!-- <v-card-item id = "darkmodeitem" >
             <div id = "darkmodeswitch">
                 <v-switch  v-model="switchValueDark" label="Dark Mode" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn" disabled></v-switch>
             </div>
             
-        </v-card-item>
-        <!-- <v-card-item id = "autozoomitem" >
-            <div id = "darkmodeswitch">
-                <v-switch  label="Automatically zoom when I change filters" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn" v-model="testVal"></v-switch>
-            </div>
-            
         </v-card-item> -->
+        <v-card-item class = "topSettings" >
+            <div style="height: 40px;">
+                <v-switch :value="isAutoZoomTemp"   class="autozoom-switch" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn(isAutoZoomTemp)" density="compact" >
+                    <template #prepend >
+                        <v-label>
+                            Automatically zoom when I change filters
+                        </v-label>
+                    </template>
+                </v-switch>
+            </div>
+                <v-label style="font-size: 10px; color: #D9D9D9; margin-left: 10px;">Display selected basemap on load</v-label>
+                <v-select style="width: 22rem; margin-left: 10px; margin: top 0; margin-bottom: 0;" class="basemap-select" variant="underlined" density="compact" v-model=defaultBasemapItem :items=basemapArray></v-select>
+        </v-card-item>
         <hr id = "separator" />
-            <v-btn @click ="activateFeedback()" color="#4472C4" rounded  style="position: absolute; right: 25px; top: 96px;">
-                <!-- 140px -->
+            <v-btn @click ="activateFeedback()" color="#4472C4" rounded  style="position: absolute; right: 25px; top: 172px; z-index: 99999;">
                 <span style="font-weight: 100;">Feedback</span>
             </v-btn>
         <v-card-item id = "notificationsitems" >
@@ -114,7 +120,13 @@
                 Send notifications for: <br>
                 <div id="notiswitches">
                     <v-card-item v-for="(item, index) in switches" :key="index" :id="'switch-container-' + index" class="switch-item">
-                        <v-switch  v-model="item.value" :label="item.label" color="primary" :style="switchStyle(item.fontColor)" @change="switchTurnedOn(index)" disabled></v-switch>
+                        <v-switch v-model="item.value" color="primary" :style="switchStyle(item.fontColor)" @change="switchTurnedOn(index)" disabled>
+                            <template #prepend >
+                                <v-label >
+                                    {{ item.label }}
+                                </v-label>
+                            </template>
+                        </v-switch>
                     </v-card-item>
                 </div>
                 
@@ -129,8 +141,8 @@
             <div style="width: 100%; position: relative; height: 100%;">
                 <div style="width: 100%; position: relative;">
                     <v-btn variant="plain" size="small" class="secondary-button"  prepend-icon="mdi-power" @click="logoutMethod()" >LOGOUT</v-btn>
-                    <v-btn style="float: right;" variant="outlined" size="small" class="main-button-style" @click=" handleactiveclass();">save</v-btn>
-                    <v-btn style="float: right;" variant="plain" size="small" class="secondary-button"  @click="handleactiveclass();">CANCEL</v-btn>
+                    <v-btn style="float: right;" variant="outlined" size="small" class="main-button-style" @click=" handleactiveclass(); saveSettings()">save</v-btn>
+                    <v-btn style="float: right;" variant="plain" size="small" class="secondary-button"  @click="handleactiveclass(); cancelSettings()">CANCEL</v-btn>
                     
                     
                 </div>
@@ -165,35 +177,78 @@
             <v-btn style="float: right;" variant="plain" size="small" class="secondary-button" @click="cancelFeedback" >CANCEL</v-btn>
         </div>
     </v-card>
-    <!-- <v-card id="releasenotesSection" v-if="isReleaseNotes" height="585" width="400" style="border-radius: 0;">
+    <v-card id="releasenotesSection" v-if="isReleaseNotes" height="630" width="400" style="border-radius: 0;">
         <v-card-title style="font-weight: 400;">Release Notes</v-card-title>
         <hr id = "separator"  />
-        <div style="height: 479px; width: 370px; margin: auto; left: 0; right: 0; ">
-            <ul style="padding-left: 30px !important; padding-top: 8px; line-height: 30px;">
-                 ADD RELEASE NOTES HERE 
-                <li>Update 1</li>
-                <li>Update 2 example</li>
-                <li>Update 3 example</li>
-                <li>Update 4 example</li>
-                <li>Update 5 example</li>
-
-
-            </ul>
-
+        <div style="height: 525px; width: 370px; margin: auto; left: 0; right: 0; overflow-y: auto; ">
+         
+            <v-list v-model:opened="openedVlist">
+  <!-- New Updates Section -->
+  <v-list-group value="New Updates" class="release-notes">
+    <template v-slot:activator="{ props }">
+      <v-list-item 
+        v-bind="props" 
+        :key="0" 
+        :title="latestReleaseNotes[0][0]">
+      </v-list-item>
+    </template>
+    
+    <!-- Bulleted Items -->
+    <v-list-item 
+      v-for="(value, i) in latestReleaseNotes[0].slice(1)" 
+      :key="`latest-item-${i}`" 
+      class="wrap-text"
+      :disabled="true" >
+      <div style="border-width: 2px;">
+        <v-list-item-title class="bullet-item">
+          <v-icon small class="mr-2">mdi-circle-small</v-icon> <!-- Bullet -->
+          {{ value }}
+        </v-list-item-title>
+    </div>
+    </v-list-item>
+  </v-list-group>
+  
+  <!-- Previous Release Notes Section -->
+  <template v-for="([version, ...changelog], i) in previousReleaseNotes" :key="i">
+    <v-list-group class="release-notes" v-model="expandedGroups[i]">
+      <template v-slot:activator="{ props }">
+        <v-list-item 
+          v-bind="props" 
+          :title="version" 
+          class="wrap-text"
+          >
+        </v-list-item>
+      </template>
+      
+      <!-- Bulleted Items -->
+      <v-list-item 
+        v-for="(log, j) in changelog" 
+        :key="j" 
+        class="wrap-text"
+        :disabled="true" >
+          <v-list-item-title class="bullet-item">
+            <v-icon small class="mr-2">mdi-circle-small</v-icon> <!-- Bullet -->
+            {{ log }}
+          </v-list-item-title>
+      </v-list-item>
+    </v-list-group>
+  </template>
+</v-list>      
         </div>
-        <hr id = "separator" style="margin-bottom: 15px;" />
+        <hr id = "separator" style="margin-bottom: 13px;" />
         <v-btn  style="float: right; margin-top: 0; margin-right: 20px;" variant="outlined" size="small" class="main-button-style" @click="isReleaseNotes = false">CLOSE</v-btn>
 
 
-    </v-card> -->
+    </v-card>
 </template>
 
 <script>
 
     import { appConstants } from '../common/constant.js';
     import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass, roadwaysRenderer, TxDOTRoadways, hybridBasemap, retsLayer} from '../components/map-Init.js';
-    import { createtool, selecttool, togglemenu, logoutUser, outlineFeedCards, retsLayerView } from '../components/utility.js';
+    import { createtool, selecttool, togglemenu, logoutUser, outlineFeedCards, retsLayerView, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM } from '../components/utility.js';
     import { vuetify } from '../main.js';
+import { addSettings } from './crud.js';
     import { store } from './store';
     import { defineAsyncComponent } from 'vue'
 
@@ -206,15 +261,24 @@
         data(){
             return{
                 toggle: store.toggleFeed,
+                openedVlist: ['New Updates'],
+                isNewReleaseOpen: true,
+                expandedIndex: null,
+                expandedGroups: [],
                 isReleaseNotes: false,
+                defaultBasemap: null,
+                defaultBasemapItem: JSON.parse(appConstants.defaultUserValue[0].settings).basemap,
+                mountedAutoZoom: null,
                 selectfunction : {},
                 store,
+                basemapArray: ['Dark Grey', 'Light Grey', 'Standard TxDOT', 'Open Street Map', 'Hybrid', 'Google', 'Imagery'],
                 shiftmap: false,
                 fontColor: '#D9D9D9',
                 releaseNotesColor: '#D9D9D9',
                 switchValueDark: true,
                 switchValue : false,
-                testVal: true,
+                isAutoZoom: null,
+                isAutoZoomTemp:  true ,
                 isActOpen: true,
                 shift: 200,
                 basemapcard: false,
@@ -231,8 +295,47 @@
                 feedbackText: "",
                 feedbackSubmitStatus: true,
                 feedbackName: "",
+                latestReleaseNotes: [
+                    [
+                        'Latest Release Version 2.1.7',
+                        'User Story 96: Version and Release Notes',
+                        'User Story 157: RETS Labels turn on sooner',
+                        'User Story 193: Add option to disable automatic zoom',
+                        'User Story 204: Add setting to change the default basemap on load',
+                        'User Story 212: Move legend icon down and basemap button up', 
+                        'Bug 229: Date Filter overlaps with buttons'
+                    ]
+                ],
+                previousReleaseNotes: [
+                ['Release 9.9.9',
+                 'User Story 83: Imagery/Roadway Hyrbrid Basemap',
+                 'User Story 169: Add ability to double-click to open a RETS point from the map pane', 
+                 'User Story 185: Expand search on Activity Feed to search all history items, especially comments',
+                 'User Story 188: Add a feedback option to the Settings menu for users to send idea',
+                 'User Story 199: Add RETS number to browser tab Title Bar text',
+                 'User Story 200: Add attachment icon to Activity Feed cards',
+                 'User Story 9: Filters: styling updates',
+                 'User Story 10: Job Detail Pane: Update 2',
+                 "Bug 122: Search isn't respected after opening a card then closing it",
+                 'Bug 6: Save issues when changing District Analyst',
+                 'Bug 11: Messages for field change triggers incorrect',
+                 'Bug 12: Remove counter from Details Pane header',
+                 'Bug 217: Description field validation missing when adding a new point',
+                 'Bug 220: New, Proposed check box in wrong place'
+
+
+                ],
+                ['Release 9.9.9', 'Changelog Here', 'CHangelog update 2', 'Cchange 3'],
+                ['Release 9.9.9', 'Changelog Here', 'CHangelog update 2', 'Cchange 3'],
+                ['Release 9.9.9', 'Changelog Here', 'CHangelog update 2', 'Cchange 3'],
+
+                    ['Release 9.9.9', 'Changelog Here', 'CHangelog update 2', 'Cchange 3'],
+                    ['Release 1.2.4', 'update 1'],
+                    ['Release 1.2.3', 'Old Change log here', 'Update 2'],
+                    
+                ],
                 switches: [
-                            { label: "RETS I Create", value: false, fontColor: "#D9D9D9" },
+                            { label: "RETS I Create", value: true, fontColor: "#D9D9D9" },
                             { label: "RETS I'm tagged in", value: false, fontColor: "#D9D9D9" },
                             { label: "High Priority RETS", value: false, fontColor: "#D9D9D9" },
                             { label: "RETS assigned to me that have been inactive for 30 days", value: false, fontColor: "#D9D9D9" },
@@ -270,20 +373,7 @@
                                     store.isDetailsPage = false
                                     this.toggle = 1
                                     store.toggleFeed = 1
-                                    store.activityBanner = "Activity Feed "
-                                    store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
-                                    view.whenLayerView(retsLayer).then((retsLayerView) => {
-                                        if (retsLayerView._highlightIds && retsLayerView._highlightIds.size > 0){
-                                            setTimeout(() => {
-                                                const elementId = String(store.retsObj.attributes.RETS_ID).concat('-', store.retsObj.attributes.OBJECTID);
-                                                const element = document.getElementById(elementId);
-                                                if (element) {
-                                                    element.classList.add('highlight-card');
-                                                } 
 
-                                            }, 800);
-                                        }
-                                    })
                                     
                                 },
                                 disabled: false
@@ -301,27 +391,25 @@
                                     store.isCard = false
                                     this.toggle = 2
                                     store.toggleFeed = 2
-                                    store.activityBanner = store.retsObj.attributes.RETS_ID
                                 },
                                 disabled: true
                                }
                             ],
  
                 retsToolsBottom: [
-                               {title:"Select", icon: 'mdi-select-multiple', color: "#D9D9D9", name: "Multi-Select", isActive: false,
-                               action: () =>{
-                                store.isSelectEnabled = !store.isSelectEnabled
-                                this.retsToolsBottom[0].isActive = !this.retsToolsBottom[0].isActive
-                                this.handleSelectTool();
+                               
+                                {title:"Basemap", icon: 'mdi-map-legend', color: "#D9D9D9", name: "Basemaps", isActive: false,
+                               action: () => {
+                                return
                                },
-                               setActive: () => {
-                                return true
-                               },
-                               hover:(i) => 
-                                    {
-                                        this.basemapcard = false;
-                                        this.jumptocard= false;
+                                hover:(i) => { 
+                                    if (i === "Basemap")
+                                        {
+                                            this.jumptocard = false;
+                                            this.basemapcard = true
+                                        }
                                     }
+                                
                                 },
                                {title:"JumpTo", icon: 'mdi-run', color: "#D9D9D9", name: "Jump To", isActive: false,
                                action: () =>{
@@ -336,24 +424,26 @@
                                             }
                                     }
                                 },
-                               {title:"Basemap", icon: 'mdi-map-legend', color: "#D9D9D9", name: "Basemaps", isActive: false,
-                               action: () => {
-                                return
+                                {title:"Select", icon: 'mdi-select-multiple', color: "#D9D9D9", name: "Multi-Select", isActive: false,
+                               action: () =>{
+                                store.isSelectEnabled = !store.isSelectEnabled
+                                this.retsToolsBottom[0].isActive = !this.retsToolsBottom[0].isActive
+                                this.handleSelectTool();
                                },
-                                hover:(i) => { 
-                                    if (i === "Basemap")
-                                        {
-                                            this.jumptocard = false;
-                                            this.basemapcard = true
-                                        }
+                               setActive: () => {
+                                return true
+                               },
+                               hover:(i) => 
+                                    {
+                                        this.basemapcard = false;
+                                        this.jumptocard= false;
                                     }
-                                
                                 },
                                {
                                 title:"Legend", icon: 'mdi-format-list-bulleted-type', color: "white", name: "Legend", 
                                action: () =>{
                                 this.handleLegendTool();
-                                this.retsToolsBottom[2].isActive = !this.retsToolsBottom[2].isActive
+                                this.retsToolsBottom[3].isActive = !this.retsToolsBottom[3].isActive
                                },
                                hover:() => 
                                     {
@@ -365,6 +455,7 @@
                                {title:"Settings", icon: 'mdi-cog', color: "#D9D9D9", name: "Settings",
                                action: () =>{
                                 this.handleSettingsTool();
+                                this.cancelSettings()
                                 this.retsToolsBottom[4].isActive = !this.retsToolsBottom[4].isActive
                                },
                                hover:(i) => 
@@ -382,7 +473,12 @@
         },
         
                 computed:{
+                    
 
+                },
+                created() { 
+                    this.expandedGroups = this.previousReleaseNotes.map(() => false); 
+                    // this.isAutoZoomTemp = JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom
                 },
                 watch: {
                    'store.toggleFeed':{
@@ -393,7 +489,7 @@
                    },
                    'store.activityBanner':{
                     handler: function(){
-                        if(store.activityBanner !== "Activity Feed" ){
+                        if(store.activityBanner !== "Activity Feed"){
                             this.retsToolsTop[2].disabled = false
                             return
                         }
@@ -420,24 +516,33 @@
                         }
                     }
                    },
-                //    'testVal':{
-                //     handler: function(){
-                //         localStorage.setItem('testVal',this.testVal)
-                //         console.log(this.testVal)
-
-                //     }
-                //    }
                 },
                 mounted() {
-                    // if (localStorage.getItem('testVal')){
-                    //     console.log(localStorage.getItem('testVal'))
-                    //     this.testVal = localStorage.getItem('testVal') === 'true';
-                    //     console.log(this.testVal)
-                    // }
+                    console.log(JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom)
+                    //this.isAutoZoomTemp = true
+                    // this.toggleswitch()
 
                 },
                 
                 methods: {
+                    toggleswitch(){
+                        this.isAutoZoomTemp = false
+                    },
+                    toggleGroup(index) { this.$set(this.expandedGroups, index, !this.expandedGroups[index])},
+                    saveSettings(){
+                        store.settings = {
+                            autoZoom : this.isAutoZoomTemp,
+                            basemap: this.defaultBasemapItem
+                        } 
+                        this.isAutoZoom = this.isAutoZoomTemp
+                        console.log(this.isAutoZoomTemp)
+                        console.log(this.isAutoZoom)
+                        const settingsObject = {attributes: {OBJECTID : appConstants.defaultUserValue[0].objectid, SETTINGS : JSON.stringify(store.settings)}}
+                        addSettings(settingsObject)
+                    },
+                    cancelSettings(){
+                        this.isAutoZoomTemp = this.isAutoZoom != null && JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom != null ? JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom : true
+                    },
                     shiftDiv(){
                         const viewSurface = document.querySelector('.esri-view');
                         viewSurface.classList.toggle('translateX-500px');
@@ -449,7 +554,8 @@
                         
 
                     },
-                    newSwitchTurnedOn() {
+                    newSwitchTurnedOn(event) {
+                        console.log(event)
                         if (this.switchValue) {
                             this.fontColor = '#FFFFFF';
                             
@@ -556,70 +662,26 @@
 
                      },
                     toggledarkgrey(){
-                        map.basemap = darkVTBasemap;
-                        this.basemapcard = false;
-                        retsLabelclass.symbol.color = "white"
-                        retsLabelclass.symbol.haloSize = 0
-                        TxDOTRoadways.labelsVisible = false
-                        TxDOTRoadways.renderer.symbol.width = 0
-                        this.basemapcard = false;
-
+                       applyDarkGrey()
                     },
                     togglelightgrey(){
-                        map.basemap = lightVTBasemap
-                        lightVTBasemap.visible = true
-                        this.basemapcard = false;
-                        retsLabelclass.symbol.color = "black"                        
-                        retsLabelclass.symbol.haloSize = 0
-                        TxDOTRoadways.labelsVisible = false,
-                        TxDOTRoadways.renderer.symbol.width = 0
-                        this.basemapcard = false;
-
-
+                       applyLightGrey()
                     },
                     togglestandard(){
-                        map.basemap = standardVTBasemap;
-                        this.basemapcard = false;
-                        retsLabelclass.symbol.color = "black"
-                        retsLabelclass.symbol.haloSize = 0
-                        TxDOTRoadways.labelsVisible = false,
-                        TxDOTRoadways.renderer.symbol.width = 0
-                        this.basemapcard = false;
+                        applyStandard()
 
                     },  
                     toggleimagery(){
-                        map.basemap = imageryBasemap;
-                        retsLabelclass.symbol.color = "black"
-                        retsLabelclass.symbol.haloColor = "gray"
-                        retsLabelclass.symbol.haloSize = 1
-                        TxDOTRoadways.labelsVisible = false,
-                        TxDOTRoadways.renderer.symbol.width = 0
-                        this.basemapcard = false;
+                        applyImagery()
                     },
                     togglehybrid(){
-                        map.basemap = hybridBasemap;
-                        retsLabelclass.symbol.color = "black"
-                        retsLabelclass.symbol.haloColor = "gray"
-                        retsLabelclass.symbol.haloSize = 1
-                        TxDOTRoadways.labelsVisible = true,
-                        TxDOTRoadways.renderer.symbol.width = 8
-                        this.basemapcard = false;
+                        applyHybrid()
                     },
                     togglegoogle(){
-                        map.basemap = googleVTBasemap;
-                        retsLabelclass.symbol.color = "black"
-                        retsLabelclass.symbol.haloSize = 0
-                        TxDOTRoadways.labelsVisible = false,
-                        TxDOTRoadways.renderer.symbol.width = 0
-                        this.basemapcard = false;
+                        applyGoogle()
                     },
                     toggleosm(){
-                        map.basemap = OSMVTBasemap;
-                        retsLabelclass.symbol.color = "black"
-                        retsLabelclass.symbol.haloSize = 0
-                        TxDOTRoadways.labelsVisible = false,
-                        TxDOTRoadways.renderer.symbol.width = 0
-                        this.basemapcard = false;
+                        applyOSM()
                     },
 
                     toggledarkmode(){
@@ -733,9 +795,9 @@
     }
     #basemaptoggle{
         position: absolute;
-        width: 165px;
+        width: 158px;
         height: 330px;
-        bottom: 5%;
+        bottom: 18.3%;
         left: 38px;
         z-index: 9999;
         border-radius: 0px;
@@ -747,8 +809,8 @@
     #jumptotoggle{
         position: absolute;
         width: 165px;
-        height: 120px;
-        bottom: 15.5%;
+        height: 90px;
+        bottom: 14%;
         left: 38px;
         z-index: 9999;
         border-radius: 0px;
@@ -771,7 +833,7 @@
         left: 0;;
         right: 0;
         width: 400px;
-        z-index: 9999;
+        z-index: 999;
         border-radius: 0px;
     }
     #settingsheader{
@@ -801,14 +863,15 @@
         height: 4rem;
         
     }
-    /* #autozoomitem{
-        position: relative;
-        bottom: 2px;
-        left: 25px;
+    #topSettings{
         font-size: 20px;
-        height: 4rem;
-        margin-top: -20px !important;
-    } */
+        width: 23rem;
+        right: 0;
+        left: 0;
+        margin: auto;
+        border: solid red;
+        border-width: 2px;
+    }
     .font-class{
         color: aqua !important;
     }
@@ -960,7 +1023,47 @@
         right: 0;
         top: 0;
         bottom: 0;
-        z-index: 9999;
+        z-index: 99999;
     }
+    .switch-item .v-input__control{
+        justify-self: end;
+        margin-right: 16.5px;
+    }
+    .topSettings .autozoom-switch .v-input__control{
+
+        justify-self: end;
+        margin-right: 5.5px;
+    }
+    .basemap-seelct{
+        z-index: 1;
+    }
+
+    .wrap-text .v-list-item-title {
+        white-space: normal; 
+        overflow: visible;
+        line-height: 1.5;
+        
+        
+    }
+
+    .release-notes .v-list-group__items{
+        background-color: #252525;
+        margin-left: -20px;
+        
+        
+    }
+    .release-notes .v-list-group__items .v-list-item{
+        height: auto;
+        max-height: 10000px !important;
+
+    }
+    .bullet-item{
+        display: flex;
+        align-items: left;
+        
+    }
+
+    
+   
     
 </style>

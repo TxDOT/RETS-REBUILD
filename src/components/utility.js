@@ -1,5 +1,13 @@
 import {view, retsLayer, homeWidget, retsGraphicLayer, TxDOTRoadways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate, 
-        retsPointRenderer, texasExtent, retsPointRendererout, retsRole, highlightLayer, map, retsPointRendererout2} from './map-Init'
+        retsPointRenderer, texasExtent, retsPointRendererout, retsRole, highlightLayer, map, retsPointRendererout2,
+        retsLabelclass,
+        darkVTBasemap,
+        standardVTBasemap,
+        imageryBasemap,
+        hybridBasemap,
+        googleVTBasemap,
+        OSMVTBasemap,
+        lightVTBasemap} from './map-Init'
 import Query from "@arcgis/core/rest/support/Query.js";
 import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant.js";
@@ -103,23 +111,29 @@ export function clickRetsPoint(){
                 }
                 else{
                     highlightLayer.removeAll()
+                    //if clicking on empty space, remove all highlights and return to activity feed
                     if(!evt.results.length){
                         if (!store.isSaveBtnDisable){
                             store.cancelpopup = true
                             return
                         }
+                        store.activityBanner = "Activity Feed"
                         removeOutline()
                         removeHighlight("a", true)
                         clearRoadHighlightObj()
                         store.isDetailsPage ? canceldetailsfunction() : null
                         return
                     }
+
+                    //track if roadway has been clicked so that cancel popup doesnt show if its been clicked
                     if (evt.results[0].layer.title === "TxDOT Roadways"){
                         store.layerName = "TxDOT Roadways"
                     }
                     else{
                         store.layerName = ""
                     }
+                    ///////
+                    //adds the popup for the roads
                     if (evt.results.length >=1 && evt.results[0].layer.title === "TxDOT Roadways"){
                         if (evt.results.length === 1){
                             view.openPopup({
@@ -128,6 +142,7 @@ export function clickRetsPoint(){
                             });
                         }
                     }
+                    //ensure that the purple highglight does not apply to other basemaps other than the hybrid
                     if (evt.results[0].layer.title ==="TxDOT Roadways" && map.basemap.title != "Hybrid"){
                         highlightLayer.add({
                             geometry: evt.results[0].graphic.geometry,
@@ -312,7 +327,7 @@ export function getGEMTasks(){
 }
 
 //filter Map and activity feed 
-export async function filterMapActivityFeed(filterOpt){
+export async function filterMapActivityFeed(filterOpt,val){
         let GIS_ANALYST = []
         let GRID_ANALYST = []
         let DIST_ANALYST = []
@@ -432,6 +447,9 @@ export async function filterMapActivityFeed(filterOpt){
                     view.goTo(texasExtent)
                     return
                 }
+                if (!JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom && val) {
+                    return
+                }//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 view.goTo(resp.extent)
             })
             return newFilter
@@ -1628,4 +1646,90 @@ export function setFilterProperties(userFilterObject){
     
 
 
+}
+
+export function setBasemap(){
+ const defaultbasemap = JSON.parse(appConstants.defaultUserValue[0].settings).basemap
+ if (defaultbasemap == null || defaultbasemap == "Dark Grey"){
+    applyDarkGrey()
+ }
+ else if (defaultbasemap == "Light Grey"){
+    applyLightGrey()
+ }
+ else if (defaultbasemap == "Standard TxDOT"){
+    applyStandard()
+ }
+ else if (defaultbasemap == "Open Street Map"){
+    applyOSM()
+ }
+ else if (defaultbasemap == "Hybrid"){
+    applyHybrid()
+ }
+ else if (defaultbasemap == "Google"){
+    applyGoogle()
+ }
+ else if (defaultbasemap == "Imagery"){
+    applyImagery()
+ }
+
+}
+
+export function applyDarkGrey(){
+    map.basemap = darkVTBasemap;
+    retsLabelclass.symbol.color = "white"
+    retsLabelclass.symbol.haloSize = 0
+    TxDOTRoadways.labelsVisible = false
+    TxDOTRoadways.renderer.symbol.width = 0
+}
+export function applyLightGrey(){
+    map.basemap = lightVTBasemap
+    retsLabelclass.symbol.color = "black"                        
+    retsLabelclass.symbol.haloSize = 0
+    TxDOTRoadways.labelsVisible = false,
+    TxDOTRoadways.renderer.symbol.width = 0
+
+
+}
+
+export function applyStandard(){
+    map.basemap = standardVTBasemap;
+    retsLabelclass.symbol.color = "black"
+    retsLabelclass.symbol.haloSize = 0
+    TxDOTRoadways.labelsVisible = false,
+    TxDOTRoadways.renderer.symbol.width = 0
+
+}
+
+export function applyImagery(){
+    map.basemap = imageryBasemap;
+    retsLabelclass.symbol.color = "black"
+    retsLabelclass.symbol.haloColor = "gray"
+    retsLabelclass.symbol.haloSize = 1
+    TxDOTRoadways.labelsVisible = false,
+    TxDOTRoadways.renderer.symbol.width = 0
+}
+
+export function applyHybrid(){
+    map.basemap = hybridBasemap;
+    retsLabelclass.symbol.color = "black"
+    retsLabelclass.symbol.haloColor = "gray"
+    retsLabelclass.symbol.haloSize = 1
+    TxDOTRoadways.labelsVisible = true,
+    TxDOTRoadways.renderer.symbol.width = 8
+}
+
+export function applyGoogle(){
+    map.basemap = googleVTBasemap;
+    retsLabelclass.symbol.color = "black"
+    retsLabelclass.symbol.haloSize = 0
+    TxDOTRoadways.labelsVisible = false,
+    TxDOTRoadways.renderer.symbol.width = 0
+}
+
+export function applyOSM(){
+    map.basemap = OSMVTBasemap;
+    retsLabelclass.symbol.color = "black"
+    retsLabelclass.symbol.haloSize = 0
+    TxDOTRoadways.labelsVisible = false,
+    TxDOTRoadways.renderer.symbol.width = 0
 }

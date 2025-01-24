@@ -183,6 +183,21 @@ export async function addRETSFilter(customQuery){
     }
 }
 
+export async function addSettings(settingsObject){
+    let esriUpdateGraphic = createGraphic(settingsObject)
+
+    try{
+        await retsRole.applyEdits({
+            updateFeatures: [esriUpdateGraphic]
+        })
+        console.log(`RETSROLE updated`)
+        return
+    }
+    catch(err){
+        console.log(err)
+    }
+}
+
 function sendWebhookEmail(retsNum, gisUser){
     fetch(`https://gis-batch-dev.txdot.gov/fmejobsubmitter/TPP-MB/RETS_Notify_DEV.fmw?Email=${gisUser}&RETSnumber=${retsNum}&opt_showresult=false&opt_servicemode=sync&token=0c12a2e7bd8784956b6b5750f763c0bf1b18323e`)
     .then(res => console.log(res))
