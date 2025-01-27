@@ -205,19 +205,19 @@ export let roadwaysRenderer = {
   type: "simple",
   symbol: {
     type: "simple-line",
-    width: 0,
+    width: 1,
     color: [105,105,105,.6],
   },
-  visualVariables: [
-    {
-      type: "size",
-      valueExpression: "$view.scale",
-      stops: [
-        { size: 8, value: 8499 },
-        { size: 0.01, value: 8500 },
-      ] 
-    }
-  ]
+  // visualVariables: [
+  //   {
+  //     type: "size",
+  //     valueExpression: "$view.scale",
+  //     stops: [
+  //       { size: 8, value: 8499 },
+  //       { size: 0.01, value: 8500 },
+  //     ] 
+  //   }
+  // ]
 }
 
 export const polygonsymbol = {
@@ -311,6 +311,7 @@ export const TxDOTRoadways = new FeatureLayer ({
   // definitionExpression: `RTE_PRFX = 'IH'`,
   popupTemplate: popupTemplateRoadways,
   labelsVisible: false,
+  opacity: 0
 })
 
 export const TxDOTRoadwayscopy = new FeatureLayer ({

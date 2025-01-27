@@ -546,7 +546,6 @@
                         retsLabelclass.symbol.color = "white"
                         retsLabelclass.symbol.haloSize = 0
                         TxDOTRoadways.labelsVisible = false
-                        TxDOTRoadways.renderer.symbol.width = 0
                         this.basemapcard = false;
 
                     },
@@ -557,7 +556,6 @@
                         retsLabelclass.symbol.color = "black"                        
                         retsLabelclass.symbol.haloSize = 0
                         TxDOTRoadways.labelsVisible = false,
-                        TxDOTRoadways.renderer.symbol.width = 0
                         this.basemapcard = false;
 
 
@@ -568,7 +566,6 @@
                         retsLabelclass.symbol.color = "black"
                         retsLabelclass.symbol.haloSize = 0
                         TxDOTRoadways.labelsVisible = false,
-                        TxDOTRoadways.renderer.symbol.width = 0
                         this.basemapcard = false;
 
                     },  
@@ -578,7 +575,6 @@
                         retsLabelclass.symbol.haloColor = "gray"
                         retsLabelclass.symbol.haloSize = 1
                         TxDOTRoadways.labelsVisible = false,
-                        TxDOTRoadways.renderer.symbol.width = 0
                         this.basemapcard = false;
                     },
                     togglehybrid(){
@@ -595,7 +591,6 @@
                         retsLabelclass.symbol.color = "black"
                         retsLabelclass.symbol.haloSize = 0
                         TxDOTRoadways.labelsVisible = false,
-                        TxDOTRoadways.renderer.symbol.width = 0
                         this.basemapcard = false;
                     },
                     toggleosm(){
@@ -603,7 +598,6 @@
                         retsLabelclass.symbol.color = "black"
                         retsLabelclass.symbol.haloSize = 0
                         TxDOTRoadways.labelsVisible = false,
-                        TxDOTRoadways.renderer.symbol.width = 0
                         this.basemapcard = false;
                     },
 
