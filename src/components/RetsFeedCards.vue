@@ -282,7 +282,7 @@ export default{
             this.searchTimer = ""
             this.searchTimer = setTimeout(()=>{
                 const zoomToRETS = rets.geometry
-                highlightRETSPoint(rets.attributes)
+                //highlightRETSPoint(rets.attributes)
                 zoomTo(zoomToRETS)
             },250)
         },

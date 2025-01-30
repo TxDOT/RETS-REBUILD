@@ -117,9 +117,10 @@ export function clickRetsPoint(){
                         store.isDetailsPage ? canceldetailsfunction() : null
                         return
                     }
+                    store.layerName = evt.results[0].layer.title
+
                     if (evt.results[0].layer.title === "TxDOT Roadways"){
                         highlightRoadways(evt.results[0].graphic.attributes)
-                        store.layerName = "TxDOT Roadways"
                         if (evt.results.length === 1){
                             view.openPopup({
                                 fetchFeatures: true,
@@ -129,23 +130,6 @@ export function clickRetsPoint(){
 
                     }
 
-                    // if (evt.results[0].layer.title ==="TxDOT Roadways" && map.basemap.title != "Hybrid"){
-                    //     highlightLayer.add({
-                    //         geometry: evt.results[0].graphic.geometry,
-                    //         symbol: {
-                    //             type: "simple-line",
-                    //             color: "cyan",
-                    //             width: 3
-                    //         }
-                    //     })
-                    //     return
-
-                    // }
-
-                    if (evt.results[0].layer.title){
-                        store.clickeventresult = evt.results[0].layer.title
-    
-                    }
                     const retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
                    
                     if (store.isDetailsPage && store.isSaveBtnDisable && !store.isEmptyRow){
@@ -160,12 +144,10 @@ export function clickRetsPoint(){
                     if (store.isSaveBtnDisable && !store.isEmptyRow){
                         removeOutline()
                         removeHighlight("a", true)
-                        //evt.results.forEach(rest => rest.graphic.layer.title ? highlightRETSPoint(rest.graphic.attributes) : highlightGraphicPt(rest.graphic.attributes))
                         const firstResult = Array.isArray(evt.results) ? evt.results[0] : null;
                         firstResult.graphic.layer.title ? highlightRETSPoint(firstResult.graphic.attributes) : highlightGraphicPt(firstResult.graphic.attributes)
                         outlineFeedCards(evt.results.splice(0,1))
                  
-                        //return evt.results[0].graphic.attributes.RETS_ID;
                     }
                     
                     

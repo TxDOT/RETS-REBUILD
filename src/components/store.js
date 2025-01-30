@@ -23,7 +23,6 @@ export const store = reactive({
         customquery:"",
         currFilter: "",
         lastQuery : "",
-        clickeventresult : "",
         filterItems: [],
         filterquery: "",
         clickevent: "",

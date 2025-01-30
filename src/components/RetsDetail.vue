@@ -342,8 +342,11 @@
                     store.cancelpopup = true
                     return
                 }
-                const archiveRets = JSON.parse(store.archiveRetsDataString)
-                this.replaceArchiveContent(archiveRets)
+                if (store.archiveRetsDataString){
+                    const archiveRets = JSON.parse(store.archiveRetsDataString)
+                    this.replaceArchiveContent(archiveRets)
+                }
+                
                 await this.returnToFeed()
                 retsLayerView.layer.definitionExpression = store.savedFilter
                 store.toggleFeed = 1
