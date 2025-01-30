@@ -19,6 +19,7 @@ export const store = reactive({
                 customQuery: []
 
         },
+        autozoomtest:true,
         layerName : "",
         customquery:"",
         currFilter: "",
@@ -303,7 +304,7 @@ export const store = reactive({
                 }    
         },
         setFilterFeed(){
-                filterMapActivityFeed(this.filter, true)
+                filterMapActivityFeed(this.filter)
                         .then((resp) => {
                                 this.RetsCardStatus = "RETSBOT is working hard to get you those RETS!"
                                 this.roadObj = []

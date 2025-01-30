@@ -440,16 +440,16 @@ export async function filterMapActivityFeed(filterOpt,val){
                 retsLayer.definitionExpression = store.savedFilter = `${newFilter}`
                 res(filterDef)
             })
-
+            if (val || (!store.autozoomtest)){
+                return newFilter
+            }
             retsLayer.queryExtent()
             .then((resp) =>{
                 if(resp.count === 0){
                     view.goTo(texasExtent)
                     return
                 }
-                if (!JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom && val) {
-                    return
-                }//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 view.goTo(resp.extent)
             })
             return newFilter
@@ -459,6 +459,8 @@ export async function filterMapActivityFeed(filterOpt,val){
         }
 
 }
+
+
 
 export const getDomainValues = (fieldName) => retsLayer.getFieldDomain(fieldName)
 
@@ -540,7 +542,7 @@ export function searchCards(cardArr, string, searchParam){
 
 }
 
-export function home(onrender){
+export async function home(onrender){
     if (onrender){
         retsLayer.queryExtent()
         .then((resp) =>{

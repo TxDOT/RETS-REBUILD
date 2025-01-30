@@ -98,7 +98,7 @@
         </v-card-item> -->
         <v-card-item class = "topSettings" >
             <div style="height: 40px;">
-                <v-switch :value="isAutoZoomTemp"   class="autozoom-switch" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn(isAutoZoomTemp)" density="compact" >
+                <v-switch v-model="store.autozoomtest"   class="autozoom-switch" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn()" density="compact" >
                     <template #prepend >
                         <v-label>
                             Automatically zoom when I change filters
@@ -267,7 +267,7 @@ import { addSettings } from './crud.js';
                 expandedGroups: [],
                 isReleaseNotes: false,
                 defaultBasemap: null,
-                defaultBasemapItem: JSON.parse(appConstants.defaultUserValue[0].settings).basemap,
+                defaultBasemapItem: JSON.parse(appConstants.defaultUserValue[0].settings).basemap == null ? 'Dark Grey' : JSON.parse(appConstants.defaultUserValue[0].settings).basemap ,
                 mountedAutoZoom: null,
                 selectfunction : {},
                 store,
@@ -278,7 +278,7 @@ import { addSettings } from './crud.js';
                 switchValueDark: true,
                 switchValue : false,
                 isAutoZoom: null,
-                isAutoZoomTemp:  true ,
+                currAutoZoomValue: null,
                 isActOpen: true,
                 shift: 200,
                 basemapcard: false,
@@ -455,7 +455,6 @@ import { addSettings } from './crud.js';
                                {title:"Settings", icon: 'mdi-cog', color: "#D9D9D9", name: "Settings",
                                action: () =>{
                                 this.handleSettingsTool();
-                                this.cancelSettings()
                                 this.retsToolsBottom[4].isActive = !this.retsToolsBottom[4].isActive
                                },
                                hover:(i) => 
@@ -478,7 +477,6 @@ import { addSettings } from './crud.js';
                 },
                 created() { 
                     this.expandedGroups = this.previousReleaseNotes.map(() => false); 
-                    // this.isAutoZoomTemp = JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom
                 },
                 watch: {
                    'store.toggleFeed':{
@@ -518,30 +516,45 @@ import { addSettings } from './crud.js';
                    },
                 },
                 mounted() {
-                    console.log(JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom)
-                    //this.isAutoZoomTemp = true
-                    // this.toggleswitch()
+                    this.setAutozoomSwitch()
 
                 },
                 
                 methods: {
-                    toggleswitch(){
-                        this.isAutoZoomTemp = false
-                    },
                     toggleGroup(index) { this.$set(this.expandedGroups, index, !this.expandedGroups[index])},
-                    saveSettings(){
+                    setAutozoomSwitch(){
+                        if (JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom == null){
+                            store.autozoomtest = true
+                            
+                        }
+                        else{
+                            store.autozoomtest = JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom
+                        }
+                    },
+                    async saveSettings(){
                         store.settings = {
-                            autoZoom : this.isAutoZoomTemp,
+                            autoZoom : store.autozoomtest,
                             basemap: this.defaultBasemapItem
                         } 
-                        this.isAutoZoom = this.isAutoZoomTemp
-                        console.log(this.isAutoZoomTemp)
-                        console.log(this.isAutoZoom)
+                        this.isAutoZoom = store.autozoomtest
                         const settingsObject = {attributes: {OBJECTID : appConstants.defaultUserValue[0].objectid, SETTINGS : JSON.stringify(store.settings)}}
-                        addSettings(settingsObject)
+                        await addSettings(settingsObject)
+
                     },
                     cancelSettings(){
-                        this.isAutoZoomTemp = this.isAutoZoom != null && JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom != null ? JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom : true
+                        if (JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom == null && this.isAutoZoom == null){
+                            store.autozoomtest = true
+                        }
+                        else if (JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom == null && this.isAutoZoom != null){
+                            store.autozoomtest = this.isAutoZoom
+                        }
+                        else if (JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom != null && this.isAutoZoom == null){
+                            store.autozoomtest = JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom
+                        }
+                        else if (JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom != null && this.isAutoZoom != null){
+                            store.autozoomtest = this.isAutoZoom
+                        }
+                       
                     },
                     shiftDiv(){
                         const viewSurface = document.querySelector('.esri-view');
@@ -554,8 +567,7 @@ import { addSettings } from './crud.js';
                         
 
                     },
-                    newSwitchTurnedOn(event) {
-                        console.log(event)
+                    newSwitchTurnedOn() {
                         if (this.switchValue) {
                             this.fontColor = '#FFFFFF';
                             

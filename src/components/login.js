@@ -78,8 +78,9 @@ const setDefExpRets = async (userId) => {
 
   const parsedUSEROBJECTID = JSON.parse(userOBJECTID.FILTERS)
   store.userFilters = parsedUSEROBJECTID
-  filterMapActivityFeed(parsedUSEROBJECTID)
+  filterMapActivityFeed(parsedUSEROBJECTID, true)
   setFilterProperties(parsedUSEROBJECTID)
+  await home(true)
 
   return
 }
