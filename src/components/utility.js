@@ -1651,26 +1651,32 @@ export function setFilterProperties(userFilterObject){
 }
 
 export function setBasemap(){
- const defaultbasemap = JSON.parse(appConstants.defaultUserValue[0].settings).basemap
- if (defaultbasemap == null || defaultbasemap == "Dark Grey"){
+    if (JSON.parse(appConstants.defaultUserValue[0].settings) == null){
+        store.basemaptest = "Dark Grey"
+        
+    }
+    else{
+        store.basemaptest = JSON.parse(appConstants.defaultUserValue[0].settings).basemap
+    }
+ if ( store.basemaptest == null ||  store.basemaptest == "Dark Grey"){
     applyDarkGrey()
  }
- else if (defaultbasemap == "Light Grey"){
+ else if ( store.basemaptest == "Light Grey"){
     applyLightGrey()
  }
- else if (defaultbasemap == "Standard TxDOT"){
+ else if ( store.basemaptest == "Standard TxDOT"){
     applyStandard()
  }
- else if (defaultbasemap == "Open Street Map"){
+ else if ( store.basemaptest == "Open Street Map"){
     applyOSM()
  }
- else if (defaultbasemap == "Hybrid"){
+ else if ( store.basemaptest == "Hybrid"){
     applyHybrid()
  }
- else if (defaultbasemap == "Google"){
+ else if ( store.basemaptest == "Google"){
     applyGoogle()
  }
- else if (defaultbasemap == "Imagery"){
+ else if ( store.basemaptest == "Imagery"){
     applyImagery()
  }
 

@@ -157,7 +157,6 @@ export default{
         this.setLayer
         store.isSaving = false
         loadData()
-        console.log('mounted')
         return
         //outlineFeedCards(store.roadHighlightObj)
     },
