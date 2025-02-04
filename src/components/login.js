@@ -45,6 +45,7 @@ async function signIn(){
          appConstants[layer.prop].push({"name" : x.name, "value": x.code})
       })
     })
+    ///////////////INSERT HERE/////////////////////////////////
     appConstants.districtDomainValues.sort((a,b) => a.name.localeCompare(b.name))
     appConstants.userRoles.sort((a,b) => a.name.localeCompare(b.name))
 
@@ -53,6 +54,8 @@ async function signIn(){
     getTxDotRdWayLayerView()
     //getHistoryView()
     //home(true)
+      home(true)
+
 
   })
   
@@ -67,7 +70,7 @@ function alreadySignedIn(){
 const setDefExpRets = async (userId) => {
   if(appConstants.defaultUserValue.length) return
   const userOBJECTID = await getUserOBJECTID(userId)
-  appConstants.defaultUserValue.push({"name": "Username", "value": `${userId}`, "objectid" : userOBJECTID.OBJECTID, "webhook" : userOBJECTID.WEBHOOK, "email" : userOBJECTID.EMAIL, "filters" : userOBJECTID.FILTERS})
+  appConstants.defaultUserValue.push({"name": "Username", "value": `${userId}`, "objectid" : userOBJECTID.OBJECTID, "webhook" : userOBJECTID.WEBHOOK, "email" : userOBJECTID.EMAIL, "filters" : userOBJECTID.FILTERS, "settings" : userOBJECTID.SETTINGS})
   if (userOBJECTID.FILTERS === null){
     retsLayer.definitionExpression = store.savedFilter = appConstants['defaultQuery'](userId)
     store.USER = [appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value)]
@@ -76,14 +79,14 @@ const setDefExpRets = async (userId) => {
 
   const parsedUSEROBJECTID = JSON.parse(userOBJECTID.FILTERS)
   store.userFilters = parsedUSEROBJECTID
-  filterMapActivityFeed(parsedUSEROBJECTID)
+  filterMapActivityFeed(parsedUSEROBJECTID, true)
   setFilterProperties(parsedUSEROBJECTID)
 
   return
 }
 
 export async function getUserId(){
-  console.warn(`VERSION: 2.0.26 -- dev status: ${store.devStatus}`)
+  console.warn(`VERSION: ${store.retsVersion} -- dev status: ${store.devStatus}`)
   const user = await esriId.getCredential(`${authen.portalUrl}/sharing/rest`,{
     oAuthPopupConfirmation: false,
   })

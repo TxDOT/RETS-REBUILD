@@ -5,7 +5,7 @@
                 <v-autocomplete :items="activityList" label="Activity" variant="underlined" density="compact" item-title="value" flat v-model="store.retsObj.attributes.ACTV" @update:model-value="completeDataSearch()"></v-autocomplete>
             </div>
             <div style="width: 30%; float: right;">
-                <v-text-field label="Number" density="compact" variant="underlined" :disabled="disableACTVNum(store.retsObj.attributes.ACTV)" v-model="store.retsObj.attributes.ACTV_NBR" @update:model-value="actvNbrUpdate(store.retsObj.attributes.ACTV_NBR)">
+                <v-text-field label="Number" density="compact" variant="underlined" :disabled="disableACTVNum(store.retsObj.attributes.ACTV)" v-model="store.retsObj.attributes.ACTV_NBR" @update:model-value="actvNbrUpdate(store.retsObj.attributes.ACTV_NBR) ; store.isSaveBtnDisable = false">
                     <template v-slot:append-inner >
                         <v-tooltip text="Find Minute Order/TxDOT Connect" location="top">
                             <template v-slot:activator="{props}">
@@ -38,7 +38,7 @@
         </div>
         <div no-gutters dense class="item" style="height: 10%; position: relative; bottom: 4px;">
             <div>
-                <v-checkbox density="compact" class="checkbox-size" v-model="store.retsObj.attributes.NO_RTE" @update:model-value="noRTECheck(store.retsObj.attributes.RTE_NM)">
+                <v-checkbox density="compact" class="checkbox-size" v-model="store.retsObj.attributes.NO_RTE" @update:model-value="noRTECheck(store.retsObj.attributes.RTE_NM) ; store.isSaveBtnDisable = false">
                     <template v-slot:label>
                         <v-label class="main-color" id="newProposedText" text="New, Proposed, or Unspecified"></v-label>
                     </template>
@@ -74,7 +74,7 @@
             </v-select>
         </div>
         <div no-gutters dense class="item">
-            <v-textarea :error="!store.retsObj.attributes.DESC_?.length ? (this.descLabel = 'Description is empty', true)  : false" :rules=[descRequired.required] rows="4" density="compact" :label="this.descLabel" variant="underlined" v-model="store.retsObj.attributes.DESC_" no-resize @update:model-value="descCheck(store.retsObj.attributes.DESC_)" @keydown.space="preventSpace">
+            <v-textarea :error="!store.retsObj.attributes.DESC_?.length ? (this.descLabel = 'Description is empty', true)  : false" :rules=[descRequired.required] rows="4" density="compact" :label="this.descLabel" variant="underlined" v-model="store.retsObj.attributes.DESC_" no-resize @update:model-value="descCheck(store.retsObj.attributes.DESC_) ; store.isSaveBtnDisable = false" @keydown.space="preventSpace">
             </v-textarea>
         </div>
         <div class="item" style="position: relative; top: 32px; width: 100%;">

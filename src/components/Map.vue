@@ -37,7 +37,7 @@
 //import functions
 //import {queryRetsTable} from './utility.js'
 import {view} from './map-Init.js'
-import {home, hoverRetsPoint, discardeditcopy, openDetails, updateRetsObj, removeOutline, removeHighlight, highlightRETSPoint, zoomTo} from './utility.js'
+import {home, hoverRetsPoint, discardeditcopy, openDetails, updateRetsObj, removeOutline, removeHighlight, highlightRETSPoint, zoomTo, canceldetailsfunction, setBasemap} from './utility.js'
 import {store} from './store.js'
 
 // import ShowChanges from './showChanges.vue'
@@ -55,7 +55,7 @@ export default{
             //1.Check to see if user is signed in. If not sign them in without using the popup
             //2. If user is signed in, get username and set retLayer definition and load map
             view.container = this.$el
-            home();
+            setBasemap();
             hoverRetsPoint();
 
 
@@ -65,12 +65,15 @@ export default{
             window.document.title = 'RETS Application'
             if(!store.isDetailsPage){
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
-                if (archiveRets != store.openAfterDiscardRets){
+
+                if (archiveRets.attributes.RETS_ID != store.openAfterDiscardRets.attributes.RETS_ID){
                     openDetails(store.openAfterDiscardRets)
                     store.isCard = false
                     store.isDetailsPage = true
                     store.activityBanner = `${store.openAfterDiscardRets.attributes.RETS_ID}`
                     //outlineFeedCards()
+                    let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
+                    updateRetsObj(findItem, archiveRets)
                     zoomTo(store.openAfterDiscardRets.geometry)
                     store.cancelpopup = false
                     store.isSaveBtnDisable = true
@@ -86,11 +89,38 @@ export default{
                 store.toggleFeed = 1
                 return
             }
+            if (store.clickStatus && store.clickeventresult === "TPP RETS"){
+                const retsPt = Array.from(store.roadHighlightObj)[0]
+                const archiveRets = JSON.parse(store.archiveRetsDataString)
+                let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
+                updateRetsObj(findItem, archiveRets)
+                removeHighlight(store.openAfterDiscardRets)
+                openDetails(retsPt)
+                store.isCard = false
+                store.isDetailsPage = true
+                store.activityBanner = `${retsPt.attributes.RETS_ID}`
+                store.cancelpopup = false
+                store.toggleFeed = 2
+                store.isSaveBtnDisable = true
+
+                return
+
+            }
+            store.activityBanner = "Activity Feed"
+            store.toggleFeed = 1
+            removeHighlight("a", true)
+            removeOutline()
             discardeditcopy();
+            store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+
             return
         },
         goBackActivity(){
-            if(!store.isSaveBtnDisable){
+            if(store.isDetailsPage){
+                store.cancelpopup = false;
+                return
+            } 
+            if(!store.isSaveBtnDisable || (store.retsObj.attributes.GIS_ANALYST === null || store.retsObj.attributes.GRID_ANALYST === null || store.retsObj.attributes.DIST_ANALYST === null|| store.retsObj.attributes.DIST_NM === null || store.retsObj.attributes.CNTY_NM === null)){
                 removeOutline()
                 removeHighlight("a", true)
                 highlightRETSPoint(store.retsObj.attributes)

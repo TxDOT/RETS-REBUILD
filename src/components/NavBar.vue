@@ -33,71 +33,84 @@
     </v-navigation-drawer>
     <v-card id="basemaptoggle" max-width="400" hover @mouseleave="mouseleavebasemap" v-if = "basemapcard" >
        
-        <v-card-item >
-            <v-btn @click="toggledarkgrey" flat>
+        <v-card-item  style="height: 50px;">
+            <v-btn @click="toggledarkgrey(); basemapcard = false" flat density="compact" style="height: 100%;">
                 <v-card-title id="basemapfont" > Dark Grey </v-card-title>
             </v-btn>
         </v-card-item>
-        <v-card-item>
-            <v-btn @click="togglelightgrey" flat>
+        <v-card-item style="height: 45px;">
+            <v-btn @click="togglelightgrey(); basemapcard = false" flat density="compact" style="height: 100%;">
                 <v-card-title id="basemapfont"> Light Grey </v-card-title>
             </v-btn>
         </v-card-item>
-        <v-card-item >
-            <v-btn @click="togglestandard" flat>
+        <v-card-item style="height: 45px;">
+            <v-btn @click="togglestandard(); basemapcard = false" flat density="compact" style="height: 100%;">
                 <v-card-title id="basemapfont"> Standard TxDOT </v-card-title>
             </v-btn>
         </v-card-item>
-        <v-card-item >
-            <v-btn @click="toggleimagery" flat>
-                <v-card-title id="basemapfont"> Imagery </v-card-title>
+        <v-card-item style="height: 45px;">
+            <v-btn @click="toggleosm(); basemapcard = false" flat density="compact" style="height: 100%;">
+                <v-card-title id="basemapfont"> OSM </v-card-title>
             </v-btn>
         </v-card-item>
-        <v-card-item >
-            <v-btn @click="togglehybrid" flat>
-                <v-card-title id="basemapfont"> Hybrid </v-card-title>
-            </v-btn>
-        </v-card-item>
-        <v-card-item >
-            <v-btn @click="togglegoogle" flat>
+        <v-card-item style="height: 45px;">
+            <v-btn @click="togglegoogle(); basemapcard = false" flat density="compact" style="height: 100%;">
                 <v-card-title id="basemapfont"> Google </v-card-title>
             </v-btn>
         </v-card-item>
-        <v-card-item >
-            <v-btn @click="toggleosm" flat>
-                <v-card-title id="basemapfont"> OSM </v-card-title>
+        <v-card-item style="height: 45px;">
+            <v-btn @click="togglehybrid(); basemapcard = false" flat density="compact" style="height: 100%;">
+                <v-card-title id="basemapfont"> Hybrid </v-card-title>
+            </v-btn>
+        </v-card-item>
+        <v-card-item style="height: 45px;">
+            <v-btn @click="toggleimagery(); basemapcard = false" flat density="compact" style="height: 100%;">
+                <v-card-title id="basemapfont"> Imagery </v-card-title>
             </v-btn>
         </v-card-item>
     </v-card>
     <v-card id="jumptotoggle" max-width="400" hover @mouseleave="mouseleavejumpto" v-if = "jumptocard" >
        
-       <v-card-item >
-           <v-btn @click="handleJumpToToolGoogle()">
+       <v-card-item style="height: 45px;">
+           <v-btn @click="handleJumpToToolGoogle()" density="compact" style="height: 100%;">
                <v-card-title id="jumptofont" > Jump to Google </v-card-title>
            </v-btn>
        </v-card-item>
-       <v-card-item>
-           <v-btn @click="handleJumpToToolSPM()">
+       <v-card-item style="height: 45px;">
+           <v-btn @click="handleJumpToToolSPM()" density="compact" style="height: 100%;">
                <v-card-title id="jumptofont"> Jump to SPM </v-card-title>
            </v-btn>
        </v-card-item>
 
    </v-card>
-   <v-card id = "containersettings" height = "585" v-if = "settingsstatus">
-        <v-card-item>
-            <span class="banner-txt">Settings</span>            
-        </v-card-item>
+   <v-card id = "containersettings" height = "615" v-show = "settingsstatus">
+    <v-card-item>
+        <span class="banner-txt">Settings</span>
+        &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+        <span id='releaseNotes' :style="{color: releaseNotesColor, fontSize: '13px'}" @mouseover="releaseNotesColor = 'white'" @mouseleave="releaseNotesColor = '#D9D9D9'" @click="isReleaseNotes = true">Version {{ store.retsVersion }}</span>
+    </v-card-item>
         <hr id = "separator"/>
-        <v-card-item id = "darkmodeitem" >
+        <!-- <v-card-item id = "darkmodeitem" >
             <div id = "darkmodeswitch">
                 <v-switch  v-model="switchValueDark" label="Dark Mode" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn" disabled></v-switch>
             </div>
             
-
+        </v-card-item> -->
+        <v-card-item class = "topSettings" >
+            <div style="height: 40px;">
+                <v-switch v-model="store.autozoomtest"   class="autozoom-switch" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn()" density="compact" >
+                    <template #prepend >
+                        <v-label>
+                            Automatically zoom when I change filters
+                        </v-label>
+                    </template>
+                </v-switch>
+            </div>
+                <v-label style="font-size: 10px; color: #D9D9D9; margin-left: 10px;">Display selected basemap on load</v-label>
+                <v-select style="width: 22rem; margin-left: 10px; margin: top 0; margin-bottom: 0;" class="basemap-select" variant="underlined" density="compact" v-model=store.basemaptest :items=basemapArray></v-select>
         </v-card-item>
-       
         <hr id = "separator" />
-            <v-btn @click ="activateFeedback()" color="#4472C4" rounded  style="position: absolute; right: 25px; top: 96px;">
+            <v-btn @click ="activateFeedback()" color="#4472C4" rounded  style="position: absolute; right: 25px; top: 172px; z-index: 99999;">
                 <span style="font-weight: 100;">Feedback</span>
             </v-btn>
         <v-card-item id = "notificationsitems" >
@@ -107,7 +120,13 @@
                 Send notifications for: <br>
                 <div id="notiswitches">
                     <v-card-item v-for="(item, index) in switches" :key="index" :id="'switch-container-' + index" class="switch-item">
-                        <v-switch  v-model="item.value" :label="item.label" color="primary" :style="switchStyle(item.fontColor)" @change="switchTurnedOn(index)" disabled></v-switch>
+                        <v-switch v-model="item.value" color="primary" :style="switchStyle(item.fontColor)" @change="switchTurnedOn(index)" disabled>
+                            <template #prepend >
+                                <v-label >
+                                    {{ item.label }}
+                                </v-label>
+                            </template>
+                        </v-switch>
                     </v-card-item>
                 </div>
                 
@@ -122,8 +141,8 @@
             <div style="width: 100%; position: relative; height: 100%;">
                 <div style="width: 100%; position: relative;">
                     <v-btn variant="plain" size="small" class="secondary-button"  prepend-icon="mdi-power" @click="logoutMethod()" >LOGOUT</v-btn>
-                    <v-btn style="float: right;" variant="outlined" size="small" class="main-button-style" @click=" handleactiveclass();">save</v-btn>
-                    <v-btn style="float: right;" variant="plain" size="small" class="secondary-button"  @click="handleactiveclass();">CANCEL</v-btn>
+                    <v-btn style="float: right;" variant="outlined" size="small" class="main-button-style" @click=" handleactiveclass(); saveSettings()">save</v-btn>
+                    <v-btn style="float: right;" variant="plain" size="small" class="secondary-button"  @click="handleactiveclass(); cancelSettings()">CANCEL</v-btn>
                     
                     
                 </div>
@@ -158,14 +177,78 @@
             <v-btn style="float: right;" variant="plain" size="small" class="secondary-button" @click="cancelFeedback" >CANCEL</v-btn>
         </div>
     </v-card>
+    <v-card id="releasenotesSection" v-if="isReleaseNotes" height="630" width="400" style="border-radius: 0;">
+        <v-card-title style="font-weight: 400;">Release Notes</v-card-title>
+        <hr id = "separator"  />
+        <div style="height: 525px; width: 370px; margin: auto; left: 0; right: 0; overflow-y: auto; ">
+         
+            <v-list v-model:opened="openedVlist">
+  <!-- New Updates Section -->
+  <v-list-group value="New Updates" class="release-notes">
+    <template v-slot:activator="{ props }">
+      <v-list-item 
+        v-bind="props" 
+        :key="0" 
+        :title="latestReleaseNotes[0][0]">
+      </v-list-item>
+    </template>
+    
+    <!-- Bulleted Items -->
+    <v-list-item 
+      v-for="(value, i) in latestReleaseNotes[0].slice(1)" 
+      :key="`latest-item-${i}`" 
+      class="wrap-text"
+      :disabled="true" >
+      <div style="border-width: 2px;">
+        <v-list-item-title class="bullet-item">
+          <v-icon small class="mr-2">mdi-circle-small</v-icon> <!-- Bullet -->
+          {{ value }}
+        </v-list-item-title>
+    </div>
+    </v-list-item>
+  </v-list-group>
+  
+  <!-- Previous Release Notes Section -->
+  <template v-for="([version, ...changelog], i) in previousReleaseNotes" :key="i">
+    <v-list-group class="release-notes" v-model="expandedGroups[i]">
+      <template v-slot:activator="{ props }">
+        <v-list-item 
+          v-bind="props" 
+          :title="version" 
+          class="wrap-text"
+          >
+        </v-list-item>
+      </template>
+      
+      <!-- Bulleted Items -->
+      <v-list-item 
+        v-for="(log, j) in changelog" 
+        :key="j" 
+        class="wrap-text"
+        :disabled="true" >
+          <v-list-item-title class="bullet-item">
+            <v-icon small class="mr-2">mdi-circle-small</v-icon> <!-- Bullet -->
+            {{ log }}
+          </v-list-item-title>
+      </v-list-item>
+    </v-list-group>
+  </template>
+</v-list>      
+        </div>
+        <hr id = "separator" style="margin-bottom: 13px;" />
+        <v-btn  style="float: right; margin-top: 0; margin-right: 20px;" variant="outlined" size="small" class="main-button-style" @click="isReleaseNotes = false">CLOSE</v-btn>
+
+
+    </v-card>
 </template>
 
 <script>
 
     import { appConstants } from '../common/constant.js';
-    import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass, roadwaysRenderer, TxDOTRoadways, hybridBasemap} from '../components/map-Init.js';
-    import { createtool, selecttool, togglemenu, logoutUser } from '../components/utility.js';
+    import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass, roadwaysRenderer, TxDOTRoadways, hybridBasemap, retsLayer} from '../components/map-Init.js';
+    import { createtool, selecttool, togglemenu, logoutUser, outlineFeedCards, retsLayerView, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM } from '../components/utility.js';
     import { vuetify } from '../main.js';
+import { addSettings } from './crud.js';
     import { store } from './store';
     import { defineAsyncComponent } from 'vue'
 
@@ -178,12 +261,22 @@
         data(){
             return{
                 toggle: store.toggleFeed,
+                openedVlist: ['New Updates'],
+                isNewReleaseOpen: true,
+                expandedIndex: null,
+                expandedGroups: [],
+                isReleaseNotes: false,
+                mountedAutoZoom: null,
                 selectfunction : {},
                 store,
+                basemapArray: ['Dark Grey', 'Light Grey', 'Standard TxDOT', 'Open Street Map', 'Hybrid', 'Google', 'Imagery'],
                 shiftmap: false,
                 fontColor: '#D9D9D9',
+                releaseNotesColor: '#D9D9D9',
                 switchValueDark: true,
                 switchValue : false,
+                isAutoZoom: null,
+                currAutoZoomValue: null,
                 isActOpen: true,
                 shift: 200,
                 basemapcard: false,
@@ -200,6 +293,64 @@
                 feedbackText: "",
                 feedbackSubmitStatus: true,
                 feedbackName: "",
+                latestReleaseNotes: [
+                    [
+                        `Latest Release Version ${store.retsVersion}`,
+                        'User Story 96: Version and Release Notes',
+                        'User Story 157: RETS Labels turn on sooner',
+                        'User Story 193: Add option to disable automatic zoom',
+                        'User Story 204: Add setting to change the default basemap on load',
+                        'User Story 212: Move legend icon down and basemap button up', 
+                        'Bug 229: Date Filter overlaps with buttons'
+                    ]
+                ],
+                previousReleaseNotes: [
+                ['Release 2.6',
+                 'User Story 83: Imagery/Roadway Hyrbrid Basemap',
+                 'User Story 169: Add ability to double-click to open a RETS point from the map pane', 
+                 'User Story 185: Expand search on Activity Feed to search all history items, especially comments',
+                 'User Story 188: Add a feedback option to the Settings menu for users to send idea',
+                 'User Story 199: Add RETS number to browser tab Title Bar text',
+                 'User Story 200: Add attachment icon to Activity Feed cards',
+                 'User Story 9: Filters: styling updates',
+                 'User Story 10: Job Detail Pane: Update 2',
+                 "Bug 122: Search isn't respected after opening a card then closing it",
+                 'Bug 6: Save issues when changing District Analyst',
+                 'Bug 11: Messages for field change triggers incorrect',
+                 'Bug 12: Remove counter from Details Pane header',
+                 'Bug 217: Description field validation missing when adding a new point',
+                 'Bug 220: New, Proposed check box in wrong place'
+
+
+                ],
+                ['Release 2.5', ' User Story 95: Add a count to the header', 'User Story 111: Use most recent history item in the card footer ', 'User Story 133: Filter: Add Custom Filter option',
+                'User Story 146: Job Detail Pane: Update', 'User Story 171: Resize app','User Sory 150: Add ability to save custom filters', 'User Story 170: Add update triggers for all updates made to a RETS',
+                'User Story 195: Add time-gated limiter to triggers to prevent 3 or more comments being added when new RETS is created', 'User Story 205: Update tables and filter for multiple district users',
+                'User Story 230: Transition to prod create portal', 'Bug 178: Activity feed detail pane selection interaction', 'Bug 192: Changing status duplicates job feed', 'Bug 176: 1969 date corrupting history update in card footer',
+                'Bug 180: New job cards are not at the top of the feed', 'Bug 181: No route check box not checked for new jobs', 'Bug 123: Map Pane Search still not working properly for Minute Orders'],
+                ['Release 2.4', 'User Story 146: Job Detail Pane: Update', ' Bug 158: Selection not respected when JD pane is open', 'Bug 172: RETS number and subtitle too close'],
+                ['Release 2.3', 'User Story 107: Create tab buttons for Activity Feed and Details', 'User Story 108: Cancel button warning popup for unsaved changes', 'User Story 137: Add "Created" by info to metadata tab',
+                'User Story 146: Job Detail Pane: Update', 'User Story 148: Update trigger for history items to reflect username instead of RETSBOT','User Story 156: Add right click to get coordinates function',
+                'Bug 120: Flags not persisting', 'Bug 161: Assigned to default incorrect', 'Bug 210: Search: Value that does not exist zooms to random street', 'Bug 221: Double Click of RETS doesnt ask to save/discard changes on RETS',
+                'Bug 223: Discard popup appears when right click while details pane is open'],
+                ['Release 2.2', 'User Story 79: Related RETS Interaction', 'User Story 109: Add Activity and Detail Pane tabs', 'User Story 144: Job Detail Pane: Disable GEM task icon',
+                'User Story 149: Set up a test environment', 'User Story 139: Update default filter (to show all RETS with your name associated with it, anywhere)', 'Bug 116: Activity feed/Filter interaction',
+                'Bug 117: Card Selection', 'Bug 86: Add new point spinner is off center for certain screen sizes', 'Bug 93: Save not enabled after changes', 'Bug 97: Add attachment issues','Bug 98: Filter: User drop down not sorted',
+                'Bug 99: Filter: Count bubble', 'Bug 100: Add new point: New points show at bottom of feed', 'Bug 101: DFO field: Limit to 3 decimal places', 'Bug 102: Add new point: Orange route remains',
+                'Bug 145: Detail Pane Save button errors', 'Bug 125: Invalid route data and description lost when making new point', 'Bug 127: Date Picker in Detail Pane cant be closed unless a date is picked',
+                'Bug 114: Marking a RETS as Complete still shows in feed even if that filter is off', 'Bug 115: Center map on Texas when no cards are loaded in the feed (not off the coast of Africa)',
+                'Bug 118: "Add" comment button does not scroll to the entry location', 'Bug 121: Left Nav Bar: Icons shift when activated', 'Bug 124: Cursor in Map Pan still shows as pointer when hovering over a road in some circumstances',
+                'Bug 126: Points remain selected in the map after cards are unselected/closed','Bug 129: Filter popup dropdowns close method', 'Bug 132: Filter: Calendar allows too many dates to be selected',
+                'Bug 141: Form field validation bugs', 'Bug 128: Filter: Count doesnt reset','Bug 134: Form Validation: MO/TxDOT Connect number', 'Bug 135: Form Validation: Number field can not be NULL',
+                'Bug 136: Route field editable','Bug 140: Setting', 'Bug 142: Show Selected: Feed does not return when selection is cleared', 'Bug 143: Show Selected: Clears selection when diactivated',
+                'Bug 151: Activity Feed does not refresh after making a change to a RETS that would exclude that card from the feed based on the current filters', 'Bug 189: Linework is not aligning with basemap in RETS'],
+                ['Release 2.1','User Story 41: Map Pane', 'User Story 42: Initial Schema','User Story 44: Activity Feed Pane','User Story 45: Left Nav Menu Bar','User Story 46: Job Detail Pane',
+                'User Story 47: Add New Job Point','User Story 50: UI: Style Guide','User Story 52: Filter','User Story 55: Form Field Validations','User Story 58: Triggers','User Story 60: Show Selected',
+                'User Story 61: History','User Story 65: History Enhancements','User Story 66: Settings','User Story 74: RETS Subtitle','User Story 76: Archive RETS jobs','User Story 77: Move existing point',
+                'Bug 84: Filter: Cancel button doesnt cancel and count doesnt reset','Bug 87: DFO error notification','Bug 88: MO link greyed out','Bug 89: Home button zooms to wrong location',
+                'Bug 91: Default deadline date','Bug 103: Map pane: Home button, filter interaction zoom', 'Bug 104: Route Name field validation and auto-update' ],  
+                ['Release 2.0','RETS V2 first release'],  
+                ],
                 switches: [
                             { label: "RETS I Create", value: false, fontColor: "#D9D9D9" },
                             { label: "RETS I'm tagged in", value: false, fontColor: "#D9D9D9" },
@@ -235,13 +386,12 @@
                                 value: 1,
                                 action: ()=>{
                                     //open feed
-                                    if (store.isEmptyRow != false && store.isSaveBtnDisable){
-                                        return
-                                    }
                                     store.isCard = true
                                     store.isDetailsPage = false
                                     this.toggle = 1
                                     store.toggleFeed = 1
+
+                                    
                                 },
                                 disabled: false
                                },
@@ -264,20 +414,19 @@
                             ],
  
                 retsToolsBottom: [
-                               {title:"Select", icon: 'mdi-select-multiple', color: "#D9D9D9", name: "Multi-Select", isActive: false,
-                               action: () =>{
-                                store.isSelectEnabled = !store.isSelectEnabled
-                                this.retsToolsBottom[0].isActive = !this.retsToolsBottom[0].isActive
-                                this.handleSelectTool();
+                               
+                                {title:"Basemap", icon: 'mdi-map-legend', color: "#D9D9D9", name: "Basemaps", isActive: false,
+                               action: () => {
+                                return
                                },
-                               setActive: () => {
-                                return true
-                               },
-                               hover:(i) => 
-                                    {
-                                        this.basemapcard = false;
-                                        this.jumptocard= false;
+                                hover:(i) => { 
+                                    if (i === "Basemap")
+                                        {
+                                            this.jumptocard = false;
+                                            this.basemapcard = true
+                                        }
                                     }
+                                
                                 },
                                {title:"JumpTo", icon: 'mdi-run', color: "#D9D9D9", name: "Jump To", isActive: false,
                                action: () =>{
@@ -292,29 +441,34 @@
                                             }
                                     }
                                 },
-                               {title:"Legend", icon: 'mdi-format-list-bulleted-type', color: "white", name: "Legend", 
+                                {title:"Select", icon: 'mdi-select-multiple', color: "#D9D9D9", name: "Multi-Select", isActive: false,
+                               action: () =>{
+                                store.isSelectEnabled = !store.isSelectEnabled
+                                this.retsToolsBottom[0].isActive = !this.retsToolsBottom[0].isActive
+                                this.handleSelectTool();
+                               },
+                               setActive: () => {
+                                return true
+                               },
+                               hover:(i) => 
+                                    {
+                                        this.basemapcard = false;
+                                        this.jumptocard= false;
+                                    }
+                                },
+                               {
+                                title:"Legend", icon: 'mdi-format-list-bulleted-type', color: "white", name: "Legend", 
                                action: () =>{
                                 this.handleLegendTool();
-                                this.retsToolsBottom[2].isActive = !this.retsToolsBottom[2].isActive
+                                this.retsToolsBottom[3].isActive = !this.retsToolsBottom[3].isActive
                                },
                                hover:() => 
                                     {
                                         this.basemapcard = false;
                                         this.jumptocard= false;
                                     }
-                                },
-                               {title:"Basemap", icon: 'mdi-map-legend', color: "#D9D9D9", name: "Basemaps", isActive: false,
-                               action: () => {
-                                return
+                                
                                },
-                                hover:(i) => { 
-                                    if (i === "Basemap")
-                                        {
-                                            this.jumptocard = false;
-                                            this.basemapcard = true
-                                        }
-                                    }
-                                },
                                {title:"Settings", icon: 'mdi-cog', color: "#D9D9D9", name: "Settings",
                                action: () =>{
                                 this.handleSettingsTool();
@@ -335,7 +489,11 @@
         },
         
                 computed:{
+                    
 
+                },
+                created() { 
+                    this.expandedGroups = this.previousReleaseNotes.map(() => false); 
                 },
                 watch: {
                    'store.toggleFeed':{
@@ -346,7 +504,7 @@
                    },
                    'store.activityBanner':{
                     handler: function(){
-                        if(store.activityBanner !== "Activity Feed" ){
+                        if(store.activityBanner !== "Activity Feed"){
                             this.retsToolsTop[2].disabled = false
                             return
                         }
@@ -372,14 +530,49 @@
                             this.feedbackName = ""
                         }
                     }
-                   }
+                   },
                 },
                 mounted() {
-                    
+                    this.setAutozoomSwitch()
 
                 },
                 
                 methods: {
+                    toggleGroup(index) { this.$set(this.expandedGroups, index, !this.expandedGroups[index])},
+                    setAutozoomSwitch(){
+                        if (JSON.parse(appConstants.defaultUserValue[0].settings) == null){
+                            store.autozoomtest = true
+                            
+                        }
+                        else{
+                            store.autozoomtest = JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom
+                        }
+                    },
+                    async saveSettings(){
+                        store.settings = {
+                            autoZoom : store.autozoomtest,
+                            basemap: store.basemaptest
+                        } 
+                        this.isAutoZoom = store.autozoomtest
+                        const settingsObject = {attributes: {OBJECTID : appConstants.defaultUserValue[0].objectid, SETTINGS : JSON.stringify(store.settings)}}
+                        await addSettings(settingsObject)
+
+                    },
+                    cancelSettings(){
+                        if (JSON.parse(appConstants.defaultUserValue[0].settings) == null && this.isAutoZoom == null){
+                            store.autozoomtest = true
+                        }
+                        else if (JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom == null && this.isAutoZoom != null){
+                            store.autozoomtest = this.isAutoZoom
+                        }
+                        else if (JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom != null && this.isAutoZoom == null){
+                            store.autozoomtest = JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom
+                        }
+                        else if (JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom != null && this.isAutoZoom != null){
+                            store.autozoomtest = this.isAutoZoom
+                        }
+                       
+                    },
                     shiftDiv(){
                         const viewSurface = document.querySelector('.esri-view');
                         viewSurface.classList.toggle('translateX-500px');
@@ -415,6 +608,7 @@
                     handleactiveclass(){
                         this.settingsstatus = false
                         this.retsToolsBottom[4].isActive = false
+
                     },
                     logoutMethod(){
                         logoutUser();
@@ -497,70 +691,26 @@
 
                      },
                     toggledarkgrey(){
-                        map.basemap = darkVTBasemap;
-                        this.basemapcard = false;
-                        retsLabelclass.symbol.color = "white"
-                        retsLabelclass.symbol.haloSize = 0
-                        TxDOTRoadways.labelsVisible = false
-                        TxDOTRoadways.renderer.symbol.width = 0
-                        this.basemapcard = false;
-
+                       applyDarkGrey()
                     },
                     togglelightgrey(){
-                        map.basemap = lightVTBasemap
-                        lightVTBasemap.visible = true
-                        this.basemapcard = false;
-                        retsLabelclass.symbol.color = "black"                        
-                        retsLabelclass.symbol.haloSize = 0
-                        TxDOTRoadways.labelsVisible = false,
-                        TxDOTRoadways.renderer.symbol.width = 0
-                        this.basemapcard = false;
-
-
+                       applyLightGrey()
                     },
                     togglestandard(){
-                        map.basemap = standardVTBasemap;
-                        this.basemapcard = false;
-                        retsLabelclass.symbol.color = "black"
-                        retsLabelclass.symbol.haloSize = 0
-                        TxDOTRoadways.labelsVisible = false,
-                        TxDOTRoadways.renderer.symbol.width = 0
-                        this.basemapcard = false;
+                        applyStandard()
 
                     },  
                     toggleimagery(){
-                        map.basemap = imageryBasemap;
-                        retsLabelclass.symbol.color = "black"
-                        retsLabelclass.symbol.haloColor = "gray"
-                        retsLabelclass.symbol.haloSize = 1
-                        TxDOTRoadways.labelsVisible = false,
-                        TxDOTRoadways.renderer.symbol.width = 0
-                        this.basemapcard = false;
+                        applyImagery()
                     },
                     togglehybrid(){
-                        map.basemap = hybridBasemap;
-                        retsLabelclass.symbol.color = "black"
-                        retsLabelclass.symbol.haloColor = "gray"
-                        retsLabelclass.symbol.haloSize = 1
-                        TxDOTRoadways.labelsVisible = true,
-                        TxDOTRoadways.renderer.symbol.width = 8
-                        this.basemapcard = false;
+                        applyHybrid()
                     },
                     togglegoogle(){
-                        map.basemap = googleVTBasemap;
-                        retsLabelclass.symbol.color = "black"
-                        retsLabelclass.symbol.haloSize = 0
-                        TxDOTRoadways.labelsVisible = false,
-                        TxDOTRoadways.renderer.symbol.width = 0
-                        this.basemapcard = false;
+                        applyGoogle()
                     },
                     toggleosm(){
-                        map.basemap = OSMVTBasemap;
-                        retsLabelclass.symbol.color = "black"
-                        retsLabelclass.symbol.haloSize = 0
-                        TxDOTRoadways.labelsVisible = false,
-                        TxDOTRoadways.renderer.symbol.width = 0
-                        this.basemapcard = false;
+                        applyOSM()
                     },
 
                     toggledarkmode(){
@@ -674,9 +824,9 @@
     }
     #basemaptoggle{
         position: absolute;
-        width: 165px;
+        width: 158px;
         height: 330px;
-        bottom: 5%;
+        bottom: 18.3%;
         left: 38px;
         z-index: 9999;
         border-radius: 0px;
@@ -688,8 +838,8 @@
     #jumptotoggle{
         position: absolute;
         width: 165px;
-        height: 120px;
-        bottom: 15.5%;
+        height: 90px;
+        bottom: 14%;
         left: 38px;
         z-index: 9999;
         border-radius: 0px;
@@ -712,7 +862,7 @@
         left: 0;;
         right: 0;
         width: 400px;
-        z-index: 9999;
+        z-index: 999;
         border-radius: 0px;
     }
     #settingsheader{
@@ -742,6 +892,15 @@
         height: 4rem;
         
     }
+    #topSettings{
+        font-size: 20px;
+        width: 23rem;
+        right: 0;
+        left: 0;
+        margin: auto;
+        border: solid red;
+        border-width: 2px;
+    }
     .font-class{
         color: aqua !important;
     }
@@ -756,7 +915,7 @@
         position: relative;
         left: 10px;
         font-size: 20px;
-        height: 25rem;
+        height: 23rem;
     }
     #notificationsfont{
         position: absolute;
@@ -768,7 +927,7 @@
         font-size: 14px;
         top: 40px;
         left: 18px;
-        height: 500px;
+        height: 350px;
     }
 
     #darkmodeswitch{
@@ -795,10 +954,11 @@
     #notiswitches{
         position: relative;
         left: -15px;
+        margin-top: -20px;
     }
     #bottomitems{
         position: absolute;
-        bottom: 10px;
+        bottom: 5px;
         width: 25rem;
     }
     
@@ -882,5 +1042,57 @@
         left: 37%;
         border-radius: 0% !important;
     }
+    #releaseNotes{
+        cursor: pointer;
+    }
+    #releasenotesSection{
+        position:absolute;
+        margin: auto;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 99999;
+    }
+    .switch-item .v-input__control{
+        justify-self: end;
+        margin-right: 16.5px;
+    }
+    .topSettings .autozoom-switch .v-input__control{
+
+        justify-self: end;
+        margin-right: 5.5px;
+    }
+    .basemap-seelct{
+        z-index: 1;
+    }
+
+    .wrap-text .v-list-item-title {
+        white-space: normal; 
+        overflow: visible;
+        line-height: 1.5;
+        
+        
+    }
+
+    .release-notes .v-list-group__items{
+        background-color: #252525;
+        margin-left: -20px;
+        
+        
+    }
+    .release-notes .v-list-group__items .v-list-item{
+        height: auto;
+        max-height: 10000px !important;
+
+    }
+    .bullet-item{
+        display: flex;
+        align-items: left;
+        
+    }
+
+    
+   
     
 </style>

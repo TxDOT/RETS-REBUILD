@@ -19,10 +19,16 @@ export const store = reactive({
                 customQuery: []
 
         },
+        retsVersion: 2.7,
+        autozoomtest:true,
+        basemaptest: "Dark Grey",
         layerName : "",
         customquery:"",
         currFilter: "",
+        settings: {},
+        autoZoom: null,
         lastQuery : "",
+        clickeventresult : "",
         filterItems: [],
         filterquery: "",
         clickevent: "",
