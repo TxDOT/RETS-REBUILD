@@ -245,10 +245,10 @@
 <script>
 
     import { appConstants } from '../common/constant.js';
-    import { imageryBasemap, darkVTBasemap, map,lightVTBasemap, standardVTBasemap, googleVTBasemap, OSMVTBasemap, graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, retsLabelclass, roadwaysRenderer, TxDOTRoadways, hybridBasemap, retsLayer} from '../components/map-Init.js';
-    import { createtool, selecttool, togglemenu, logoutUser, outlineFeedCards, retsLayerView, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM } from '../components/utility.js';
+    import { graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect } from '../components/map-Init.js';
+    import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM } from '../components/utility.js';
     import { vuetify } from '../main.js';
-import { addSettings } from './crud.js';
+    import { addSettings } from './crud.js';
     import { store } from './store';
     import { defineAsyncComponent } from 'vue'
 
@@ -734,7 +734,6 @@ import { addSettings } from './crud.js';
                         try{
                             const response = await fetch(url)
                             if (!response.ok){
-                               return
                             }
                             else{
                                 this.feedbackStatus = false
