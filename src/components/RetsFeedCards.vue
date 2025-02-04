@@ -8,7 +8,7 @@
             </div>
             <div class="add-new-btn">
                 <div style="float:right;">
-                    <v-btn v-for="(tool, i) in addbutton" :key="i" :value="tool" @click="tool.action()" :prepend-icon="buttonIcon" color="#4472C4" rounded="0" id="add-new-btn"  class="main-button" v-if="!store.isDetailsPage">
+                    <v-btn v-for="(tool, i) in addbutton" :key="i" :value="tool" @click="tool.action()" :prepend-icon="buttonIcon" color="#4472C4" rounded="0" id="add-new-btn" :disabled="store.isAddBtn" class="main-button" v-if="!store.isDetailsPage">
                         <span class="text-btn">{{addbtntext}}</span>
                     </v-btn>
                 </div>
@@ -143,7 +143,7 @@ export default{
             currRoad: {},
             isColorPicked: false,
             pickColor: "blue",
-            
+            disabledAddRd: false,
             flagColor: "",
             timer: "",
             currentValues: "",
@@ -469,8 +469,6 @@ export default{
                 }
             },
             immediate: true // Runs the watcher immediately upon creation
-    
-
         },
     },
     computed:{

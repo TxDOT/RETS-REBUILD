@@ -78,7 +78,7 @@
             </v-textarea>
         </div>
         <div class="item" style="position: relative; top: 32px; width: 100%;">
-            <v-btn icon="mdi-plus" density="compact" variant="plain" @click="displayGemSearch" color="white" id="addGemTaskBtn"></v-btn>
+            <v-btn disabled icon="mdi-plus" density="compact" variant="plain" @click="displayGemSearch" color="white" id="addGemTaskBtn"></v-btn>
             <div id="chips">
                 <v-chip v-for="i in gemTasks" closable color="#4472C4" density="compact" variant="elevated" rounded="0" pill size="default" class="gem-chip">
                     {{ i }}
@@ -597,7 +597,6 @@ import {store} from './store.js'
     max-height: 30px;
     top: .5rem;
     width: 300px;
-    border: 2px solid green;
 }
 
 .gem-chip{

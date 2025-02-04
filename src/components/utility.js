@@ -44,17 +44,18 @@ return
 }
 
 export async function getTxDotRdWayLayerView(){
-    store.isAddBtn = true
+    
     const rdLayerView = await view.whenLayerView(TxDOTRoadways)
     rdLayerView.highlightOptions = {
         color: "#FF00FF", //bright fuchsia
         haloOpacity: 0.8,
         fillOpacity: 0.3
-      };
+    };
     reactiveUtils.once(() => !rdLayerView.dataUpdating)
       .then(() => {
         try{
             console.log("roads ready")
+            store.isAddBtn = false
             // if( rdLayerView.view.zoom > 9 ){
             //     if(TxDOTRoadways.definitionExpression === "") return
             //     rdLayerView.layer.definitionExpression = ""
