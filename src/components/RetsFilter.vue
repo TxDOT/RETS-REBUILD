@@ -356,9 +356,6 @@ export default{
             return
         },
         setFilterNumber(){
-            console.log(store.customquery)
-            console.log(this.validationMessage)
-           
             store.filter = {
                 createDt: store.CREATE_DT,
                 jobType: store.JOB_TYPE,
