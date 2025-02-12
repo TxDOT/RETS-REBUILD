@@ -6,7 +6,7 @@ import { appConstants } from "../common/constant.js";
 import {store} from './store.js'
 //import {getDFOFromGRID} from './crud.js'
 import esriId from "@arcgis/core/identity/IdentityManager.js";
-import { addRETSPT } from './crud.js';
+import { addRETSPT, deleteRETSPT } from './crud.js';
 import esriRequest from "@arcgis/core/request.js";
 import * as geodesicUtils from "@arcgis/core/geometry/support/geodesicUtils.js";
 import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils.js";
@@ -119,6 +119,9 @@ export function clickRetsPoint(){
                     }
                     store.layerName = evt.results[0].layer.title
 
+                    if ( store.retsObj.attributes.CREATE_DT === store.retsObj.attributes.EDIT_DT && store.archiveRetsDataString.length != 0){
+                        return
+                    }
                     if (evt.results[0].layer.title === "TxDOT Roadways"){
                         highlightRoadways(evt.results[0].graphic.attributes)
                         if (evt.results.length === 1){
@@ -1642,4 +1645,16 @@ export function setFilterProperties(userFilterObject){
     
 
 
+}
+
+export async function deleteRets(){
+    store.retsObj.attributes.isDelete = true
+    console.log(store.retsObj)
+    await deleteRETSPT(store.retsObj)
+    removeRelatedRetsFromMap(store.retsObj.attributes.OBJECTID)
+    store.deleteRetsID()
+    deleteRetsGraphic()
+    //this.returnToFeed()
+    store.toggleFeed = 1
+    return
 }

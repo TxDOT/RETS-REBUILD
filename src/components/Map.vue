@@ -37,7 +37,7 @@
 //import functions
 //import {queryRetsTable} from './utility.js'
 import {view} from './map-Init.js'
-import {home, hoverRetsPoint, discardeditcopy, openDetails, updateRetsObj, removeOutline, removeHighlight, highlightRETSPoint, zoomTo, canceldetailsfunction} from './utility.js'
+import {home, hoverRetsPoint, discardeditcopy, openDetails, updateRetsObj, removeOutline, removeHighlight, highlightRETSPoint, zoomTo, canceldetailsfunction, deleteRets, returnToFeedFunction} from './utility.js'
 import {store} from './store.js'
 
 // import ShowChanges from './showChanges.vue'
@@ -61,7 +61,7 @@ export default{
 
     },
     methods:{
-        discardedits(){
+        async discardedits(){
             window.document.title = 'RETS Application'
             const archiveRets = JSON.parse(store.archiveRetsDataString)
             let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
@@ -69,11 +69,19 @@ export default{
             store.cancelpopup = false
             store.toggleFeed = 2
             store.isSaveBtnDisable = true
-            updateRetsObj(findItem, archiveRets)
+            if (findItem){
+                updateRetsObj(findItem, archiveRets)
 
+            }
             //runs when switching to other rets points from within the feed
             if(!store.isDetailsPage){
                 if (archiveRets.attributes.RETS_ID != store.openAfterDiscardRets.attributes.RETS_ID){
+                    if (store.deleteafterdiscard){
+                        await deleteRets()
+                        store.isCancelBtnDisable = false
+                        store.deleteafterdiscard = false
+                        store.isAlert = false
+                    }
                     openDetails(store.openAfterDiscardRets)
                     zoomTo(store.openAfterDiscardRets.geometry)
                     store.isDetailsPage = true
@@ -113,13 +121,17 @@ export default{
                 store.cancelpopup = false;
                 return
             }
-            if(!store.isSaveBtnDisable || (store.retsObj.attributes.GIS_ANALYST === null || store.retsObj.attributes.GRID_ANALYST === null || store.retsObj.attributes.DIST_ANALYST === null|| store.retsObj.attributes.DIST_NM === null || store.retsObj.attributes.CNTY_NM === null)){
+            if((!store.isSaveBtnDisable ||  store.retsObj.attributes.CREATE_DT === store.retsObj.attributes.EDIT_DT && store.archiveRetsDataString.length != 0 )|| (store.retsObj.attributes.GIS_ANALYST === null || store.retsObj.attributes.GRID_ANALYST === null || store.retsObj.attributes.DIST_ANALYST === null|| store.retsObj.attributes.DIST_NM === null || store.retsObj.attributes.CNTY_NM === null)){
                 removeOutline()
                 removeHighlight("a", true)
                 highlightRETSPoint(store.retsObj.attributes)
                 const elementId = String(store.retsObj.attributes.RETS_ID).concat('-', store.retsObj.attributes.OBJECTID);
+                console.log(elementId)
                 const element = document.getElementById(elementId);
-                element.classList.toggle('highlight-card');
+                if (element){
+                    element.classList.toggle('highlight-card');
+
+                }
 
                 store.isCard = false
                 store.isDetailsPage = true

@@ -199,6 +199,10 @@ export default{
             this.closeFlagDiv()
         },
         async zoomToRetsPt(rets){
+            if ( store.retsObj.attributes.CREATE_DT === store.retsObj.attributes.EDIT_DT && store.archiveRetsDataString.length != 0){
+                return
+            }
+            console.log("zoom")
             await includes(rets.attributes).then(result => {
                  var isIncluded = result
                  if (isIncluded === false){
@@ -222,8 +226,13 @@ export default{
                 zoomTo(zoomToRETS)
             },250)
         },
-        double(road, index){         
+        double(road, index){  
             store.openAfterDiscardRets = road
+            if ( (store.retsObj.attributes.CREATE_DT != null && store.retsObj.attributes.EDIT_DT != null) && (store.retsObj.attributes.CREATE_DT === store.retsObj.attributes.EDIT_DT) && (store.activityBanner != "Activity Feed" )){
+                store.deleteafterdiscard = true
+                store.cancelpopup = true
+                return
+            }
             if (store.archiveRetsDataString.length){
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
                 if (archiveRets.attributes.RETS_ID === road.attributes.RETS_ID ){
@@ -232,11 +241,14 @@ export default{
                 }
 
             }   
-            if(!store.isSaveBtnDisable || (store.retsObj.attributes.GIS_ANALYST === null || store.retsObj.attributes.GRID_ANALYST === null || store.retsObj.attributes.DIST_ANALYST === null|| store.retsObj.attributes.DIST_NM === null || store.retsObj.attributes.CNTY_NM === null)){
+            
+            if(!store.isSaveBtnDisable || (store.retsObj.attributes.GIS_ANALYST === null || store.retsObj.attributes.GRID_ANALYST === null || store.retsObj.attributes.DIST_ANALYST === null|| store.retsObj.attributes.DIST_NM === null || store.retsObj.attributes.CNTY_NM === null ) ){ //|| store.retsObj.attributes.DESC_ == null && 
                 clearTimeout(this.timer)
                 store.cancelpopup = true
                 return
             }
+
+           
             openDetails(road)
             return
         },
