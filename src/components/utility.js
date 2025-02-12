@@ -1437,6 +1437,9 @@ export function checkhighlightfunction(retsid){
 
 export function openDetails(road){
     clearGraphicsLayer()
+    if (store.alertTextInfo.type == "error"){
+        store.isAlert = false
+    }
     store.toggleFeed = 2
     store.isSaving = false
     //store.isSaveBtnDisable = true
@@ -1750,4 +1753,15 @@ export function applyOSM(){
     retsLabelclass.symbol.haloSize = 0
     TxDOTRoadways.labelsVisible = false,
     TxDOTRoadways.renderer.symbol.width = 0
+}
+
+export async function deleteRets(){
+    store.retsObj.attributes.isDelete = true
+    await deleteRETSPT(store.retsObj)
+    removeRelatedRetsFromMap(store.retsObj.attributes.OBJECTID)
+    store.deleteRetsID()
+    deleteRetsGraphic()
+    //this.returnToFeed()
+    store.toggleFeed = 1
+    return
 }

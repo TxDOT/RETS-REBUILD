@@ -326,7 +326,7 @@
                 ['Release 2.5', ' User Story 95: Add a count to the header', 'User Story 111: Use most recent history item in the card footer ', 'User Story 133: Filter: Add Custom Filter option',
                 'User Story 146: Job Detail Pane: Update', 'User Story 171: Resize app','User Sory 150: Add ability to save custom filters', 'User Story 170: Add update triggers for all updates made to a RETS',
                 'User Story 195: Add time-gated limiter to triggers to prevent 3 or more comments being added when new RETS is created', 'User Story 205: Update tables and filter for multiple district users',
-                'User Story 230: Transition to prod create portal', 'Bug 178: Activity feed detail pane selection interaction', 'Bug 192: Changing status duplicates job feed', 'Bug 176: 1969 date corrupting history update in card footer',
+                 'Bug 178: Activity feed detail pane selection interaction', 'Bug 192: Changing status duplicates job feed', 'Bug 176: 1969 date corrupting history update in card footer',
                 'Bug 180: New job cards are not at the top of the feed', 'Bug 181: No route check box not checked for new jobs', 'Bug 123: Map Pane Search still not working properly for Minute Orders'],
                 ['Release 2.4', 'User Story 146: Job Detail Pane: Update', ' Bug 158: Selection not respected when JD pane is open', 'Bug 172: RETS number and subtitle too close'],
                 ['Release 2.3', 'User Story 107: Create tab buttons for Activity Feed and Details', 'User Story 108: Cancel button warning popup for unsaved changes', 'User Story 137: Add "Created" by info to metadata tab',

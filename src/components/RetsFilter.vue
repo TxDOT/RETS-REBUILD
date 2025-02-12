@@ -4,7 +4,7 @@
             <div style="margin: 10px;">
                 <div style="position: relative; bottom:0rem; font-weight: normal; font-size: 20px; flex: auto; padding-bottom: 8px;">Filter Activity Feed</div>
                 <hr></hr>
-                <div class="container" style="padding-top: 8px;" @click="isDisabled = false; ">
+                <div class="container" style="padding-top: 8px;" @click="isDisabled = false; store.customquery = ''; validationMessage = '' ">
                     <div no-gutters class="item">
                         <v-select :disabled="isDisabled" :items="filterSort" item-title="title" return-object density="compact" label="Sort" variant="underlined" v-model="store.CREATE_DT" >
                         </v-select>
@@ -253,6 +253,7 @@ export default{
         runCustomQuery(){
             // this.clearValue()
             // return
+            this.isDisabled = true
             if (store.customquery === ''){
                 return
             }
@@ -411,6 +412,7 @@ export default{
             return
         },
         closeDateChip(){
+            this.currentYear = false
             this.selectDate = []
             store.EDIT_DT = null
             return

@@ -37,7 +37,7 @@
 //import functions
 //import {queryRetsTable} from './utility.js'
 import {view} from './map-Init.js'
-import {home, hoverRetsPoint, discardeditcopy, openDetails, updateRetsObj, removeOutline, removeHighlight, highlightRETSPoint, zoomTo, canceldetailsfunction, deleteRets, returnToFeedFunction} from './utility.js'
+import {home, hoverRetsPoint, discardeditcopy, openDetails, updateRetsObj, removeOutline, removeHighlight, highlightRETSPoint, zoomTo, canceldetailsfunction, deleteRets, returnToFeedFunction,setBasemap} from './utility.js'
 import {store} from './store.js'
 
 // import ShowChanges from './showChanges.vue'
@@ -114,7 +114,18 @@ export default{
             store.isSaveBtnDisable = true
             removeHighlight("a", true)
             removeOutline()
-            store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+            if (store.isAlert && store.alertTextInfo.type == "error"){
+                    store.isAlert = false
+                }
+            // store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+            if (store.CREATE_DT){
+                            await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+
+                        }
+                        else{
+                            await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+
+                        }
 
             return
         },
@@ -129,7 +140,6 @@ export default{
                 removeHighlight("a", true)
                 highlightRETSPoint(store.retsObj.attributes)
                 const elementId = String(store.retsObj.attributes.RETS_ID).concat('-', store.retsObj.attributes.OBJECTID);
-                console.log(elementId)
                 const element = document.getElementById(elementId);
                 if (element){
                     element.classList.toggle('highlight-card');

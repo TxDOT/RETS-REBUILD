@@ -279,7 +279,14 @@
                     removeHighlight(store.retsObj)
                     store.roadHighlightObj.clear()
                     if(!store.isSearch){
-                        await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                        if (store.CREATE_DT){
+                            await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+
+                        }
+                        else{
+                            await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+
+                        }
                         store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                     }
                     // }
@@ -308,6 +315,9 @@
             },
 
             async sendToParent(){
+                if ((store.isAlert && store.alertTextInfo.type == "error") || (!store.retsObj.attributes.DESC_)){
+                    return
+                }
                 const roadExist = await isRoadExist()
                 if(roadExist && !store.retsObj.attributes.NO_RTE){
                     store.closeIsRoadExist = true

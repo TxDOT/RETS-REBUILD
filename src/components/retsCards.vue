@@ -201,7 +201,6 @@ export default{
             if ( store.retsObj.attributes.CREATE_DT === store.retsObj.attributes.EDIT_DT && store.archiveRetsDataString.length != 0){
                 return
             }
-            console.log("zoom")
             await includes(rets.attributes).then(result => {
                  var isIncluded = result
                  if (isIncluded === false){
@@ -241,7 +240,7 @@ export default{
 
             }   
             
-            if(!store.isSaveBtnDisable || (store.retsObj.attributes.GIS_ANALYST === null || store.retsObj.attributes.GRID_ANALYST === null || store.retsObj.attributes.DIST_ANALYST === null|| store.retsObj.attributes.DIST_NM === null || store.retsObj.attributes.CNTY_NM === null ) ){ //|| store.retsObj.attributes.DESC_ == null && 
+            if(!store.isSaveBtnDisable || (store.retsObj.attributes.GIS_ANALYST === null || store.retsObj.attributes.GRID_ANALYST === null || store.retsObj.attributes.DIST_ANALYST === null|| store.retsObj.attributes.DIST_NM === null || store.retsObj.attributes.CNTY_NM === null) ){
                 clearTimeout(this.timer)
                 store.cancelpopup = true
                 return

@@ -35,7 +35,16 @@ async function signIn(){
   
   await queryFlags(userId)
   await setDefExpRets(userId)
-  store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+  //store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+  if (store.CREATE_DT){
+    await store.getRetsLayer(userId, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+
+}
+else{
+    await store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+
+}
+
   appConstants.userQueryField = appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]
   router.push({name: "Map"})
   //needs to be worked on//
