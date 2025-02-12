@@ -389,8 +389,7 @@
                                     store.isCard = true
                                     store.isDetailsPage = false
                                     this.toggle = 1
-                                    store.toggleFeed = 1
-
+                                    store.toggleFeed = 1                                    
                                     
                                 },
                                 disabled: false

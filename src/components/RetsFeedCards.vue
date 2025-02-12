@@ -232,6 +232,8 @@ export default{
                 this.isSpinner = false
                 this.Spinneractive = true
                 store.activityBanner = objectid
+                store.isDetailsPage = true
+                store.toggleFeed = 2
                 return
             }
             catch(err){
@@ -282,7 +284,7 @@ export default{
             this.searchTimer = ""
             this.searchTimer = setTimeout(()=>{
                 const zoomToRETS = rets.geometry
-                highlightRETSPoint(rets.attributes)
+                //highlightRETSPoint(rets.attributes)
                 zoomTo(zoomToRETS)
             },250)
         },
@@ -463,7 +465,7 @@ export default{
         },
         'store.clickevent': {
             handler: function() {
-                if (!store.isSaveBtnDisable && store.isDetailsPage  && store.layerName != "TxDOT Roadways" && store.clickevent.button === 0){
+                if (!store.isSaveBtnDisable && store.isDetailsPage && store.layerName != "TxDOT Roadways" && store.clickevent.button === 0){
                     store.cancelpopup = true
                     return
                 }

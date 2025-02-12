@@ -14,7 +14,7 @@ import { appConstants } from "../common/constant.js";
 import {store} from './store.js'
 //import {getDFOFromGRID} from './crud.js'
 import esriId from "@arcgis/core/identity/IdentityManager.js";
-import { addRETSPT } from './crud.js';
+import { addRETSPT, deleteRETSPT } from './crud.js';
 import esriRequest from "@arcgis/core/request.js";
 import * as geodesicUtils from "@arcgis/core/geometry/support/geodesicUtils.js";
 import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils.js";
@@ -55,7 +55,7 @@ export async function getTxDotRdWayLayerView(){
     
     const rdLayerView = await view.whenLayerView(TxDOTRoadways)
     rdLayerView.highlightOptions = {
-        color: "#FF00FF", //bright fuchsia
+        color: "cyan", //bright fuchsia
         haloOpacity: 0.8,
         fillOpacity: 0.3
     };
@@ -109,8 +109,9 @@ export function clickRetsPoint(){
                       }, 10000);
                 }
                 else{
+
                     highlightLayer.removeAll()
-                    //if clicking on empty space, remove all highlights and return to activity feed
+                    removeHighlightRoadways('a', true)
                     if(!evt.results.length){
                         if (!store.isSaveBtnDisable){
                             store.cancelpopup = true
@@ -123,41 +124,22 @@ export function clickRetsPoint(){
                         store.isDetailsPage ? canceldetailsfunction() : null
                         return
                     }
+                    store.layerName = evt.results[0].layer.title
 
-                    //track if roadway has been clicked so that cancel popup doesnt show if its been clicked
+                    if ( store.retsObj.attributes.CREATE_DT === store.retsObj.attributes.EDIT_DT && store.archiveRetsDataString.length != 0){
+                        return
+                    }
                     if (evt.results[0].layer.title === "TxDOT Roadways"){
-                        store.layerName = "TxDOT Roadways"
-                    }
-                    else{
-                        store.layerName = ""
-                    }
-                    ///////
-                    //adds the popup for the roads
-                    if (evt.results.length >=1 && evt.results[0].layer.title === "TxDOT Roadways"){
+                        highlightRoadways(evt.results[0].graphic.attributes)
                         if (evt.results.length === 1){
                             view.openPopup({
                                 fetchFeatures: true,
                                 location: event.mapPoint
                             });
                         }
-                    }
-                    //ensure that the purple highglight does not apply to other basemaps other than the hybrid
-                    if (evt.results[0].layer.title ==="TxDOT Roadways" && map.basemap.title != "Hybrid"){
-                        highlightLayer.add({
-                            geometry: evt.results[0].graphic.geometry,
-                            symbol: {
-                                type: "simple-line",
-                                color: "cyan",
-                                width: 3
-                            }
-                        })
-                        return
 
                     }
-                    if (evt.results[0].layer.title){
-                        store.clickeventresult = evt.results[0].layer.title
-    
-                    }
+
                     const retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
                    
                     if (store.isDetailsPage && store.isSaveBtnDisable && !store.isEmptyRow){
@@ -172,12 +154,10 @@ export function clickRetsPoint(){
                     if (store.isSaveBtnDisable && !store.isEmptyRow){
                         removeOutline()
                         removeHighlight("a", true)
-                        //evt.results.forEach(rest => rest.graphic.layer.title ? highlightRETSPoint(rest.graphic.attributes) : highlightGraphicPt(rest.graphic.attributes))
                         const firstResult = Array.isArray(evt.results) ? evt.results[0] : null;
                         firstResult.graphic.layer.title ? highlightRETSPoint(firstResult.graphic.attributes) : highlightGraphicPt(firstResult.graphic.attributes)
                         outlineFeedCards(evt.results.splice(0,1))
                  
-                        //return evt.results[0].graphic.attributes.RETS_ID;
                     }
                     
                     
@@ -239,6 +219,17 @@ export function highlightRETSPoint(feature){
     return
 }
 
+export function highlightRoadways(feature){
+    view.whenLayerView(TxDOTRoadways)
+        .then((lyrView) => {
+            //highlights Point by giving OBJECTID
+            const highlight = lyrView.highlight(feature.OBJECTID)
+            highlightedFeatures.push(highlight)
+    
+            
+        })
+}
+
 export async function includes(feature){
     return view.whenLayerView(retsLayer)
     .then((lyrView) => {
@@ -266,6 +257,25 @@ export async function getHighlightGraphic(){
 
 export function removeHighlight(feature, removeAll){
     view.whenLayerView(retsLayer)
+        .then((lyrView) => {
+            if(removeAll){
+                lyrView._highlightIds.clear()
+                return
+            }
+
+            if(lyrView._highlightIds.has(feature?.attributes.OBJECTID)){
+                lyrView._highlightIds.delete(feature.attributes.OBJECTID)
+                lyrView._updateHighlight();
+                return
+            }
+            
+            
+        })
+    return
+}
+
+export function removeHighlightRoadways(feature, removeAll){
+    view.whenLayerView(TxDOTRoadways)
         .then((lyrView) => {
             if(removeAll){
                 lyrView._highlightIds.clear()

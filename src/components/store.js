@@ -28,7 +28,6 @@ export const store = reactive({
         settings: {},
         autoZoom: null,
         lastQuery : "",
-        clickeventresult : "",
         filterItems: [],
         filterquery: "",
         clickevent: "",
