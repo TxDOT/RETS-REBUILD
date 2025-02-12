@@ -277,11 +277,13 @@ export default{
                                     this.validationMessageColor = "green"
                                     this.validationMessage = "Query was successful"
                                     view.goTo(resp.extent)
+                                    //store.isfilter = false
                                     if (store.customquery && !store.userFilters.customQuery.includes(store.customquery))
                                         {
                                             store.userFilters.customQuery.push(store.customquery)
                                             this.isDisabled = true
                                             store.customquery = store.userFilters.customQuery.at(-1)
+                                            
                                         }
                                     
                                 })
@@ -354,6 +356,9 @@ export default{
             return
         },
         setFilterNumber(){
+            console.log(store.customquery)
+            console.log(this.validationMessage)
+           
             store.filter = {
                 createDt: store.CREATE_DT,
                 jobType: store.JOB_TYPE,
@@ -366,6 +371,12 @@ export default{
                 isAssignedTo: store.isAssignedTo,
                 customQuery: store.userFilters.customQuery
 
+            }
+
+            if (store.customquery && this.validationMessage != "No features returned." && this.validationMessage != "Invalid Query." ){
+                store.isfilter = false
+                this.cancelsaveQuery(store.filter)
+                return
             }
             store.customquery = null
             this.calcFilterDiff()
