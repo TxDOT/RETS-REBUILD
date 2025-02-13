@@ -528,4 +528,16 @@ export default{
     overflow: hidden;
 }
 
+.date :deep(.v-date-picker-years){
+    /* height: 320px; */
+    /* overflow-y: scroll; */
+    height: 300px;
+    overflow-y: auto;
+}
+.date :deep(.v-date-picker-years__content){
+    /* height: 260px !important; */
+    max-height: 80%;
+    overflow-y: auto;
+}
+
 </style>

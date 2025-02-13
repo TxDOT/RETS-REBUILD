@@ -301,7 +301,9 @@
                         'User Story 193: Add option to disable automatic zoom',
                         'User Story 204: Add setting to change the default basemap on load',
                         'User Story 212: Move legend icon down and basemap button up', 
-                        'Bug 229: Date Filter overlaps with buttons'
+                        'Bug 229: Date Filter overlaps with buttons','Bug 227: Interaction between feed and details tab not working properly',
+                        'Bug 228: Update the format of the RETS number in the browser tab','Bug 232: Date Filter','Bug 233: Custom Query/ filter interaction',
+                        'Bug 255: Filter: Date sorting reverts'
                     ]
                 ],
                 previousReleaseNotes: [
