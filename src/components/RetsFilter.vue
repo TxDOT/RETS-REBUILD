@@ -356,7 +356,6 @@ export default{
             return
         },
         setFilterNumber(){
-           
             store.filter = {
                 createDt: store.CREATE_DT,
                 jobType: store.JOB_TYPE,
