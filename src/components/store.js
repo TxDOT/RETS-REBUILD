@@ -25,6 +25,7 @@ export const store = reactive({
         layerName : "",
         customquery:"",
         currFilter: "",
+        deleteafterdiscard: false,
         settings: {},
         autoZoom: null,
         lastQuery : "",
