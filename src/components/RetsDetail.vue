@@ -341,7 +341,6 @@
                 return
             },
             async cancelDetailsMetadata(){
-
                 if(!store.isSaveBtnDisable){
                     store.clickStatus = false
                     store.cancelpopup = true

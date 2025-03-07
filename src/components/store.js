@@ -16,12 +16,16 @@ export const store = reactive({
                 cntyNM: '',
                 user: '',
                 isAssignedTo: '',
+                isAssociated: '',
                 customQuery: []
 
         },
         retsVersion: "2.7.0",
         autozoomtest:true,
+        autozoomextent: true,
         basemaptest: "Dark Grey",
+        retspointlength: null,
+        deleteafterdiscard: false,
         layerName : "",
         customquery:"",
         currFilter: "",
@@ -107,6 +111,7 @@ export const store = reactive({
         CNTY_NM:[],
         USER:[],
         isAssignedTo: false,
+        isAssociated: false,
         filterTotal: 2,
         isfilter: false,
         filterQuery: "",
@@ -314,7 +319,6 @@ export const store = reactive({
                                 this.updateRetsSearch = []
                                 const query = {"whereString": `${resp}`, "queryLayer": "retsLayerLayerView"}
                                 const orderField = `${this.filter.createDt.filter} ${this.filter.createDt.sortType}`
-                                 
                                 this.getRetsLayer(store.loggedInUser, query.whereString, query.queryLayer, orderField)
                                 this.isDetailsPage = false
                                 this.isNoRets = true

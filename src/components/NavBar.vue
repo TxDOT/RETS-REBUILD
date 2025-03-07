@@ -83,7 +83,7 @@
        </v-card-item>
 
    </v-card>
-   <v-card id = "containersettings" height = "615" v-show = "settingsstatus">
+   <v-card id = "containersettings" height = "655" v-show = "settingsstatus">
     <v-card-item>
         <span class="banner-txt">Settings</span>
         &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
@@ -105,12 +105,23 @@
                         </v-label>
                     </template>
                 </v-switch>
+                
             </div>
+            <div style="height: 40px;">
+                <v-switch v-model="store.autozoomextent"   class="autozoom-switch" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn()" density="compact" >
+                    <template #prepend >
+                        <v-label>
+                            Automatically filter the activity feed based on the map extent
+                        </v-label>
+                    </template>
+                </v-switch>
+            </div>
+
                 <v-label style="font-size: 10px; color: #D9D9D9; margin-left: 10px;">Display selected basemap on load</v-label>
                 <v-select style="width: 22rem; margin-left: 10px; margin: top 0; margin-bottom: 0;" class="basemap-select" variant="underlined" density="compact" v-model=store.basemaptest :items=basemapArray></v-select>
         </v-card-item>
         <hr id = "separator" />
-            <v-btn @click ="activateFeedback()" color="#4472C4" rounded  style="position: absolute; right: 25px; top: 172px; z-index: 99999;">
+            <v-btn @click ="activateFeedback()" color="#4472C4" rounded  style="position: absolute; right: 25px; top: 212px; z-index: 99999;">
                 <span style="font-weight: 100;">Feedback</span>
             </v-btn>
         <v-card-item id = "notificationsitems" >
@@ -246,7 +257,7 @@
 
     import { appConstants } from '../common/constant.js';
     import { graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect } from '../components/map-Init.js';
-    import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM } from '../components/utility.js';
+    import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM, home, restoreExtent} from '../components/utility.js';
     import { vuetify } from '../main.js';
     import { addSettings } from './crud.js';
     import { store } from './store';
@@ -276,6 +287,8 @@
                 switchValueDark: true,
                 switchValue : false,
                 isAutoZoom: null,
+                isAutoZoomExtent: null,
+                userSettings: JSON.parse(appConstants.defaultUserValue[0].settings) || {},
                 currAutoZoomValue: null,
                 isActOpen: true,
                 shift: 200,
@@ -445,7 +458,7 @@
                                 {title:"Select", icon: 'mdi-select-multiple', color: "#D9D9D9", name: "Multi-Select", isActive: false,
                                action: () =>{
                                 store.isSelectEnabled = !store.isSelectEnabled
-                                this.retsToolsBottom[0].isActive = !this.retsToolsBottom[0].isActive
+                                this.retsToolsBottom[2].isActive = !this.retsToolsBottom[2].isActive
                                 this.handleSelectTool();
                                },
                                setActive: () => {
@@ -535,43 +548,84 @@
                 },
                 mounted() {
                     this.setAutozoomSwitch()
+                    this.setAutozoomExtentSwitch()
 
                 },
                 
                 methods: {
                     toggleGroup(index) { this.$set(this.expandedGroups, index, !this.expandedGroups[index])},
-                    setAutozoomSwitch(){
-                        if (JSON.parse(appConstants.defaultUserValue[0].settings) == null){
-                            store.autozoomtest = true
-                            
+                    setAutozoomExtentSwitch(){
+                        const { autoZoom, autoZoomExtent } = this.userSettings;
+                        if (autoZoomExtent != null){
+                            store.autozoomextent = autoZoomExtent
                         }
                         else{
-                            store.autozoomtest = JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom
+                            store.autozoomextent = false
                         }
+                        // if (JSON.parse(appConstants.defaultUserValue[0].settings) == null){
+                        //     store.autozoomextent = true
+                            
+                        // }
+                        // else{
+                        //     store.autozoomextent = JSON.parse(appConstants.defaultUserValue[0].settings).autoZoomExtent
+                        // }
+                    },
+                    setAutozoomSwitch(){
+                        const { autoZoom, autoZoomExtent } = this.userSettings;
+                        if (autoZoom != null){
+                            store.autozoomtest = autoZoom
+                        }
+                        else{
+                            store.autozoomtest = true
+                        }
+                        // if (JSON.parse(appConstants.defaultUserValue[0].settings) == null){
+                        //     store.autozoomtest = true
+                            
+                        // }
+                        // else{
+                        //     store.autozoomtest = JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom
+                        // }
                     },
                     async saveSettings(){
                         store.settings = {
                             autoZoom : store.autozoomtest,
+                            autoZoomExtent: store.autozoomextent,
                             basemap: store.basemaptest
                         } 
                         this.isAutoZoom = store.autozoomtest
+                        this.isAutoZoomExtent = store.autozoomextent
+                        
                         const settingsObject = {attributes: {OBJECTID : appConstants.defaultUserValue[0].objectid, SETTINGS : JSON.stringify(store.settings)}}
                         await addSettings(settingsObject)
+                        if (store.updateRetsSearch.length != store.retspointlength && store.autozoomextent == false){
+                            if (store.CREATE_DT){
+                            await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+
+                        }
+                        else{
+                            await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+
+                        }
+                            
+                    }
 
                     },
                     cancelSettings(){
-                        if (JSON.parse(appConstants.defaultUserValue[0].settings) == null && this.isAutoZoom == null){
-                            store.autozoomtest = true
-                        }
-                        else if (JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom == null && this.isAutoZoom != null){
-                            store.autozoomtest = this.isAutoZoom
-                        }
-                        else if (JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom != null && this.isAutoZoom == null){
-                            store.autozoomtest = JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom
-                        }
-                        else if (JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom != null && this.isAutoZoom != null){
-                            store.autozoomtest = this.isAutoZoom
-                        }
+                        const { autoZoom, autoZoomExtent } = this.userSettings;
+                        store.autozoomtest = this.isAutoZoom ?? autoZoom ?? true;
+                        store.autozoomextent = this.isAutoZoomExtent ?? autoZoomExtent ?? false;
+                        // if (JSON.parse(appConstants.defaultUserValue[0].settings) == null && this.isAutoZoom == null){
+                        //     store.autozoomtest = true
+                        // }
+                        // else if (JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom == null && this.isAutoZoom != null){
+                        //     store.autozoomtest = this.isAutoZoom
+                        // }
+                        // else if (JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom != null && this.isAutoZoom == null){
+                        //     store.autozoomtest = JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom
+                        // }
+                        // else if (JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom != null && this.isAutoZoom != null){
+                        //     store.autozoomtest = this.isAutoZoom
+                        // }
                        
                     },
                     shiftDiv(){

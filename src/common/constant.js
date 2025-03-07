@@ -39,7 +39,7 @@ export const appConstants = {
     activityList: [],
     userRoles: [],
     defaultQuery : (userId) => {
-        return `(${appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]} like '%${userId}%' OR ASSIGNED_TO = '${userId}') AND (STAT = 1 OR STAT = 2 or STAT = 4) AND (JOB_TYPE = 1 OR JOB_TYPE = 2)`
+        return `(${appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]} like '%${userId}%' OR ASSIGNED_TO = '${userId}' OR CREATE_NM = '${userId}' OR EDIT_NM = '${userId}') AND (STAT = 1 OR STAT = 2 or STAT = 4) AND (JOB_TYPE = 1 OR JOB_TYPE = 2)`
     },
     userQueryField: [],
     defineCMNT: {
