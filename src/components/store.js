@@ -20,7 +20,7 @@ export const store = reactive({
                 customQuery: []
 
         },
-        retsVersion: "2.7.0",
+        retsVersion: "2.7.1",
         autozoomtest:true,
         autozoomextent: true,
         basemaptest: "Dark Grey",
