@@ -7,11 +7,11 @@ import router from '../router/index.js'
 import {store} from './store.js'
 
 const authen = new OAuthInfo({
-  appId: "qzqSMtBVUMsAt2Is",
+  appId: "vnsviwIoWbrwbnw8",
   popup: false,
   expiration: 10080,
   preserveUrlHash: true,
-  portalUrl: "https://testportal.txdot.gov/create"
+  portalUrl: "https://maps.txdot.gov/create"
 })
 
 export function login(){
