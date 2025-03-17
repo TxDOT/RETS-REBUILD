@@ -27,7 +27,7 @@
 
                     <div class="retsSubtitle">
                         <div id="retSubText">
-                            <v-text-field variant="plain" v-if="store.isDetailsPage" :disabled="isSubtitle" placeholder="Add a subtitle" id="subtitleCard" :class="store.retsObj.attributes.RETS_NM?.length ? 'rets-subtitle-text-active' : 'rets-subtitle-text'" v-model="store.retsObj.attributes.RETS_NM" @update:modelValue="retsSubtitleUpdate($event)" maxlength="34"></v-text-field>
+                            <v-text-field variant="plain" autocomplete="off" v-if="store.isDetailsPage" :disabled="isSubtitle" placeholder="Add a subtitle" id="subtitleCard" :class="store.retsObj.attributes.RETS_NM?.length ? 'rets-subtitle-text-active' : 'rets-subtitle-text'" v-model="store.retsObj.attributes.RETS_NM" @update:modelValue="retsSubtitleUpdate($event)" maxlength="34"></v-text-field>
                         </div>
                     </div>
                 </div>
@@ -208,6 +208,7 @@ export default{
         });
         this.retsFilters.loggedInUser = store.loggedInUser
         this.retsFilters[appConstants.queryField[appConstants.userRoles.find(x => x.value === store.loggedInUser).type]] = appConstants.defaultUserValue
+        store.retspointlength = store.updateRetsSearch.length
     },
     methods:{
         retsSubtitleUpdate(a){

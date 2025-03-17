@@ -36,6 +36,7 @@ async function signIn(){
   await queryFlags(userId)
   await setDefExpRets(userId)
   //store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+  store.savedFilter = store.savedFilter.replace(/''/g, `'${userId}'`)
   if (store.CREATE_DT){
     await store.getRetsLayer(userId, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
 
@@ -88,9 +89,8 @@ const setDefExpRets = async (userId) => {
 
   const parsedUSEROBJECTID = JSON.parse(userOBJECTID.FILTERS)
   store.userFilters = parsedUSEROBJECTID
-  filterMapActivityFeed(parsedUSEROBJECTID, true)
+  filterMapActivityFeed(parsedUSEROBJECTID, true, userId)
   setFilterProperties(parsedUSEROBJECTID)
-
   return
 }
 

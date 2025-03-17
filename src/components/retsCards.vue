@@ -221,6 +221,7 @@ export default{
             this.timer = setTimeout(()=>{
                 const zoomToRETS = rets.geometry
                 highlightRETSPoint(rets.attributes)
+                store.roadHighlightObj.add(rets)
                 zoomTo(zoomToRETS)
             },250)
         },

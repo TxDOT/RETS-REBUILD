@@ -141,6 +141,7 @@ export function clickRetsPoint(){
                     }
 
                     const retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
+                    console.log(retsPt)
                    
                     if (store.isDetailsPage && store.isSaveBtnDisable && !store.isEmptyRow){
                         //canceldetailsfunction()
@@ -159,7 +160,6 @@ export function clickRetsPoint(){
                         outlineFeedCards(evt.results.splice(0,1))
                  
                     }
-                    
                     
                 }
                 
@@ -337,12 +337,13 @@ export function getGEMTasks(){
 }
 
 //filter Map and activity feed 
-export async function filterMapActivityFeed(filterOpt,val){
+export async function filterMapActivityFeed(filterOpt,val,userId){
         let GIS_ANALYST = []
         let GRID_ANALYST = []
         let DIST_ANALYST = []
         let ANALYST = []
         let ASSIGNED_TO = []
+        let ASSOCIATED = []
         let STAT = []
         let DIST_NM = []
         let CNTY_NM = []
@@ -358,10 +359,15 @@ export async function filterMapActivityFeed(filterOpt,val){
                 if(key === 'isAssignedTo' && value){
                     fullFilter.push(`ASSIGNED_TO in ('${store.loggedInUser}')`)
                 }
-                if(key === 'user' && !filterOpt.isAssignedTo){
+                if(key === 'isAssociated' && value){
+                    fullFilter.push(`(CREATE_NM in ('${store.loggedInUser}') OR EDIT_NM in ('${store.loggedInUser}') )`)
+                }
+                if(key === 'user' && !filterOpt.isAssignedTo && !filterOpt.isAssociated){
                     let a; 
                     for(a=0; a < value.length; a++){
                         ASSIGNED_TO.push(`'${value[a].value}'`)
+                        ASSOCIATED.push(`'${value[a].value}'`)
+
                         if(value[a].type === 1){
                             GIS_ANALYST.push(`'${value[a].value}'`)
                         }
@@ -386,7 +392,9 @@ export async function filterMapActivityFeed(filterOpt,val){
                     })
                     
                     fullFilter = [...fullFilter, mapAnalyst.join(' OR ')]
-                    ASSIGNED_TO.length ? fullFilter.push(`OR ASSIGNED_TO in (${ASSIGNED_TO.join(" , ")}))`) : null
+                    ASSIGNED_TO.length ? fullFilter.push(`OR ASSIGNED_TO in (${ASSIGNED_TO.join(" , ")})`) : null
+                    ASSOCIATED.length ? fullFilter.push(`OR CREATE_NM in (${ASSIGNED_TO.join(" , ")}) OR EDIT_NM in (${ASSIGNED_TO.join(" , ")})) ` ) : null
+                    
                 }
                 if(key === 'stat' || key === 'distNM' || key === 'cntyNM' || key === 'actv' || key === 'jobType'){
 
@@ -438,7 +446,9 @@ export async function filterMapActivityFeed(filterOpt,val){
         }
         const removeEmpty = fullFilter.filter(x => x.length)
         let filterDef = removeEmpty.join(" AND ")
-        let newFilter = filterDef.replace("AND OR", "OR")
+        //let newFilter = filterDef.replace("AND OR", "OR")
+        let newFilter = filterDef.replace(/AND OR/g, 'OR')
+
         // if(!filterOpt.isAssignedTo){
         //     const assignedToQuery = [...GIS_ANALYST, ...GRID_ANALYST, ...DIST_ANALYST]
         //     assignedToQuery.map((i) => `${i}`).join(",")
@@ -447,7 +457,8 @@ export async function filterMapActivityFeed(filterOpt,val){
         // }
         try{
             const filterMapPromise = new Promise((res, rej) => {
-                retsLayer.definitionExpression = store.savedFilter = `${newFilter}`
+                store.savedFilter = `${newFilter}`
+                retsLayer.definitionExpression = store.savedFilter = store.savedFilter.replace(/''/g, `'${userId}'`)
                 res(filterDef)
             })
             if (val || (!store.autozoomtest)){
@@ -1657,6 +1668,7 @@ export function setFilterProperties(userFilterObject){
     store.CNTY_NM = userFilterObject.cntyNM
     store.USER = userFilterObject.user
     store.isAssignedTo = userFilterObject.isAssignedTo
+    store.isAssociated = userFilterObject.isAssociated
     return
     
 
@@ -1764,4 +1776,13 @@ export async function deleteRets(){
     //this.returnToFeed()
     store.toggleFeed = 1
     return
+}
+
+export function restoreExtent(){
+    return retsLayer.queryExtent().then((response) => {
+        view.goTo(response.extent)
+        .catch((error) => {
+          console.error(error);
+        });
+      });
 }
