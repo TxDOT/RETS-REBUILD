@@ -7,11 +7,11 @@ import router from '../router/index.js'
 import {store} from './store.js'
 
 const authen = new OAuthInfo({
-  appId: "qzqSMtBVUMsAt2Is",
+  appId: "vnsviwIoWbrwbnw8",
   popup: false,
   expiration: 10080,
   preserveUrlHash: true,
-  portalUrl: "https://testportal.txdot.gov/create"
+  portalUrl: "https://maps.txdot.gov/create"
 })
 
 export function login(){
@@ -35,7 +35,17 @@ async function signIn(){
   
   await queryFlags(userId)
   await setDefExpRets(userId)
-  store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+  //store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+  store.savedFilter = store.savedFilter.replace(/''/g, `'${userId}'`)
+  if (store.CREATE_DT){
+    await store.getRetsLayer(userId, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+
+}
+else{
+    await store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+
+}
+
   appConstants.userQueryField = appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]
   router.push({name: "Map"})
   //needs to be worked on//
@@ -79,9 +89,8 @@ const setDefExpRets = async (userId) => {
 
   const parsedUSEROBJECTID = JSON.parse(userOBJECTID.FILTERS)
   store.userFilters = parsedUSEROBJECTID
-  filterMapActivityFeed(parsedUSEROBJECTID, true)
+  filterMapActivityFeed(parsedUSEROBJECTID, true, userId)
   setFilterProperties(parsedUSEROBJECTID)
-
   return
 }
 

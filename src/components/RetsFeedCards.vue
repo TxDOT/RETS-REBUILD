@@ -27,7 +27,7 @@
 
                     <div class="retsSubtitle">
                         <div id="retSubText">
-                            <v-text-field variant="plain" v-if="store.isDetailsPage" :disabled="isSubtitle" placeholder="Add a subtitle" id="subtitleCard" :class="store.retsObj.attributes.RETS_NM?.length ? 'rets-subtitle-text-active' : 'rets-subtitle-text'" v-model="store.retsObj.attributes.RETS_NM" @update:modelValue="retsSubtitleUpdate($event)" maxlength="34"></v-text-field>
+                            <v-text-field variant="plain" autocomplete="off" v-if="store.isDetailsPage" :disabled="isSubtitle" placeholder="Add a subtitle" id="subtitleCard" :class="store.retsObj.attributes.RETS_NM?.length ? 'rets-subtitle-text-active' : 'rets-subtitle-text'" v-model="store.retsObj.attributes.RETS_NM" @update:modelValue="retsSubtitleUpdate($event)" maxlength="34"></v-text-field>
                         </div>
                     </div>
                 </div>
@@ -208,6 +208,7 @@ export default{
         });
         this.retsFilters.loggedInUser = store.loggedInUser
         this.retsFilters[appConstants.queryField[appConstants.userRoles.find(x => x.value === store.loggedInUser).type]] = appConstants.defaultUserValue
+        store.retspointlength = store.updateRetsSearch.length
     },
     methods:{
         retsSubtitleUpdate(a){
@@ -232,6 +233,8 @@ export default{
                 this.isSpinner = false
                 this.Spinneractive = true
                 store.activityBanner = objectid
+                store.isDetailsPage = true
+                store.toggleFeed = 2
                 return
             }
             catch(err){
@@ -282,7 +285,7 @@ export default{
             this.searchTimer = ""
             this.searchTimer = setTimeout(()=>{
                 const zoomToRETS = rets.geometry
-                highlightRETSPoint(rets.attributes)
+                //highlightRETSPoint(rets.attributes)
                 zoomTo(zoomToRETS)
             },250)
         },
@@ -463,7 +466,7 @@ export default{
         },
         'store.clickevent': {
             handler: function() {
-                if (!store.isSaveBtnDisable && store.isDetailsPage  && store.layerName != "TxDOT Roadways" && store.clickevent.button === 0){
+                if (!store.isSaveBtnDisable && store.isDetailsPage && store.layerName != "TxDOT Roadways" && store.clickevent.button === 0){
                     store.cancelpopup = true
                     return
                 }

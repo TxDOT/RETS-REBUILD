@@ -1,12 +1,12 @@
 export const appConstants = {
-    retsPtDev: "https://testportal.txdot.gov/createags/rest/services/TPP_RETS/FeatureServer/0",
-    retsPtProd: "https://testportal.txdot.gov/createags/rest/services/RETS/FeatureServer/0",
-    retsCMNTDev: "https://testportal.txdot.gov/createags/rest/services/TPP_RETS_CMNT/FeatureServer/0",
-    retsCMNTProd: "https://testportal.txdot.gov/createags/rest/services/RETS_CMNT/FeatureServer/0",
-    retsUserRoleDev: "https://testportal.txdot.gov/createags/rest/services/RETS_SUPPORT_UAT/FeatureServer/1",
-    retsUserRoleProd: "https://testportal.txdot.gov/createags/rest/services/RETS_SUPPORT/FeatureServer/1",
-    retsFlagColorDev: "https://testportal.txdot.gov/createags/rest/services/RETS_SUPPORT_UAT/FeatureServer/3",
-    retsFlagColorProd: "https://testportal.txdot.gov/createags/rest/services/RETS_SUPPORT/FeatureServer/3",
+    retsPtDev: "https://maps.txdot.gov/createags/rest/services/RETS_UAT/FeatureServer/0",
+    retsPtProd: "https://maps.txdot.gov/createags/rest/services/RETS/FeatureServer/0",
+    retsCMNTDev: "https://maps.txdot.gov/createags/rest/services/RETS_CMNT_UAT/FeatureServer/0",
+    retsCMNTProd: "https://maps.txdot.gov/createags/rest/services/RETS_CMNT/FeatureServer/0",
+    retsUserRoleDev: "https://maps.txdot.gov/createags/rest/services/RETS_SUPPORT_UAT/FeatureServer/1",
+    retsUserRoleProd: "https://maps.txdot.gov/createags/rest/services/RETS_SUPPORT/FeatureServer/1",
+    retsFlagColorDev: "https://maps.txdot.gov/createags/rest/services/RETS_SUPPORT_UAT/FeatureServer/3",
+    retsFlagColorProd: "https://maps.txdot.gov/createags/rest/services/RETS_SUPPORT/FeatureServer/3",
     RetsStatus: ['Not Started', 'On Hold', 'In Progress'],
     CardColorMap:{
         '1': '#FF00C5',
@@ -39,7 +39,7 @@ export const appConstants = {
     activityList: [],
     userRoles: [],
     defaultQuery : (userId) => {
-        return `(${appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]} like '%${userId}%' OR ASSIGNED_TO = '${userId}') AND (STAT = 1 OR STAT = 2 or STAT = 4) AND (JOB_TYPE = 1 OR JOB_TYPE = 2)`
+        return `(${appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]} like '%${userId}%' OR ASSIGNED_TO = '${userId}' OR CREATE_NM = '${userId}' OR EDIT_NM = '${userId}') AND (STAT = 1 OR STAT = 2 or STAT = 4) AND (JOB_TYPE = 1 OR JOB_TYPE = 2)`
     },
     userQueryField: [],
     defineCMNT: {

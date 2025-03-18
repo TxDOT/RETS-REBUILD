@@ -19,9 +19,11 @@ import TileInfo from "@arcgis/core/layers/support/TileInfo.js";
 import Legend from "@arcgis/core/widgets/Legend";
 import LegendViewModel from "@arcgis/core/widgets/Legend/LegendViewModel";
 import Graphic from "@arcgis/core/Graphic";
-import { outlineFeedCards, removeOutline, home, scrollToTopOfFeed} from "./utility.js";
+import { outlineFeedCards, removeOutline, home, scrollToTopOfFeed, retsLayerView} from "./utility.js";
 import Extent from "@arcgis/core/geometry/Extent.js";
 import {store} from './store.js'
+import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
+import { render } from "vue";
 
 
 
@@ -205,19 +207,19 @@ export let roadwaysRenderer = {
   type: "simple",
   symbol: {
     type: "simple-line",
-    width: 0,
+    width: 1,
     color: [105,105,105,.6],
   },
-  visualVariables: [
-    {
-      type: "size",
-      valueExpression: "$view.scale",
-      stops: [
-        { size: 8, value: 8499 },
-        { size: 0.01, value: 8500 },
-      ] 
-    }
-  ]
+  // visualVariables: [
+  //   {
+  //     type: "size",
+  //     valueExpression: "$view.scale",
+  //     stops: [
+  //       { size: 8, value: 8499 },
+  //       { size: 0.01, value: 8500 },
+  //     ] 
+  //   }
+  // ]
 }
 
 export const polygonsymbol = {
@@ -311,6 +313,7 @@ export const TxDOTRoadways = new FeatureLayer ({
   // definitionExpression: `RTE_PRFX = 'IH'`,
   popupTemplate: popupTemplateRoadways,
   labelsVisible: false,
+  opacity: 0
 })
 
 export const TxDOTRoadwayscopy = new FeatureLayer ({
@@ -526,7 +529,9 @@ export const searchWidget = new Search({
 
         const feats = await retsLayer.queryFeatures(query)
         const feature = feats.features[0]
-
+        if (!feature){
+          return
+        }
         view.goTo({
           target: feats.features[0].geometry,
           zoom: 16
@@ -637,7 +642,9 @@ export const searchWidget = new Search({
 
         const feats = await retsLayer.queryFeatures(query)
         const feature = feats.features[0]
-
+        if (!feature){
+          return
+        }
         view.goTo({
           target: feats.features[0].geometry,
           zoom: 16
@@ -668,14 +675,13 @@ export const searchWidget = new Search({
 
       }
     },
-    {
+    { 
       name: "Latitude/Longitude",
       url: "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer",
       singleLineFieldName: "SingleLine",
       suggestionsEnabled: false,
       placeholder: "34.24190694,-101.12269563",
       localSearchDisabled: true,
-
     }
   ]
 
@@ -861,18 +867,80 @@ homeWidget.on("go", function() {
   home();
 });
 
+// const handlescale = reactiveUtils.watch(
+//   () => [view.stationary, view.scale],
+//   ([stationary, scale]) => {
+//     if (stationary){
+//       console.log("ok")
+//       if (view.scale < 1000000 ) { 
+//         retsLayer.renderer = retsPointRenderer;
+//       } 
+//       else if(view.scale > 1000000 && view.scale < 2000000){
+//         retsLayer.renderer = retsPointRendererout2
+//       }
+//       else {
+//         retsLayer.renderer = retsPointRendererout;
+//       }
+//       }
+//     }
+    
+//  );
 
-view.watch("scale", function(newValue) {
-  if (newValue < 1000000 ) { 
-    retsLayer.renderer = retsPointRenderer;
-  } 
-  else if(newValue > 1000000 && newValue < 2000000){
-    retsLayer.renderer = retsPointRendererout2
+retsPointRenderer.visualVariables = [
+  {
+    type : "size",
+    valueExpression: "$view.scale",
+    stops : [
+    
+
+      {size: 8, value: 0 },
+      {size: 6, value: 1000001 },
+      {size: 5, value: 2000000}
+    ]
   }
-  else {
-    retsLayer.renderer = retsPointRendererout;
+]
+
+
+
+const handleextent = reactiveUtils.watch(
+  () => [view.stationary, view.extent],
+  ([stationary, extent]) => {
+    // Only print the new zoom value when the view is stationary
+
+    if(stationary && !store.isDetailsPage && !store.autozoomextent != true){
+      let query = retsLayer.createQuery();
+      query.geometry = view.extent
+      query.spatialRelationship = "intersects"
+      query.returnGeometry = false
+      query.outFields = ["RETS_ID"]
+      const featurestring = []
+
+      retsLayer.queryFeatures(query)
+        .then(function(response){
+          response.features.forEach((feature) =>
+            featurestring.push(feature.attributes.RETS_ID)
+
+          )  
+          let stringex = null
+          if (response.features.length > 0){
+            stringex = featurestring.join(" OR RETS_ID = ")
+          }        
+          if (store.CREATE_DT){
+            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${stringex}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                //check if features are highlighted, if they are run the outlinefeedcards
+
+        }
+        else{
+            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${stringex}`, "retsLayer", "EDIT_DT DESC, PRIO")
+
+        }
+
+          
+        })
+    }
   }
-});
+ );
+  
 
 //remove attribution and zoom information
 view.ui.remove("attribution")

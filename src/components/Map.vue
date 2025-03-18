@@ -37,7 +37,7 @@
 //import functions
 //import {queryRetsTable} from './utility.js'
 import {view} from './map-Init.js'
-import {home, hoverRetsPoint, discardeditcopy, openDetails, updateRetsObj, removeOutline, removeHighlight, highlightRETSPoint, zoomTo, canceldetailsfunction, setBasemap} from './utility.js'
+import {home, hoverRetsPoint, discardeditcopy, openDetails, updateRetsObj, removeOutline, removeHighlight, highlightRETSPoint, zoomTo, canceldetailsfunction, deleteRets, returnToFeedFunction,setBasemap} from './utility.js'
 import {store} from './store.js'
 
 // import ShowChanges from './showChanges.vue'
@@ -61,72 +61,90 @@ export default{
 
     },
     methods:{
-        discardedits(){
+        async discardedits(){
             window.document.title = 'RETS Application'
-            if(!store.isDetailsPage){
-                const archiveRets = JSON.parse(store.archiveRetsDataString)
+            const archiveRets = JSON.parse(store.archiveRetsDataString)
+            let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
+            store.isCard = false
+            store.cancelpopup = false
+            store.toggleFeed = 2
+            store.isSaveBtnDisable = true
+            if (findItem){
+                updateRetsObj(findItem, archiveRets)
 
+            }
+            //runs when switching to other rets points from within the feed
+            if(!store.isDetailsPage){
                 if (archiveRets.attributes.RETS_ID != store.openAfterDiscardRets.attributes.RETS_ID){
+                    if (store.deleteafterdiscard){
+                        await deleteRets()
+                        store.isCancelBtnDisable = false
+                        store.deleteafterdiscard = false
+                        store.isAlert = false
+                    }
                     openDetails(store.openAfterDiscardRets)
-                    store.isCard = false
+                    zoomTo(store.openAfterDiscardRets.geometry)
                     store.isDetailsPage = true
                     store.activityBanner = `${store.openAfterDiscardRets.attributes.RETS_ID}`
-                    //outlineFeedCards()
-                    let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
-                    updateRetsObj(findItem, archiveRets)
-                    zoomTo(store.openAfterDiscardRets.geometry)
-                    store.cancelpopup = false
-                    store.isSaveBtnDisable = true
-                    store.toggleFeed = 2
                     return
                 }
-
-                let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
-                updateRetsObj(findItem, archiveRets)
-                store.cancelpopup = false
-                store.isSaveBtnDisable = true
-                store.activityBanner = "Activity Feed"
-                store.toggleFeed = 1
-                return
+               
             }
-            if (store.clickStatus && store.clickeventresult === "TPP RETS"){
+
+            //runs when switching to other rets points by clicking on the points
+            if (store.clickStatus && store.layerName === "TPP RETS"){
                 const retsPt = Array.from(store.roadHighlightObj)[0]
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
                 let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
                 updateRetsObj(findItem, archiveRets)
                 removeHighlight(store.openAfterDiscardRets)
+                removeOutline()
                 openDetails(retsPt)
-                store.isCard = false
                 store.isDetailsPage = true
+
                 store.activityBanner = `${retsPt.attributes.RETS_ID}`
-                store.cancelpopup = false
-                store.toggleFeed = 2
-                store.isSaveBtnDisable = true
 
                 return
 
             }
+            //runs when the discard popup appears after clicking on an empty part of map
             store.activityBanner = "Activity Feed"
             store.toggleFeed = 1
+            store.cancelpopup = false
+            store.isSaveBtnDisable = true
             removeHighlight("a", true)
             removeOutline()
-            discardeditcopy();
-            store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+            if (store.isAlert && store.alertTextInfo.type == "error"){
+                    store.isAlert = false
+                }
+            // store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+            if (store.CREATE_DT){
+                            await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+
+                        }
+                        else{
+                            await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+
+                        }
 
             return
         },
+        
         goBackActivity(){
             if(store.isDetailsPage){
                 store.cancelpopup = false;
                 return
-            } 
-            if(!store.isSaveBtnDisable || (store.retsObj.attributes.GIS_ANALYST === null || store.retsObj.attributes.GRID_ANALYST === null || store.retsObj.attributes.DIST_ANALYST === null|| store.retsObj.attributes.DIST_NM === null || store.retsObj.attributes.CNTY_NM === null)){
+            }
+            if((!store.isSaveBtnDisable ||  store.retsObj.attributes.CREATE_DT === store.retsObj.attributes.EDIT_DT && store.archiveRetsDataString.length != 0 )|| (store.retsObj.attributes.GIS_ANALYST === null || store.retsObj.attributes.GRID_ANALYST === null || store.retsObj.attributes.DIST_ANALYST === null|| store.retsObj.attributes.DIST_NM === null || store.retsObj.attributes.CNTY_NM === null)){
                 removeOutline()
                 removeHighlight("a", true)
                 highlightRETSPoint(store.retsObj.attributes)
                 const elementId = String(store.retsObj.attributes.RETS_ID).concat('-', store.retsObj.attributes.OBJECTID);
                 const element = document.getElementById(elementId);
-                element.classList.toggle('highlight-card');
+                if (element){
+                    element.classList.toggle('highlight-card');
+
+                }
 
                 store.isCard = false
                 store.isDetailsPage = true

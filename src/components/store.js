@@ -16,19 +16,23 @@ export const store = reactive({
                 cntyNM: '',
                 user: '',
                 isAssignedTo: '',
+                isAssociated: '',
                 customQuery: []
 
         },
-        retsVersion: 2.7,
+        retsVersion: "2.7.1",
         autozoomtest:true,
+        autozoomextent: true,
         basemaptest: "Dark Grey",
+        retspointlength: null,
+        deleteafterdiscard: false,
         layerName : "",
         customquery:"",
         currFilter: "",
+        deleteafterdiscard: false,
         settings: {},
         autoZoom: null,
         lastQuery : "",
-        clickeventresult : "",
         filterItems: [],
         filterquery: "",
         clickevent: "",
@@ -108,6 +112,7 @@ export const store = reactive({
         CNTY_NM:[],
         USER:[],
         isAssignedTo: false,
+        isAssociated: false,
         filterTotal: 2,
         isfilter: false,
         filterQuery: "",
@@ -198,7 +203,7 @@ export const store = reactive({
                         
                 
         },
-        modifyNote(cmt, oid){
+        async modifyNote(cmt, oid){
                 const modDate = new Date().getTime()
                 if(this.isShowSelected){
                         this.roadHighlightObj.forEach((x) => {
@@ -212,7 +217,7 @@ export const store = reactive({
                 findItem.EDIT_DT = modDate
                 findItem.CMNT = cmt
                 findItem.CMNT_TYPE_ID = 0
-                sendChatHistory(findItem, "modify")
+                await sendChatHistory(findItem, "modify")
                 return findItem
         },
         async deleteNote(oid){
@@ -315,7 +320,6 @@ export const store = reactive({
                                 this.updateRetsSearch = []
                                 const query = {"whereString": `${resp}`, "queryLayer": "retsLayerLayerView"}
                                 const orderField = `${this.filter.createDt.filter} ${this.filter.createDt.sortType}`
-                                 
                                 this.getRetsLayer(store.loggedInUser, query.whereString, query.queryLayer, orderField)
                                 this.isDetailsPage = false
                                 this.isNoRets = true

@@ -28,22 +28,20 @@
                                 <div>
                                     <span v-if="note.PARENT_ID" style="margin:0% !important; ">
                                         <p id="replyingToCmnt">Replying to "{{store.historyChat.find(x => x.OBJECTID === note.PARENT_ID)?.CMNT ?? "Referenced Note has been deleted"}}"</p>
-                                    </span>
-                                    
+                                    </span>    
                                 </div>
-                                        <v-textarea class="history-note mx-2" rows="1" auto-grow density="compact" variant="plain" :disabled="note.OBJECTID !== updateOID" v-model="note.CMNT"  placeholder="Enter Comment"></v-textarea>
-                                    
-                                    <div style="position: relative; bottom: 1px;">
-                                        <span style="font-size: 10px; color: grey; padding-left: 2px;">{{ returnUserName(note.CMNT_NM) }} {{ returnDateFormat(note.CREATE_DT) }} <b v-if="note.CREATE_DT !== note.EDIT_DT && note.SYS_GEN === 0" class="main-color">{{ `Edited ${returnDateFormat(note.EDIT_DT)}` }}</b></span>
-                                    </div>
-                                    <div style="position: relative; bottom: 0px;" v-if="note.attachments">
-                                        <span v-for="attach in note.attachments" style="padding-right: 3px;">
-                                            <v-chip :text="attach.name" color="#4472C4" class="" :closable="editContent && updateOID === note.OBJECTID ? true: false" density="compact" rounded="0" variant="flat" @click="openAttachement(attach.url)" @click:close="deleteAttach(note.OBJECTID, attach.name)"></v-chip>
-                                        </span>
-                                    </div>
-                               
-                               
-                                        
+                                <v-textarea class="history-note mx-2" rows="1" auto-grow density="compact" variant="plain" :disabled="note.OBJECTID !== updateOID" v-model="note.CMNT"  placeholder="Enter Comment"></v-textarea>
+                                <span v-for="(i,n) in note.URL" style="display: flex; flex-direction: row; max-width: 99%; font-size: 12px;">
+                                    <span v-html="`Link ${n+1} <a href='${i}' target='_blank'>${i}</a>`" style="max-width: 99%;"></span>
+                                </span>    
+                                <div style="position: relative; bottom: 1px;">
+                                    <span style="font-size: 10px; color: grey; padding-left: 2px;">{{ returnUserName(note.CMNT_NM) }} {{ returnDateFormat(note.CREATE_DT) }} <b v-if="note.CREATE_DT !== note.EDIT_DT && note.SYS_GEN === 0" class="main-color">{{ `Edited ${returnDateFormat(note.EDIT_DT)}` }}</b></span>
+                                </div>
+                                <div style="position: relative; bottom: 0px;" v-if="note.attachments">
+                                    <span v-for="attach in note.attachments" style="padding-right: 3px;">
+                                        <v-chip :text="attach.name" color="#4472C4" class="" :closable="editContent && updateOID === note.OBJECTID ? true: false" density="compact" rounded="0" variant="flat" @click="openAttachement(attach.url)" @click:close="deleteAttach(note.OBJECTID, attach.name)"></v-chip>
+                                    </span>
+                                </div>
                             </div>
 
                         </v-banner-text>
@@ -108,6 +106,20 @@
             document.querySelector('#displayHistoryL').scrollTop = document.querySelector('#displayHistoryL').scrollHeight - document.querySelector('#displayHistoryL').clientHeight
         },
         methods:{
+            getHyperLinks(index){
+                let findURL = index.CMNT.match(/(https?[^\s]+)/g)
+                if(findURL){
+                    index.URL = findURL
+                    //console.log(findURL)
+                    findURL.forEach((url, i) => {
+                        let returnUpdateCMNT = index.CMNT.replace(url, `see Link ${i + 1}`)
+                        index.CMNT = returnUpdateCMNT
+                        console.log(returnUpdateCMNT)
+                    })
+                }
+
+                return index.CMNT
+            },
             clearContent(){
                 this.searchHistoryFilter = ""
             },
@@ -124,6 +136,8 @@
                 this.ogNote = n
                 const oidFlag = `${oid}`    
                 document.getElementById(`${oidFlag}Expand`).classList.add("active-chat-box")
+                this.switchHyperlink(n)
+                return
             },
             deleteNote(n,oid){
                 store.deleteNote(oid)
@@ -140,6 +154,8 @@
                 this.updateOID = -1
                 const oidFlag = `${oid}`
                 document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
+                this.getHyperLinks(n)
+                return
             },
             closeNotes(n, notes){
                 notes.CMNT = this.ogNote
@@ -174,6 +190,16 @@
                 input.remove()
                 const oidFlag = `${oid}Expand`
                 document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
+            },
+            switchHyperlink(note){
+                console.log(note)
+                note.URL.forEach((url, i) => {
+                    let switchHyper = note.CMNT.replace(`see Link ${i+1}`, url)
+                    note.CMNT = switchHyper
+                    console.log(switchHyper)
+                })
+
+                return
             },
             returnDateFormat(e){
                 //10/29/2023 09:11am

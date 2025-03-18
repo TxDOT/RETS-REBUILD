@@ -184,6 +184,7 @@ import {store} from './store.js'
                     return false
                 }
                 this.dfoLabel = "I'm blank!"
+                store.isSaveBtnDisable = false
                 store.isAlert = true
                 store.alertTextInfo = {"text": `Route and/or DFO are not valid. Use the Move (icon) to move to a valid location.`, "color": "red", "type":"error", "toggle": true}
                 return true

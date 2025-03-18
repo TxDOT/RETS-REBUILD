@@ -28,12 +28,17 @@
         <div id="displayHistory" v-if="!this.isHistNotesEmpty">
             <div v-for="(note, i) in histNotes" :key="note.OBJECTID" track-by="OBJECTID">
                 <v-banner :id="`${note.OBJECTID}Small`" v-model="note[i]" density="compact" class="note">
-                    <div style="width: 100%;">
+                    <div style="max-width: 84%;">
                         <span v-if="note.PARENT_ID" style="margin:0% !important;">
                             <p id="replyingToCmnt">Replying to "{{store.historyChat.find(x => x.OBJECTID === note.PARENT_ID)?.CMNT ?? "Referenced Note has been deleted"}}"</p>
                         </span>
-                          
-                        <v-textarea class="history-note" rows="1" max-rows="3" auto-grow density="compact" variant="plain" :disabled="note.OBJECTID !== updateOID" v-model="note.CMNT" placeholder="Enter Comment" autofocus></v-textarea>
+                        
+                        <v-textarea class="history-note" rows="1" auto-grow density="compact" :disabled="note.OBJECTID !== updateOID" variant="plain" v-model="note.CMNT" placeholder="Enter Comment" autofocus></v-textarea>
+                        
+                        <span v-for="(i,n) in note.URL" style="display: flex; flex-direction: row; max-width: 99%; font-size: 12px;">
+                            <span v-html="`Link ${n+1} <a href='${i}' target='_blank'>${i}</a>`" style="max-width: 99%;"></span>
+                        </span>
+                        
                         <div style="flex: auto; position: relative; top: 00px; width: 100%;">
                             <span style="font-size: 10px; color: grey; padding-left: 2px; position: relative; bottom: 0px; padding: 0px;">{{ returnUserName(note.CMNT_NM) }} {{ returnDateFormat(note.CREATE_DT) }} <b v-if="note.CREATE_DT !== note.EDIT_DT && note.SYS_GEN === 0" class="main-color">{{ `Edited ${returnDateFormat(note.EDIT_DT)}` }}</b></span>
                         </div>
@@ -45,22 +50,17 @@
                     </div>
                     <div v-if="note.SYS_GEN === 0" style="position: relative; flex: auto;">
                         <div style="position: relative; float: right; width: 60px;">
-                            <v-btn variant="plain" density="compact" icon="mdi-pencil-outline" style="font-size: 10px;" @click="openNote(note.CMNT, note.OBJECTID)" :disabled="note.CMNT_NM !== loggedInUserName"></v-btn>
+                            <v-btn variant="plain" density="compact" icon="mdi-pencil-outline" style="font-size: 10px;" @click="openNote(note)" :disabled="note.CMNT_NM !== loggedInUserName"></v-btn>
                             <v-btn variant="plain" density="compact" icon="mdi-reply" style="font-size: 10px;" @click="replyNote(note)"></v-btn>
                         </div>
                     </div>
-
-                    
-                            
-
-
                 </v-banner>
                     <span v-if="updateOID === note.OBJECTID && note.SYS_GEN === 0" :id="note.OBJECTID">
                         <div style="position: relative; float: right; top: 15px; margin: 0% !important; padding: 0% !important; padding-right: 5px;">                           
                             <v-btn icon="mdi-delete" variant="plain" density="compact" style="font-size: 10px; bottom: 15px;" @click="deleteNote(note.CMNT, note.OBJECTID)"></v-btn>
                             <v-btn icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px; bottom: 15px;" @click="attachToNote(note.CMNT, note.OBJECTID)"></v-btn>
-                            <v-btn icon="mdi-close" variant="plain" density="compact" style="font-size: 10px; bottom: 15px;" @click="closeNotes(note.CMNT, note)"></v-btn>
-                            <v-btn icon="mdi-check"  variant="plain" density="compact" style="font-size: 10px; bottom: 15px;" @click="updateNote(note.CMNT, note.OBJECTID)"></v-btn>
+                            <v-btn icon="mdi-close" variant="plain" density="compact" style="font-size: 10px; bottom: 15px;" @click="closeNotes(note)"></v-btn>
+                            <v-btn icon="mdi-check"  variant="plain" density="compact" style="font-size: 10px; bottom: 15px;" @click="updateNote(note)"></v-btn>
                         </div>
                     </span>
                 </div>
@@ -99,28 +99,52 @@
                 isActive: false,
                 testOid: 0,
                 searchAttach: false,
+                urlLinks: ["<a href='google.com'>google</a>"],
+                addURL: false,
             }
+        },
+        mounted(){
+            this.orderList
         },
         updated(){
             document.querySelector('#displayHistory').scrollTop = document.querySelector('#displayHistory').scrollHeight - document.querySelector('#displayHistory').clientHeight
+           
         },
         methods:{
+            getHyperLinks(index){
+                if(!index.CMNT) return
+                let findURL = index.CMNT.match(/(https?[^\s]+)/g)
+                if(findURL){
+                    index.URL = findURL
+                    //console.log(findURL)
+                    findURL.forEach((url, i) => {
+                        let returnUpdateCMNT = index.CMNT.replace(url, `see Link ${i + 1}`)
+                        index.CMNT = returnUpdateCMNT
+                    })
+                }
+
+                return index.CMNT
+            },
             clearContent(){
                 this.searchHistoryFilter = ""
+                return
             },
             async addNote(){
                 await store.addNote(null, false)
                 this.isHistNotesEmpty = false
                 this.orderList
                 this.openNote(null, `${store.addNoteOid}`)
+                return
             },
-            openNote(n, oid){
+            openNote(n){
                 this.editContent = true
                 this.isClose = true;
-                this.updateOID = oid
-                this.ogNote = n
-                const oidFlag = `${oid}`    
+                this.updateOID = n.OBJECTID
+                this.ogNote = n.CMNT
+                const oidFlag = `${n.OBJECTID}`    
                 document.getElementById(`${oidFlag}Small`).classList.add("active-chat-box")
+                this.switchHyperlink(n)
+                return
             },
             deleteNote(n,oid){
                 store.deleteNote(oid)
@@ -130,21 +154,24 @@
                 }
                 return
             },
-            async updateNote(n, oid){
-                const findItem = store.modifyNote(n, oid)
+            async updateNote(n){
+                const findItem = await store.modifyNote(n.CMNT, n.OBJECTID)
                 this.editContent = false
                 this.updateOID = findItem.OBJECTID
                 this.updateOID = -1
-                const oidFlag = `${oid}`
+                const oidFlag = `${n.OBJECTID}`
                 document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
+                this.getHyperLinks(findItem)
+                return
             },
-            closeNotes(n, notes){
-                notes.CMNT = this.ogNote
+            closeNotes(note){
+                note.CMNT = this.ogNote
                 this.editContent = false
                 this.isClose = false;
                 this.updateOID = -1
-                const oidFlag = `${notes.OBJECTID}Small`
+                const oidFlag = `${note.OBJECTID}Small`
                 document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
+                this.getHyperLinks(note)
                 return
             },
             async replyNote(note){
@@ -172,6 +199,14 @@
                 const oidFlag = `${oid}Small`
                 document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
             },
+            switchHyperlink(note){
+                note.URL.forEach((url, i) => {
+                    let switchHyper = note.CMNT.replace(`see Link ${i+1}`, url)
+                    note.CMNT = switchHyper
+                })
+
+                return
+            },
             returnDateFormat(e){
                 //10/29/2023 09:11am
                 const date = new Date(e)
@@ -194,9 +229,6 @@
                 this.histNotes = this.orderList
                 return
                 
-            },
-            getAttachmentCount(){
-
             },
             openAttachement(url){
                 window.open(url, "_blank")
@@ -267,7 +299,12 @@
         },
         computed:{
             orderList: function(){
-                return this.histNotes = store.historyChat.slice().sort((a,b) => a.CREATE_DT - b.CREATE_DT)
+                this.histNotes = store.historyChat.slice().sort((a,b) => a.CREATE_DT - b.CREATE_DT)
+                this.histNotes.forEach((x) => {
+                    let cmnt = this.getHyperLinks(x)
+                    x.CMNT = cmnt
+                })
+                return this.histNotes
             }
         }
     }
@@ -347,21 +384,9 @@
         bottom: 2px;
     }
     .history-note{
-        /* width: 320px;
-        position: relative; */
-        /* min-height: 20px !important;
-        max-height: 59px !important;
-        flex: auto;
-        overflow-y: auto; */
-        /* position: relative; 
-        width: 380px;
+        width: 320px;
         position: relative;
-        padding-bottom: 4px;
-        display: flex; 
-        flex-direction: column; 
-        min-height: 2px; 
-        max-height: 38px;
-        overflow: hidden; */
+        height: fit-content;
     }
 
     :deep(.v-input__details){

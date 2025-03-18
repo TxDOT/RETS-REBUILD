@@ -4,7 +4,7 @@
             <div style="margin: 10px;">
                 <div style="position: relative; bottom:0rem; font-weight: normal; font-size: 20px; flex: auto; padding-bottom: 8px;">Filter Activity Feed</div>
                 <hr></hr>
-                <div class="container" style="padding-top: 8px;" @click="isDisabled = false; ">
+                <div class="container" style="padding-top: 8px;" @click="isDisabled = false; store.customquery = ''; validationMessage = '' ">
                     <div no-gutters class="item">
                         <v-select :disabled="isDisabled" :items="filterSort" item-title="title" return-object density="compact" label="Sort" variant="underlined" v-model="store.CREATE_DT" >
                         </v-select>
@@ -38,10 +38,23 @@
                         <v-autocomplete :disabled="isDisabled" :items="filterCounty" item-title="name" item-value="value" return-object multiple label="County" chips closable-chips variant="underlined" density="compact" v-model="store.CNTY_NM" class="filterFields" @update:modelValue="countySearch = ''" :search="countySearch" @update:search="countySearch = $event" @update:menu="countySearch = ''"></v-autocomplete>
                     </div>
                     <div no-gutters dense class="item"> 
-                        <v-autocomplete :items="filterUser" item-title="name" item-value="value" return-object label="Users" multiple chips closable-chips variant="underlined" density="compact" v-model="store.USER" class="filterFields" :disabled="store.isAssignedTo || isDisabled" @update:modelValue="userSearch = ''" :search="userSearch" @update:search="userSearch = $event" @update:menu="userSearch = ''"></v-autocomplete>
+                        <v-autocomplete :items="filterUser" item-title="name" item-value="value" return-object label="Users" multiple chips closable-chips variant="underlined" density="compact" v-model="store.USER" class="filterFields" :disabled="store.isAssignedTo || isDisabled || store.isAssociated" @update:modelValue="userSearch = ''" :search="userSearch" @update:search="userSearch = $event" @update:menu="userSearch = ''"></v-autocomplete>
                     </div>
-                    <div style="position: relative; float: left; max-height: 40px !important; font-size: 11px; display: flex; flex-wrap: wrap; bottom: 0rem;" class="item">
-                        <v-checkbox :disabled="isDisabled" label="RETS Assigned to Me" density="compact" class="checkbox-size" v-model="store.isAssignedTo"></v-checkbox>
+                    <div style="position: relative; width: 40% ; float: left; max-height: 40px !important; font-size: 11px; display: flex; flex-wrap: wrap; bottom: 0rem;" class="item">
+                            <v-tooltip text="Filters for RETS with a history item in your name (e.g. created by you or updated by you)." location="right" >
+                                <template v-slot:activator="{props}">
+                                <v-checkbox :disabled="isDisabled || store.isAssignedTo" label="RETS associated with me" density="compact" class="checkbox-size" v-bind="props" v-model="store.isAssociated" ></v-checkbox>
+                                </template>
+
+                            </v-tooltip>
+                        
+                    </div>
+                    <div style="position: relative; width: 40% ; float: left; max-height: 40px !important; font-size: 11px; display: flex; flex-wrap: wrap; bottom: 0rem;" class="item">
+                        <v-tooltip text="Filters for RETS with your name in the Assigned To field." location="right">
+                            <template v-slot:activator="{props}">
+                                <v-checkbox :disabled="isDisabled || store.isAssociated" label="RETS assigned to me" density="compact" class="checkbox-size" v-bind="props" v-model="store.isAssignedTo"></v-checkbox>
+                            </template>
+                        </v-tooltip>
                     </div>
                 </div>
                     
@@ -253,6 +266,7 @@ export default{
         runCustomQuery(){
             // this.clearValue()
             // return
+            this.isDisabled = true
             if (store.customquery === ''){
                 return
             }
@@ -275,12 +289,20 @@ export default{
                                 .then((resp) =>{
                                     this.validationMessageColor = "green"
                                     this.validationMessage = "Query was successful"
-                                    view.goTo(resp.extent)
+                                    if (!store.autozoomtest){
+                                        null
+                                    }
+                                    else{
+                                        view.goTo(resp.extent)
+
+                                    }
+                                    //store.isfilter = false
                                     if (store.customquery && !store.userFilters.customQuery.includes(store.customquery))
                                         {
                                             store.userFilters.customQuery.push(store.customquery)
                                             this.isDisabled = true
                                             store.customquery = store.userFilters.customQuery.at(-1)
+                                            
                                         }
                                     
                                 })
@@ -317,7 +339,9 @@ export default{
                 distNM: store.DIST_NM,
                 cntyNM: store.CNTY_NM,
                 user: store.USER,
-                isAssignedTo: store.isAssignedTo
+                isAssignedTo: store.isAssignedTo,
+                isAssociated: store.isAssociated
+
             })
             return 
         },
@@ -331,7 +355,8 @@ export default{
             store.DIST_NM = filterParse.distNM
             store.CNTY_NM = filterParse.cntyNM
             store.USER = filterParse.user
-            store.isAssignedTo = filterParse.isAssignedTo
+            store.isAssignedTo = filterParse.isAssignedTo,
+            store.isAssociated = filterParse.isAssociated
 
             const filterObject = {
                 createDt: store.CREATE_DT,
@@ -343,6 +368,7 @@ export default{
                 cntyNM: store.CNTY_NM,
                 user: store.USER,
                 isAssignedTo: store.isAssignedTo,
+                isAssociated: store.isAssociated,
                 customQuery: store.userFilters.customQuery
 
             }
@@ -363,8 +389,15 @@ export default{
                 cntyNM: store.CNTY_NM,
                 user: store.USER,
                 isAssignedTo: store.isAssignedTo,
+                isAssociated: store.isAssociated,
                 customQuery: store.userFilters.customQuery
 
+            }
+
+            if (store.customquery && this.validationMessage != "No features returned." && this.validationMessage != "Invalid Query." ){
+                store.isfilter = false
+                this.cancelsaveQuery(store.filter)
+                return
             }
             store.customquery = null
             this.calcFilterDiff()
@@ -391,7 +424,8 @@ export default{
             store.DIST_NM.length = 0
             store.CNTY_NM.length = 0
             store.USER = [appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value)]
-            store.isAssignedTo = false
+            store.isAssignedTo = false,
+            store.isAssociated = false,
             store.customquery =  null
             store.defaultFilterSetup()
             
@@ -411,6 +445,7 @@ export default{
             return
         },
         closeDateChip(){
+            this.currentYear = false
             this.selectDate = []
             store.EDIT_DT = null
             return
@@ -435,6 +470,25 @@ export default{
                 return
             },
             immediate: true
+        },
+        'store.isAssociated': {
+            handler: function(val){
+                if (val == true){
+                    store.isAssignedTo = false
+                    //store.USER.length = 0
+                }
+                // else{
+                //     store.USER = [appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value)]
+                // }
+            }
+        },
+        'store.isAssignedTo': {
+            handler: function(val){
+                if (val == true){
+                    store.isAssociated = false
+                    
+                }
+            }
         }
     }
 
@@ -515,6 +569,18 @@ export default{
 }
 .date :deep(.v-date-picker-months){
     overflow: hidden;
+}
+
+.date :deep(.v-date-picker-years){
+    /* height: 320px; */
+    /* overflow-y: scroll; */
+    height: 300px;
+    overflow-y: auto;
+}
+.date :deep(.v-date-picker-years__content){
+    /* height: 260px !important; */
+    max-height: 80%;
+    overflow-y: auto;
 }
 
 </style>

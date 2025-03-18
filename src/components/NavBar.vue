@@ -86,19 +86,13 @@
    <v-card id="jumptotoggle" max-width="400" hover @mouseleave="mouseleavejumpto" v-if = "jumptocard">
     
    </v-card>
-   <v-card id = "containersettings" height = "615" v-show = "settingsstatus">
+   <v-card id = "containersettings" height = "655" v-show = "settingsstatus">
     <v-card-item>
         <span class="banner-txt">Settings</span>
         &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
         <span id='releaseNotes' :style="{color: releaseNotesColor, fontSize: '13px'}" @mouseover="releaseNotesColor = 'white'" @mouseleave="releaseNotesColor = '#D9D9D9'" @click="isReleaseNotes = true">Version {{ store.retsVersion }}</span>
     </v-card-item>
         <hr id = "separator"/>
-        <!-- <v-card-item id = "darkmodeitem" >
-            <div id = "darkmodeswitch">
-                <v-switch  v-model="switchValueDark" label="Dark Mode" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn" disabled></v-switch>
-            </div>
-            
-        </v-card-item> -->
         <v-card-item class = "topSettings" >
             <div style="height: 40px;">
                 <v-switch v-model="store.autozoomtest"   class="autozoom-switch" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn()" density="compact" >
@@ -108,12 +102,23 @@
                         </v-label>
                     </template>
                 </v-switch>
+                
             </div>
+            <div style="height: 40px;">
+                <v-switch v-model="store.autozoomextent"   class="autozoom-switch" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn()" density="compact" >
+                    <template #prepend >
+                        <v-label>
+                            Automatically filter the activity feed based on the map extent
+                        </v-label>
+                    </template>
+                </v-switch>
+            </div>
+
                 <v-label style="font-size: 10px; color: #D9D9D9; margin-left: 10px;">Display selected basemap on load</v-label>
                 <v-select style="width: 22rem; margin-left: 10px; margin: top 0; margin-bottom: 0;" class="basemap-select" variant="underlined" density="compact" v-model=store.basemaptest :items=basemapArray></v-select>
         </v-card-item>
         <hr id = "separator" />
-            <v-btn @click ="activateFeedback()" color="#4472C4" rounded  style="position: absolute; right: 25px; top: 172px; z-index: 99999;">
+            <v-btn @click ="activateFeedback()" color="#4472C4" rounded  style="position: absolute; right: 25px; top: 212px; z-index: 99999;">
                 <span style="font-weight: 100;">Feedback</span>
             </v-btn>
         <v-card-item id = "notificationsitems" >
@@ -139,24 +144,13 @@
         </v-card-item>
             <hr id = "separator" />
         <v-card-item id="bottomitems">
-
-        <!-- <v-btn-toggle density="compact" id="trigger-buttons"> -->
             <div style="width: 100%; position: relative; height: 100%;">
                 <div style="width: 100%; position: relative;">
                     <v-btn variant="plain" size="small" class="secondary-button"  prepend-icon="mdi-power" @click="logoutMethod()" >LOGOUT</v-btn>
                     <v-btn style="float: right;" variant="outlined" size="small" class="main-button-style" @click=" handleactiveclass(); saveSettings()">save</v-btn>
                     <v-btn style="float: right;" variant="plain" size="small" class="secondary-button"  @click="handleactiveclass(); cancelSettings()">CANCEL</v-btn>
-                    
-                    
                 </div>
-
-
             </div>
-            
-            
-        <!-- </v-btn-toggle> -->
-            
-
         </v-card-item>
 
     </v-card>
@@ -249,7 +243,7 @@
 
     import { appConstants } from '../common/constant.js';
     import { graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect } from '../components/map-Init.js';
-    import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM } from '../components/utility.js';
+    import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM, home, restoreExtent} from '../components/utility.js';
     import { vuetify } from '../main.js';
     import { addSettings } from './crud.js';
     import { store } from './store';
@@ -279,6 +273,8 @@
                 switchValueDark: true,
                 switchValue : false,
                 isAutoZoom: null,
+                isAutoZoomExtent: null,
+                userSettings: JSON.parse(appConstants.defaultUserValue[0].settings) || {},
                 currAutoZoomValue: null,
                 isActOpen: true,
                 shift: 200,
@@ -298,16 +294,24 @@
                 feedbackName: "",
                 latestReleaseNotes: [
                     [
-                        `Latest Release Version ${store.retsVersion}`,
-                        'User Story 96: Version and Release Notes',
+                        `Latest Release Version ${store.retsVersion}`,'User Story 226: Add Lat/Long searching','User Story 230: Transition to prod create portal','User Story 119: Add links/URL to a comment in History',
+                        'User Story 256: History items should expand to fit all text',
+                        'User Story 62: Add Setting to filter feed based on map extent','User Story 139: Update default filter  (to show all RETS with your name associated with it, anywhere)',
+                        'Bug 219: Settings button activates the basemap button', 'Bug 271: Subtitle has blue highlight when editing', 'Bug 272: Custom query and map zoom interaction',
+                        'Bug 302: Multi select activates basemap button'
+                    ]
+                ],
+                previousReleaseNotes: [
+                    ['Release 2.7','User Story 96: Version and Release Notes',
                         'User Story 157: RETS Labels turn on sooner',
                         'User Story 193: Add option to disable automatic zoom',
                         'User Story 204: Add setting to change the default basemap on load',
                         'User Story 212: Move legend icon down and basemap button up', 
-                        'Bug 229: Date Filter overlaps with buttons'
-                    ]
-                ],
-                previousReleaseNotes: [
+                        'Bug 229: Date Filter overlaps with buttons','Bug 227: Interaction between feed and details tab not working properly',
+                        'Bug 228: Update the format of the RETS number in the browser tab','Bug 232: Date Filter','Bug 233: Custom Query/ filter interaction',
+                        'Bug 255: Filter: Date sorting reverts'
+
+                    ],
                 ['Release 2.6',
                  'User Story 83: Imagery/Roadway Hyrbrid Basemap',
                  'User Story 169: Add ability to double-click to open a RETS point from the map pane', 
@@ -329,7 +333,7 @@
                 ['Release 2.5', ' User Story 95: Add a count to the header', 'User Story 111: Use most recent history item in the card footer ', 'User Story 133: Filter: Add Custom Filter option',
                 'User Story 146: Job Detail Pane: Update', 'User Story 171: Resize app','User Sory 150: Add ability to save custom filters', 'User Story 170: Add update triggers for all updates made to a RETS',
                 'User Story 195: Add time-gated limiter to triggers to prevent 3 or more comments being added when new RETS is created', 'User Story 205: Update tables and filter for multiple district users',
-                'User Story 230: Transition to prod create portal', 'Bug 178: Activity feed detail pane selection interaction', 'Bug 192: Changing status duplicates job feed', 'Bug 176: 1969 date corrupting history update in card footer',
+                 'Bug 178: Activity feed detail pane selection interaction', 'Bug 192: Changing status duplicates job feed', 'Bug 176: 1969 date corrupting history update in card footer',
                 'Bug 180: New job cards are not at the top of the feed', 'Bug 181: No route check box not checked for new jobs', 'Bug 123: Map Pane Search still not working properly for Minute Orders'],
                 ['Release 2.4', 'User Story 146: Job Detail Pane: Update', ' Bug 158: Selection not respected when JD pane is open', 'Bug 172: RETS number and subtitle too close'],
                 ['Release 2.3', 'User Story 107: Create tab buttons for Activity Feed and Details', 'User Story 108: Cancel button warning popup for unsaved changes', 'User Story 137: Add "Created" by info to metadata tab',
@@ -392,8 +396,7 @@
                                     store.isCard = true
                                     store.isDetailsPage = false
                                     this.toggle = 1
-                                    store.toggleFeed = 1
-
+                                    store.toggleFeed = 1                                    
                                     
                                 },
                                 disabled: false
@@ -447,7 +450,7 @@
                                 {title:"Select", icon: 'mdi-select-multiple', color: "#D9D9D9", name: "Multi-Select", isActive: false,
                                action: () =>{
                                 store.isSelectEnabled = !store.isSelectEnabled
-                                this.retsToolsBottom[0].isActive = !this.retsToolsBottom[0].isActive
+                                this.retsToolsBottom[2].isActive = !this.retsToolsBottom[2].isActive
                                 this.handleSelectTool();
                                },
                                setActive: () => {
@@ -506,86 +509,97 @@
                         immediate: true
                    },
                    'store.activityBanner':{
-                    handler: function(){
-                        if(store.activityBanner !== "Activity Feed"){
-                            this.retsToolsTop[2].disabled = false
+                        handler: function(){
+                            if(store.activityBanner !== "Activity Feed"){
+                                this.retsToolsTop[2].disabled = false
+                                return
+                            }
+                        
+                            this.retsToolsTop[2].disabled = true
                             return
-                        }
-                    
-                        this.retsToolsTop[2].disabled = true
-                        return
-                    },
-                    immediate: true
+                        },
+                        immediate: true
                    },
                    'feedbackText':{
-                    handler: function(){
-                        if (this.feedbackText.length){
-                            this.feedbackSubmitStatus = false
+                        handler: function(){
+                            if (this.feedbackText.length){
+                                this.feedbackSubmitStatus = false
+                            }
+                            else{
+                                this.feedbackSubmitStatus = true
+                            }
                         }
-                        else{
-                            this.feedbackSubmitStatus = true
-                        }
-                    }
                    },
                    'isAnonymous':{
-                    handler: function(){
-                        if (this.isAnonymous){
-                            this.feedbackName = ""
+                        handler: function(){
+                            if (this.isAnonymous){
+                                this.feedbackName = ""
+                            }
                         }
-                    }
                    },
                 },
                 mounted() {
                     this.setAutozoomSwitch()
+                    this.setAutozoomExtentSwitch()
 
                 },
                 
                 methods: {
-                    toggleGroup(index) { this.$set(this.expandedGroups, index, !this.expandedGroups[index])},
-                    setAutozoomSwitch(){
-                        if (JSON.parse(appConstants.defaultUserValue[0].settings) == null){
-                            store.autozoomtest = true
-                            
+                    toggleGroup(index) { 
+                        this.$set(this.expandedGroups, index, !this.expandedGroups[index])
+                    },
+                    setAutozoomExtentSwitch(){
+                        const { autoZoomExtent } = this.userSettings;
+                        if (autoZoomExtent != null){
+                            store.autozoomextent = autoZoomExtent
                         }
                         else{
-                            store.autozoomtest = JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom
+                            store.autozoomextent = false
                         }
+                        return
+                    },
+                    setAutozoomSwitch(){
+                        const { autoZoom } = this.userSettings;
+                        if (autoZoom != null){
+                            store.autozoomtest = autoZoom
+                        }
+                        else{
+                            store.autozoomtest = true
+                        }
+                        return
                     },
                     async saveSettings(){
                         store.settings = {
                             autoZoom : store.autozoomtest,
+                            autoZoomExtent: store.autozoomextent,
                             basemap: store.basemaptest
                         } 
                         this.isAutoZoom = store.autozoomtest
+                        this.isAutoZoomExtent = store.autozoomextent
+                        
                         const settingsObject = {attributes: {OBJECTID : appConstants.defaultUserValue[0].objectid, SETTINGS : JSON.stringify(store.settings)}}
                         await addSettings(settingsObject)
+                        if (store.updateRetsSearch.length != store.retspointlength && store.autozoomextent == false){
+                            if (store.CREATE_DT){
+                                await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                            }
+                            else{
+                                await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                            }
+                        return  
+                    }
 
                     },
                     cancelSettings(){
-                        if (JSON.parse(appConstants.defaultUserValue[0].settings) == null && this.isAutoZoom == null){
-                            store.autozoomtest = true
-                        }
-                        else if (JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom == null && this.isAutoZoom != null){
-                            store.autozoomtest = this.isAutoZoom
-                        }
-                        else if (JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom != null && this.isAutoZoom == null){
-                            store.autozoomtest = JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom
-                        }
-                        else if (JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom != null && this.isAutoZoom != null){
-                            store.autozoomtest = this.isAutoZoom
-                        }
-                       
+                        const { autoZoom, autoZoomExtent } = this.userSettings;
+                        store.autozoomtest = this.isAutoZoom ?? autoZoom ?? true;
+                        store.autozoomextent = this.isAutoZoomExtent ?? autoZoomExtent ?? false;
+                        return
                     },
                     shiftDiv(){
                         const viewSurface = document.querySelector('.esri-view');
                         viewSurface.classList.toggle('translateX-500px');
-                        const settingspopup = document.querySelector('#containersettings')
-                        // if(settingspopup){
-                        //     settingspopup.classList.toggle('translatesettings')
-
-                        // }
-                        
-
+                        return
                     },
                     newSwitchTurnedOn() {
                         if (this.switchValue) {
@@ -596,13 +610,12 @@
                         }
                     },
                     switchTurnedOn(index) {
-      
-                            if (this.switches[index].value) {
-                                this.switches[index].fontColor = '#FFFFFF';
-                            } 
-                            else {
-                                this.switches[index].fontColor = '#D9D9D9';
-                            }
+                        if (this.switches[index].value) {
+                            this.switches[index].fontColor = '#FFFFFF';
+                        } 
+                        else {
+                            this.switches[index].fontColor = '#D9D9D9';
+                        }
                         
                         },
                     switchStyle(fontColor) {
@@ -650,7 +663,6 @@
                         }
                         else{
                             sketchWidgetselect.cancel()
-                            //this.selectfunction.remove()
                         }
 
                         

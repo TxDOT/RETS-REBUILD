@@ -14,7 +14,7 @@ import { appConstants } from "../common/constant.js";
 import {store} from './store.js'
 //import {getDFOFromGRID} from './crud.js'
 import esriId from "@arcgis/core/identity/IdentityManager.js";
-import { addRETSPT } from './crud.js';
+import { addRETSPT, deleteRETSPT } from './crud.js';
 import esriRequest from "@arcgis/core/request.js";
 import * as geodesicUtils from "@arcgis/core/geometry/support/geodesicUtils.js";
 import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils.js";
@@ -55,7 +55,7 @@ export async function getTxDotRdWayLayerView(){
     
     const rdLayerView = await view.whenLayerView(TxDOTRoadways)
     rdLayerView.highlightOptions = {
-        color: "#FF00FF", //bright fuchsia
+        color: "cyan", //bright fuchsia
         haloOpacity: 0.8,
         fillOpacity: 0.3
     };
@@ -109,8 +109,9 @@ export function clickRetsPoint(){
                       }, 10000);
                 }
                 else{
+
                     highlightLayer.removeAll()
-                    //if clicking on empty space, remove all highlights and return to activity feed
+                    removeHighlightRoadways('a', true)
                     if(!evt.results.length){
                         if (!store.isSaveBtnDisable){
                             store.cancelpopup = true
@@ -123,42 +124,24 @@ export function clickRetsPoint(){
                         store.isDetailsPage ? canceldetailsfunction() : null
                         return
                     }
+                    store.layerName = evt.results[0].layer.title
 
-                    //track if roadway has been clicked so that cancel popup doesnt show if its been clicked
+                    if ( store.retsObj.attributes.CREATE_DT === store.retsObj.attributes.EDIT_DT && store.archiveRetsDataString.length != 0){
+                        return
+                    }
                     if (evt.results[0].layer.title === "TxDOT Roadways"){
-                        store.layerName = "TxDOT Roadways"
-                    }
-                    else{
-                        store.layerName = ""
-                    }
-                    ///////
-                    //adds the popup for the roads
-                    if (evt.results.length >=1 && evt.results[0].layer.title === "TxDOT Roadways"){
+                        highlightRoadways(evt.results[0].graphic.attributes)
                         if (evt.results.length === 1){
                             view.openPopup({
                                 fetchFeatures: true,
                                 location: event.mapPoint
                             });
                         }
-                    }
-                    //ensure that the purple highglight does not apply to other basemaps other than the hybrid
-                    if (evt.results[0].layer.title ==="TxDOT Roadways" && map.basemap.title != "Hybrid"){
-                        highlightLayer.add({
-                            geometry: evt.results[0].graphic.geometry,
-                            symbol: {
-                                type: "simple-line",
-                                color: "cyan",
-                                width: 3
-                            }
-                        })
-                        return
 
                     }
-                    if (evt.results[0].layer.title){
-                        store.clickeventresult = evt.results[0].layer.title
-    
-                    }
+
                     const retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
+                    console.log(retsPt)
                    
                     if (store.isDetailsPage && store.isSaveBtnDisable && !store.isEmptyRow){
                         //canceldetailsfunction()
@@ -172,14 +155,11 @@ export function clickRetsPoint(){
                     if (store.isSaveBtnDisable && !store.isEmptyRow){
                         removeOutline()
                         removeHighlight("a", true)
-                        //evt.results.forEach(rest => rest.graphic.layer.title ? highlightRETSPoint(rest.graphic.attributes) : highlightGraphicPt(rest.graphic.attributes))
                         const firstResult = Array.isArray(evt.results) ? evt.results[0] : null;
                         firstResult.graphic.layer.title ? highlightRETSPoint(firstResult.graphic.attributes) : highlightGraphicPt(firstResult.graphic.attributes)
                         outlineFeedCards(evt.results.splice(0,1))
                  
-                        //return evt.results[0].graphic.attributes.RETS_ID;
                     }
-                    
                     
                 }
                 
@@ -239,6 +219,17 @@ export function highlightRETSPoint(feature){
     return
 }
 
+export function highlightRoadways(feature){
+    view.whenLayerView(TxDOTRoadways)
+        .then((lyrView) => {
+            //highlights Point by giving OBJECTID
+            const highlight = lyrView.highlight(feature.OBJECTID)
+            highlightedFeatures.push(highlight)
+    
+            
+        })
+}
+
 export async function includes(feature){
     return view.whenLayerView(retsLayer)
     .then((lyrView) => {
@@ -266,6 +257,25 @@ export async function getHighlightGraphic(){
 
 export function removeHighlight(feature, removeAll){
     view.whenLayerView(retsLayer)
+        .then((lyrView) => {
+            if(removeAll){
+                lyrView._highlightIds.clear()
+                return
+            }
+
+            if(lyrView._highlightIds.has(feature?.attributes.OBJECTID)){
+                lyrView._highlightIds.delete(feature.attributes.OBJECTID)
+                lyrView._updateHighlight();
+                return
+            }
+            
+            
+        })
+    return
+}
+
+export function removeHighlightRoadways(feature, removeAll){
+    view.whenLayerView(TxDOTRoadways)
         .then((lyrView) => {
             if(removeAll){
                 lyrView._highlightIds.clear()
@@ -327,12 +337,13 @@ export function getGEMTasks(){
 }
 
 //filter Map and activity feed 
-export async function filterMapActivityFeed(filterOpt,val){
+export async function filterMapActivityFeed(filterOpt,val,userId){
         let GIS_ANALYST = []
         let GRID_ANALYST = []
         let DIST_ANALYST = []
         let ANALYST = []
         let ASSIGNED_TO = []
+        let ASSOCIATED = []
         let STAT = []
         let DIST_NM = []
         let CNTY_NM = []
@@ -348,10 +359,15 @@ export async function filterMapActivityFeed(filterOpt,val){
                 if(key === 'isAssignedTo' && value){
                     fullFilter.push(`ASSIGNED_TO in ('${store.loggedInUser}')`)
                 }
-                if(key === 'user' && !filterOpt.isAssignedTo){
+                if(key === 'isAssociated' && value){
+                    fullFilter.push(`(CREATE_NM in ('${store.loggedInUser}') OR EDIT_NM in ('${store.loggedInUser}') )`)
+                }
+                if(key === 'user' && !filterOpt.isAssignedTo && !filterOpt.isAssociated){
                     let a; 
                     for(a=0; a < value.length; a++){
                         ASSIGNED_TO.push(`'${value[a].value}'`)
+                        ASSOCIATED.push(`'${value[a].value}'`)
+
                         if(value[a].type === 1){
                             GIS_ANALYST.push(`'${value[a].value}'`)
                         }
@@ -376,7 +392,9 @@ export async function filterMapActivityFeed(filterOpt,val){
                     })
                     
                     fullFilter = [...fullFilter, mapAnalyst.join(' OR ')]
-                    ASSIGNED_TO.length ? fullFilter.push(`OR ASSIGNED_TO in (${ASSIGNED_TO.join(" , ")}))`) : null
+                    ASSIGNED_TO.length ? fullFilter.push(`OR ASSIGNED_TO in (${ASSIGNED_TO.join(" , ")})`) : null
+                    ASSOCIATED.length ? fullFilter.push(`OR CREATE_NM in (${ASSIGNED_TO.join(" , ")}) OR EDIT_NM in (${ASSIGNED_TO.join(" , ")})) ` ) : null
+                    
                 }
                 if(key === 'stat' || key === 'distNM' || key === 'cntyNM' || key === 'actv' || key === 'jobType'){
 
@@ -428,7 +446,9 @@ export async function filterMapActivityFeed(filterOpt,val){
         }
         const removeEmpty = fullFilter.filter(x => x.length)
         let filterDef = removeEmpty.join(" AND ")
-        let newFilter = filterDef.replace("AND OR", "OR")
+        //let newFilter = filterDef.replace("AND OR", "OR")
+        let newFilter = filterDef.replace(/AND OR/g, 'OR')
+
         // if(!filterOpt.isAssignedTo){
         //     const assignedToQuery = [...GIS_ANALYST, ...GRID_ANALYST, ...DIST_ANALYST]
         //     assignedToQuery.map((i) => `${i}`).join(",")
@@ -437,7 +457,8 @@ export async function filterMapActivityFeed(filterOpt,val){
         // }
         try{
             const filterMapPromise = new Promise((res, rej) => {
-                retsLayer.definitionExpression = store.savedFilter = `${newFilter}`
+                store.savedFilter = `${newFilter}`
+                retsLayer.definitionExpression = store.savedFilter = store.savedFilter.replace(/''/g, `'${userId}'`)
                 res(filterDef)
             })
             if (val || (!store.autozoomtest)){
@@ -1557,6 +1578,9 @@ export function checkhighlightfunction(retsid){
 
 export function openDetails(road){
     clearGraphicsLayer()
+    if (store.alertTextInfo.type == "error"){
+        store.isAlert = false
+    }
     store.toggleFeed = 2
     store.isSaving = false
     //store.isSaveBtnDisable = true
@@ -1774,6 +1798,7 @@ export function setFilterProperties(userFilterObject){
     store.CNTY_NM = userFilterObject.cntyNM
     store.USER = userFilterObject.user
     store.isAssignedTo = userFilterObject.isAssignedTo
+    store.isAssociated = userFilterObject.isAssociated
     return
     
 
@@ -1870,4 +1895,24 @@ export function applyOSM(){
     retsLabelclass.symbol.haloSize = 0
     TxDOTRoadways.labelsVisible = false,
     TxDOTRoadways.renderer.symbol.width = 0
+}
+
+export async function deleteRets(){
+    store.retsObj.attributes.isDelete = true
+    await deleteRETSPT(store.retsObj)
+    removeRelatedRetsFromMap(store.retsObj.attributes.OBJECTID)
+    store.deleteRetsID()
+    deleteRetsGraphic()
+    //this.returnToFeed()
+    store.toggleFeed = 1
+    return
+}
+
+export function restoreExtent(){
+    return retsLayer.queryExtent().then((response) => {
+        view.goTo(response.extent)
+        .catch((error) => {
+          console.error(error);
+        });
+      });
 }
