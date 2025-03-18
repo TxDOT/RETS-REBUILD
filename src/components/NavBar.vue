@@ -90,12 +90,6 @@
         <span id='releaseNotes' :style="{color: releaseNotesColor, fontSize: '13px'}" @mouseover="releaseNotesColor = 'white'" @mouseleave="releaseNotesColor = '#D9D9D9'" @click="isReleaseNotes = true">Version {{ store.retsVersion }}</span>
     </v-card-item>
         <hr id = "separator"/>
-        <!-- <v-card-item id = "darkmodeitem" >
-            <div id = "darkmodeswitch">
-                <v-switch  v-model="switchValueDark" label="Dark Mode" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn" disabled></v-switch>
-            </div>
-            
-        </v-card-item> -->
         <v-card-item class = "topSettings" >
             <div style="height: 40px;">
                 <v-switch v-model="store.autozoomtest"   class="autozoom-switch" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn()" density="compact" >
@@ -147,24 +141,13 @@
         </v-card-item>
             <hr id = "separator" />
         <v-card-item id="bottomitems">
-
-        <!-- <v-btn-toggle density="compact" id="trigger-buttons"> -->
             <div style="width: 100%; position: relative; height: 100%;">
                 <div style="width: 100%; position: relative;">
                     <v-btn variant="plain" size="small" class="secondary-button"  prepend-icon="mdi-power" @click="logoutMethod()" >LOGOUT</v-btn>
                     <v-btn style="float: right;" variant="outlined" size="small" class="main-button-style" @click=" handleactiveclass(); saveSettings()">save</v-btn>
                     <v-btn style="float: right;" variant="plain" size="small" class="secondary-button"  @click="handleactiveclass(); cancelSettings()">CANCEL</v-btn>
-                    
-                    
                 </div>
-
-
             </div>
-            
-            
-        <!-- </v-btn-toggle> -->
-            
-
         </v-card-item>
 
     </v-card>
@@ -523,33 +506,33 @@
                         immediate: true
                    },
                    'store.activityBanner':{
-                    handler: function(){
-                        if(store.activityBanner !== "Activity Feed"){
-                            this.retsToolsTop[2].disabled = false
+                        handler: function(){
+                            if(store.activityBanner !== "Activity Feed"){
+                                this.retsToolsTop[2].disabled = false
+                                return
+                            }
+                        
+                            this.retsToolsTop[2].disabled = true
                             return
-                        }
-                    
-                        this.retsToolsTop[2].disabled = true
-                        return
-                    },
-                    immediate: true
+                        },
+                        immediate: true
                    },
                    'feedbackText':{
-                    handler: function(){
-                        if (this.feedbackText.length){
-                            this.feedbackSubmitStatus = false
+                        handler: function(){
+                            if (this.feedbackText.length){
+                                this.feedbackSubmitStatus = false
+                            }
+                            else{
+                                this.feedbackSubmitStatus = true
+                            }
                         }
-                        else{
-                            this.feedbackSubmitStatus = true
-                        }
-                    }
                    },
                    'isAnonymous':{
-                    handler: function(){
-                        if (this.isAnonymous){
-                            this.feedbackName = ""
+                        handler: function(){
+                            if (this.isAnonymous){
+                                this.feedbackName = ""
+                            }
                         }
-                    }
                    },
                 },
                 mounted() {
@@ -559,38 +542,28 @@
                 },
                 
                 methods: {
-                    toggleGroup(index) { this.$set(this.expandedGroups, index, !this.expandedGroups[index])},
+                    toggleGroup(index) { 
+                        this.$set(this.expandedGroups, index, !this.expandedGroups[index])
+                    },
                     setAutozoomExtentSwitch(){
-                        const { autoZoom, autoZoomExtent } = this.userSettings;
+                        const { autoZoomExtent } = this.userSettings;
                         if (autoZoomExtent != null){
                             store.autozoomextent = autoZoomExtent
                         }
                         else{
                             store.autozoomextent = false
                         }
-                        // if (JSON.parse(appConstants.defaultUserValue[0].settings) == null){
-                        //     store.autozoomextent = true
-                            
-                        // }
-                        // else{
-                        //     store.autozoomextent = JSON.parse(appConstants.defaultUserValue[0].settings).autoZoomExtent
-                        // }
+                        return
                     },
                     setAutozoomSwitch(){
-                        const { autoZoom, autoZoomExtent } = this.userSettings;
+                        const { autoZoom } = this.userSettings;
                         if (autoZoom != null){
                             store.autozoomtest = autoZoom
                         }
                         else{
                             store.autozoomtest = true
                         }
-                        // if (JSON.parse(appConstants.defaultUserValue[0].settings) == null){
-                        //     store.autozoomtest = true
-                            
-                        // }
-                        // else{
-                        //     store.autozoomtest = JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom
-                        // }
+                        return
                     },
                     async saveSettings(){
                         store.settings = {
@@ -605,14 +578,12 @@
                         await addSettings(settingsObject)
                         if (store.updateRetsSearch.length != store.retspointlength && store.autozoomextent == false){
                             if (store.CREATE_DT){
-                            await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
-
-                        }
-                        else{
-                            await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
-
-                        }
-                            
+                                await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                            }
+                            else{
+                                await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                            }
+                        return  
                     }
 
                     },
@@ -620,30 +591,12 @@
                         const { autoZoom, autoZoomExtent } = this.userSettings;
                         store.autozoomtest = this.isAutoZoom ?? autoZoom ?? true;
                         store.autozoomextent = this.isAutoZoomExtent ?? autoZoomExtent ?? false;
-                        // if (JSON.parse(appConstants.defaultUserValue[0].settings) == null && this.isAutoZoom == null){
-                        //     store.autozoomtest = true
-                        // }
-                        // else if (JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom == null && this.isAutoZoom != null){
-                        //     store.autozoomtest = this.isAutoZoom
-                        // }
-                        // else if (JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom != null && this.isAutoZoom == null){
-                        //     store.autozoomtest = JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom
-                        // }
-                        // else if (JSON.parse(appConstants.defaultUserValue[0].settings).autoZoom != null && this.isAutoZoom != null){
-                        //     store.autozoomtest = this.isAutoZoom
-                        // }
-                       
+                        return
                     },
                     shiftDiv(){
                         const viewSurface = document.querySelector('.esri-view');
                         viewSurface.classList.toggle('translateX-500px');
-                        const settingspopup = document.querySelector('#containersettings')
-                        // if(settingspopup){
-                        //     settingspopup.classList.toggle('translatesettings')
-
-                        // }
-                        
-
+                        return
                     },
                     newSwitchTurnedOn() {
                         if (this.switchValue) {
@@ -654,13 +607,12 @@
                         }
                     },
                     switchTurnedOn(index) {
-      
-                            if (this.switches[index].value) {
-                                this.switches[index].fontColor = '#FFFFFF';
-                            } 
-                            else {
-                                this.switches[index].fontColor = '#D9D9D9';
-                            }
+                        if (this.switches[index].value) {
+                            this.switches[index].fontColor = '#FFFFFF';
+                        } 
+                        else {
+                            this.switches[index].fontColor = '#D9D9D9';
+                        }
                         
                         },
                     switchStyle(fontColor) {
@@ -708,7 +660,6 @@
                         }
                         else{
                             sketchWidgetselect.cancel()
-                            //this.selectfunction.remove()
                         }
 
                         

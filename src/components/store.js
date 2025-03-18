@@ -203,7 +203,7 @@ export const store = reactive({
                         
                 
         },
-        modifyNote(cmt, oid){
+        async modifyNote(cmt, oid){
                 const modDate = new Date().getTime()
                 if(this.isShowSelected){
                         this.roadHighlightObj.forEach((x) => {
@@ -217,7 +217,7 @@ export const store = reactive({
                 findItem.EDIT_DT = modDate
                 findItem.CMNT = cmt
                 findItem.CMNT_TYPE_ID = 0
-                sendChatHistory(findItem, "modify")
+                await sendChatHistory(findItem, "modify")
                 return findItem
         },
         async deleteNote(oid){

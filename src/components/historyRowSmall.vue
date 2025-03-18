@@ -34,6 +34,7 @@
                         </span>
                         
                         <v-textarea class="history-note" rows="1" auto-grow density="compact" :disabled="note.OBJECTID !== updateOID" variant="plain" v-model="note.CMNT" placeholder="Enter Comment" autofocus></v-textarea>
+                        
                         <span v-for="(i,n) in note.URL" style="display: flex; flex-direction: row; max-width: 99%; font-size: 12px;">
                             <span v-html="`Link ${n+1} <a href='${i}' target='_blank'>${i}</a>`" style="max-width: 99%;"></span>
                         </span>
@@ -111,6 +112,7 @@
         },
         methods:{
             getHyperLinks(index){
+                if(!index.CMNT) return
                 let findURL = index.CMNT.match(/(https?[^\s]+)/g)
                 if(findURL){
                     index.URL = findURL
@@ -118,7 +120,6 @@
                     findURL.forEach((url, i) => {
                         let returnUpdateCMNT = index.CMNT.replace(url, `see Link ${i + 1}`)
                         index.CMNT = returnUpdateCMNT
-                        console.log(returnUpdateCMNT)
                     })
                 }
 
@@ -154,20 +155,21 @@
                 return
             },
             async updateNote(n){
-                const findItem = store.modifyNote(n.CMNT, n.OBJECTID)
+                const findItem = await store.modifyNote(n.CMNT, n.OBJECTID)
                 this.editContent = false
                 this.updateOID = findItem.OBJECTID
                 this.updateOID = -1
                 const oidFlag = `${n.OBJECTID}`
                 document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
-                this.getHyperLinks(n)
+                this.getHyperLinks(findItem)
+                return
             },
             closeNotes(note){
                 note.CMNT = this.ogNote
                 this.editContent = false
                 this.isClose = false;
                 this.updateOID = -1
-                const oidFlag = `${notes.OBJECTID}Small`
+                const oidFlag = `${note.OBJECTID}Small`
                 document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
                 this.getHyperLinks(note)
                 return
@@ -198,11 +200,9 @@
                 document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
             },
             switchHyperlink(note){
-                console.log(note)
                 note.URL.forEach((url, i) => {
                     let switchHyper = note.CMNT.replace(`see Link ${i+1}`, url)
                     note.CMNT = switchHyper
-                    console.log(switchHyper)
                 })
 
                 return
@@ -304,7 +304,6 @@
                     let cmnt = this.getHyperLinks(x)
                     x.CMNT = cmnt
                 })
-                console.log(this.histNotes)
                 return this.histNotes
             }
         }
@@ -387,19 +386,7 @@
     .history-note{
         width: 320px;
         position: relative;
-        /* min-height: 20px !important;
-        max-height: 59px !important; */
-        /* flex: auto;
-        overflow-y: auto;
-        position: relative; 
-        width: 380px;
-        position: relative;
-        padding-bottom: 4px;
-        display: flex; 
-        flex-direction: column; 
-        min-height: 2px; 
-        max-height: 38px;
-        overflow: hidden; */
+        height: fit-content;
     }
 
     :deep(.v-input__details){
