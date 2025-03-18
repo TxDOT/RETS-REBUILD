@@ -4,7 +4,7 @@
        
         <div id="activity-header" class="main-color">
             <div id="container-header">
-                <header>RETS Dashboard</header>
+                <header>RETS Dashboard Khan</header>
             </div>
             <div class="add-new-btn">
                 <div style="float:right;">

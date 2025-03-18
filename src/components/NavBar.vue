@@ -81,7 +81,10 @@
                <v-card-title id="jumptofont"> Jump to SPM </v-card-title>
            </v-btn>
        </v-card-item>
-
+ 
+   </v-card>
+   <v-card id="jumptotoggle" max-width="400" hover @mouseleave="mouseleavejumpto" v-if = "jumptocard">
+    
    </v-card>
    <v-card id = "containersettings" height = "615" v-show = "settingsstatus">
     <v-card-item>

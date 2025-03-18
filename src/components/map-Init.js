@@ -475,7 +475,7 @@ export const searchWidget = new Search({
   /////////////////////////////////
   view: view,
   includeDefaultSources: false,
-  allPlaceholder: "City, County, District, Route, Minute Order, RETS ID",
+  allPlaceholder: "City, County, District, Route, Minute Order, RETS ID, Lat/Lon",
   popupEnabled: false,
   popupTemplate: false,
   minSuggestCharacters: 3,
@@ -668,6 +668,15 @@ export const searchWidget = new Search({
 
       }
     },
+    {
+      name: "Latitude/Longitude",
+      url: "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer",
+      singleLineFieldName: "SingleLine",
+      suggestionsEnabled: false,
+      placeholder: "34.24190694,-101.12269563",
+      localSearchDisabled: true,
+
+    }
   ]
 
 });
