@@ -113,7 +113,7 @@
         methods:{
             getHyperLinks(index){
                 if(!index.CMNT) return
-                let findURL = index.CMNT.match(/(https?[^\s]+)/g)
+                let findURL = index.CMNT.match(/([^\s]+www?[^\s]+)/g)
                 if(findURL){
                     index.URL = findURL
                     //console.log(findURL)

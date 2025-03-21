@@ -30,7 +30,7 @@
                                         <p id="replyingToCmnt">Replying to "{{store.historyChat.find(x => x.OBJECTID === note.PARENT_ID)?.CMNT ?? "Referenced Note has been deleted"}}"</p>
                                     </span>    
                                 </div>
-                                <v-textarea class="history-note mx-2" rows="1" auto-grow density="compact" variant="plain" :disabled="note.OBJECTID !== updateOID" v-model="note.CMNT"  placeholder="Enter Comment"></v-textarea>
+                                <v-textarea class="history-note mx-2" rows="1" auto-grow density="compact" variant="plain" :disabled="note.OBJECTID !== updateOID" v-model="note.CMNT" placeholder="Enter Comment"></v-textarea>
                                 <span v-for="(i,n) in note.URL" style="display: flex; flex-direction: row; max-width: 99%; font-size: 12px;">
                                     <span v-html="`Link ${n+1} <a href='${i}' target='_blank'>${i}</a>`" style="max-width: 99%;"></span>
                                 </span>    
@@ -107,7 +107,7 @@
         },
         methods:{
             getHyperLinks(index){
-                let findURL = index.CMNT.match(/(https?[^\s]+)/g)
+                let findURL = index.CMNT.match(/((https|www)?[^\s]+)/g)
                 if(findURL){
                     index.URL = findURL
                     //console.log(findURL)
