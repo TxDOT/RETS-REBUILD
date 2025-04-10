@@ -125,7 +125,7 @@
                 Send notifications for: <br>
                 <div id="notiswitches">
                     <v-card-item v-for="(item, index) in switches" :key="index" :id="'switch-container-' + index" class="switch-item">
-                        <v-switch v-model="item.value" color="primary" :style="switchStyle(item.fontColor)" @change="switchTurnedOn(index)" disabled>
+                        <v-switch :v-model="item.value" color="primary" :style="switchStyle(item.fontColor)" @change="switchTurnedOn(index)" :disabled="isDisabled(index)" @update:modelValue="item.value = !item.value" >
                             <template #prepend >
                                 <v-label >
                                     {{ item.label }}
@@ -289,6 +289,7 @@
                 feedbackText: "",
                 feedbackSubmitStatus: true,
                 feedbackName: "",
+                notificationValue: false,
                 latestReleaseNotes: [
                     [
                         `Latest Release Version ${store.retsVersion}`,'User Story 226: Add Lat/Long searching','User Story 230: Transition to prod create portal','User Story 119: Add links/URL to a comment in History',
@@ -356,13 +357,20 @@
                 ['Release 2.0','RETS V2 first release'],  
                 ],
                 switches: [
-                            { label: "RETS I Create", value: false, fontColor: "#D9D9D9" },
-                            { label: "RETS I'm tagged in", value: false, fontColor: "#D9D9D9" },
-                            { label: "High Priority RETS", value: false, fontColor: "#D9D9D9" },
-                            { label: "RETS assigned to me that have been inactive for 30 days", value: false, fontColor: "#D9D9D9" },
-                            { label: "New RETS assigned to me", value: false, fontColor: "#D9D9D9" },
-                            { label: "Status changed to", value: false, fontColor: "#D9D9D9" },
-                            { label: "My RETS are archived", value: false, fontColor: "#D9D9D9" },
+                            // { label: "RETS I Create", value: false, fontColor: "#D9D9D9" },
+                            // { label: "RETS I'm tagged in", value: false, fontColor: "#D9D9D9" },
+                            // { label: "High Priority RETS", value: false, fontColor: "#D9D9D9" },
+                            // { label: "RETS assigned to me that have been inactive for 30 days", value: false, fontColor: "#D9D9D9" },
+                            // { label: "New RETS assigned to me", value: false, fontColor: "#D9D9D9" },
+                            // { label: "Status changed to", value: false, fontColor: "#D9D9D9" },
+                            // { label: "My RETS are archived", value: false, fontColor: "#D9D9D9" },
+                            { label: "News RETS in my district(s)", value: false, fontColor: "#D9D9D9"},
+                            { label: "RETS assigned to me", value: false, fontColor: "#D9D9D9" },
+                            { label: "Someone tags me", value: false, fontColor: "#D9D9D9" },
+                            { label: "RETS marked high priority", value: false, fontColor: "#D9D9D9" },
+                            { label: "No activty in ___ days", value: false, fontColor: "#D9D9D9" },
+                            { label: "A RETS is deleted", value: false, fontColor: "#D9D9D9" },
+                            { label: "Status changes to", value: false, fontColor: "#D9D9D9" },
                             // Add more switches as needed
                         ],
                 darkmodeswitch: [
@@ -542,6 +550,16 @@
                 },
                 
                 methods: {
+                    getVMOdel(value){
+                        console.log(value)
+
+                    },
+                    isDisabled(index){
+                        if (index == 7){
+                            return true
+                        }
+                        return false
+                    },  
                     toggleGroup(index) { 
                         this.$set(this.expandedGroups, index, !this.expandedGroups[index])
                     },
@@ -569,13 +587,14 @@
                         store.settings = {
                             autoZoom : store.autozoomtest,
                             autoZoomExtent: store.autozoomextent,
-                            basemap: store.basemaptest
+                            basemap: store.basemaptest,
+                            notifications: this.switches
                         } 
                         this.isAutoZoom = store.autozoomtest
                         this.isAutoZoomExtent = store.autozoomextent
                         
                         const settingsObject = {attributes: {OBJECTID : appConstants.defaultUserValue[0].objectid, SETTINGS : JSON.stringify(store.settings)}}
-                        await addSettings(settingsObject)
+                        // await addSettings(settingsObject)
                         if (store.updateRetsSearch.length != store.retspointlength && store.autozoomextent == false){
                             if (store.CREATE_DT){
                                 await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
@@ -583,8 +602,12 @@
                             else{
                                 await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
                             }
-                        return  
-                    }
+                            return  
+                        }
+                        console.log(settingsObject.attributes.SETTINGS)
+                        console.log(JSON.parse(settingsObject.attributes.SETTINGS))
+                       
+                        
 
                     },
                     cancelSettings(){
