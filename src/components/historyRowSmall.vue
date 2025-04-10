@@ -151,15 +151,16 @@
                 this.orderList
                 if(!this.histNotes.length){
                     this.isHistNotesEmpty = true
+                    return
                 }
                 return
             },
             async updateNote(n){
                 const findItem = await store.modifyNote(n.CMNT, n.OBJECTID)
                 this.editContent = false
-                this.updateOID = findItem.OBJECTID
+                //this.updateOID = findItem.OBJECTID
                 this.updateOID = -1
-                const oidFlag = `${n.OBJECTID}`
+                const oidFlag = `${n.OBJECTID}Small`
                 document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
                 this.getHyperLinks(findItem)
                 return
@@ -329,6 +330,7 @@
         padding-bottom: 30px;
         margin-bottom: 4px;
         flex: auto;
+        gap: 5px;
     }
     .note{
         display: flex;
@@ -337,6 +339,7 @@
         padding-left: 5px;
         border-left: 3px solid #4472C4 !important; 
         margin-bottom: 0px;
+        gap: 5px;
     }
     #search{
         position: relative;
