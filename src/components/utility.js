@@ -141,7 +141,6 @@ export function clickRetsPoint(){
                     }
 
                     const retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
-                    console.log(retsPt)
                    
                     if (store.isDetailsPage && store.isSaveBtnDisable && !store.isEmptyRow){
                         //canceldetailsfunction()

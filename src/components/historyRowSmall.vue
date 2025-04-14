@@ -125,7 +125,6 @@
                     index.URL = findURL
                     //console.log(findURL)
                     findURL.forEach((url, i) => {
-                        console.log(url, i)
                         let returnUpdateCMNT = index.CMNT.replace(url, `see Link ${i + 1}`)
                         index.CMNT = returnUpdateCMNT
                     })
@@ -210,7 +209,6 @@
             },
             switchHyperlink(note){
                 note.URL.forEach((url, i) => {
-                    console.log(url, i)
                     let switchHyper = note.CMNT.replace(`see Link ${i+1}`, url)
                     note.CMNT = switchHyper
                 })
