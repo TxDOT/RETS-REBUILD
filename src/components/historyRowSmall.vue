@@ -36,7 +36,7 @@
                         <v-textarea class="history-note" rows="1" auto-grow density="compact" :disabled="note.OBJECTID !== updateOID" variant="plain" v-model="note.CMNT" placeholder="Enter Comment" autofocus></v-textarea>
                         
                         <span v-for="(i,n) in note.URL" style="display: flex; flex-direction: row; max-width: 99%; font-size: 12px;">
-                            <span v-html="`Link ${n+1} <a href='${i}' target='_blank'>${i}</a>`" style="max-width: 99%;"></span>
+                            <span v-html="returnHyperLink(i, n)" style="max-width: 99%;"></span>
                         </span>
                         
                         <div style="flex: auto; position: relative; top: 00px; width: 100%;">
@@ -99,7 +99,7 @@
                 isActive: false,
                 testOid: 0,
                 searchAttach: false,
-                urlLinks: ["<a href='google.com'>google</a>"],
+                urlLinks: [],
                 addURL: false,
             }
         },
@@ -111,13 +111,21 @@
            
         },
         methods:{
+            returnHyperLink(url, index){
+                if(url.match(/^www./g)){
+                    return `Link ${index+1} <a href='https://${url}' target='_blank'>${url}</a>`
+                }
+                return `Link ${index+1} <a href='${url}' target='_blank'>${url}</a>`
+                
+            },
             getHyperLinks(index){
                 if(!index.CMNT) return
-                let findURL = index.CMNT.match(/([^\s]+www?[^\s]+)/g)
+                let findURL = index.CMNT.match(/(\S+(?<=www|https)((?=)\S+))/g)
                 if(findURL){
                     index.URL = findURL
                     //console.log(findURL)
                     findURL.forEach((url, i) => {
+                        console.log(url, i)
                         let returnUpdateCMNT = index.CMNT.replace(url, `see Link ${i + 1}`)
                         index.CMNT = returnUpdateCMNT
                     })
@@ -202,6 +210,7 @@
             },
             switchHyperlink(note){
                 note.URL.forEach((url, i) => {
+                    console.log(url, i)
                     let switchHyper = note.CMNT.replace(`see Link ${i+1}`, url)
                     note.CMNT = switchHyper
                 })

@@ -1683,6 +1683,7 @@ export function setBasemap(){
     else{
         store.basemaptest = JSON.parse(appConstants.defaultUserValue[0].settings).basemap
     }
+
  if ( store.basemaptest == null ||  store.basemaptest == "Dark Grey"){
     applyDarkGrey()
  }
