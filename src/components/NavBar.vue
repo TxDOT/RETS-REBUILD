@@ -30,7 +30,10 @@
             </v-list-item>
         </v-list>
 
+       
+
     </v-navigation-drawer>
+    
     <v-card id="basemaptoggle" max-width="400" hover @mouseleave="mouseleavebasemap" v-if = "basemapcard" >
        
         <v-card-item  style="height: 50px;">
@@ -83,9 +86,18 @@
        </v-card-item>
  
    </v-card>
-   <v-card id="jumptotoggle" max-width="400" hover @mouseleave="mouseleavejumpto" v-if = "jumptocard">
-    
-   </v-card>
+   <v-card class= "Selecticons" @mouseleave="mouseleaveselect" v-if = "selecttoggle">
+            <v-card-item  style="height: 50px;">
+            <v-btn @click="handleSelectTool('selectrectangle');" flat density="compact" style="height: 100%;">
+                <v-icon>mdi-rectangle-outline</v-icon>
+            </v-btn>
+        </v-card-item>
+        <v-card-item style="height: 45px;">
+            <v-btn @click="handleSelectTool();" flat density="compact" style="height: 100%;">
+                <v-icon>mdi-vector-polygon</v-icon>
+            </v-btn>
+        </v-card-item>
+        </v-card>
    <v-card id = "containersettings" height = "655" v-show = "settingsstatus">
     <v-card-item>
         <span class="banner-txt">Settings</span>
@@ -243,7 +255,7 @@
 
     import { appConstants } from '../common/constant.js';
     import { graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect } from '../components/map-Init.js';
-    import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM, home, restoreExtent} from '../components/utility.js';
+    import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM, home, restoreExtent, selecttoolfreehand} from '../components/utility.js';
     import { vuetify } from '../main.js';
     import { addSettings } from './crud.js';
     import { store } from './store';
@@ -266,6 +278,7 @@
                 mountedAutoZoom: null,
                 selectfunction : {},
                 store,
+                selecttoggle: false,
                 basemapArray: ['Dark Grey', 'Light Grey', 'Standard TxDOT', 'Open Street Map', 'Hybrid', 'Google', 'Imagery'],
                 shiftmap: false,
                 fontColor: '#D9D9D9',
@@ -458,8 +471,10 @@
                                },
                                hover:(i) => 
                                     {
+                                        store.isSelectEnabled = !store.isSelectEnabled
                                         this.basemapcard = false;
                                         this.jumptocard= false;
+                                        this.selecttoggle = true;
                                     }
                                 },
                                {
@@ -640,6 +655,9 @@
                     mouseleavejumpto(){
                         this.jumptocard = false;
                     },
+                    mouseleaveselect(){
+                        this.selecttoggle = false;
+                    },
 
                     async handleCreateTool() {
                         if (this.isCreateEnabled === true) {
@@ -657,9 +675,13 @@
                         
                        
                     },
-                    handleSelectTool() { 
+                    handleSelectTool(tooltype) { 
                         if (store.isSelectEnabled === true ){
-                            this.selectfunction = selecttool(store.isSelectEnabled, sketchWidgetselect, graphics);
+                            if(tooltype="selectrectangle"){
+                                this.selectfunction = selecttool(store.isSelectEnabled, sketchWidgetselect, graphics)
+                            } else {
+                                this.selectfunction = selecttoolfreehand(store.isSelectEnabled, sketchWidgetselect, graphics)
+                            }
                         }
                         else{
                             sketchWidgetselect.cancel()
@@ -1106,7 +1128,11 @@
         
     }
 
-    
+    .Selecticons{
+        height: 100px;
+        width: 75px;
+        top: 650px;
+    }
    
     
 </style>
