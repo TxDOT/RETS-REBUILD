@@ -1676,34 +1676,29 @@ export function setFilterProperties(userFilterObject){
 }
 
 export function setBasemap(){
-    if (JSON.parse(appConstants.defaultUserValue[0].settings) == null){
-        store.basemaptest = "Dark Grey"
-        
+    store.basemaptest = JSON.parse(appConstants.defaultUserValue[0].settings) === null ? "Dark Grey" : JSON.parse(appConstants.defaultUserValue[0].settings).basemap
+
+    if ( store.basemaptest === null ||  store.basemaptest === "Dark Grey"){
+        applyDarkGrey()
     }
-    else{
-        store.basemaptest = JSON.parse(appConstants.defaultUserValue[0].settings).basemap
+    else if ( store.basemaptest === "Light Grey"){
+        applyLightGrey()
     }
- if ( store.basemaptest == null ||  store.basemaptest == "Dark Grey"){
-    applyDarkGrey()
- }
- else if ( store.basemaptest == "Light Grey"){
-    applyLightGrey()
- }
- else if ( store.basemaptest == "Standard TxDOT"){
-    applyStandard()
- }
- else if ( store.basemaptest == "Open Street Map"){
-    applyOSM()
- }
- else if ( store.basemaptest == "Hybrid"){
-    applyHybrid()
- }
- else if ( store.basemaptest == "Google"){
-    applyGoogle()
- }
- else if ( store.basemaptest == "Imagery"){
-    applyImagery()
- }
+    else if ( store.basemaptest === "Standard TxDOT"){
+        applyStandard()
+    }
+    else if ( store.basemaptest === "Open Street Map"){
+        applyOSM()
+    }
+    else if ( store.basemaptest === "Hybrid"){
+        applyHybrid()
+    }
+    else if ( store.basemaptest === "Google"){
+        applyGoogle()
+    }
+    else if ( store.basemaptest === "Imagery"){
+        applyImagery()
+    }
 
 }
 
@@ -1765,6 +1760,10 @@ export function applyOSM(){
     retsLabelclass.symbol.haloSize = 0
     TxDOTRoadways.labelsVisible = false,
     TxDOTRoadways.renderer.symbol.width = 1
+}
+
+export function applybasemap(basemap){
+
 }
 
 export async function deleteRets(){

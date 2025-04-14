@@ -125,7 +125,7 @@
                 Send notifications for: <br>
                 <div id="notiswitches">
                     <v-card-item v-for="(item, index) in switches" :key="index" :id="'switch-container-' + index" class="switch-item">
-                        <v-switch :v-model="item.value" color="primary" :style="switchStyle(item.fontColor)" @change="switchTurnedOn(index)" :disabled="isDisabled(index)" @update:modelValue="item.value = !item.value" >
+                        <v-switch :v-model="item.value" color="primary" :style="switchStyle(item.fontColor)" @change="switchTurnedOn(index)" :disabled="isDisabled(index)" @update:modelValue="item.value = !item.value; setNotifications() " >
                             <template #prepend >
                                 <v-label >
                                     {{ item.label }}
@@ -290,6 +290,7 @@
                 feedbackSubmitStatus: true,
                 feedbackName: "",
                 notificationValue: false,
+                notificationWatcher: false,
                 latestReleaseNotes: [
                     [
                         `Latest Release Version ${store.retsVersion}`,'User Story 226: Add Lat/Long searching','User Story 230: Transition to prod create portal','User Story 119: Add links/URL to a comment in History',
@@ -546,10 +547,28 @@
                 mounted() {
                     this.setAutozoomSwitch()
                     this.setAutozoomExtentSwitch()
+                    this.setNotifications()
 
                 },
                 
                 methods: {
+                    setNotifications(){
+                        const { notifications } = this.userSettings
+                        if (notifications != null){
+                            console.log("not null")
+                            
+                            
+                        }
+                        else{
+                            console.log("is null")
+                            console.log(this.switches[1].value)
+                            this.switches[1].value = true
+                            this.notificationWatcher = true
+
+                            console.log(this.switches[1].value)
+
+                        }
+                    },
                     getVMOdel(value){
                         console.log(value)
 
@@ -588,13 +607,13 @@
                             autoZoom : store.autozoomtest,
                             autoZoomExtent: store.autozoomextent,
                             basemap: store.basemaptest,
-                            notifications: this.switches
+                           // notifications: this.switches
                         } 
                         this.isAutoZoom = store.autozoomtest
                         this.isAutoZoomExtent = store.autozoomextent
                         
                         const settingsObject = {attributes: {OBJECTID : appConstants.defaultUserValue[0].objectid, SETTINGS : JSON.stringify(store.settings)}}
-                        // await addSettings(settingsObject)
+                         await addSettings(settingsObject)
                         if (store.updateRetsSearch.length != store.retspointlength && store.autozoomextent == false){
                             if (store.CREATE_DT){
                                 await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
@@ -604,7 +623,6 @@
                             }
                             return  
                         }
-                        console.log(settingsObject.attributes.SETTINGS)
                         console.log(JSON.parse(settingsObject.attributes.SETTINGS))
                        
                         
