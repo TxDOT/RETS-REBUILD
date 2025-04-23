@@ -868,6 +868,7 @@ window.addEventListener("keyup", (event) => {
 });
 
 export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
+    console.log('selecttool')
     if(isSelectEnabled === true){ 
         sketchWidgetselect.create("rectangle");
         const selectretspoints = sketchWidgetselect
@@ -981,6 +982,7 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
 }
 
 export function selecttoolfreehand(isSelectEnabled, sketchWidgetselect, graphics){
+    console.log('selecttoolfreehand')
     if(isSelectEnabled === true){ 
         sketchWidgetselect.create("polygon", { mode: "freehand" });
         const selectretspoints = sketchWidgetselect

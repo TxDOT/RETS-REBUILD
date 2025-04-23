@@ -93,7 +93,7 @@
             </v-btn>
         </v-card-item>
         <v-card-item style="height: 45px;">
-            <v-btn @click="handleSelectTool();" flat density="compact" style="height: 100%;">
+            <v-btn @click="handleSelectTool('selecttoolfreehand');" flat density="compact" style="height: 100%;">
                 <v-icon>mdi-vector-polygon</v-icon>
             </v-btn>
         </v-card-item>
@@ -462,9 +462,9 @@
                                 },
                                 {title:"Select", icon: 'mdi-select-multiple', color: "#D9D9D9", name: "Multi-Select", isActive: false,
                                action: () =>{
-                                store.isSelectEnabled = !store.isSelectEnabled
-                                this.retsToolsBottom[2].isActive = !this.retsToolsBottom[2].isActive
-                                this.handleSelectTool();
+                                // store.isSelectEnabled = !store.isSelectEnabled
+                                // this.retsToolsBottom[2].isActive = !this.retsToolsBottom[2].isActive
+                                // this.handleSelectTool();
                                },
                                setActive: () => {
                                 return true
@@ -679,7 +679,7 @@
                         if (store.isSelectEnabled === true ){
                             if(tooltype="selectrectangle"){
                                 this.selectfunction = selecttool(store.isSelectEnabled, sketchWidgetselect, graphics)
-                            } else {
+                            } else if (tooltype="selecttoolfreehand"){
                                 this.selectfunction = selecttoolfreehand(store.isSelectEnabled, sketchWidgetselect, graphics)
                             }
                         }
@@ -1129,9 +1129,10 @@
     }
 
     .Selecticons{
+        position: absolute;
         height: 100px;
         width: 75px;
-        top: 650px;
+        bottom: 7.5%;
     }
    
     
