@@ -36,7 +36,7 @@
                         <v-textarea class="history-note" rows="1" auto-grow density="compact" :disabled="note.OBJECTID !== updateOID" variant="plain" v-model="note.CMNT" placeholder="Enter Comment" autofocus></v-textarea>
                         
                         <span v-for="(i,n) in note.URL" style="display: flex; flex-direction: row; max-width: 99%; font-size: 12px;">
-                            <span v-html="`Link ${n+1} <a href='${i}' target='_blank'>${i}</a>`" style="max-width: 99%;"></span>
+                            <span v-html="returnHyperLink(i, n)" style="max-width: 99%;"></span>
                         </span>
                         
                         <div style="flex: auto; position: relative; top: 00px; width: 100%;">
@@ -99,7 +99,7 @@
                 isActive: false,
                 testOid: 0,
                 searchAttach: false,
-                urlLinks: ["<a href='google.com'>google</a>"],
+                urlLinks: [],
                 addURL: false,
             }
         },
@@ -111,9 +111,16 @@
            
         },
         methods:{
+            returnHyperLink(url, index){
+                if(url.match(/^www./g)){
+                    return `Link ${index+1} <a href='https://${url}' target='_blank'>${url}</a>`
+                }
+                return `Link ${index+1} <a href='${url}' target='_blank'>${url}</a>`
+                
+            },
             getHyperLinks(index){
                 if(!index.CMNT) return
-                let findURL = index.CMNT.match(/(https?[^\s]+)/g)
+                let findURL = index.CMNT.match(/(\S+(?<=www|https)((?=)\S+))/g)
                 if(findURL){
                     index.URL = findURL
                     //console.log(findURL)
@@ -151,15 +158,16 @@
                 this.orderList
                 if(!this.histNotes.length){
                     this.isHistNotesEmpty = true
+                    return
                 }
                 return
             },
             async updateNote(n){
                 const findItem = await store.modifyNote(n.CMNT, n.OBJECTID)
                 this.editContent = false
-                this.updateOID = findItem.OBJECTID
+                //this.updateOID = findItem.OBJECTID
                 this.updateOID = -1
-                const oidFlag = `${n.OBJECTID}`
+                const oidFlag = `${n.OBJECTID}Small`
                 document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
                 this.getHyperLinks(findItem)
                 return
@@ -329,6 +337,7 @@
         padding-bottom: 30px;
         margin-bottom: 4px;
         flex: auto;
+        gap: 5px;
     }
     .note{
         display: flex;
@@ -337,6 +346,7 @@
         padding-left: 5px;
         border-left: 3px solid #4472C4 !important; 
         margin-bottom: 0px;
+        gap: 5px;
     }
     #search{
         position: relative;

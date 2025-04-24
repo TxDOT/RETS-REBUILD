@@ -79,7 +79,6 @@
                     </v-btn-toggle>
                 </div>
             </div>
-
             <div id="commentDiv" v-if="editText">
                 <v-card style="position: relative; height: 100%; border-radius: 0%;" >
                     <v-card-title style="padding-bottom: 30px;">History</v-card-title>
@@ -528,8 +527,8 @@
 }
 
 #commentDiv{
-    position: relative;
-    bottom: 100%; 
+    position: absolute;
+    top: calc(100% + -91vh); 
     left: 70vh; 
     width: 50rem;
     padding:0%;

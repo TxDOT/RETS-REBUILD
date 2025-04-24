@@ -137,11 +137,10 @@ export function clickRetsPoint(){
                                 location: event.mapPoint
                             });
                         }
-                        return
+
                     }
 
                     const retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
-                    console.log(retsPt)
                    
                     if (store.isDetailsPage && store.isSaveBtnDisable && !store.isEmptyRow){
                         //canceldetailsfunction()
@@ -1707,14 +1706,14 @@ export function applyDarkGrey(){
     retsLabelclass.symbol.color = "white"
     retsLabelclass.symbol.haloSize = 0
     TxDOTRoadways.labelsVisible = false
-    TxDOTRoadways.renderer.symbol.width = 1
+    TxDOTRoadways.renderer.symbol.width = 0
 }
 export function applyLightGrey(){
     map.basemap = lightVTBasemap
     retsLabelclass.symbol.color = "black"                        
     retsLabelclass.symbol.haloSize = 0
     TxDOTRoadways.labelsVisible = false,
-    TxDOTRoadways.renderer.symbol.width = 1
+    TxDOTRoadways.renderer.symbol.width = 0
 
 
 }
@@ -1724,7 +1723,7 @@ export function applyStandard(){
     retsLabelclass.symbol.color = "black"
     retsLabelclass.symbol.haloSize = 0
     TxDOTRoadways.labelsVisible = false,
-    TxDOTRoadways.renderer.symbol.width = 1
+    TxDOTRoadways.renderer.symbol.width = 0
 
 }
 
@@ -1734,7 +1733,7 @@ export function applyImagery(){
     retsLabelclass.symbol.haloColor = "gray"
     retsLabelclass.symbol.haloSize = 1
     TxDOTRoadways.labelsVisible = false,
-    TxDOTRoadways.renderer.symbol.width = 1
+    TxDOTRoadways.renderer.symbol.width = 0
 }
 
 export function applyHybrid(){
@@ -1751,7 +1750,7 @@ export function applyGoogle(){
     retsLabelclass.symbol.color = "black"
     retsLabelclass.symbol.haloSize = 0
     TxDOTRoadways.labelsVisible = false,
-    TxDOTRoadways.renderer.symbol.width = 1
+    TxDOTRoadways.renderer.symbol.width = 0
 }
 
 export function applyOSM(){

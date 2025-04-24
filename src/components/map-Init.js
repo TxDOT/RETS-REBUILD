@@ -929,7 +929,7 @@ const handleextent = reactiveUtils.watch(
             store.getRetsLayer(store.loggedInUser, `RETS_ID = ${stringex}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
                 //check if features are highlighted, if they are run the outlinefeedcards
 
-        }
+          }
         else{
             store.getRetsLayer(store.loggedInUser, `RETS_ID = ${stringex}`, "retsLayer", "EDIT_DT DESC, PRIO")
 
