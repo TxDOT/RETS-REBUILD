@@ -88,9 +88,7 @@
    </v-card>
    <v-card class= "Selecticons" @mouseleave="mouseleaveselect" v-if = "selecttoggle">
             <v-card-item  style="height: 50px;">
-            <v-btn @click="handleSelectTool('selectrectangle');" flat density="compact" style="height: 100%;">
-                <v-icon>mdi-rectangle-outline</v-icon>
-            </v-btn>
+            <v-btn @click="handleSelectTool('selectrectangle');" flat density="compact" style="height: 100%;"><v-icon>mdi-rectangle-outline</v-icon></v-btn>
         </v-card-item>
         <v-card-item style="height: 45px;">
             <v-btn @click="handleSelectTool('selecttoolfreehand');" flat density="compact" style="height: 100%;">
@@ -471,7 +469,7 @@
                                },
                                hover:(i) => 
                                     {
-                                        store.isSelectEnabled = !store.isSelectEnabled
+                                        // store.isSelectEnabled = !store.isSelectEnabled
                                         this.basemapcard = false;
                                         this.jumptocard= false;
                                         this.selecttoggle = true;
@@ -676,15 +674,25 @@
                        
                     },
                     handleSelectTool(tooltype) { 
-                        if (store.isSelectEnabled === true ){
-                            if(tooltype="selectrectangle"){
-                                this.selectfunction = selecttool(store.isSelectEnabled, sketchWidgetselect, graphics)
-                            } else if (tooltype="selecttoolfreehand"){
-                                this.selectfunction = selecttoolfreehand(store.isSelectEnabled, sketchWidgetselect, graphics)
+                        if (store.isSelectEnabled  === false){
+                            store.isSelectEnabled = !store.isSelectEnabled
+                            this.retsToolsBottom[2].isActive = true
+                            if (tooltype === "selectrectangle"){
+                                
+                                selecttool(store.isSelectEnabled, sketchWidgetselect, graphics)
+ 
+                            }
+                            else if (tooltype="selecttoolfreehand"){
+                                
+                                selecttoolfreehand(store.isSelectEnabled, sketchWidgetselect, graphics)
+ 
                             }
                         }
                         else{
                             sketchWidgetselect.cancel()
+                            // this.selectfunction.remove()
+                            this.retsToolsBottom[2].isActive = false
+                            store.isSelectEnabled = !store.isSelectEnabled
                         }
 
                         
