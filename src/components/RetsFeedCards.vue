@@ -225,7 +225,6 @@ export default{
                 this.isSpinner = true
                 this.Spinneractive = false
                 store.isCard = false
-                
                 const obj = await addRETSPT(newPointGraphic, "rets")
                 const objectid = obj.addFeatureResults[0].objectId
                 await this.addretss(objectid)
@@ -235,6 +234,7 @@ export default{
                 store.activityBanner = objectid
                 store.isDetailsPage = true
                 store.toggleFeed = 2
+                store.isNewRets = true
                 return
             }
             catch(err){

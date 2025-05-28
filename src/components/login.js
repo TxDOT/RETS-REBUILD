@@ -77,8 +77,8 @@ function alreadySignedIn(){
 }
 
 
-const setDefExpRets = async (userId) => {
-  if(appConstants.defaultUserValue.length) return
+export const setDefExpRets = async (userId) => {
+  if(appConstants.defaultUserValue.length ) return
   const userOBJECTID = await getUserOBJECTID(userId)
   appConstants.defaultUserValue.push({"name": "Username", "value": `${userId}`, "objectid" : userOBJECTID.OBJECTID, "webhook" : userOBJECTID.WEBHOOK, "email" : userOBJECTID.EMAIL, "filters" : userOBJECTID.FILTERS, "settings" : userOBJECTID.SETTINGS})
   if (userOBJECTID.FILTERS === null){

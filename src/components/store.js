@@ -130,6 +130,8 @@ export const store = reactive({
         savedFilter: "",
         coordinatenotification: false,
         latlonstring:"",
+        isNewRets: false,
+        userSettings: null,
         defaultFilterSetup(){
                 // this.CREATE_DT.push({title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"})
                 // this.STAT = appConstants.defaultStatValues

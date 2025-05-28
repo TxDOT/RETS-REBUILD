@@ -864,7 +864,15 @@ view.popup.dockOptions = {
 }
 
 homeWidget.on("go", function() {
-  home();
+  retsLayer.queryExtent()
+            .then((resp) =>{
+                if (resp.count== 0 || resp.count > 3000){
+                    view.goTo(view.center)
+                }
+                else{
+                    view.goTo(resp.extent)
+                }
+            })
 });
 
 // const handlescale = reactiveUtils.watch(

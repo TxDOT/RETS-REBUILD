@@ -16,34 +16,34 @@
             <v-lazy :options="{'threshold': 0}" transition="expand-transition" height="100" width="439">
                 <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `5px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="checkhighlight(String(rd.attributes.RETS_ID)) ?? 'card-rets'"  @dblclick="double(rd, road);" @click="zoomToRetsPt(rd)">
                     <!-- <div class="boundary-rets-card"> -->
-                    <div style="top: 0px; max-height: 0px; position: relative;">
-                        <div style="position: relative;">
-                            <v-card-text id="retsId">
-                                RETS {{  rd.attributes.RETS_ID  }}
-                            </v-card-text>
-                        </div>
+                       <div style="display:flex;  bottom: 12px !important; position: relative;  width: 374px;">
+                            <div>
+                                <v-card-text id="retsId">
+                                    RETS {{  rd.attributes.RETS_ID  }}
+                                </v-card-text>
+                            </div>
+                            
+                            <div style=" min-width: 0; flex: 1; container-type: inline-size;">
+                                <v-card-text id="retsCMNT" >
+                                    {{ rd.attributes.RETS_NM}}
+                                </v-card-text>
+                            </div> 
+                            <div >
+                                <v-card-text class="route-name" >
+                                    {{ rd.attributes.RTE_NM ?? "No Route" }}
+                                </v-card-text>
 
-                        <div style="position: relative;">
-                            <v-card-text class="route-name">
-                                {{ rd.attributes.RTE_NM ?? "No Route" }}
-                            </v-card-text>
-                        </div>
-
-                        <div style="position: relative; margin-left: 5px;">
-                            <v-card-text id="retsCMNT">
-                                {{ rd.attributes.RETS_NM}}
-                            </v-card-text>
-                        </div>
-
-                        <div style="width: 100%;">
+                            </div>
+                       </div>
+                        <div style="bottom: 13px; position: relative;min-height: 54%;">
                             <span class="text-concat">
                                 {{ rd.attributes.DESC_ ? rd.attributes.DESC_ : "Description is empty" }}
                             </span>
                         </div>
-                    </div>
+                    
                     
                     <div class="bottomCardText">
-                        <div style="position:relative; float:right; font-size: 11px; top: 45px; left: 190px;" >
+                        <div style="position:relative; float:right; font-size: 11px;  bottom: -65px; right: -8px;" >
                             <v-tooltip text="Assigned to you" location="top">
                                 <template v-slot:activator="{props}">
                                     <v-icon icon="mdi-account-multiple-check" color="white" v-if="rd.attributes.mdiaccountmultiplecheck === true" class="cardPRIO" v-bind="props"></v-icon>
@@ -189,7 +189,7 @@ export default{
         closeFlagDiv(){
             this.flagClickedId = ""
         },
-        assignColorToFlag(clr){
+        assignColorToFlag(clr){ `   1111111111111   `
             document.getElementById(`${this.flagClickedId}Icon`).style.color = clr
             const rets = store.updateRetsSearch.find(rd => rd.attributes.RETS_ID === this.flagClickedId)
             rets.attributes.flagColor.FLAG = clr
@@ -221,7 +221,9 @@ export default{
             this.timer = setTimeout(()=>{
                 const zoomToRETS = rets.geometry
                 highlightRETSPoint(rets.attributes)
+                store.roadHighlightObj.clear()
                 store.roadHighlightObj.add(rets)
+
                 zoomTo(zoomToRETS)
             },250)
         },
@@ -271,7 +273,7 @@ export default{
 <style scoped>
 .bottomCardText{
     position: relative;
-    bottom: 11px;
+    bottom: 66px;
 }
 .rets-card-row{
     position: relative;
@@ -335,39 +337,34 @@ export default{
 #retsId{
     padding:0px; 
     position: relative; 
-    bottom: 12px; 
-    width: 20%;
+   
     font-size: 12px;
     color: #D9D9D9;
     font-weight: bold;
     margin-right: 10px;
-    justify-content: center;
+    white-space: nowrap;
 }
 #retsCMNT{
     position: relative;
+    bottom: 1px;
     overflow: hidden;
-    padding: 0px 0px 0px 0px;
+    padding: 0;
     text-overflow: ellipsis;
     white-space: nowrap;
     font-weight: bold;
     color: #4472C4;
-    bottom: 33px;
-    left:75px;
-    font-size: 12.5px;
+    z-index: 1;
+    font-size: 5.5cqw;
+
 }
 .route-name{
-    position: relative;
-    right: 30px;
-    float: right;
-    bottom: 32px;
-    justify-content: end;
-    width: 45%;
-    display: flex;
-    flex-direction: row;
-    padding: 0px;
+    padding: 0;
     font-size: 12.3px;
     color:#D9D9D9;
     font-weight: bold;
+    z-index: 2;
+    white-space: nowrap;
+
 }
 .text-concat {
     display: -webkit-box;
@@ -378,7 +375,7 @@ export default{
     position: relative;
     color: #a6a6a6;
     width: 100%;
-    bottom: 33px;
+    /* bottom: 33px; */
 }
 .cardPRIO{
     margin-left:10px;

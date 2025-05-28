@@ -83,63 +83,74 @@
        </v-card-item>
 
    </v-card>
-   <v-card id = "containersettings" height = "655" v-show = "settingsstatus">
+   <v-card id = "containersettings" v-show = "settingsstatus">
     <v-card-item>
         <span class="banner-txt">Settings</span>
         &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
         <span id='releaseNotes' :style="{color: releaseNotesColor, fontSize: '13px'}" @mouseover="releaseNotesColor = 'white'" @mouseleave="releaseNotesColor = '#D9D9D9'" @click="isReleaseNotes = true">Version {{ store.retsVersion }}</span>
     </v-card-item>
-        <hr id = "separator"/>
         <v-card-item class = "topSettings" >
-            <div style="height: 40px;">
-                <v-switch v-model="store.autozoomtest"   class="autozoom-switch" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn()" density="compact" >
+                <v-switch v-model="store.autozoomtest"   class="autozoom-switch" color="primary" :style="{color: fontColor}" density="compact" >
                     <template #prepend >
                         <v-label>
                             Automatically zoom when I change filters
                         </v-label>
                     </template>
                 </v-switch>
-                
-            </div>
-            <div style="height: 40px;">
-                <v-switch v-model="store.autozoomextent"   class="autozoom-switch" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn()" density="compact" >
+                <v-switch v-model="store.autozoomextent"   class="autozoom-switch" color="primary" :style="{color: fontColor}" density="compact" >
                     <template #prepend >
                         <v-label>
                             Automatically filter the activity feed based on the map extent
                         </v-label>
                     </template>
                 </v-switch>
-            </div>
 
                 <v-label style="font-size: 10px; color: #D9D9D9; margin-left: 10px;">Display selected basemap on load</v-label>
                 <v-select style="width: 22rem; margin-left: 10px; margin: top 0; margin-bottom: 0;" class="basemap-select" variant="underlined" density="compact" v-model=store.basemaptest :items=basemapArray></v-select>
         </v-card-item>
-        <hr id = "separator" />
             <v-btn @click ="activateFeedback()" color="#4472C4" rounded  style="position: absolute; right: 25px; top: 212px; z-index: 99999;">
                 <span style="font-weight: 100;">Feedback</span>
             </v-btn>
         <v-card-item id = "notificationsitems" >
-            <v-card-title id="notificationsfont">Notifications</v-card-title>
-            <v-card-subtitle id = "notificationssub">
+            <v-card-item class="banner-txt" style="padding-left: 7px; padding-top: 0; padding-bottom: 0;"><span>Notifications</span></v-card-item>
+            <v-card-subtitle id = "notificationssub">Send notifications for:</v-card-subtitle>
             <div id="notis">
-                Send notifications for: <br>
-                <div id="notiswitches">
-                    <v-card-item v-for="(item, index) in switches" :key="index" :id="'switch-container-' + index" class="switch-item">
-                        <v-switch :v-model="item.value" color="primary" :style="switchStyle(item.fontColor)" @change="switchTurnedOn(index)" :disabled="isDisabled(index)" @update:modelValue="item.value = !item.value; setNotifications() " >
-                            <template #prepend >
+                <v-card-item v-for="(item, index) in switches" :key="index"  class="switch-item">
+                    <div style="height: auto; ">
+                        <v-switch :model-value="item.value" color="primary"  @update:modelValue="item.value= $event" :disabled="isDisabled(index)"  :style="{color: fontColor, height: '50px'}"   >
+                        <template #prepend >
+                            <v-label @mouseover="testfunction(index) " >
+                                {{ item.label }}
+                                
+                            </v-label>
+                            <v-card class="daysDropdown" v-if="this.showDropdown === true" @mouseleave="this.showDropdown = false">
                                 <v-label >
-                                    {{ item.label }}
+                                    30
                                 </v-label>
-                            </template>
-                        </v-switch>
-                    </v-card-item>
-                </div>
-                
+                                <v-label>
+                                    60
+                                </v-label>
+                                <v-label>
+                                    90
+                                </v-label>
+                            </v-card>
+                            <!-- <v-select v-if="testfunction(index) === true" variant="underlined" class="daysDropdown"></v-select> -->
+                        </template>
+                    </v-switch>
+
+                    <v-select :key="index" v-if="addDropdown(index)" density="compact" variant="underlined" class="switchDropdown"  multiple chips :items=statuses>
+                        <template #prepend>
+                            <v-label >
+                                Applies to: 
+                            </v-label>
+                        </template>
+                    </v-select> 
+                    </div>
+                    
+                </v-card-item>  
             </div>
-            </v-card-subtitle>
             
         </v-card-item>
-            <hr id = "separator" />
         <v-card-item id="bottomitems">
             <div style="width: 100%; position: relative; height: 100%;">
                 <div style="width: 100%; position: relative;">
@@ -151,9 +162,10 @@
         </v-card-item>
 
     </v-card>
-    <v-card id="suggestionsSection" height="370px" width="350" style="border-radius: 0;" v-if="feedbackStatus">
-        <v-card-title>Provide Feedback</v-card-title>
-        <hr id = "separator" style="width: 320px !important; " />
+    <v-card id="suggestionsSection" height="360px" width="350" style="border-radius: 0;" v-if="feedbackStatus">
+        <v-card-title class="feedbackHeader">
+            Provide Feedback
+        </v-card-title>
         <v-card-text >
             We appreciate your feedback, let us know what you think.
         </v-card-text>
@@ -166,73 +178,55 @@
         </v-textarea>
         
         <v-checkbox class="small-checkbox" label="I prefer to remain anonymous" v-model="isAnonymous" style="margin-left: -40px; margin-top: -20px;"></v-checkbox>
-        <div style="margin-right: 10px;">
+        <div style="margin-right: 10px; margin-bottom: 0px; height: 40px;">
             <v-btn style="float: right;" variant="outlined" size="small" class="main-button-style" @click="submitFeedback" :disabled=feedbackSubmitStatus >SUBMIT</v-btn>
             <v-btn style="float: right;" variant="plain" size="small" class="secondary-button" @click="cancelFeedback" >CANCEL</v-btn>
         </div>
     </v-card>
-    <v-card id="releasenotesSection" v-if="isReleaseNotes" height="630" width="400" style="border-radius: 0;">
+    <v-card id="releasenotesSection" v-if="isReleaseNotes" height="655" width="400" style="border-radius: 0;">
         <v-card-title style="font-weight: 400;">Release Notes</v-card-title>
-        <hr id = "separator"  />
-        <div style="height: 525px; width: 370px; margin: auto; left: 0; right: 0; overflow-y: auto; ">
-         
+        <div  class="releaseNotesItems">
             <v-list v-model:opened="openedVlist">
-  <!-- New Updates Section -->
-  <v-list-group value="New Updates" class="release-notes">
-    <template v-slot:activator="{ props }">
-      <v-list-item 
-        v-bind="props" 
-        :key="0" 
-        :title="latestReleaseNotes[0][0]">
-      </v-list-item>
-    </template>
-    
-    <!-- Bulleted Items -->
-    <v-list-item 
-      v-for="(value, i) in latestReleaseNotes[0].slice(1)" 
-      :key="`latest-item-${i}`" 
-      class="wrap-text"
-      :disabled="true" >
-      <div style="border-width: 2px;">
-        <v-list-item-title class="bullet-item">
-          <v-icon small class="mr-2">mdi-circle-small</v-icon> <!-- Bullet -->
-          {{ value }}
-        </v-list-item-title>
-    </div>
-    </v-list-item>
-  </v-list-group>
-  
-  <!-- Previous Release Notes Section -->
-  <template v-for="([version, ...changelog], i) in previousReleaseNotes" :key="i">
-    <v-list-group class="release-notes" v-model="expandedGroups[i]">
-      <template v-slot:activator="{ props }">
-        <v-list-item 
-          v-bind="props" 
-          :title="version" 
-          class="wrap-text"
-          >
-        </v-list-item>
-      </template>
-      
-      <!-- Bulleted Items -->
-      <v-list-item 
-        v-for="(log, j) in changelog" 
-        :key="j" 
-        class="wrap-text"
-        :disabled="true" >
-          <v-list-item-title class="bullet-item">
-            <v-icon small class="mr-2">mdi-circle-small</v-icon> <!-- Bullet -->
-            {{ log }}
-          </v-list-item-title>
-      </v-list-item>
-    </v-list-group>
-  </template>
-</v-list>      
+                <!-- New Updates Section -->
+                <v-list-group value="New Updates" class="release-notes">
+                    <template v-slot:activator="{ props }">
+                        <v-list-item 
+                            v-bind="props" 
+                            :key="0" 
+                            :title="latestReleaseNotes[0][0]">
+                        </v-list-item>
+                    </template>
+                    <!-- Bulleted Items -->
+                    <v-list-item v-for="(value, i) in latestReleaseNotes[0].slice(1)" :key="`latest-item-${i}`"  class="wrap-text" :disabled="true" >
+                            <div style="border-width: 2px;">
+                                <v-list-item-title class="bullet-item">
+                                    <v-icon small class="mr-2">mdi-circle-small</v-icon> <!-- Bullet -->
+                                    {{ value }}
+                                </v-list-item-title>
+                            </div>
+                    </v-list-item>
+                </v-list-group>
+                
+                <!-- Previous Release Notes Section -->
+                <template v-for="([version, ...changelog], i) in previousReleaseNotes" :key="i">
+                    <v-list-group class="release-notes" v-model="expandedGroups[i]">
+                        <template v-slot:activator="{ props }">
+                            <v-list-item  v-bind="props" :title="version" class="wrap-text"></v-list-item>
+                        </template>
+                    
+                        <!-- Bulleted Items -->
+                        <v-list-item 
+                            v-for="(log, j) in changelog"  :key="j" class="wrap-text":disabled="true" >
+                            <v-list-item-title class="bullet-item">
+                                <v-icon small class="mr-2">mdi-circle-small</v-icon> <!-- Bullet -->
+                                {{ log }}
+                            </v-list-item-title>
+                        </v-list-item>
+                    </v-list-group>
+                </template>
+            </v-list>      
         </div>
-        <hr id = "separator" style="margin-bottom: 13px;" />
         <v-btn  style="float: right; margin-top: 0; margin-right: 20px;" variant="outlined" size="small" class="main-button-style" @click="isReleaseNotes = false">CLOSE</v-btn>
-
-
     </v-card>
 </template>
 
@@ -240,12 +234,12 @@
 
     import { appConstants } from '../common/constant.js';
     import { graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect } from '../components/map-Init.js';
-    import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM, home, restoreExtent} from '../components/utility.js';
+    import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM, home, restoreExtent, getUserOBJECTID} from '../components/utility.js';
     import { vuetify } from '../main.js';
     import { addSettings } from './crud.js';
     import { store } from './store';
     import { defineAsyncComponent } from 'vue'
-
+    import { setDefExpRets } from './login.js';
     export default{
         name: "NavBar",
         components:{
@@ -290,7 +284,9 @@
                 feedbackSubmitStatus: true,
                 feedbackName: "",
                 notificationValue: false,
-                notificationWatcher: false,
+                currentSwitchValue: [],
+                statuses: ['Not Started', 'In Progress', 'Completed', 'On Hold'],
+                showDropdown: false,
                 latestReleaseNotes: [
                     [
                         `Latest Release Version ${store.retsVersion}`,'User Story 226: Add Lat/Long searching','User Story 230: Transition to prod create portal','User Story 119: Add links/URL to a comment in History',
@@ -358,25 +354,14 @@
                 ['Release 2.0','RETS V2 first release'],  
                 ],
                 switches: [
-                            // { label: "RETS I Create", value: false, fontColor: "#D9D9D9" },
-                            // { label: "RETS I'm tagged in", value: false, fontColor: "#D9D9D9" },
-                            // { label: "High Priority RETS", value: false, fontColor: "#D9D9D9" },
-                            // { label: "RETS assigned to me that have been inactive for 30 days", value: false, fontColor: "#D9D9D9" },
-                            // { label: "New RETS assigned to me", value: false, fontColor: "#D9D9D9" },
-                            // { label: "Status changed to", value: false, fontColor: "#D9D9D9" },
-                            // { label: "My RETS are archived", value: false, fontColor: "#D9D9D9" },
-                            { label: "News RETS in my district(s)", value: false, fontColor: "#D9D9D9"},
-                            { label: "RETS assigned to me", value: false, fontColor: "#D9D9D9" },
-                            { label: "Someone tags me", value: false, fontColor: "#D9D9D9" },
-                            { label: "RETS marked high priority", value: false, fontColor: "#D9D9D9" },
-                            { label: "No activty in ___ days", value: false, fontColor: "#D9D9D9" },
-                            { label: "A RETS is deleted", value: false, fontColor: "#D9D9D9" },
-                            { label: "Status changes to", value: false, fontColor: "#D9D9D9" },
-                            // Add more switches as needed
+                            { label: "New RETS in my district(s)", value: false},
+                            { label: "RETS assigned to me", value: false},
+                            { label: "Someone tags me", value: false},
+                            { label: "RETS marked high priority", value: false},
+                            { label: "No activty in ______ days", value: false},
+                            { label: "A RETS is deleted", value: false},
+                            { label: "Status changes to", value: false},
                         ],
-                darkmodeswitch: [
-                            { label: "Dark Mode", value: false, fontColor: "#D9D9D9" },
-                ],
                 retsToolsTop: [
                                {
                                 title:"Toggle",
@@ -484,7 +469,7 @@
                                {title:"Settings", icon: 'mdi-cog', color: "#D9D9D9", name: "Settings",
                                action: () =>{
                                 this.handleSettingsTool();
-                                this.retsToolsBottom[4].isActive = !this.retsToolsBottom[4].isActive
+                                this.retsToolsBottom[4].isActive = !this.retsToolsBottom[4].isActive;
                                },
                                hover:(i) => 
                                     {
@@ -548,39 +533,55 @@
                     this.setAutozoomSwitch()
                     this.setAutozoomExtentSwitch()
                     this.setNotifications()
+                    this.updateuserSettings()
 
                 },
                 
                 methods: {
+                    testfunction(index){
+                        if (index === 4){
+                        console.log("clickkkkkk")
+                        this.showDropdown = !this.showDropdown
+                        console.log(this.showDropdown)
+                        return true
+                        }
+                        
+                    },
+                    addDays(index){
+                        if (index === 2){
+                            return true
+
+                        }
+                        else{
+                            return false
+                        }
+                    },
+                    addDropdown(index){
+                        if (index > 3){
+                            return true
+                        }
+                        else{
+                            return false
+                        }
+                    },
+                    updateuserSettings(){
+                        store.userSettings = this.userSettings
+                    },
                     setNotifications(){
                         const { notifications } = this.userSettings
                         if (notifications != null){
-                            console.log("not null")
-                            
-                            
+                            for (let i = 0; i< notifications.length; i++ ){
+                                this.switches[i].value = notifications[i].value
+                            }
                         }
-                        else{
-                            console.log("is null")
-                            console.log(this.switches[1].value)
-                            this.switches[1].value = true
-                            this.notificationWatcher = true
-
-                            console.log(this.switches[1].value)
-
-                        }
-                    },
-                    getVMOdel(value){
-                        console.log(value)
-
+                       
                     },
                     isDisabled(index){
-                        if (index == 7){
+                        return
+                        if (index > 0){
                             return true
                         }
                         return false
-                    },  
-                    toggleGroup(index) { 
-                        this.$set(this.expandedGroups, index, !this.expandedGroups[index])
                     },
                     setAutozoomExtentSwitch(){
                         const { autoZoomExtent } = this.userSettings;
@@ -607,13 +608,18 @@
                             autoZoom : store.autozoomtest,
                             autoZoomExtent: store.autozoomextent,
                             basemap: store.basemaptest,
-                           // notifications: this.switches
+                            notifications: this.switches
                         } 
                         this.isAutoZoom = store.autozoomtest
                         this.isAutoZoomExtent = store.autozoomextent
-                        
                         const settingsObject = {attributes: {OBJECTID : appConstants.defaultUserValue[0].objectid, SETTINGS : JSON.stringify(store.settings)}}
-                         await addSettings(settingsObject)
+                        await addSettings(settingsObject)
+
+                        const userOBJECTID = await getUserOBJECTID(store.loggedInUser)
+                        this.userSettings = JSON.parse(userOBJECTID.SETTINGS)
+                        store.userSettings = this.userSettings
+
+
                         if (store.updateRetsSearch.length != store.retspointlength && store.autozoomextent == false){
                             if (store.CREATE_DT){
                                 await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
@@ -623,15 +629,23 @@
                             }
                             return  
                         }
-                        console.log(JSON.parse(settingsObject.attributes.SETTINGS))
                        
                         
 
                     },
                     cancelSettings(){
-                        const { autoZoom, autoZoomExtent } = this.userSettings;
+                        const { autoZoom, autoZoomExtent, notifications } = this.userSettings;
                         store.autozoomtest = this.isAutoZoom ?? autoZoom ?? true;
                         store.autozoomextent = this.isAutoZoomExtent ?? autoZoomExtent ?? false;
+              
+                        if (!notifications){
+                            return
+                        }
+                        for (let i =0; i < this.switches.length; i++){
+                            this.switches[i].value = notifications[i].value
+
+                        }
+
                         return
                     },
                     shiftDiv(){
@@ -639,23 +653,23 @@
                         viewSurface.classList.toggle('translateX-500px');
                         return
                     },
-                    newSwitchTurnedOn() {
-                        if (this.switchValue) {
-                            this.fontColor = '#FFFFFF';
+                    // newSwitchTurnedOn() {
+                    //     if (this.switchValue) {
+                    //         this.fontColor = '#FFFFFF';
                             
-                        } else {
-                            this.fontColor = "#D9D9D9";
-                        }
-                    },
-                    switchTurnedOn(index) {
-                        if (this.switches[index].value) {
-                            this.switches[index].fontColor = '#FFFFFF';
-                        } 
-                        else {
-                            this.switches[index].fontColor = '#D9D9D9';
-                        }
+                    //     } else {
+                    //         this.fontColor = "#D9D9D9";
+                    //     }
+                    // },
+                    // switchTurnedOn(index) {
+                    //     if (this.switches[index].value) {
+                    //         this.switches[index].fontColor = '#FFFFFF';
+                    //     } 
+                    //     else {
+                    //         this.switches[index].fontColor = '#D9D9D9';
+                    //     }
                         
-                        },
+                    //     },
                     switchStyle(fontColor) {
                         return { color: fontColor };
                     },
@@ -720,7 +734,7 @@
                         var lat = ctr.latitude;                
                         var lon = ctr.longitude;                
                         var level = view.zoom -1 ;                
-                        window.open("https://www.txdot.gov/apps/statewide_mapping/StatewidePlanningMap.html?coords="+lat+","+lon+","+level);
+                        window.open("https://www.txdot.gov/apps/statewide_mapping/StatewidePlanningMap.html?map=txdot&coords="+lat+","+lon+","+level);
                         this.jumptocard = false;
                     },
 
@@ -739,6 +753,9 @@
                             this.feedbackStatus = false
                             this.settingsstatus = false
                             return
+                        }
+                        if (this.settingsstatus){
+                            this.cancelSettings()
                         }
                         this.settingsstatus = !this.settingsstatus;
 
@@ -783,6 +800,7 @@
                         
                     },
                     async sendWebhookRequest(feedbackString, user){
+                        this.feedbackSubmitStatus = true
                         let url = `https://gis-batch-dev.txdot.gov/fmejobsubmitter/TPP/TPP_DEV_RETS_Emailer.fmw?FEEDBACK=${feedbackString}&USERNAME=${user}&opt_showresult=false&opt_servicemode=sync&token=27a9777b0f14467fcfc09b854466559d14c24e43`
                         try{
                             const response = await fetch(url)
@@ -795,6 +813,7 @@
                                 this.isAnonymous = false
                                 store.alertTextInfo = {"text": "Thank you for your feedback!", "color": "#70ad47", "type":"success", "toggle": true}
                                 store.isAlert = true
+                                this.feedbackSubmitStatus = false
 
                                 setTimeout(() => {
                                     store.isAlert = false
@@ -870,10 +889,6 @@
     .v-navigation-drawer__content{
         overflow-y: hidden !important;
     }
-
-    .v-color-picker-swatches{
-        overflow-y: hidden !important;
-    }
     #basemaptoggle{
         position: absolute;
         width: 158px;
@@ -916,26 +931,16 @@
         width: 400px;
         z-index: 999;
         border-radius: 0px;
+        /* height: 655px; */
+        height: 655px;
     }
-    #settingsheader{
-        position: relative;
-        left: 10px;
-        font-size: 20px;
-    }
+
     #headerfont{
         left: 10px;
         /* font-size: 18px; */
         
         
     }
-    #separator{
-        border: 0;
-        border-bottom: 1px solid ;
-        margin: 0 auto;
-        width: 23rem;
-        
-    }
-
     #darkmodeitem{
         position: relative;
         bottom: 2px;
@@ -944,85 +949,70 @@
         height: 4rem;
         
     }
-    #topSettings{
-        font-size: 20px;
+    .topSettings{
+       border-bottom : 1px solid ;
+       border-top: 1px solid ;
+       justify-self: center;
+       width: 23rem;
+       padding-right: 0;
+       padding-left: 0;
+
+
+        }      
+            
+            
+    #notificationsitems{
+        border-bottom : 1px solid ;
+        justify-self: center;
         width: 23rem;
-        right: 0;
-        left: 0;
-        margin: auto;
-        border: solid red;
-        border-width: 2px;
-    }
-    .font-class{
-        color: aqua !important;
+        padding-right: 0;
+        padding-left: 0;
+        padding-bottom: 0;
+        overflow-y: hidden;
+
+
     }
 
-    #darkmodetogglefont{
-        position: relative;
-        font-size: 14px;
-        left: 1rem;
-        bottom: -2px;
-    }
-    #notificationsitems{
-        position: relative;
-        left: 10px;
-        font-size: 20px;
-        height: 23rem;
-    }
+
     #notificationsfont{
-        position: absolute;
-        top: 5px;
+        position: relative;
         font-size: 18px;
+        left: 5px;
     }
     #notificationssub{
-        position: absolute;
         font-size: 14px;
-        top: 40px;
-        left: 18px;
-        height: 350px;
-    }
+        position: relative;
+        left: 10px;
+        padding-top: 3px;
 
-    #darkmodeswitch{
-        margin-left: 1px; 
-        margin-bottom: -55px;
-        margin-top: 0px;
-        left: 5px;;
-    }    
+    }
+  
     .switch-item{
-        /* position: absolute; */
-        margin-left: 1px; 
-        margin-bottom: -55px;
-        margin-top: 0px;
-        /* flex: 1 1 auto; */
+        /* height: 42px; */
+        padding-top: 0;
+        padding-bottom: 0;
+        max-height: 50px;
+        padding-right: 0;
+        
 
     }
     #notis{
         /* display: block; */
         /* flex-wrap: wrap; */
         position: relative;
-        width: 400px;
+        width: 370px;
+        height: 290px;
+        overflow-y: auto;
+        
+        
+    }
 
-    }
-    #notiswitches{
-        position: relative;
-        left: -15px;
-        margin-top: -20px;
-    }
     #bottomitems{
         position: absolute;
         bottom: 5px;
         width: 25rem;
     }
     
-    #darkmodeswitch{
-        position: absolute;
-        bottom: 2.3rem;
-    }
-    #save{
-        border: 1px solid ;
-        border-radius: 9%;
-        
-    }
     .iconList{
         position: relative;
         width: 40px;
@@ -1110,13 +1100,12 @@
         justify-self: end;
         margin-right: 16.5px;
     }
-    .topSettings .autozoom-switch .v-input__control{
-
-        justify-self: end;
-        margin-right: 5.5px;
+    .autozoom-switch{
+        width: 22.5rem;
+        height: 40px;
     }
-    .basemap-seelct{
-        z-index: 1;
+    .topSettings .autozoom-switch .v-input__control{
+        justify-self: end;
     }
 
     .wrap-text .v-list-item-title {
@@ -1142,6 +1131,76 @@
         display: flex;
         align-items: left;
         
+    }
+
+    .feedbackHeader{
+        border-bottom: 1px solid;
+        width: 20rem;
+        justify-self: center;
+        padding-left: 0;
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+    }
+
+    .releaseNotesItems{
+        height: 555px; 
+        width: 23rem; 
+        justify-self: center;
+        overflow-y: auto; 
+        border-top: 1px solid;
+        border-bottom: 1px solid;
+        padding-bottom: 5px;
+        margin-bottom: 12px;
+
+    }
+
+    .switchDropdown{
+        position: relative;
+        /* left: -200px; */
+        /* width: 200px; */
+        margin-left: 20px;
+        margin-top: 0;
+        height: 32px;
+        top: -20px;
+    }
+    
+    .switchDropdown .v-field__input{
+        height: 20px;
+        width: 300px !important;
+        font-size: 10px;
+                        overflow-y: auto;
+
+        
+    }
+
+    .switchDropdown .v-field{
+        width: 190px;
+        left: -50px;
+        height: 33px;
+
+
+
+    }
+
+
+    .switchDropdown .v-input__prepend{
+        /* position: relative;
+        padding: 0 !important */
+    }
+
+    .switchDropdown .v-chip__content{
+        font-size: 9px;
+    }
+
+    .daysDropdown{
+       position: absolute;
+       width: 30px;
+       height: 75px;
+       background-color: rgb(84, 79, 79);
+        /*width: 0px; */
+        top: 234px;
+        left: 83.8px;
+        border-radius: 0;
     }
 
     

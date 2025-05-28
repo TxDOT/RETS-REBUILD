@@ -178,6 +178,14 @@ export function doubleClickRetsPoint(){
             view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt)=>{
                 if (evt.results.length && !store.isDetailsPage){
                     openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID))
+                    let obj = {}
+                    obj.attributes = evt.results[0].graphic.attributes
+                    obj.geometry =evt.results[0].graphic.geometry
+                    console.log(obj)
+                    let proxy = new Proxy(obj, {})
+                    ///////////////////////////////////ADD CLICKED RETS POINT TO THE HIGHLIGHR OBJECT//////////////////////////////////////////////////
+                    console.log(proxy)
+                    store.roadHighlightObj.add(proxy)
 
                 }
             })
@@ -365,7 +373,7 @@ export async function filterMapActivityFeed(filterOpt,val,userId){
                     let a; 
                     for(a=0; a < value.length; a++){
                         ASSIGNED_TO.push(`'${value[a].value}'`)
-                        ASSOCIATED.push(`'${value[a].value}'`)
+                        //ASSOCIATED.push(`'${value[a].value}'`)
 
                         if(value[a].type === 1){
                             GIS_ANALYST.push(`'${value[a].value}'`)
@@ -391,7 +399,7 @@ export async function filterMapActivityFeed(filterOpt,val,userId){
                     })
                     
                     fullFilter = [...fullFilter, mapAnalyst.join(' OR ')]
-                    ASSIGNED_TO.length ? fullFilter.push(`OR ASSIGNED_TO in (${ASSIGNED_TO.join(" , ")})`) : null
+                    ASSIGNED_TO.length ? fullFilter.push(`OR ASSIGNED_TO in (${ASSIGNED_TO.join(" , ")}))`) : null
                     ASSOCIATED.length ? fullFilter.push(`OR CREATE_NM in (${ASSIGNED_TO.join(" , ")}) OR EDIT_NM in (${ASSIGNED_TO.join(" , ")})) ` ) : null
                     
                 }
@@ -447,7 +455,7 @@ export async function filterMapActivityFeed(filterOpt,val,userId){
         let filterDef = removeEmpty.join(" AND ")
         //let newFilter = filterDef.replace("AND OR", "OR")
         let newFilter = filterDef.replace(/AND OR/g, 'OR')
-
+        console.log(newFilter)
         // if(!filterOpt.isAssignedTo){
         //     const assignedToQuery = [...GIS_ANALYST, ...GRID_ANALYST, ...DIST_ANALYST]
         //     assignedToQuery.map((i) => `${i}`).join(",")
@@ -575,19 +583,19 @@ export async function home(onrender){
         })
         return
     }
-    homeWidget.cancelGo()
-    homeWidget.on("go", ()=>{
+    // homeWidget.cancelGo()
+    // homeWidget.on("go", ()=>{
         
-        retsLayer.queryExtent()
-            .then((resp) =>{
-                if (resp.count== 0 || resp.count > 3000){
-                    view.goTo(view.center)
-                }
-                else{
-                    view.goTo(resp.extent)
-                }
-            })
-    })
+    //     retsLayer.queryExtent()
+    //         .then((resp) =>{
+    //             if (resp.count== 0 || resp.count > 3000){
+    //                 view.goTo(view.center)
+    //             }
+    //             else{
+    //                 view.goTo(resp.extent)
+    //             }
+    //         })
+    // })
     return
 }
 
@@ -835,7 +843,6 @@ export function createtool(sketchWidgetcreate, createretssym) {
                     geometry: pointGeometry,
                     spatialReference: { wkid: 3857 }
                 });
-                    
                 event.graphic.symbol = createretssym;
                 resolve(newPointGraphic);
                 return
@@ -1655,6 +1662,18 @@ export async function getUserOBJECTID(userId){
     const returnUserAttributes = await retsRole.queryFeatures(query)
 
     return returnUserAttributes.features[0].attributes
+}
+
+export async function getAllUserSettings(users){
+    let usersString = users.join(",")
+    var result = '\'' + usersString.split(',').join('\',\'') + '\'';
+
+     const query = {
+         where: `USERNAME IN (${result})`,
+         outFields: ['*']
+     }
+     const returnSettings = await retsRole.queryFeatures(query)
+     return JSON.parse(returnSettings.features[0].attributes.SETTINGS)
 }
 
 export function setFilterProperties(userFilterObject){

@@ -134,7 +134,7 @@
 
 <script>
     import { appConstants } from '../common/constant.js'
-    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, updateRetsObj, openDetails, outlineFeedCards, removeOutline, highlightRETSPoint} from './utility.js'
+    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, updateRetsObj, openDetails, outlineFeedCards, removeOutline, highlightRETSPoint, getUserOBJECTID, getAllUserSettings} from './utility.js'
 
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
@@ -185,7 +185,8 @@
                 histNoteRequired: {
                     required: value => !!value || "Write a note. Submit your thought to History!"
                 },
-                initRules: false
+                initRules: false,
+                userArray: []
             }
         },
         mounted(){
@@ -335,9 +336,63 @@
                 deleteRetsGraphic()
                 retsLayerView.layer.definitionExpression = store.savedFilter
                 store.isSaveBtnDisable = true
+
+
+
+                //let distAnalysts = store.retsObj.attributes.DIST_ANALYST.split(",")
+                this.userArray.push(`${store.retsObj.attributes.GIS_ANALYST}`)
+                //this.userArray.push(`${store.retsObj.attributes.GRID_ANALYST}`)
+
+
+
+                // for (let index = 0; index < distAnalysts.length; index++) {
+                //     this.userArray.push(distAnalysts[index]);
+                    
+                // }
+                let userSettings = await getAllUserSettings(this.userArray)
+
+
+
+                await this.sendNotification(userSettings)
+
+
                 //store.updateRetsID()
                 //retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
                 return
+            },
+            async sendNotification(userSettings){
+                if (userSettings === null || !userSettings.notifications){
+                    return
+                }
+                const {notifications} = userSettings
+
+                if (notifications[0].value === true && store.isNewRets){
+                    store.isNewRets = false
+                    await this.notificationTrigger()
+                }
+            },
+            async notificationTrigger(){
+
+                let distNm
+                appConstants.districtDomainValues.forEach((element) => {
+                    if (element.value === store.retsObj.attributes.DIST_NM){
+                        distNm = element.name.toUpperCase()
+                    }
+                }
+
+                   
+                    
+                )
+                let url = `https://gis-batch-dnd.txdot.gov/fmejobsubmitter/TPP-MB/RETS_NOTIFY_created.fmw?RETS_NUM=${store.retsObj.attributes.RETS_ID}&DISTRICT=${distNm}&DESC=${store.retsObj.attributes.DESC_}&CREATED_BY=${store.retsObj.attributes.CREATE_NM}&CREATE_DT=${store.retsObj.attributes.CREATE_DT}&opt_showresult=false&opt_servicemode=sync&token=696074193c2f5daeb783bc5c8c164ee8c5ceff36`
+                const response = await fetch(url)
+                if (response.ok){
+
+                }
+                else{
+                    console.error(response)
+                }
+                            
+    
             },
             async cancelDetailsMetadata(){
                 if(!store.isSaveBtnDisable){
@@ -350,13 +405,17 @@
                     this.replaceArchiveContent(archiveRets)
                 }
                 
-                await this.returnToFeed()
+                //////////////////////////// REMOVE LINE BELOW TO ENSURE CARD SELECTION REMAINS AFTER RETURNING TO FEED////////////////////////////
+                /////////////////////////// SUPPOSED TO BE UNCOMMENTED BY DEFAULT/////////////////////////////////////////////////////////////////
+
+                //await this.returnToFeed()
+
                 retsLayerView.layer.definitionExpression = store.savedFilter
                 store.toggleFeed = 1
                 store.cancelpopup = false
-                setTimeout(() => {
-                    outlineFeedCards(store.roadHighlightObj)
-                }, 1000);
+                // setTimeout(() => {
+                //     outlineFeedCards(store.roadHighlightObj)
+                // }, 1000);
                 window.document.title = `RETS Application`
                 store.activityBanner = "Activity Feed"
                 store.toggleFeed = 1
