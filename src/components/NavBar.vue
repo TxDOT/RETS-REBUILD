@@ -30,7 +30,10 @@
             </v-list-item>
         </v-list>
 
+       
+
     </v-navigation-drawer>
+    
     <v-card id="basemaptoggle" max-width="400" hover @mouseleave="mouseleavebasemap" v-if = "basemapcard" >
        
         <v-card-item  style="height: 50px;">
@@ -81,9 +84,32 @@
                <v-card-title id="jumptofont"> Jump to SPM </v-card-title>
            </v-btn>
        </v-card-item>
-
+ 
    </v-card>
-   <v-card id = "containersettings" v-show = "settingsstatus">
+   <v-card class= "Selecticons" @mouseleave="mouseleaveselect" v-if = "selecttoggle">
+            <v-card-item  style="height: 50px;">
+
+            <v-tooltip location="right" text="Rectangle">
+                            <template v-slot:activator="{ props }">
+            <v-icon class="topIcon3" v-bind="props" @click="handleSelectTool('selectrectangle');">mdi-rectangle-outline</v-icon>
+                            </template>
+                    </v-tooltip>
+
+            <!-- <v-btn @click="handleSelectTool('selectrectangle');" flat density="compact" style="height: 100%;"><v-icon>mdi-rectangle-outline</v-icon></v-btn> -->
+            <!-- <v-icon class="topIcon" @click="handleSelectTool('selectrectangle');">mdi-rectangle-outline</v-icon> -->               
+        </v-card-item>
+
+        <v-card-item style="height: 50px;">
+
+            <v-tooltip location="right" text="Lasso">
+                            <template v-slot:activator="{ props }">
+            <!-- <v-btn @click="handleSelectTool('selecttoolfreehand');" flat density="compact" style="height: 100%;"><v-icon>mdi-vector-polygon</v-icon></v-btn> -->
+             <v-icon class="topIcon2" v-bind="props" @click="handleSelectTool('selecttoolfreehand');">mdi-vector-polygon</v-icon>
+              </template>
+                    </v-tooltip>
+        </v-card-item>
+        </v-card>
+   <v-card id = "containersettings" height = "655" v-show = "settingsstatus">
     <v-card-item>
         <span class="banner-txt">Settings</span>
         &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
@@ -114,40 +140,19 @@
         <v-card-item id = "notificationsitems" >
             <v-card-item class="banner-txt" style="padding-left: 7px; padding-top: 0; padding-bottom: 0;"><span>Notifications</span></v-card-item>
             <v-card-subtitle id = "notificationssub">Send notifications for:</v-card-subtitle>
-            <div id="notis">
-                <v-card-item v-for="(item, index) in switches" :key="index"  class="switch-item">
-                    <div style="height: auto; ">
-                        <v-switch :model-value="item.value" color="primary"  @update:modelValue="item.value= $event" :disabled="isDisabled(index)"  :style="{color: fontColor, height: '50px'}"   >
-                        <template #prepend >
-                            <v-label @mouseover="testfunction(index) " >
-                                {{ item.label }}
-                                
-                            </v-label>
-                            <v-card class="daysDropdown" v-if="this.showDropdown === true" @mouseleave="this.showDropdown = false">
+          <div id="notis">
+                <div id="notiswitches">
+                    <v-card-item v-for="(item, index) in switches" :key="index" :id="'switch-container-' + index" class="switch-item">
+                        <v-switch v-model="item.value" color="primary" :style="switchStyle(item.fontColor)" @change="switchTurnedOn(index)" disabled>
+                            <template #prepend >
                                 <v-label >
-                                    30
+                                    {{ item.label }}
                                 </v-label>
-                                <v-label>
-                                    60
-                                </v-label>
-                                <v-label>
-                                    90
-                                </v-label>
-                            </v-card>
-                            <!-- <v-select v-if="testfunction(index) === true" variant="underlined" class="daysDropdown"></v-select> -->
-                        </template>
-                    </v-switch>
-
-                    <v-select :key="index" v-if="addDropdown(index)" density="compact" variant="underlined" class="switchDropdown"  multiple chips :items=statuses>
-                        <template #prepend>
-                            <v-label >
-                                Applies to: 
-                            </v-label>
-                        </template>
-                    </v-select> 
-                    </div>
-                    
-                </v-card-item>  
+                            </template>
+                        </v-switch>
+                    </v-card-item>
+                </div>
+                
             </div>
             
         </v-card-item>
@@ -234,7 +239,7 @@
 
     import { appConstants } from '../common/constant.js';
     import { graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect } from '../components/map-Init.js';
-    import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM, home, restoreExtent, getUserOBJECTID} from '../components/utility.js';
+    import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM, home, restoreExtent, selecttoolfreehand, getUserOBJECTID} from '../components/utility.js';
     import { vuetify } from '../main.js';
     import { addSettings } from './crud.js';
     import { store } from './store';
@@ -257,6 +262,7 @@
                 mountedAutoZoom: null,
                 selectfunction : {},
                 store,
+                selecttoggle: false,
                 basemapArray: ['Dark Grey', 'Light Grey', 'Standard TxDOT', 'Open Street Map', 'Hybrid', 'Google', 'Imagery'],
                 shiftmap: false,
                 fontColor: '#D9D9D9',
@@ -426,6 +432,7 @@
                                         {
                                             this.jumptocard = false;
                                             this.basemapcard = true
+                                            this.selecttoggle = false
                                         }
                                     }
                                 
@@ -440,22 +447,31 @@
                                             {
                                                 this.basemapcard = false;
                                                 this.jumptocard = true
+                                                this.selecttoggle = false
+
                                             }
                                     }
                                 },
                                 {title:"Select", icon: 'mdi-select-multiple', color: "#D9D9D9", name: "Multi-Select", isActive: false,
                                action: () =>{
+                                // store.isSelectEnabled = !store.isSelectEnabled
+                                // this.retsToolsBottom[2].isActive = !this.retsToolsBottom[2].isActive
+                                // this.handleSelectTool();
+            
+                                sketchWidgetselect.cancel()                           
+                                this.retsToolsBottom[2].isActive = false
                                 store.isSelectEnabled = !store.isSelectEnabled
-                                this.retsToolsBottom[2].isActive = !this.retsToolsBottom[2].isActive
-                                this.handleSelectTool();
+                                
                                },
                                setActive: () => {
                                 return true
                                },
                                hover:(i) => 
                                     {
+                                        // store.isSelectEnabled = !store.isSelectEnabled
                                         this.basemapcard = false;
                                         this.jumptocard= false;
+                                        this.selecttoggle = true;
                                     }
                                 },
                                {
@@ -468,6 +484,8 @@
                                     {
                                         this.basemapcard = false;
                                         this.jumptocard= false;
+                                        this.selecttoggle = false
+
                                     }
                                 
                                },
@@ -480,7 +498,8 @@
                                     {
                                         this.basemapcard = false;
                                         this.jumptocard= false;
-                                        
+                                        this.selecttoggle = false
+
                                         
                                     }
                                 }
@@ -697,6 +716,9 @@
                     mouseleavejumpto(){
                         this.jumptocard = false;
                     },
+                    mouseleaveselect(){
+                        this.selecttoggle = false;
+                    },
 
                     async handleCreateTool() {
                         if (this.isCreateEnabled === true) {
@@ -714,12 +736,26 @@
                         
                        
                     },
-                    handleSelectTool() { 
-                        if (store.isSelectEnabled === true ){
-                            this.selectfunction = selecttool(store.isSelectEnabled, sketchWidgetselect, graphics);
+                    handleSelectTool(tooltype) { 
+                        if (store.isSelectEnabled  === false){
+                            store.isSelectEnabled = !store.isSelectEnabled
+                            this.retsToolsBottom[2].isActive = true
+                            if (tooltype === "selectrectangle"){
+                                
+                                selecttool(store.isSelectEnabled, sketchWidgetselect, graphics)
+ 
+                            }
+                            else if (tooltype="selecttoolfreehand"){
+                                
+                                selecttoolfreehand(store.isSelectEnabled, sketchWidgetselect, graphics)
+ 
+                            }
                         }
                         else{
                             sketchWidgetselect.cancel()
+                            // this.selectfunction.remove()
+                            this.retsToolsBottom[2].isActive = false
+                            store.isSelectEnabled = !store.isSelectEnabled
                         }
 
                         
@@ -851,13 +887,29 @@
         transform: translate(-25%, -25%);
     }
 
-    .topIcon{
+  .topIcon{
         position: absolute;
         top: 35%;
         left: 40%;
         transform: translate(-25%, -25%);
     }
+
+      .topIcon3{
+        position: absolute;
+        top: 75%;
+        left: 70%;
+        font-size: 20px;
+        transform: translate(-25%, -25%);
+         }
     
+    .topIcon2{
+        position: absolute;
+        top: 20%;
+        left: 70%;
+        font-size: 20px;
+        transform: translate(-25%, -25%);
+    }
+
     .v-list-item:hover{
         cursor: pointer;
         background-color: rgba(128,128,128,.3);
@@ -1006,7 +1058,7 @@
         /* flex-wrap: wrap; */
         position: relative;
         width: 370px;
-        height: 290px;
+        height: 300px;
         overflow-y: auto;
         
         
@@ -1138,7 +1190,14 @@
         
     }
 
-    .feedbackHeader{
+    .Selecticons{
+        position: absolute;
+        height: 90px;
+        width: 70px;
+        bottom: 7.5%;
+    }
+
+     .feedbackHeader{
         border-bottom: 1px solid;
         width: 20rem;
         justify-self: center;
@@ -1208,6 +1267,7 @@
         border-radius: 0;
     }
 
+    
     
    
     

@@ -478,7 +478,7 @@ export const searchWidget = new Search({
   /////////////////////////////////
   view: view,
   includeDefaultSources: false,
-  allPlaceholder: "City, County, District, Route, Minute Order, RETS ID",
+  allPlaceholder: "City, County, District, Route, Minute Order, RETS ID, Lat/Lon",
   popupEnabled: false,
   popupTemplate: false,
   minSuggestCharacters: 3,
