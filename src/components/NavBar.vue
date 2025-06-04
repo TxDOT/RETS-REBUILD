@@ -140,40 +140,19 @@
         <v-card-item id = "notificationsitems" >
             <v-card-item class="banner-txt" style="padding-left: 7px; padding-top: 0; padding-bottom: 0;"><span>Notifications</span></v-card-item>
             <v-card-subtitle id = "notificationssub">Send notifications for:</v-card-subtitle>
-            <div id="notis">
-                <v-card-item v-for="(item, index) in switches" :key="index"  class="switch-item">
-                    <div style="height: auto; ">
-                        <v-switch :model-value="item.value" color="primary"  @update:modelValue="item.value= $event" :disabled="isDisabled(index)"  :style="{color: fontColor, height: '50px'}"   >
-                        <template #prepend >
-                            <v-label @mouseover="testfunction(index) " >
-                                {{ item.label }}
-                                
-                            </v-label>
-                            <v-card class="daysDropdown" v-if="this.showDropdown === true" @mouseleave="this.showDropdown = false">
+          <div id="notis">
+                <div id="notiswitches">
+                    <v-card-item v-for="(item, index) in switches" :key="index" :id="'switch-container-' + index" class="switch-item">
+                        <v-switch v-model="item.value" color="primary" :style="switchStyle(item.fontColor)" @change="switchTurnedOn(index)" disabled>
+                            <template #prepend >
                                 <v-label >
-                                    30
+                                    {{ item.label }}
                                 </v-label>
-                                <v-label>
-                                    60
-                                </v-label>
-                                <v-label>
-                                    90
-                                </v-label>
-                            </v-card>
-                            <!-- <v-select v-if="testfunction(index) === true" variant="underlined" class="daysDropdown"></v-select> -->
-                        </template>
-                    </v-switch>
-
-                    <v-select :key="index" v-if="addDropdown(index)" density="compact" variant="underlined" class="switchDropdown"  multiple chips :items=statuses>
-                        <template #prepend>
-                            <v-label >
-                                Applies to: 
-                            </v-label>
-                        </template>
-                    </v-select> 
-                    </div>
-                    
-                </v-card-item>  
+                            </template>
+                        </v-switch>
+                    </v-card-item>
+                </div>
+                
             </div>
             
         </v-card-item>

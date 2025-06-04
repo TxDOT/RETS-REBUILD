@@ -181,10 +181,8 @@ export function doubleClickRetsPoint(){
                     let obj = {}
                     obj.attributes = evt.results[0].graphic.attributes
                     obj.geometry =evt.results[0].graphic.geometry
-                    console.log(obj)
                     let proxy = new Proxy(obj, {})
                     ///////////////////////////////////ADD CLICKED RETS POINT TO THE HIGHLIGHR OBJECT//////////////////////////////////////////////////
-                    console.log(proxy)
                     store.roadHighlightObj.add(proxy)
 
             }
