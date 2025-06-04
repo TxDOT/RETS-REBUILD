@@ -453,7 +453,6 @@ export async function filterMapActivityFeed(filterOpt,val,userId){
         let filterDef = removeEmpty.join(" AND ")
         //let newFilter = filterDef.replace("AND OR", "OR")
         let newFilter = filterDef.replace(/AND OR/g, 'OR')
-        console.log(newFilter)
         // if(!filterOpt.isAssignedTo){
         //     const assignedToQuery = [...GIS_ANALYST, ...GRID_ANALYST, ...DIST_ANALYST]
         //     assignedToQuery.map((i) => `${i}`).join(",")

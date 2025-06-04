@@ -432,6 +432,7 @@
                                         {
                                             this.jumptocard = false;
                                             this.basemapcard = true
+                                            this.selecttoggle = false
                                         }
                                     }
                                 
@@ -446,6 +447,8 @@
                                             {
                                                 this.basemapcard = false;
                                                 this.jumptocard = true
+                                                this.selecttoggle = false
+
                                             }
                                     }
                                 },
@@ -481,6 +484,8 @@
                                     {
                                         this.basemapcard = false;
                                         this.jumptocard= false;
+                                        this.selecttoggle = false
+
                                     }
                                 
                                },
@@ -493,7 +498,8 @@
                                     {
                                         this.basemapcard = false;
                                         this.jumptocard= false;
-                                        
+                                        this.selecttoggle = false
+
                                         
                                     }
                                 }
@@ -1052,7 +1058,7 @@
         /* flex-wrap: wrap; */
         position: relative;
         width: 370px;
-        height: 290px;
+        height: 300px;
         overflow-y: auto;
         
         
@@ -1189,7 +1195,9 @@
         height: 90px;
         width: 70px;
         bottom: 7.5%;
-        .feedbackHeader{
+    }
+
+     .feedbackHeader{
         border-bottom: 1px solid;
         width: 20rem;
         justify-self: center;
@@ -1260,8 +1268,7 @@
     }
 
     
-        /* align-content: center; */
-    }
+    
    
     
 </style>
