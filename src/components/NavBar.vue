@@ -88,12 +88,25 @@
    </v-card>
    <v-card class= "Selecticons" @mouseleave="mouseleaveselect" v-if = "selecttoggle">
             <v-card-item  style="height: 50px;">
-            <v-btn @click="handleSelectTool('selectrectangle');" flat density="compact" style="height: 100%;"><v-icon>mdi-rectangle-outline</v-icon></v-btn>
+
+            <v-tooltip location="right" text="Rectangle">
+                            <template v-slot:activator="{ props }">
+            <v-icon class="topIcon3" v-bind="props" @click="handleSelectTool('selectrectangle');">mdi-rectangle-outline</v-icon>
+                            </template>
+                    </v-tooltip>
+
+            <!-- <v-btn @click="handleSelectTool('selectrectangle');" flat density="compact" style="height: 100%;"><v-icon>mdi-rectangle-outline</v-icon></v-btn> -->
+            <!-- <v-icon class="topIcon" @click="handleSelectTool('selectrectangle');">mdi-rectangle-outline</v-icon> -->               
         </v-card-item>
-        <v-card-item style="height: 45px;">
-            <v-btn @click="handleSelectTool('selecttoolfreehand');" flat density="compact" style="height: 100%;">
-                <v-icon>mdi-vector-polygon</v-icon>
-            </v-btn>
+
+        <v-card-item style="height: 50px;">
+
+            <v-tooltip location="right" text="Lasso">
+                            <template v-slot:activator="{ props }">
+            <!-- <v-btn @click="handleSelectTool('selecttoolfreehand');" flat density="compact" style="height: 100%;"><v-icon>mdi-vector-polygon</v-icon></v-btn> -->
+             <v-icon class="topIcon2" v-bind="props" @click="handleSelectTool('selecttoolfreehand');">mdi-vector-polygon</v-icon>
+              </template>
+                    </v-tooltip>
         </v-card-item>
         </v-card>
    <v-card id = "containersettings" height = "655" v-show = "settingsstatus">
@@ -463,6 +476,11 @@
                                 // store.isSelectEnabled = !store.isSelectEnabled
                                 // this.retsToolsBottom[2].isActive = !this.retsToolsBottom[2].isActive
                                 // this.handleSelectTool();
+            
+                                sketchWidgetselect.cancel()                           
+                                this.retsToolsBottom[2].isActive = false
+                                store.isSelectEnabled = !store.isSelectEnabled
+                                
                                },
                                setActive: () => {
                                 return true
@@ -819,13 +837,29 @@
         transform: translate(-25%, -25%);
     }
 
-    .topIcon{
+  .topIcon{
         position: absolute;
         top: 35%;
         left: 40%;
         transform: translate(-25%, -25%);
     }
+
+      .topIcon3{
+        position: absolute;
+        top: 75%;
+        left: 70%;
+        font-size: 20px;
+        transform: translate(-25%, -25%);
+         }
     
+    .topIcon2{
+        position: absolute;
+        top: 20%;
+        left: 70%;
+        font-size: 20px;
+        transform: translate(-25%, -25%);
+    }
+
     .v-list-item:hover{
         cursor: pointer;
         background-color: rgba(128,128,128,.3);
@@ -1138,9 +1172,11 @@
 
     .Selecticons{
         position: absolute;
-        height: 100px;
-        width: 75px;
+        height: 90px;
+        width: 70px;
         bottom: 7.5%;
+        
+        /* align-content: center; */
     }
    
     
