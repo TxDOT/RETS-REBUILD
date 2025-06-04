@@ -30,7 +30,10 @@
             </v-list-item>
         </v-list>
 
+       
+
     </v-navigation-drawer>
+    
     <v-card id="basemaptoggle" max-width="400" hover @mouseleave="mouseleavebasemap" v-if = "basemapcard" >
        
         <v-card-item  style="height: 50px;">
@@ -81,48 +84,63 @@
                <v-card-title id="jumptofont"> Jump to SPM </v-card-title>
            </v-btn>
        </v-card-item>
-
+ 
    </v-card>
+   <v-card class= "Selecticons" @mouseleave="mouseleaveselect" v-if = "selecttoggle">
+            <v-card-item  style="height: 50px;">
+
+            <v-tooltip location="right" text="Rectangle">
+                            <template v-slot:activator="{ props }">
+            <v-icon class="topIcon3" v-bind="props" @click="handleSelectTool('selectrectangle');">mdi-rectangle-outline</v-icon>
+                            </template>
+                    </v-tooltip>
+
+            <!-- <v-btn @click="handleSelectTool('selectrectangle');" flat density="compact" style="height: 100%;"><v-icon>mdi-rectangle-outline</v-icon></v-btn> -->
+            <!-- <v-icon class="topIcon" @click="handleSelectTool('selectrectangle');">mdi-rectangle-outline</v-icon> -->               
+        </v-card-item>
+
+        <v-card-item style="height: 50px;">
+
+            <v-tooltip location="right" text="Lasso">
+                            <template v-slot:activator="{ props }">
+            <!-- <v-btn @click="handleSelectTool('selecttoolfreehand');" flat density="compact" style="height: 100%;"><v-icon>mdi-vector-polygon</v-icon></v-btn> -->
+             <v-icon class="topIcon2" v-bind="props" @click="handleSelectTool('selecttoolfreehand');">mdi-vector-polygon</v-icon>
+              </template>
+                    </v-tooltip>
+        </v-card-item>
+        </v-card>
    <v-card id = "containersettings" height = "655" v-show = "settingsstatus">
     <v-card-item>
         <span class="banner-txt">Settings</span>
         &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
         <span id='releaseNotes' :style="{color: releaseNotesColor, fontSize: '13px'}" @mouseover="releaseNotesColor = 'white'" @mouseleave="releaseNotesColor = '#D9D9D9'" @click="isReleaseNotes = true">Version {{ store.retsVersion }}</span>
     </v-card-item>
-        <hr id = "separator"/>
         <v-card-item class = "topSettings" >
-            <div style="height: 40px;">
-                <v-switch v-model="store.autozoomtest"   class="autozoom-switch" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn()" density="compact" >
+                <v-switch v-model="store.autozoomtest"   class="autozoom-switch" color="primary" :style="{color: fontColor}" density="compact" >
                     <template #prepend >
                         <v-label>
                             Automatically zoom when I change filters
                         </v-label>
                     </template>
                 </v-switch>
-                
-            </div>
-            <div style="height: 40px;">
-                <v-switch v-model="store.autozoomextent"   class="autozoom-switch" color="primary" :style="{color: fontColor}" @change="newSwitchTurnedOn()" density="compact" >
+                <v-switch v-model="store.autozoomextent"   class="autozoom-switch" color="primary" :style="{color: fontColor}" density="compact" >
                     <template #prepend >
                         <v-label>
                             Automatically filter the activity feed based on the map extent
                         </v-label>
                     </template>
                 </v-switch>
-            </div>
 
                 <v-label style="font-size: 10px; color: #D9D9D9; margin-left: 10px;">Display selected basemap on load</v-label>
                 <v-select style="width: 22rem; margin-left: 10px; margin: top 0; margin-bottom: 0;" class="basemap-select" variant="underlined" density="compact" v-model=store.basemaptest :items=basemapArray></v-select>
         </v-card-item>
-        <hr id = "separator" />
             <v-btn @click ="activateFeedback()" color="#4472C4" rounded  style="position: absolute; right: 25px; top: 212px; z-index: 99999;">
                 <span style="font-weight: 100;">Feedback</span>
             </v-btn>
         <v-card-item id = "notificationsitems" >
-            <v-card-title id="notificationsfont">Notifications</v-card-title>
-            <v-card-subtitle id = "notificationssub">
-            <div id="notis">
-                Send notifications for: <br>
+            <v-card-item class="banner-txt" style="padding-left: 7px; padding-top: 0; padding-bottom: 0;"><span>Notifications</span></v-card-item>
+            <v-card-subtitle id = "notificationssub">Send notifications for:</v-card-subtitle>
+          <div id="notis">
                 <div id="notiswitches">
                     <v-card-item v-for="(item, index) in switches" :key="index" :id="'switch-container-' + index" class="switch-item">
                         <v-switch v-model="item.value" color="primary" :style="switchStyle(item.fontColor)" @change="switchTurnedOn(index)" disabled>
@@ -136,10 +154,8 @@
                 </div>
                 
             </div>
-            </v-card-subtitle>
             
         </v-card-item>
-            <hr id = "separator" />
         <v-card-item id="bottomitems">
             <div style="width: 100%; position: relative; height: 100%;">
                 <div style="width: 100%; position: relative;">
@@ -151,9 +167,10 @@
         </v-card-item>
 
     </v-card>
-    <v-card id="suggestionsSection" height="370px" width="350" style="border-radius: 0;" v-if="feedbackStatus">
-        <v-card-title>Provide Feedback</v-card-title>
-        <hr id = "separator" style="width: 320px !important; " />
+    <v-card id="suggestionsSection" height="360px" width="350" style="border-radius: 0;" v-if="feedbackStatus">
+        <v-card-title class="feedbackHeader">
+            Provide Feedback
+        </v-card-title>
         <v-card-text >
             We appreciate your feedback, let us know what you think.
         </v-card-text>
@@ -166,73 +183,55 @@
         </v-textarea>
         
         <v-checkbox class="small-checkbox" label="I prefer to remain anonymous" v-model="isAnonymous" style="margin-left: -40px; margin-top: -20px;"></v-checkbox>
-        <div style="margin-right: 10px;">
+        <div style="margin-right: 10px; margin-bottom: 0px; height: 40px;">
             <v-btn style="float: right;" variant="outlined" size="small" class="main-button-style" @click="submitFeedback" :disabled=feedbackSubmitStatus >SUBMIT</v-btn>
             <v-btn style="float: right;" variant="plain" size="small" class="secondary-button" @click="cancelFeedback" >CANCEL</v-btn>
         </div>
     </v-card>
-    <v-card id="releasenotesSection" v-if="isReleaseNotes" height="630" width="400" style="border-radius: 0;">
+    <v-card id="releasenotesSection" v-if="isReleaseNotes" height="655" width="400" style="border-radius: 0;">
         <v-card-title style="font-weight: 400;">Release Notes</v-card-title>
-        <hr id = "separator"  />
-        <div style="height: 525px; width: 370px; margin: auto; left: 0; right: 0; overflow-y: auto; ">
-         
+        <div  class="releaseNotesItems">
             <v-list v-model:opened="openedVlist">
-  <!-- New Updates Section -->
-  <v-list-group value="New Updates" class="release-notes">
-    <template v-slot:activator="{ props }">
-      <v-list-item 
-        v-bind="props" 
-        :key="0" 
-        :title="latestReleaseNotes[0][0]">
-      </v-list-item>
-    </template>
-    
-    <!-- Bulleted Items -->
-    <v-list-item 
-      v-for="(value, i) in latestReleaseNotes[0].slice(1)" 
-      :key="`latest-item-${i}`" 
-      class="wrap-text"
-      :disabled="true" >
-      <div style="border-width: 2px;">
-        <v-list-item-title class="bullet-item">
-          <v-icon small class="mr-2">mdi-circle-small</v-icon> <!-- Bullet -->
-          {{ value }}
-        </v-list-item-title>
-    </div>
-    </v-list-item>
-  </v-list-group>
-  
-  <!-- Previous Release Notes Section -->
-  <template v-for="([version, ...changelog], i) in previousReleaseNotes" :key="i">
-    <v-list-group class="release-notes" v-model="expandedGroups[i]">
-      <template v-slot:activator="{ props }">
-        <v-list-item 
-          v-bind="props" 
-          :title="version" 
-          class="wrap-text"
-          >
-        </v-list-item>
-      </template>
-      
-      <!-- Bulleted Items -->
-      <v-list-item 
-        v-for="(log, j) in changelog" 
-        :key="j" 
-        class="wrap-text"
-        :disabled="true" >
-          <v-list-item-title class="bullet-item">
-            <v-icon small class="mr-2">mdi-circle-small</v-icon> <!-- Bullet -->
-            {{ log }}
-          </v-list-item-title>
-      </v-list-item>
-    </v-list-group>
-  </template>
-</v-list>      
+                <!-- New Updates Section -->
+                <v-list-group value="New Updates" class="release-notes">
+                    <template v-slot:activator="{ props }">
+                        <v-list-item 
+                            v-bind="props" 
+                            :key="0" 
+                            :title="latestReleaseNotes[0][0]">
+                        </v-list-item>
+                    </template>
+                    <!-- Bulleted Items -->
+                    <v-list-item v-for="(value, i) in latestReleaseNotes[0].slice(1)" :key="`latest-item-${i}`"  class="wrap-text" :disabled="true" >
+                            <div style="border-width: 2px;">
+                                <v-list-item-title class="bullet-item">
+                                    <v-icon small class="mr-2">mdi-circle-small</v-icon> <!-- Bullet -->
+                                    {{ value }}
+                                </v-list-item-title>
+                            </div>
+                    </v-list-item>
+                </v-list-group>
+                
+                <!-- Previous Release Notes Section -->
+                <template v-for="([version, ...changelog], i) in previousReleaseNotes" :key="i">
+                    <v-list-group class="release-notes" v-model="expandedGroups[i]">
+                        <template v-slot:activator="{ props }">
+                            <v-list-item  v-bind="props" :title="version" class="wrap-text"></v-list-item>
+                        </template>
+                    
+                        <!-- Bulleted Items -->
+                        <v-list-item 
+                            v-for="(log, j) in changelog"  :key="j" class="wrap-text":disabled="true" >
+                            <v-list-item-title class="bullet-item">
+                                <v-icon small class="mr-2">mdi-circle-small</v-icon> <!-- Bullet -->
+                                {{ log }}
+                            </v-list-item-title>
+                        </v-list-item>
+                    </v-list-group>
+                </template>
+            </v-list>      
         </div>
-        <hr id = "separator" style="margin-bottom: 13px;" />
         <v-btn  style="float: right; margin-top: 0; margin-right: 20px;" variant="outlined" size="small" class="main-button-style" @click="isReleaseNotes = false">CLOSE</v-btn>
-
-
     </v-card>
 </template>
 
@@ -240,12 +239,12 @@
 
     import { appConstants } from '../common/constant.js';
     import { graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect } from '../components/map-Init.js';
-    import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM, home, restoreExtent} from '../components/utility.js';
+    import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM, home, restoreExtent, selecttoolfreehand, getUserOBJECTID} from '../components/utility.js';
     import { vuetify } from '../main.js';
     import { addSettings } from './crud.js';
     import { store } from './store';
     import { defineAsyncComponent } from 'vue'
-
+    import { setDefExpRets } from './login.js';
     export default{
         name: "NavBar",
         components:{
@@ -263,6 +262,7 @@
                 mountedAutoZoom: null,
                 selectfunction : {},
                 store,
+                selecttoggle: false,
                 basemapArray: ['Dark Grey', 'Light Grey', 'Standard TxDOT', 'Open Street Map', 'Hybrid', 'Google', 'Imagery'],
                 shiftmap: false,
                 fontColor: '#D9D9D9',
@@ -289,16 +289,25 @@
                 feedbackText: "",
                 feedbackSubmitStatus: true,
                 feedbackName: "",
+                notificationValue: false,
+                currentSwitchValue: [],
+                statuses: ['Not Started', 'In Progress', 'Completed', 'On Hold'],
+                showDropdown: false,
                 latestReleaseNotes: [
                     [
-                        `Latest Release Version ${store.retsVersion}`,'User Story 226: Add Lat/Long searching','User Story 230: Transition to prod create portal','User Story 119: Add links/URL to a comment in History',
+                        `Latest Release Version ${store.retsVersion}`,'User Story 110: Multi Select Tool: Lasso', 'User Story 357: Card return to previous in feed pane', 'Bug 360: Selected features counter on the select button increases when opening a selected point', 
+                        'Bug 359: Jump to SPM button opens a blank map', 'Bug 344: User filter returning results outside the scope of that filter', 'Bug 337: Route and subtitle overlap', 
+                        'Bug 338: Save enabled with no description', 
+                    ]
+                ],
+                previousReleaseNotes: [
+                    [
+                        `Release 2.7.1`,'User Story 226: Add Lat/Long searching','User Story 230: Transition to prod create portal','User Story 119: Add links/URL to a comment in History',
                         'User Story 256: History items should expand to fit all text',
                         'User Story 62: Add Setting to filter feed based on map extent','User Story 139: Update default filter  (to show all RETS with your name associated with it, anywhere)',
                         'Bug 219: Settings button activates the basemap button', 'Bug 271: Subtitle has blue highlight when editing', 'Bug 272: Custom query and map zoom interaction',
                         'Bug 302: Multi select activates basemap button'
-                    ]
-                ],
-                previousReleaseNotes: [
+                    ],
                     ['Release 2.7','User Story 96: Version and Release Notes',
                         'User Story 157: RETS Labels turn on sooner',
                         'User Story 193: Add option to disable automatic zoom',
@@ -356,18 +365,14 @@
                 ['Release 2.0','RETS V2 first release'],  
                 ],
                 switches: [
-                            { label: "RETS I Create", value: false, fontColor: "#D9D9D9" },
-                            { label: "RETS I'm tagged in", value: false, fontColor: "#D9D9D9" },
-                            { label: "High Priority RETS", value: false, fontColor: "#D9D9D9" },
-                            { label: "RETS assigned to me that have been inactive for 30 days", value: false, fontColor: "#D9D9D9" },
-                            { label: "New RETS assigned to me", value: false, fontColor: "#D9D9D9" },
-                            { label: "Status changed to", value: false, fontColor: "#D9D9D9" },
-                            { label: "My RETS are archived", value: false, fontColor: "#D9D9D9" },
-                            // Add more switches as needed
+                            { label: "New RETS in my district(s)", value: false},
+                            { label: "RETS assigned to me", value: false},
+                            { label: "Someone tags me", value: false},
+                            { label: "RETS marked high priority", value: false},
+                            { label: "No activty in ______ days", value: false},
+                            { label: "A RETS is deleted", value: false},
+                            { label: "Status changes to", value: false},
                         ],
-                darkmodeswitch: [
-                            { label: "Dark Mode", value: false, fontColor: "#D9D9D9" },
-                ],
                 retsToolsTop: [
                                {
                                 title:"Toggle",
@@ -427,6 +432,7 @@
                                         {
                                             this.jumptocard = false;
                                             this.basemapcard = true
+                                            this.selecttoggle = false
                                         }
                                     }
                                 
@@ -441,22 +447,31 @@
                                             {
                                                 this.basemapcard = false;
                                                 this.jumptocard = true
+                                                this.selecttoggle = false
+
                                             }
                                     }
                                 },
                                 {title:"Select", icon: 'mdi-select-multiple', color: "#D9D9D9", name: "Multi-Select", isActive: false,
                                action: () =>{
+                                // store.isSelectEnabled = !store.isSelectEnabled
+                                // this.retsToolsBottom[2].isActive = !this.retsToolsBottom[2].isActive
+                                // this.handleSelectTool();
+            
+                                sketchWidgetselect.cancel()                           
+                                this.retsToolsBottom[2].isActive = false
                                 store.isSelectEnabled = !store.isSelectEnabled
-                                this.retsToolsBottom[2].isActive = !this.retsToolsBottom[2].isActive
-                                this.handleSelectTool();
+                                
                                },
                                setActive: () => {
                                 return true
                                },
                                hover:(i) => 
                                     {
+                                        // store.isSelectEnabled = !store.isSelectEnabled
                                         this.basemapcard = false;
                                         this.jumptocard= false;
+                                        this.selecttoggle = true;
                                     }
                                 },
                                {
@@ -469,19 +484,22 @@
                                     {
                                         this.basemapcard = false;
                                         this.jumptocard= false;
+                                        this.selecttoggle = false
+
                                     }
                                 
                                },
                                {title:"Settings", icon: 'mdi-cog', color: "#D9D9D9", name: "Settings",
                                action: () =>{
                                 this.handleSettingsTool();
-                                this.retsToolsBottom[4].isActive = !this.retsToolsBottom[4].isActive
+                                this.retsToolsBottom[4].isActive = !this.retsToolsBottom[4].isActive;
                                },
                                hover:(i) => 
                                     {
                                         this.basemapcard = false;
                                         this.jumptocard= false;
-                                        
+                                        this.selecttoggle = false
+
                                         
                                     }
                                 }
@@ -538,12 +556,56 @@
                 mounted() {
                     this.setAutozoomSwitch()
                     this.setAutozoomExtentSwitch()
+                    this.setNotifications()
+                    this.updateuserSettings()
 
                 },
                 
                 methods: {
-                    toggleGroup(index) { 
-                        this.$set(this.expandedGroups, index, !this.expandedGroups[index])
+                    testfunction(index){
+                        if (index === 4){
+                        console.log("clickkkkkk")
+                        this.showDropdown = !this.showDropdown
+                        console.log(this.showDropdown)
+                        return true
+                        }
+                        
+                    },
+                    addDays(index){
+                        if (index === 2){
+                            return true
+
+                        }
+                        else{
+                            return false
+                        }
+                    },
+                    addDropdown(index){
+                        if (index > 3){
+                            return true
+                        }
+                        else{
+                            return false
+                        }
+                    },
+                    updateuserSettings(){
+                        store.userSettings = this.userSettings
+                    },
+                    setNotifications(){
+                        const { notifications } = this.userSettings
+                        if (notifications != null){
+                            for (let i = 0; i< notifications.length; i++ ){
+                                this.switches[i].value = notifications[i].value
+                            }
+                        }
+                       
+                    },
+                    isDisabled(index){
+                        return
+                        if (index > 0){
+                            return true
+                        }
+                        return false
                     },
                     setAutozoomExtentSwitch(){
                         const { autoZoomExtent } = this.userSettings;
@@ -569,13 +631,19 @@
                         store.settings = {
                             autoZoom : store.autozoomtest,
                             autoZoomExtent: store.autozoomextent,
-                            basemap: store.basemaptest
+                            basemap: store.basemaptest,
+                            notifications: this.switches
                         } 
                         this.isAutoZoom = store.autozoomtest
                         this.isAutoZoomExtent = store.autozoomextent
-                        
                         const settingsObject = {attributes: {OBJECTID : appConstants.defaultUserValue[0].objectid, SETTINGS : JSON.stringify(store.settings)}}
                         await addSettings(settingsObject)
+
+                        const userOBJECTID = await getUserOBJECTID(store.loggedInUser)
+                        this.userSettings = JSON.parse(userOBJECTID.SETTINGS)
+                        store.userSettings = this.userSettings
+
+
                         if (store.updateRetsSearch.length != store.retspointlength && store.autozoomextent == false){
                             if (store.CREATE_DT){
                                 await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
@@ -583,14 +651,25 @@
                             else{
                                 await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
                             }
-                        return  
-                    }
+                            return  
+                        }
+                       
+                        
 
                     },
                     cancelSettings(){
-                        const { autoZoom, autoZoomExtent } = this.userSettings;
+                        const { autoZoom, autoZoomExtent, notifications } = this.userSettings;
                         store.autozoomtest = this.isAutoZoom ?? autoZoom ?? true;
                         store.autozoomextent = this.isAutoZoomExtent ?? autoZoomExtent ?? false;
+              
+                        if (!notifications){
+                            return
+                        }
+                        for (let i =0; i < this.switches.length; i++){
+                            this.switches[i].value = notifications[i].value
+
+                        }
+
                         return
                     },
                     shiftDiv(){
@@ -598,23 +677,23 @@
                         viewSurface.classList.toggle('translateX-500px');
                         return
                     },
-                    newSwitchTurnedOn() {
-                        if (this.switchValue) {
-                            this.fontColor = '#FFFFFF';
+                    // newSwitchTurnedOn() {
+                    //     if (this.switchValue) {
+                    //         this.fontColor = '#FFFFFF';
                             
-                        } else {
-                            this.fontColor = "#D9D9D9";
-                        }
-                    },
-                    switchTurnedOn(index) {
-                        if (this.switches[index].value) {
-                            this.switches[index].fontColor = '#FFFFFF';
-                        } 
-                        else {
-                            this.switches[index].fontColor = '#D9D9D9';
-                        }
+                    //     } else {
+                    //         this.fontColor = "#D9D9D9";
+                    //     }
+                    // },
+                    // switchTurnedOn(index) {
+                    //     if (this.switches[index].value) {
+                    //         this.switches[index].fontColor = '#FFFFFF';
+                    //     } 
+                    //     else {
+                    //         this.switches[index].fontColor = '#D9D9D9';
+                    //     }
                         
-                        },
+                    //     },
                     switchStyle(fontColor) {
                         return { color: fontColor };
                     },
@@ -637,6 +716,9 @@
                     mouseleavejumpto(){
                         this.jumptocard = false;
                     },
+                    mouseleaveselect(){
+                        this.selecttoggle = false;
+                    },
 
                     async handleCreateTool() {
                         if (this.isCreateEnabled === true) {
@@ -654,12 +736,26 @@
                         
                        
                     },
-                    handleSelectTool() { 
-                        if (store.isSelectEnabled === true ){
-                            this.selectfunction = selecttool(store.isSelectEnabled, sketchWidgetselect, graphics);
+                    handleSelectTool(tooltype) { 
+                        if (store.isSelectEnabled  === false){
+                            store.isSelectEnabled = !store.isSelectEnabled
+                            this.retsToolsBottom[2].isActive = true
+                            if (tooltype === "selectrectangle"){
+                                
+                                selecttool(store.isSelectEnabled, sketchWidgetselect, graphics)
+ 
+                            }
+                            else if (tooltype="selecttoolfreehand"){
+                                
+                                selecttoolfreehand(store.isSelectEnabled, sketchWidgetselect, graphics)
+ 
+                            }
                         }
                         else{
                             sketchWidgetselect.cancel()
+                            // this.selectfunction.remove()
+                            this.retsToolsBottom[2].isActive = false
+                            store.isSelectEnabled = !store.isSelectEnabled
                         }
 
                         
@@ -679,7 +775,7 @@
                         var lat = ctr.latitude;                
                         var lon = ctr.longitude;                
                         var level = view.zoom -1 ;                
-                        window.open("https://www.txdot.gov/apps/statewide_mapping/StatewidePlanningMap.html?coords="+lat+","+lon+","+level);
+                        window.open("https://www.txdot.gov/apps/statewide_mapping/StatewidePlanningMap.html?map=txdot&coords="+lat+","+lon+","+level);
                         this.jumptocard = false;
                     },
 
@@ -698,6 +794,9 @@
                             this.feedbackStatus = false
                             this.settingsstatus = false
                             return
+                        }
+                        if (this.settingsstatus){
+                            this.cancelSettings()
                         }
                         this.settingsstatus = !this.settingsstatus;
 
@@ -742,6 +841,7 @@
                         
                     },
                     async sendWebhookRequest(feedbackString, user){
+                        this.feedbackSubmitStatus = true
                         let url = `https://gis-batch-dev.txdot.gov/fmejobsubmitter/TPP/TPP_DEV_RETS_Emailer.fmw?FEEDBACK=${feedbackString}&USERNAME=${user}&opt_showresult=false&opt_servicemode=sync&token=27a9777b0f14467fcfc09b854466559d14c24e43`
                         try{
                             const response = await fetch(url)
@@ -754,6 +854,7 @@
                                 this.isAnonymous = false
                                 store.alertTextInfo = {"text": "Thank you for your feedback!", "color": "#70ad47", "type":"success", "toggle": true}
                                 store.isAlert = true
+                                this.feedbackSubmitStatus = false
 
                                 setTimeout(() => {
                                     store.isAlert = false
@@ -786,13 +887,29 @@
         transform: translate(-25%, -25%);
     }
 
-    .topIcon{
+  .topIcon{
         position: absolute;
         top: 35%;
         left: 40%;
         transform: translate(-25%, -25%);
     }
+
+      .topIcon3{
+        position: absolute;
+        top: 75%;
+        left: 70%;
+        font-size: 20px;
+        transform: translate(-25%, -25%);
+         }
     
+    .topIcon2{
+        position: absolute;
+        top: 20%;
+        left: 70%;
+        font-size: 20px;
+        transform: translate(-25%, -25%);
+    }
+
     .v-list-item:hover{
         cursor: pointer;
         background-color: rgba(128,128,128,.3);
@@ -827,10 +944,6 @@
     }
 
     .v-navigation-drawer__content{
-        overflow-y: hidden !important;
-    }
-
-    .v-color-picker-swatches{
         overflow-y: hidden !important;
     }
     #basemaptoggle{
@@ -875,26 +988,16 @@
         width: 400px;
         z-index: 999;
         border-radius: 0px;
+        /* height: 655px; */
+        height: 655px;
     }
-    #settingsheader{
-        position: relative;
-        left: 10px;
-        font-size: 20px;
-    }
+
     #headerfont{
         left: 10px;
         /* font-size: 18px; */
         
         
     }
-    #separator{
-        border: 0;
-        border-bottom: 1px solid ;
-        margin: 0 auto;
-        width: 23rem;
-        
-    }
-
     #darkmodeitem{
         position: relative;
         bottom: 2px;
@@ -903,85 +1006,70 @@
         height: 4rem;
         
     }
-    #topSettings{
-        font-size: 20px;
+    .topSettings{
+       border-bottom : 1px solid ;
+       border-top: 1px solid ;
+       justify-self: center;
+       width: 23rem;
+       padding-right: 0;
+       padding-left: 0;
+
+
+        }      
+            
+            
+    #notificationsitems{
+        border-bottom : 1px solid ;
+        justify-self: center;
         width: 23rem;
-        right: 0;
-        left: 0;
-        margin: auto;
-        border: solid red;
-        border-width: 2px;
-    }
-    .font-class{
-        color: aqua !important;
+        padding-right: 0;
+        padding-left: 0;
+        padding-bottom: 0;
+        overflow-y: hidden;
+
+
     }
 
-    #darkmodetogglefont{
-        position: relative;
-        font-size: 14px;
-        left: 1rem;
-        bottom: -2px;
-    }
-    #notificationsitems{
-        position: relative;
-        left: 10px;
-        font-size: 20px;
-        height: 23rem;
-    }
+
     #notificationsfont{
-        position: absolute;
-        top: 5px;
+        position: relative;
         font-size: 18px;
+        left: 5px;
     }
     #notificationssub{
-        position: absolute;
         font-size: 14px;
-        top: 40px;
-        left: 18px;
-        height: 350px;
-    }
+        position: relative;
+        left: 10px;
+        padding-top: 3px;
 
-    #darkmodeswitch{
-        margin-left: 1px; 
-        margin-bottom: -55px;
-        margin-top: 0px;
-        left: 5px;;
-    }    
+    }
+  
     .switch-item{
-        /* position: absolute; */
-        margin-left: 1px; 
-        margin-bottom: -55px;
-        margin-top: 0px;
-        /* flex: 1 1 auto; */
+        /* height: 42px; */
+        padding-top: 0;
+        padding-bottom: 0;
+        max-height: 50px;
+        padding-right: 0;
+        
 
     }
     #notis{
         /* display: block; */
         /* flex-wrap: wrap; */
         position: relative;
-        width: 400px;
+        width: 370px;
+        height: 300px;
+        overflow-y: auto;
+        
+        
+    }
 
-    }
-    #notiswitches{
-        position: relative;
-        left: -15px;
-        margin-top: -20px;
-    }
     #bottomitems{
         position: absolute;
         bottom: 5px;
         width: 25rem;
     }
     
-    #darkmodeswitch{
-        position: absolute;
-        bottom: 2.3rem;
-    }
-    #save{
-        border: 1px solid ;
-        border-radius: 9%;
-        
-    }
     .iconList{
         position: relative;
         width: 40px;
@@ -1069,13 +1157,12 @@
         justify-self: end;
         margin-right: 16.5px;
     }
-    .topSettings .autozoom-switch .v-input__control{
-
-        justify-self: end;
-        margin-right: 5.5px;
+    .autozoom-switch{
+        width: 22.5rem;
+        height: 40px;
     }
-    .basemap-seelct{
-        z-index: 1;
+    .topSettings .autozoom-switch .v-input__control{
+        justify-self: end;
     }
 
     .wrap-text .v-list-item-title {
@@ -1103,6 +1190,84 @@
         
     }
 
+    .Selecticons{
+        position: absolute;
+        height: 90px;
+        width: 70px;
+        bottom: 7.5%;
+    }
+
+     .feedbackHeader{
+        border-bottom: 1px solid;
+        width: 20rem;
+        justify-self: center;
+        padding-left: 0;
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+    }
+
+    .releaseNotesItems{
+        height: 555px; 
+        width: 23rem; 
+        justify-self: center;
+        overflow-y: auto; 
+        border-top: 1px solid;
+        border-bottom: 1px solid;
+        padding-bottom: 5px;
+        margin-bottom: 12px;
+
+    }
+
+    .switchDropdown{
+        position: relative;
+        /* left: -200px; */
+        /* width: 200px; */
+        margin-left: 20px;
+        margin-top: 0;
+        height: 32px;
+        top: -20px;
+    }
+    
+    .switchDropdown .v-field__input{
+        height: 20px;
+        width: 300px !important;
+        font-size: 10px;
+                        overflow-y: auto;
+
+        
+    }
+
+    .switchDropdown .v-field{
+        width: 190px;
+        left: -50px;
+        height: 33px;
+
+
+
+    }
+
+
+    .switchDropdown .v-input__prepend{
+        /* position: relative;
+        padding: 0 !important */
+    }
+
+    .switchDropdown .v-chip__content{
+        font-size: 9px;
+    }
+
+    .daysDropdown{
+       position: absolute;
+       width: 30px;
+       height: 75px;
+       background-color: rgb(84, 79, 79);
+        /*width: 0px; */
+        top: 234px;
+        left: 83.8px;
+        border-radius: 0;
+    }
+
+    
     
    
     

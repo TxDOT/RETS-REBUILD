@@ -478,7 +478,7 @@ export const searchWidget = new Search({
   /////////////////////////////////
   view: view,
   includeDefaultSources: false,
-  allPlaceholder: "City, County, District, Route, Minute Order, RETS ID",
+  allPlaceholder: "City, County, District, Route, Minute Order, RETS ID, Lat/Lon",
   popupEnabled: false,
   popupTemplate: false,
   minSuggestCharacters: 3,
@@ -864,7 +864,15 @@ view.popup.dockOptions = {
 }
 
 homeWidget.on("go", function() {
-  home();
+  retsLayer.queryExtent()
+            .then((resp) =>{
+                if (resp.count== 0 || resp.count > 3000){
+                    view.goTo(view.center)
+                }
+                else{
+                    view.goTo(resp.extent)
+                }
+            })
 });
 
 // const handlescale = reactiveUtils.watch(
