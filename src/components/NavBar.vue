@@ -289,14 +289,19 @@
                 showDropdown: false,
                 latestReleaseNotes: [
                     [
-                        `Latest Release Version ${store.retsVersion}`,'User Story 226: Add Lat/Long searching','User Story 230: Transition to prod create portal','User Story 119: Add links/URL to a comment in History',
+                        `Latest Release Version ${store.retsVersion}`,'User Story 110: Multi Select Tool: Lasso', 'User Story 357: Card return to previous in feed pane', 'Bug 360: Selected features counter on the select button increases when opening a selected point', 
+                        'Bug 359: Jump to SPM button opens a blank map', 'Bug 344: User filter returning results outside the scope of that filter', 'Bug 337: Route and subtitle overlap', 
+                        'Bug 338: Save enabled with no description', 
+                    ]
+                ],
+                previousReleaseNotes: [
+                    [
+                        `Release 2.7.1`,'User Story 226: Add Lat/Long searching','User Story 230: Transition to prod create portal','User Story 119: Add links/URL to a comment in History',
                         'User Story 256: History items should expand to fit all text',
                         'User Story 62: Add Setting to filter feed based on map extent','User Story 139: Update default filter  (to show all RETS with your name associated with it, anywhere)',
                         'Bug 219: Settings button activates the basemap button', 'Bug 271: Subtitle has blue highlight when editing', 'Bug 272: Custom query and map zoom interaction',
                         'Bug 302: Multi select activates basemap button'
-                    ]
-                ],
-                previousReleaseNotes: [
+                    ],
                     ['Release 2.7','User Story 96: Version and Release Notes',
                         'User Story 157: RETS Labels turn on sooner',
                         'User Story 193: Add option to disable automatic zoom',
