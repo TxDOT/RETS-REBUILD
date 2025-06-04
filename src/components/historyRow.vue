@@ -1,15 +1,15 @@
 
 <template>
-    <hr class="popup-title-border"></hr>
+    <hr class="popup-title-border" style="width: 97.5%; justify-self: center;"></hr>
     <div style="margin-right: 10px; margin-left: 10px; width: 100%; height: 250px;">
         <div id="search">
             <v-text-field class="search-history" placeholder="Search..." flat rounded="0" prepend-inner-icon="mdi-magnify" density="compact" v-model="searchHistoryFilter" variant="solo-filled" elevation="0" >
                 <template v-slot:append-inner>
-                    <v-icon icon="mdi-close" @click="clearContent" v-if="searchHistoryFilter.length"></v-icon>
+                    <v-icon icon="mdi-close" @click="clearContent" v-if="searchHistoryFilter.length" class="close-icon"></v-icon>
                 </template>
             </v-text-field>
         </div>
-        <div style="position: relative; bottom: 2rem; left: 43px;">
+        <div style="position: relative; bottom: 1.2rem; left: 43px;">
             <v-btn variant="plain" density="compact" style="font-size: 10px; float: right; position: relative; top:2px; margin:0%; padding: 0%; padding:0px 10px 0px 10px; margin-right: 10px; margin-bottom: 0px; text-transform: none;" @click="queryAttachments" :disabled="store.numAttachments === 0" v-model="isAttachedActive" :active="isAttachedActive" active-class="active-button">
                 <template v-slot:prepend>
                     <v-icon icon="mdi-filter"></v-icon>
@@ -309,12 +309,29 @@
 
 <style scoped>
     .search-history{
-        height: 10px;
+        height: 0px;
         margin-left: 10px; 
         margin-right: 10px;
         max-width: 550px;
         min-width: 100px;
     }
+
+    .search-history :deep(.v-input__control) {
+        height: 30px !important;
+        margin-top: 8px;
+        
+    }
+
+    .search-history :deep(.v-field__prepend-inner){
+        padding-bottom:25px;
+    }
+
+      .search-history :deep(.v-field__input){
+        padding-bottom:30px;
+    }
+
+   
+    
     
     #displayHistoryL{
         display: flex;
@@ -388,6 +405,10 @@
         min-height: 2px; 
         max-height: 38px;
         overflow: hidden; */
+    }
+
+    .close-icon{
+        padding-bottom: 25px;
     }
 
 </style>
