@@ -1,6 +1,6 @@
 <template>
     <!-- details section -->
-    
+
         <div id="detailsHeaderIcon">
             <v-btn density="compact" flat @click="changeColor(store.retsObj.attributes.RETS_ID);" id="flagBtnDetails">
                 <template v-slot:prepend>
@@ -19,8 +19,8 @@
                 <div class="details-div">
                     <v-card class="details-page">
                         <v-btn-toggle selected-class="active-button" variant="plain" mandatory v-model="isBtnSet" id="retsDetailMeta" density="compact">
-                            <v-btn flat class="retsMetaBtn" @click="this.isDetails = true; this.isMetadata = false" density="compact">Details</v-btn>
-                            <v-btn flat class="retsMetaBtn" @click="this.isMetadata = true; this.isDetails = false" density="compact">Metadata</v-btn>
+                            <v-btn flat class="retsMetaBtn" @click="isDetails = true; isMetadata = false" density="compact">Details</v-btn>
+                            <v-btn flat class="retsMetaBtn" @click="isMetadata = true; isDetails = false" density="compact">Metadata</v-btn>
                         </v-btn-toggle>
                         <DetailsCard v-if="isDetails"/>
                         <MetadataCard v-if="isMetadata"/>

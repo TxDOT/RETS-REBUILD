@@ -475,22 +475,39 @@ export const store = reactive({
                 return true
         },
         checkDetailsForComplete(){
-                let item = [this.retsObj.attributes.RTE_NM, this.retsObj.attributes.DFO, this.retsObj.attributes.STAT, this.retsObj.attributes.DESC_].filter(x => !x)
-
-                const fieldsToCheck = [
+                const metadataFieldsToCheck = [
                         this.retsObj.attributes.GIS_ANALYST, this.retsObj.attributes.GRID_ANALYST, 
-                        this.retsObj.attributes.DIST_ANALYST, this.retsObj.attributes.DIST_NM, 
+                        [...this.retsObj.attributes.DIST_ANALYST].length === 0 ? false : true, this.retsObj.attributes.DIST_NM, 
                         this.retsObj.attributes.CNTY_NM
-                    ]
-                
-                !this.retsObj.attributes.NO_RTE ? fieldsToCheck.push(this.retsObj.attributes.DFO) : null    
-                const metadataIsUpdate = fieldsToCheck.some(x => !x)
-                
-                if(item.length && !this.retsObj.attributes.NO_RTE){
-                    this.isSaveBtnDisable = true
-                    return
+                ]
+
+                const detailFieldsToCheck = [this.retsObj.attributes.STAT, this.retsObj.attributes.DESC_]
+
+                !this.retsObj.attributes.NO_RTE ? detailFieldsToCheck.push(this.retsObj.attributes.DFO) : null
+
+                let totalFieldsToCheck = [...detailFieldsToCheck, ...metadataFieldsToCheck]
+
+                let item = totalFieldsToCheck.filter(f => !f)
+                console.log(item)
+                if(item.length){
+                        this.isSaveBtnDisable = true
+                        return
                 }
-                this.isSaveBtnDisable = metadataIsUpdate
+
+                this.isSaveBtnDisable = false
+                return
+                // if(!this.retsObj.attributes.NO_RTE){
+                //         this.isSaveBtnDisable = item.length || !this.retsObj.attributes.RTE_NM || !this.retsObj.attributes.DFO
+                //         return
+                // }
+
+                
+                    
+
+                // const metadataIsUpdate = metadataFieldsToCheck.some(x => !x)
+                
+
+                // this.isSaveBtnDisable = metadataIsUpdate
         }         
         // async returnTopCMNT(retsID){
         //         const topCMNT = returnTopHistory(retsID)

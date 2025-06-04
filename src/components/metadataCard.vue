@@ -55,10 +55,14 @@
             this.createName = store.retsObj.attributes.CREATE_NM
             this.createDate = store.retsObj.attributes.CREATE_DT.split(",")[0]
             store.retsObj.attributes.DIST_ANALYST = typeof store.retsObj.attributes.DIST_ANALYST === "string" ? store.retsObj.attributes.DIST_ANALYST.split(",") : store.retsObj.attributes.DIST_ANALYST
-            store.retsObj.attributes.GRID_ANALYST = store.retsObj.attributes.GRID_ANALYST.toUpperCase()
+            store.retsObj.attributes.GRID_ANALYST = store?.retsObj?.attributes?.GRID_ANALYST?.toUpperCase() ?? this.disableSaveBtn()
             store.isEmptyRow = this.emptyRow.required
         },
         methods:{
+            disableSaveBtn(){
+                store.isSaveBtnDisable = true
+                return 
+            },
             onDropDownChange(){
                 const metadataFieldPass = this.checkMetadatFields()
                 if (store.retsObj.attributes.DIST_ANALYST.includes('Clear All')){
