@@ -985,7 +985,7 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
 }
 
 export function selecttoolfreehand(isSelectEnabled, sketchWidgetselect, graphics){
-    console.log('selecttoolfreehand')
+
     if(isSelectEnabled === true){ 
         sketchWidgetselect.create("polygon", { mode: "freehand" });
         const selectretspoints = sketchWidgetselect
@@ -1862,35 +1862,36 @@ return
 }
 
 export function discardeditcopy(){
-if(store.clickStatus){
+    if(store.clickStatus){
+        const archiveRets = JSON.parse(store.archiveRetsDataString)
+        let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
+        updateRetsObj(findItem, archiveRets)
+        store.roadHighlightObj.forEach(entry => {
+            if (store.retsObj.attributes.RETS_ID != entry.attributes.RETS_ID){
+                openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === entry.attributes.RETS_ID))
+                removeHighlight("a", true)
+                highlightRETSPoint(entry.attributes)
+                outlineFeedCards(store.roadHighlightObj)
+            }
+            });                                           
+        store.clickStatus = false
+        store.cancelpopup = false
+        store.isSaveBtnDisable = true
+        return
+    }
+
     const archiveRets = JSON.parse(store.archiveRetsDataString)
-    let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
-    updateRetsObj(findItem, archiveRets)
-    store.roadHighlightObj.forEach(entry => {
-        if (store.retsObj.attributes.RETS_ID != entry.attributes.RETS_ID){
-            openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === entry.attributes.RETS_ID))
-            removeHighlight("a", true)
-            highlightRETSPoint(entry.attributes)
-            outlineFeedCards(store.roadHighlightObj)
-        }
-        });                                           
-    store.clickStatus = false
+    replacearchivecopy(archiveRets)
+    clearGraphicsLayer()
+    //returntofeedcopy()
+    retsLayerView.layer.definitionExpression = store.savedFilter
+    store.isCard = true
+    store.toggleFeed = 1
     store.cancelpopup = false
     store.isSaveBtnDisable = true
+    store.isAlert = false
+    outlineFeedCards(store.roadHighlightObj)
     return
-}
-const archiveRets = JSON.parse(store.archiveRetsDataString)
-replacearchivecopy(archiveRets)
-clearGraphicsLayer()
-//returntofeedcopy()
-retsLayerView.layer.definitionExpression = store.savedFilter
-store.isCard = true
-store.toggleFeed = 1
-store.cancelpopup = false
-store.isSaveBtnDisable = true
-store.isAlert = false
-outlineFeedCards(store.roadHighlightObj)
-return
 }
 
 export async function getUserOBJECTID(userId){
@@ -1917,16 +1918,16 @@ export async function getAllUserSettings(users){
 }
 
 export function setFilterProperties(userFilterObject){
-store.CREATE_DT = userFilterObject.createDt
-store.JOB_TYPE = userFilterObject.jobType
-store.EDIT_DT = userFilterObject.editDt
-store.STAT = userFilterObject.stat
-store.ACTV = userFilterObject.actv
-store.DIST_NM = userFilterObject.distNM
-store.CNTY_NM = userFilterObject.cntyNM
-store.USER = userFilterObject.user
-store.isAssignedTo = userFilterObject.isAssignedTo
-store.isAssociated = userFilterObject.isAssociated
+    store.CREATE_DT = userFilterObject.createDt
+    store.JOB_TYPE = userFilterObject.jobType
+    store.EDIT_DT = userFilterObject.editDt
+    store.STAT = userFilterObject.stat
+    store.ACTV = userFilterObject.actv
+    store.DIST_NM = userFilterObject.distNM
+    store.CNTY_NM = userFilterObject.cntyNM
+    store.USER = userFilterObject.user
+    store.isAssignedTo = userFilterObject.isAssignedTo
+    store.isAssociated = userFilterObject.isAssociated
 return
 
 
@@ -1961,55 +1962,52 @@ export function setBasemap(){
 }
 
 export function applyDarkGrey(){
-map.basemap = darkVTBasemap;
-retsLabelclass.symbol.color = "white"
-retsLabelclass.symbol.haloSize = 0
-TxDOTRoadways.labelsVisible = false
+    map.basemap = darkVTBasemap;
+    retsLabelclass.symbol.color = "white"
+    retsLabelclass.symbol.haloSize = 0
+    TxDOTRoadways.labelsVisible = false
 TxDOTRoadways.renderer.symbol.width = 0
 }
 export function applyLightGrey(){
-map.basemap = lightVTBasemap
-retsLabelclass.symbol.color = "black"                        
-retsLabelclass.symbol.haloSize = 0
-TxDOTRoadways.labelsVisible = false,
-TxDOTRoadways.renderer.symbol.width = 0
-
-
+    map.basemap = lightVTBasemap
+    retsLabelclass.symbol.color = "black"                        
+    retsLabelclass.symbol.haloSize = 0
+    TxDOTRoadways.labelsVisible = false,
+    TxDOTRoadways.renderer.symbol.width = 0
 }
 
 export function applyStandard(){
-map.basemap = standardVTBasemap;
-retsLabelclass.symbol.color = "black"
-retsLabelclass.symbol.haloSize = 0
-TxDOTRoadways.labelsVisible = false,
-TxDOTRoadways.renderer.symbol.width = 0
-
+    map.basemap = standardVTBasemap;
+    retsLabelclass.symbol.color = "black"
+    retsLabelclass.symbol.haloSize = 0
+    TxDOTRoadways.labelsVisible = false,
+    TxDOTRoadways.renderer.symbol.width = 0
 }
 
 export function applyImagery(){
-map.basemap = imageryBasemap;
-retsLabelclass.symbol.color = "black"
-retsLabelclass.symbol.haloColor = "gray"
-retsLabelclass.symbol.haloSize = 1
-TxDOTRoadways.labelsVisible = false,
-TxDOTRoadways.renderer.symbol.width = 0
+    map.basemap = imageryBasemap;
+    retsLabelclass.symbol.color = "black"
+    retsLabelclass.symbol.haloColor = "gray"
+    retsLabelclass.symbol.haloSize = 1
+    TxDOTRoadways.labelsVisible = false,
+    TxDOTRoadways.renderer.symbol.width = 0
 }
 
 export function applyHybrid(){
-map.basemap = hybridBasemap;
-retsLabelclass.symbol.color = "black"
-retsLabelclass.symbol.haloColor = "gray"
-retsLabelclass.symbol.haloSize = 1
-TxDOTRoadways.labelsVisible = true,
-TxDOTRoadways.renderer.symbol.width = 8
+    map.basemap = hybridBasemap;
+    retsLabelclass.symbol.color = "black"
+    retsLabelclass.symbol.haloColor = "gray"
+    retsLabelclass.symbol.haloSize = 1
+    TxDOTRoadways.labelsVisible = true,
+    TxDOTRoadways.renderer.symbol.width = 8
 }
 
 export function applyGoogle(){
-map.basemap = googleVTBasemap;
-retsLabelclass.symbol.color = "black"
-retsLabelclass.symbol.haloSize = 0
-TxDOTRoadways.labelsVisible = false,
-TxDOTRoadways.renderer.symbol.width = 0
+    map.basemap = googleVTBasemap;
+    retsLabelclass.symbol.color = "black"
+    retsLabelclass.symbol.haloSize = 0
+    TxDOTRoadways.labelsVisible = false,
+    TxDOTRoadways.renderer.symbol.width = 0
 }
 
 export function applyOSM(){
@@ -2020,26 +2018,14 @@ export function applyOSM(){
     TxDOTRoadways.renderer.symbol.width = 1
 }
 
-export function applybasemap(basemap){
-
-}
 
 export async function deleteRets(){
-store.retsObj.attributes.isDelete = true
-await deleteRETSPT(store.retsObj)
-removeRelatedRetsFromMap(store.retsObj.attributes.OBJECTID)
-store.deleteRetsID()
-deleteRetsGraphic()
-//this.returnToFeed()
-store.toggleFeed = 1
-return
-}
-
-export function restoreExtent(){
-return retsLayer.queryExtent().then((response) => {
-    view.goTo(response.extent)
-    .catch((error) => {
-      console.error(error);
-    });
-  });
+    store.retsObj.attributes.isDelete = true
+    await deleteRETSPT(store.retsObj)
+    removeRelatedRetsFromMap(store.retsObj.attributes.OBJECTID)
+    store.deleteRetsID()
+    deleteRetsGraphic()
+    //this.returnToFeed()
+    store.toggleFeed = 1
+    return
 }

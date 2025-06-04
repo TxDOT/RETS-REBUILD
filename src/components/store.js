@@ -490,7 +490,6 @@ export const store = reactive({
                 let totalFieldsToCheck = [...detailFieldsToCheck, ...metadataFieldsToCheck]
 
                 let item = totalFieldsToCheck.filter(f => !f)
-                console.log(item)
                 if(item.length){
                         this.isSaveBtnDisable = true
                         return
