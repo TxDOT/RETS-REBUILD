@@ -12,8 +12,8 @@
         </v-list>
         <v-list id="icons-bottom" class="iconList">
             <v-list-item id="popoutitems" class="iconList-item" v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" :active="tool.isActive" :active-class="tool.name !== 'Jump To' || tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
-                <template v-if="tool.name !== 'Basemaps' && tool.name !== 'Jump To'">
-                    <v-tooltip location="right" :text="tool.name">
+                <template v-if="tool.name !== 'Basemaps' && tool.name !== 'Jump To' ">
+                    <v-tooltip location="right" :text="tool.name !== 'Multi-Select' ?  tool.name:'' ">
                             <template v-if="tool.name !== 'Multi-Select'" v-slot:activator="{ props }">
                                     <v-icon class="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
                             </template>
@@ -25,8 +25,10 @@
                     </v-tooltip>
                 </template>
                 <template v-else>
+
                         <v-icon class="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
-                </template>
+                        
+                    </template>
             </v-list-item>
         </v-list>
 
@@ -86,28 +88,16 @@
        </v-card-item>
  
    </v-card>
-   <v-card class= "Selecticons" @mouseleave="mouseleaveselect" v-if = "selecttoggle">
-            <v-card-item  style="height: 50px;">
-
-            <v-tooltip location="right" text="Rectangle">
-                            <template v-slot:activator="{ props }">
-            <v-icon class="topIcon3" v-bind="props" @click="handleSelectTool('selectrectangle');">mdi-rectangle-outline</v-icon>
-                            </template>
-                    </v-tooltip>
-
-            <!-- <v-btn @click="handleSelectTool('selectrectangle');" flat density="compact" style="height: 100%;"><v-icon>mdi-rectangle-outline</v-icon></v-btn> -->
-            <!-- <v-icon class="topIcon" @click="handleSelectTool('selectrectangle');">mdi-rectangle-outline</v-icon> -->               
-        </v-card-item>
-
-        <v-card-item style="height: 50px;">
-
-            <v-tooltip location="right" text="Lasso">
-                            <template v-slot:activator="{ props }">
-            <!-- <v-btn @click="handleSelectTool('selecttoolfreehand');" flat density="compact" style="height: 100%;"><v-icon>mdi-vector-polygon</v-icon></v-btn> -->
-             <v-icon class="topIcon2" v-bind="props" @click="handleSelectTool('selecttoolfreehand');">mdi-vector-polygon</v-icon>
-              </template>
-                    </v-tooltip>
-        </v-card-item>
+   <v-card class='Selecticons' @mouseleave="mouseleaveselect" v-if = "selecttoggle">
+          
+        <v-list-item  v-for="(tool, i) in multiselectOptions" :key="i" :value="tool" @click="tool.action()">    
+                <v-tooltip location="right bottom" :text=tool.name >
+                    <template v-slot:activator="{ props}">
+                        <v-icon size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
+                    </template>
+                </v-tooltip>
+                
+            </v-list-item>
         </v-card>
    <v-card id = "containersettings" height = "655" v-show = "settingsstatus">
     <v-card-item>
@@ -239,7 +229,7 @@
 
     import { appConstants } from '../common/constant.js';
     import { graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect } from '../components/map-Init.js';
-    import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM, home, restoreExtent, selecttoolfreehand, getUserOBJECTID} from '../components/utility.js';
+    import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM, home, restoreExtent, getUserOBJECTID} from '../components/utility.js';
     import { vuetify } from '../main.js';
     import { addSettings } from './crud.js';
     import { store } from './store';
@@ -498,6 +488,27 @@
                                     }
                                 }
                             ],
+
+                multiselectOptions: [ {title:"Rectangle", icon: 'mdi-rectangle-outline', color: "#D9D9D9", name: "Rectangle", class:"topIcon3", isActive: true,
+                               action: () => {
+                                this.handleSelectTool('selectrectangle');
+                                console.log("rectangle selected")
+                                                                this.multiselectOptions[0].isActive = !this.multiselectOptions[0].isActive;
+
+                                return
+                               },
+                            
+                                },
+                               {title:"Lasso", icon: 'mdi-vector-polygon', color: "#D9D9D9", name: "Lasso", class:"topIcon2", isActive: false,
+                               action: () =>{
+                                this.handleSelectTool('selecttoolfreehand');
+                                return
+                               },
+                            
+                                }
+
+
+                ],
                             
 
             }
@@ -736,12 +747,12 @@
                             this.retsToolsBottom[2].isActive = true
                             if (tooltype === "selectrectangle"){
                                 
-                                selecttool(store.isSelectEnabled, sketchWidgetselect, graphics)
+                                selecttool(store.isSelectEnabled, sketchWidgetselect, graphics, "rectangle","freehand")
  
                             }
                             else if (tooltype="selecttoolfreehand"){
                                 
-                                selecttoolfreehand(store.isSelectEnabled, sketchWidgetselect, graphics)
+                                selecttool(store.isSelectEnabled, sketchWidgetselect, graphics, "polygon","freehand")
  
                             }
                         }
@@ -1185,18 +1196,16 @@
     }
 
     .Selecticons{
-        position: absolute;
+        /* position: absolute;
         height: 90px;
         width: 70px;
-        bottom: 7.5%;
-        .feedbackHeader{
-        border-bottom: 1px solid;
-        width: 20rem;
-        justify-self: center;
-        padding-left: 0;
-        padding-bottom: 5px;
-        margin-bottom: 10px;
+        bottom: 7.5%; */
+        width: 40px;
+        justify-items: center;
+        top: 85%;
+        left: 40px;
     }
+
 
     .releaseNotesItems{
         height: 555px; 
@@ -1261,7 +1270,7 @@
 
     
         /* align-content: center; */
-    }
+    
    
     
 </style>
