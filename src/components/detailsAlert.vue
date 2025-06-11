@@ -27,4 +27,14 @@
         min-height: fit-content;
         right: 50vh;
     }
+
+    .detailsAlert :deep(.v-alert__underlay){
+        opacity: .3 !important;
+        
+    }
+
+    .detailsAlert :deep(.v-alert__content){
+        opacity: 1;
+        text-shadow: black .5px .5px .5px ;
+    }
 </style>

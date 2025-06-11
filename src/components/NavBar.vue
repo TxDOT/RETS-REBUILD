@@ -142,14 +142,14 @@
             <v-card-subtitle id = "notificationssub">Send notifications for:</v-card-subtitle>
            <div id="notis">
                 <v-card-item v-for="(item, index) in switches" :key="index"  class="switch-item">
-                    <div style="height: auto; ">
+                    <div style="height: auto;">
                         <v-switch :model-value="item.value" color="primary"  @update:modelValue="item.value= $event" :disabled="isDisabled(index)"  :style="{color: fontColor, height: '50px'}"   >
                         <template #prepend >
                             <v-label @mouseover="testfunction(index) " >
                                 {{ item.label }}
                                 
                             </v-label>
-                            <v-card class="daysDropdown" v-if="this.showDropdown === true" @mouseleave="this.showDropdown = false">
+                            <!-- <v-card class="daysDropdown" v-if="this.showDropdown === true" @mouseleave="this.showDropdown = false">
                                 <v-label >
                                     30
                                 </v-label>
@@ -159,12 +159,16 @@
                                 <v-label>
                                     90
                                 </v-label>
-                            </v-card>
-                            <!-- <v-select v-if="testfunction(index) === true" variant="underlined" class="daysDropdown"></v-select> -->
+                            </v-card> -->
+                        <template v-if="item.label === 'No activty in ______ days'">
+                            <v-select :items="noActivityDays" class="daysDropdown" base-color="transparent" bg-color="transparent" :center-affix=true chips density="compact" variant="plain" max-width="20px" v-model="item.value3"></v-select>
+                        </template>
+
+
                         </template>
                     </v-switch>
 
-                    <v-select :key="index" v-if="addDropdown(index)" density="compact" variant="underlined" class="switchDropdown"  multiple chips :items=statuses>
+                    <v-select :key="index" v-if="addDropdown(index)" density="compact" variant="underlined" class="switchDropdown" v-model="item.value2" multiple :items=statuses  >
                         <template #prepend>
                             <v-label >
                                 Applies to: 
@@ -266,6 +270,8 @@
     import { store } from './store';
     import { defineAsyncComponent } from 'vue'
     import { setDefExpRets } from './login.js';
+      import { shallowRef } from 'vue'
+
     export default{
         name: "NavBar",
         components:{
@@ -274,6 +280,7 @@
         },
         data(){
             return{
+                favorites : shallowRef([]),
                 toggle: store.toggleFeed,
                 openedVlist: ['New Updates'],
                 isNewReleaseOpen: true,
@@ -312,8 +319,14 @@
                 feedbackName: "",
                 notificationValue: false,
                 currentSwitchValue: [],
-                statuses: ['Not Started', 'In Progress', 'Completed', 'On Hold'],
+                statuses: ['In my district(s)', 'Assigned to me', "I'm tagged in ", 'Created by me', 'Any association with me (incl. history items)'],
                 showDropdown: false,
+                noActivityDays: [30,60,90],
+                numberOfDays: null,
+                noActivityAppliesTo: 0,
+                deleteAppliesTo: 0,
+                statusAppliesTo: 0,
+                testvmodel:null,
                 latestReleaseNotes: [
                     [
                         `Latest Release Version ${store.retsVersion}`,'User Story 110: Multi Select Tool: Lasso', 'User Story 357: Card return to previous in feed pane', 'Bug 360: Selected features counter on the select button increases when opening a selected point', 
@@ -390,9 +403,9 @@
                             { label: "RETS assigned to me", value: false},
                             { label: "Someone tags me", value: false},
                             { label: "RETS marked high priority", value: false},
-                            { label: "No activty in ______ days", value: false},
-                            { label: "A RETS is deleted", value: false},
-                            { label: "Status changes to", value: false},
+                            { label: "No activty in ______ days", value: false, value2: null, value3: this.numberOfDays},
+                            { label: "A RETS is deleted", value: false, value2: null},
+                            { label: "Status changes to", value: false, value2: null},
                         ],
                 retsToolsTop: [
                                {
@@ -583,6 +596,21 @@
                 },
                 
                 methods: {
+                    updateSwitchValue2(item, value2){
+                        console.log(item)
+                        console.log(value2)
+                        console.log(this.switches)
+
+                        for (let index = 0; index < this.switches.length; index++) {
+                            if (item === this.switches[index].label ){
+                                console.log("match")
+                                this.switches[index].value2 = value2
+
+                            }
+                            
+                        }
+
+                    },
                     testfunction(index){
                         if (index === 4){
                         console.log("clickkkkkk")
@@ -658,7 +686,8 @@
                         this.isAutoZoom = store.autozoomtest
                         this.isAutoZoomExtent = store.autozoomextent
                         const settingsObject = {attributes: {OBJECTID : appConstants.defaultUserValue[0].objectid, SETTINGS : JSON.stringify(store.settings)}}
-                        await addSettings(settingsObject)
+                       // await addSettings(settingsObject)
+                       console.log(store.settings)
 
                         const userOBJECTID = await getUserOBJECTID(store.loggedInUser)
                         this.userSettings = JSON.parse(userOBJECTID.SETTINGS)
@@ -1246,14 +1275,14 @@
         margin-left: 20px;
         margin-top: 0;
         height: 32px;
-        top: -20px;
+        top: -15px;
     }
     
     .switchDropdown .v-field__input{
         height: 20px;
         width: 300px !important;
         font-size: 10px;
-                        overflow-y: auto;
+                        overflow-x: hidden;
 
         
     }
@@ -1262,6 +1291,8 @@
         width: 190px;
         left: -50px;
         height: 33px;
+        /* padding-bottom: 20px; */
+
 
 
 
@@ -1278,14 +1309,49 @@
     }
 
     .daysDropdown{
-       position: absolute;
-       width: 30px;
-       height: 75px;
-       background-color: rgb(84, 79, 79);
+        position: absolute;
+       height: 1px;
         /*width: 0px; */
-        top: 234px;
-        left: 83.8px;
+        top: 204px;
+        left: 83px;
         border-radius: 0;
+    }
+
+    .daysDropdown .v-chip__content{
+        position: relative;
+        font-size: 10px;
+        /* top: 3.5px; */
+    }
+
+    .daysDropdown .v-field__append-inner{
+        color: transparent;
+        left: -40px;
+        position: relative;
+    }
+
+    .daysDropdown .v-input__control{
+        /* width: 28px; */
+        
+    }
+
+    .daysDropdown .v-field__overlay{
+        color: transparent;
+
+    }
+
+    .daysDropdown .v-field .v-chip {
+        background-color: rgba(128,128,128,0)  !important;
+        border-radius: 2px;
+        height: 14px;
+        top: 3px;
+    }
+
+    .daysDropdown .v-field__append-inner{
+        left: -38px;
+    }
+ 
+     .daysDropdown .v-select--active-menu  {
+        width: 10px !important;
     }
 
     

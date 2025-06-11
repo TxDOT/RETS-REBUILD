@@ -89,7 +89,7 @@
                     <div class="marginSetting" style="padding-top: 10px; position: relative; width: 98%; bottom: 0rem;">
                         <v-text-field label="Type a message" density="compact" tile v-model="addHistoryChat" style="margin-left: 0px; margin-right: 5px;" :error-messages= "initRules ? 'Write a note. Submit your thought to History!' : null" @update:modelValue="historyValue"></v-text-field>
                         <div style="float: left; bottom: 1rem; position: relative;">
-                            <v-btn prepend-icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px !important; top: 10px; text-transform: none;" @click="displayAttachments()">Add an attachment</v-btn>
+                            <v-btn prepend-icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px !important; top: 0px; text-transform: none;" @click="displayAttachments()">Add an attachment</v-btn>
                         </div>
                         
                         <div style="float:right; bottom: 1.3rem; position: relative; left: 7px;">
@@ -682,7 +682,7 @@
 }
 
 #history-notes{
-    border-left: 3px solid #4472C4 !important;
+    border-left: 5px solid #4472C4 !important;
     position: relative;
     bottom: 2rem !important;
     border-radius: 0%;

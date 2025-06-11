@@ -98,9 +98,11 @@ try{
                 let lon = Math.round(event.mapPoint.longitude * 100000000) / 100000000;
                 let coordinate = lon + ", " + lat
                 
-                navigator.clipboard.writeText(coordinate);
+                //navigator.clipboard.writeText(coordinate);
                 store.latlonstring = coordinate
-                store.alertTextInfo = {"text": ` ${coordinate} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
+                // store.alertTextInfo = {"text": ` ${coordinate} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
+                store.alertTextInfo = {"text": `has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
+
                 store.isAlert = true
 
                 setTimeout(() => {
@@ -985,7 +987,6 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
 }
 
 export function selecttoolfreehand(isSelectEnabled, sketchWidgetselect, graphics){
-    console.log('selecttoolfreehand')
     if(isSelectEnabled === true){ 
         sketchWidgetselect.create("polygon", { mode: "freehand" });
         const selectretspoints = sketchWidgetselect
