@@ -12,8 +12,8 @@
         </v-list>
         <v-list id="icons-bottom" class="iconList">
             <v-list-item id="popoutitems" class="iconList-item" v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" :active="tool.isActive" :active-class="tool.name !== 'Jump To' || tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
-                <template v-if="tool.name !== 'Basemaps' && tool.name !== 'Jump To' ">
-                    <v-tooltip location="right" :text="tool.name !== 'Multi-Select' ?  tool.name:'' ">
+                <template v-if="tool.name !== 'Basemaps' && tool.name !== 'Jump To' && tool.name !=='Multi-Select' ">
+                    <v-tooltip location="right" :text="tool.name"> 
                             <template v-if="tool.name !== 'Multi-Select'" v-slot:activator="{ props }">
                                     <v-icon class="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
                             </template>
@@ -25,8 +25,15 @@
                     </v-tooltip>
                 </template>
                 <template v-else>
+                         <template v-if="tool.name == 'Multi-Select'">
+                                    <v-badge location="end" color="#4472C4" :content="store.roadHighlightObj.size" id="badge"> 
+                                        <v-icon class="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
+                                </v-badge>
+                            </template>
+                            <template v-else>
+                                <v-icon class="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
 
-                        <v-icon class="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
+                            </template>
                         
                     </template>
             </v-list-item>
@@ -88,17 +95,17 @@
        </v-card-item>
  
    </v-card>
-   <v-card class='Selecticons' @mouseleave="mouseleaveselect" v-if = "selecttoggle">
+   <v-list class='Selecticons' @mouseleave="mouseleaveselect" v-if = "selecttoggle">
           
-        <v-list-item  v-for="(tool, i) in multiselectOptions" :key="i" :value="tool" @click="tool.action()">    
+        <v-list-item  v-for="(tool, i) in multiselectOptions" :key="i" :value="tool" @click="tool.action()" :active="tool.isActive" style="margin: 0 !important; width: 100%; justify-items: center;">    
                 <v-tooltip location="right bottom" :text=tool.name >
                     <template v-slot:activator="{ props}">
-                        <v-icon size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
+                        <v-icon size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" isActive="true"  ></v-icon>
                     </template>
                 </v-tooltip>
                 
             </v-list-item>
-        </v-card>
+        </v-list>
    <v-card id = "containersettings" height = "655" v-show = "settingsstatus">
     <v-card-item>
         <span class="banner-txt">Settings</span>
@@ -489,11 +496,11 @@
                                 }
                             ],
 
-                multiselectOptions: [ {title:"Rectangle", icon: 'mdi-rectangle-outline', color: "#D9D9D9", name: "Rectangle", class:"topIcon3", isActive: true,
+                multiselectOptions: [ {title:"Rectangle", icon: 'mdi-rectangle-outline', color: "#D9D9D9", name: "Rectangle", class:"topIcon3", isActive: false,
                                action: () => {
                                 this.handleSelectTool('selectrectangle');
                                 console.log("rectangle selected")
-                                                                this.multiselectOptions[0].isActive = !this.multiselectOptions[0].isActive;
+                                this.multiselectOptions[0].isActive = !this.multiselectOptions[0].isActive;
 
                                 return
                                },
@@ -502,6 +509,8 @@
                                {title:"Lasso", icon: 'mdi-vector-polygon', color: "#D9D9D9", name: "Lasso", class:"topIcon2", isActive: false,
                                action: () =>{
                                 this.handleSelectTool('selecttoolfreehand');
+                                this.multiselectOptions[1].isActive = !this.multiselectOptions[1].isActive;
+
                                 return
                                },
                             
@@ -1201,9 +1210,9 @@
         width: 70px;
         bottom: 7.5%; */
         width: 40px;
-        justify-items: center;
         top: 85%;
-        left: 40px;
+        left: 38px;
+        /* height: 78px; */
     }
 
 
