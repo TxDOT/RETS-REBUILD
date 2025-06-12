@@ -149,7 +149,10 @@ try{
 
                 
                 store.roadHighlightObj.clear()
-                store.roadHighlightObj.add(retsPt)
+                if (retsPt){
+                    store.roadHighlightObj.add(retsPt)
+
+                }
 
                 if (store.isSaveBtnDisable && !store.isEmptyRow){
                     removeOutline()
@@ -870,10 +873,9 @@ window.addEventListener("keyup", (event) => {
     pressedkey = false
 });
 
-export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
-    console.log('selecttool')
+export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, tooltype, mode){
     if(isSelectEnabled === true){ 
-        sketchWidgetselect.create("rectangle");
+        sketchWidgetselect.create(tooltype, { mode: mode });
         const selectretspoints = sketchWidgetselect
             .on("create", function (event)
                 {
@@ -983,248 +985,6 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
             
     }
 }
-
-export function selecttoolfreehand(isSelectEnabled, sketchWidgetselect, graphics){
-
-    if(isSelectEnabled === true){ 
-        sketchWidgetselect.create("polygon", { mode: "freehand" });
-        const selectretspoints = sketchWidgetselect
-            .on("create", function (event)
-                {
-                    if(event.state === "complete")
-                        {
-                            // Get the rectangle geometry
-                            var rectangleGeometry = event.graphic.geometry;
-                            // Query for points within the rectangle
-                            var query = retsLayer.createQuery();
-                            query.geometry = rectangleGeometry;
-                            retsLayer.queryFeatures(query)
-                            .then(function (result)
-                                {
-                                    graphics.removeAll();
-                                    var selectedFeatures = result.features;
-                                    if (pressedkey === false){
-                                        
-                                        removeHighlight("a", true); 
-                                        store.roadHighlightObj.clear()
-                                        let i
-                                        for (i = 0; i < selectedFeatures.length; i++ ) {
-                                            store.roadHighlightObj.add(store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[i].attributes.OBJECTID))
-                                            if ( store.isSaveBtnDisable){
-                                                highlightRETSPoint(selectedFeatures[i].attributes, true); 
-
-                                            }
-                                                    
-                                        }
-                                        // if (store.roadHighlightObj.size && store.isSaveBtnDisable){
-                                        //     outlineFeedCards(store.roadHighlightObj); 
-
-                                        // }
-                                        if (store.isSaveBtnDisable){
-                                            outlineFeedCards(store.roadHighlightObj)
-                                            scrollToTopOfFeed(store.roadHighlightObj.size)             
-
-                                        }
-                                        
-                                    }
-                                    if (pressedkey === "Shift"){
-                                        let i
-                                        for (i = 0; i < selectedFeatures.length; i++ ) {
-                                            store.roadHighlightObj.add(store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[i].attributes.OBJECTID))
-                                            highlightRETSPoint(selectedFeatures[i].attributes);
-                                        }
-                                        outlineFeedCards(store.roadHighlightObj);  
-                                    }
-                                    
-                                    if (pressedkey === "Control"){   
-                                        graphics.removeAll();   
-                                        if (selectedFeatures.length > 0){
-                                            let n
-                                            for (n = 0; n < selectedFeatures.length; n++){
-                                                removeHighlight(selectedFeatures[n]);
-                                                store.roadHighlightObj.delete(store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[n].attributes.OBJECTID))
-                                                scrollToTopOfFeed(store.roadHighlightObj.size) 
-                                            } 
-                                            if (store.roadHighlightObj.size){
-                                                outlineFeedCards(store.roadHighlightObj); 
-
-                                            }  
-                                        }
-                                    }
-                                    if (!store.isSaveBtnDisable){
-                                        store.clickStatus = true
-                                        store.cancelpopup = true
-                                        return
-                                    }
-                                    if (store.isDetailsPage && store.isSaveBtnDisable && (store.roadHighlightObj.size > 1)){
-
-                                        returnToFeedFunction()
-                                        //outlineFeedCards(store.roadHighlightObj)
-                                        removeOutline()
-                                        //utlineFeedCards(store.roadHighlightObj)
-                                    }
-                                    if (store.isDetailsPage && store.isSaveBtnDisable && (store.roadHighlightObj.size === 0)){
-
-                                        returnToFeedFunction()
-                                        removeOutline()
-                                    }
-                                    if (store.isDetailsPage && store.isSaveBtnDisable && store.roadHighlightObj.size === 1 ){
-                                        store.roadHighlightObj.forEach(entry => {
-                                            //canceldetailsfunction()
-
-                                            if (store.retsObj.attributes.RETS_ID != entry.attributes.RETS_ID){
-                                                openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === entry.attributes.RETS_ID))
-                                                removeOutline()
-                                                outlineFeedCards(store.roadHighlightObj)
-                                            }
-                                          });
-
-
-                                    }
-
-                                    
-                                });          
-                        }
-                });
-
-        isSelectEnabled = !isSelectEnabled; 
-        return selectretspoints
-
-    }
-    else{
-        isSelectEnabled = !isSelectEnabled;
-        sketchWidgetselect.cancel()
-            
-    }
-}
-
-
-// export function selecttool(isSelectEnabled, sketchWidgetselect, graphics){
-//     if(isSelectEnabled === true){ 
-//         sketchWidgetselect.create("polygon", { mode: "freehand" });
-//         const selectretspoints = sketchWidgetselect
-//             .on("create", function (event)
-//                 {
-//                     if(event.state === "complete")
-//                         {
-//                             // Get the rectangle geometry
-//                             var rectangleGeometry = event.graphic.geometry;
-//                             // Query for points within the rectangle
-//                             var query = retsLayer.createQuery();
-//                             query.geometry = rectangleGeometry;
-//                             retsLayer.queryFeatures(query)
-//                             .then(function (result)
-//                                 {
-//                                     graphics.removeAll();
-//                                     var selectedFeatures = result.features;
-//                                     if (pressedkey === false){
-                                        
-//                                         removeHighlight("a", true); 
-//                                         store.roadHighlightObj.clear()
-//                                         let i
-//                                         for (i = 0; i < selectedFeatures.length; i++ ) {
-//                                             store.roadHighlightObj.add(store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[i].attributes.OBJECTID))
-//                                             if ( store.isSaveBtnDisable){
-//                                                 highlightRETSPoint(selectedFeatures[i].attributes, true); 
-
-//                                             }
-                                                    
-//                                         }
-//                                         // if (store.roadHighlightObj.size && store.isSaveBtnDisable){
-//                                         //     outlineFeedCards(store.roadHighlightObj); 
-
-//                                         // }
-//                                         if (store.isSaveBtnDisable){
-//                                             outlineFeedCards(store.roadHighlightObj)
-//                                             scrollToTopOfFeed(store.roadHighlightObj.size)             
-
-//                                         }
-                                        
-//                                     }
-//                                     if (pressedkey === "Shift"){
-//                                         let i
-//                                         for (i = 0; i < selectedFeatures.length; i++ ) {
-//                                             store.roadHighlightObj.add(store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[i].attributes.OBJECTID))
-//                                             highlightRETSPoint(selectedFeatures[i].attributes);
-//                                         }
-//                                         outlineFeedCards(store.roadHighlightObj);  
-//                                     }
-                                    
-//                                     if (pressedkey === "Control"){   
-//                                         graphics.removeAll();   
-//                                         if (selectedFeatures.length > 0){
-//                                             let n
-//                                             for (n = 0; n < selectedFeatures.length; n++){
-//                                                 removeHighlight(selectedFeatures[n]);
-//                                                 store.roadHighlightObj.delete(store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[n].attributes.OBJECTID))
-//                                                 scrollToTopOfFeed(store.roadHighlightObj.size) 
-//                                             } 
-//                                             if (store.roadHighlightObj.size){
-//                                                 outlineFeedCards(store.roadHighlightObj); 
-
-//                                             }  
-//                                         }
-//                                     }
-//                                     if (!store.isSaveBtnDisable){
-//                                         store.clickStatus = true
-//                                         store.cancelpopup = true
-//                                         return
-//                                     }
-//                                     if (store.isDetailsPage && store.isSaveBtnDisable && (store.roadHighlightObj.size > 1)){
-
-//                                         returnToFeedFunction()
-//                                         //outlineFeedCards(store.roadHighlightObj)
-//                                         removeOutline()
-//                                         //utlineFeedCards(store.roadHighlightObj)
-//                                     }
-//                                     if (store.isDetailsPage && store.isSaveBtnDisable && (store.roadHighlightObj.size === 0)){
-
-//                                         returnToFeedFunction()
-//                                         removeOutline()
-//                                     }
-//                                     if (store.isDetailsPage && store.isSaveBtnDisable && store.roadHighlightObj.size === 1 ){
-//                                         store.roadHighlightObj.forEach(entry => {
-//                                             //canceldetailsfunction()
-
-//                                             if (store.retsObj.attributes.RETS_ID != entry.attributes.RETS_ID){
-//                                                 openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === entry.attributes.RETS_ID))
-//                                                 removeOutline()
-//                                                 outlineFeedCards(store.roadHighlightObj)
-//                                             }
-//                                           });
-
-
-//                                     }
-
-                                    
-//                                 });          
-//                         }
-//                 });
-
-//         isSelectEnabled = !isSelectEnabled; 
-//         return selectretspoints
-
-//     }
-//     else{
-//         isSelectEnabled = !isSelectEnabled;
-//         sketchWidgetselect.cancel()
-            
-//     }
-// }
-// // Call create method to create a polygon with freehand mode.
-// sketch.create("polygon", { mode: "freehand" });
-
-// // listen to create event, only respond when event's state changes to complete
-// sketch.on("create", function(event) {
-//   if (event.state === "complete") {
-//     // remove the graphic from the layer associated with the Sketch widget
-//     // instead use the polygon that user created to query features that
-//     // intersect it.
-//     polygonGraphicsLayer.remove(event.graphic);
-//     selectFeatures(event.graphic.geometry);
-//   }
-
-
 
 
 export function scrollToTopOfFeed(setsize){
