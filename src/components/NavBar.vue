@@ -241,8 +241,6 @@
     import { addSettings } from './crud.js';
     import { store } from './store';
     import { defineAsyncComponent } from 'vue'
-    import { setDefExpRets } from './login.js';
-import { sk } from 'vuetify/locale';
     export default{
         name: "NavBar",
         components:{
