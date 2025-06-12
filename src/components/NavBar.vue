@@ -508,7 +508,6 @@ import { sk } from 'vuetify/locale';
                 multiselectOptions: [ {title:"Rectangle", icon: 'mdi-rectangle-outline', color: "#D9D9D9", name: "Multi-Select - Rectangle", class:"topIcon3", isActive: false,
                                action: () => {
                                 this.handleSelectTool('rectangle');
-                                console.log("rectangle selected")
                                 if (this.multiselectOptions[1].isActive == true) {   
                                     this.multiselectOptions[1].isActive = false; 
                                 }
@@ -1231,7 +1230,7 @@ import { sk } from 'vuetify/locale';
         bottom: 7.5%; */
         width: 40px;
         justify-items: center;
-        top: 80%;
+        top: 81.8%;
         left: 38px;
        padding-top: 0;
        padding-bottom: 0;

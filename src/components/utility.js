@@ -874,7 +874,6 @@ window.addEventListener("keyup", (event) => {
 });
 
 export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, tooltype, mode){
-    console.log('selecttool')
     if(isSelectEnabled === true){ 
         sketchWidgetselect.create(tooltype, { mode: mode });
         const selectretspoints = sketchWidgetselect
