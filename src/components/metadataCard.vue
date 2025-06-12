@@ -64,12 +64,11 @@
                 return 
             },
             onDropDownChange(){
-                const metadataFieldPass = this.checkMetadatFields()
                 if (store.retsObj.attributes.DIST_ANALYST.includes('Clear All')){
                     this.$refs.dropdown.reset()
                     this.$refs.dropdown.blur()
                 }
-                store.isSaveBtnDisable = metadataFieldPass
+                const metadataFieldPass = this.checkMetadatFields()
                 return 
             },
             isEmptyRow(a){
@@ -77,19 +76,8 @@
                 return "Empty value is not allowed"
             },
             checkMetadatFields(){
-                const fieldsToCheck = [
-                    store.retsObj.attributes.GIS_ANALYST, store.retsObj.attributes.GRID_ANALYST, 
-                    store.retsObj.attributes.DIST_ANALYST.length || null, store.retsObj.attributes.DIST_NM, 
-                    store.retsObj.attributes.CNTY_NM
-                ]
-
-                if(!store.retsObj.attributes.NO_RTE){
-                   const pushItemsToCheckArr = [store.retsObj.attributes.DFO, store.retsObj.attributes.RTE_NM, store.retsObj.attributes.STAT, store.retsObj.attributes.DESC_]
-                   fieldsToCheck.push(...pushItemsToCheckArr)
-                }
-
-                const isLength = fieldsToCheck.some((x) => !x)
-                return isLength
+                store.checkDetailsForComplete()
+                return
             }
 
         }

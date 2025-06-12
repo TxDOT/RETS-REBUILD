@@ -20,7 +20,7 @@
         </div>
         <div no-gutters dense class="item">
             <div style="width: 60%; float: left;">
-                <v-text-field :disabled="store.retsObj.attributes.NO_RTE === false" label="Route" density="compact" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required, valueRequired.limitCharacter] : []" :class="!store.retsObj.attributes.NO_RTE && !store.retsObj.attributes.RTE_NM?.length ? 'route route-error' : 'route'" @update:model-value="!store.retsObj.attributes.NO_RTE ? completeDataSearch() : store.isSaveBtnDisable = false" maxlength="17"></v-text-field>
+                <v-text-field :disabled="store.retsObj.attributes.NO_RTE === false" label="Route" density="compact" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required, valueRequired.limitCharacter] : []" :class="!store.retsObj.attributes.NO_RTE && !store.retsObj.attributes.RTE_NM?.length ? 'route route-error' : 'route'" @update:model-value="store.retsObj.attributes.NO_RTE ? completeDataSearch() : store.isSaveBtnDisable = false" maxlength="17"></v-text-field>
             </div>
             <div style="width: 30%; float: right;">
                 <v-text-field :label="this.dfoLabel" density="compact" variant="underlined" :error ="(!store.retsObj.attributes.DFO || store.outOfRange) && !store.retsObj.attributes.NO_RTE ? returnErrMsg(store.retsObj.attributes.DFO, store.outOfRange) : false" v-model="store.retsObj.attributes.DFO" :rules="!store.retsObj.attributes.NO_RTE ? [onlyNumbers.required, onlyNumbers.numbers]: []" @update:model-value="!store.retsObj.attributes.NO_RTE ? manuallyUpdateDFO(store.retsObj.attributes.DFO) : null">

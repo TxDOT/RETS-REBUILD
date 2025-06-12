@@ -1,6 +1,5 @@
 <template>
     <!-- details section -->
-
         <div id="detailsHeaderIcon">
             <v-btn density="compact" flat @click="changeColor(store.retsObj.attributes.RETS_ID);" id="flagBtnDetails">
                 <template v-slot:prepend>
@@ -202,12 +201,17 @@
             return
         },
         methods:{
+            dataMetadataCheck(){
+                let items = store.checkDetailsForComplete()
+                console.log(items)
+                return
+            },
             historyValue(){
                 this.initRules = false
                 return
             },
             updatePRIO(){
-                store.checkDetailsForComplete()
+                this.dataMetadataCheck()
                 return
             },
             removeAttachment(index){
@@ -241,7 +245,7 @@
                 store.retsObj.attributes.flagColor.FLAG = clr
                 this.isColorPicked = false;
                 this.closeFlagDiv()
-                store.checkDetailsForComplete()
+                this.dataMetadataCheck()
                 return
             },
             changeColor(id){
@@ -497,7 +501,7 @@
                 return
             },
             isAssetJob(){
-                store.checkDetailsForComplete()
+                this.dataMetadataCheck()
                 return
             },
             closeGEMTask(){
