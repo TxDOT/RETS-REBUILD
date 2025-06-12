@@ -12,8 +12,8 @@
         </v-list>
         <v-list id="icons-bottom" class="iconList">
             <v-list-item id="popoutitems" class="iconList-item" v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" :active="tool.isActive" :active-class="tool.name !== 'Jump To' || tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
-                <template v-if="tool.name !== 'Basemaps' && tool.name !== 'Jump To' ">
-                    <v-tooltip location="right" :text="tool.name !== 'Multi-Select' ?  tool.name:'' ">
+                <template v-if="tool.name !== 'Basemaps' && tool.name !== 'Jump To' && tool.name !=='Multi-Select' ">
+                    <v-tooltip location="right" :text="tool.name"> 
                             <template v-if="tool.name !== 'Multi-Select'" v-slot:activator="{ props }">
                                     <v-icon class="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
                             </template>
@@ -25,16 +25,22 @@
                     </v-tooltip>
                 </template>
                 <template v-else>
+                         <template v-if="tool.name == 'Multi-Select'">
+                                    <v-badge location="end" color="#4472C4" :content="store.roadHighlightObj.size" id="badge"> 
+                                        <v-icon class="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
+                                </v-badge>
+                            </template>
+                            <template v-else>
+                                <v-icon class="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
 
-                        <v-icon class="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
+                            </template>
                         
                     </template>
             </v-list-item>
         </v-list>
 
-       
-
     </v-navigation-drawer>
+
     
     <v-card id="basemaptoggle" max-width="400" hover @mouseleave="mouseleavebasemap" v-if = "basemapcard" >
        
@@ -88,17 +94,18 @@
        </v-card-item>
  
    </v-card>
-   <v-card class='Selecticons' @mouseleave="mouseleaveselect" v-if = "selecttoggle">
-          
-        <v-list-item  v-for="(tool, i) in multiselectOptions" :key="i" :value="tool" @click="tool.action()">    
+   
+   <v-list class='Selecticons' @mouseleave="mouseleaveselect" v-if = "selecttoggle">
+
+        <v-list-item  v-for="(tool, i) in multiselectOptions" :key="i" :value="tool" @click="tool.action()":active="tool.isActive" style="margin: 0; padding-left: 0 !important;  width:39px; height: 39px; justify-items: center;">    
                 <v-tooltip location="right bottom" :text=tool.name >
                     <template v-slot:activator="{ props}">
-                        <v-icon size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
+                        <v-icon size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" style="justify-items: center; align-self: center;"></v-icon>
                     </template>
                 </v-tooltip>
                 
             </v-list-item>
-        </v-card>
+        </v-list>
    <v-card id = "containersettings" height = "655" v-show = "settingsstatus">
     <v-card-item>
         <span class="banner-txt">Settings</span>
@@ -235,6 +242,7 @@
     import { store } from './store';
     import { defineAsyncComponent } from 'vue'
     import { setDefExpRets } from './login.js';
+import { sk } from 'vuetify/locale';
     export default{
         name: "NavBar",
         components:{
@@ -447,6 +455,8 @@
             
                                 sketchWidgetselect.cancel()                           
                                 this.retsToolsBottom[2].isActive = false
+                                this.multiselectOptions[0].isActive = false
+                                this.multiselectOptions[1].isActive = false
                                 store.isSelectEnabled = !store.isSelectEnabled
                                 
                                },
@@ -489,24 +499,31 @@
                                 }
                             ],
 
-                multiselectOptions: [ {title:"Rectangle", icon: 'mdi-rectangle-outline', color: "#D9D9D9", name: "Rectangle", class:"topIcon3", isActive: true,
+                multiselectOptions: [ {title:"Rectangle", icon: 'mdi-rectangle-outline', color: "#D9D9D9", name: "Multi-Select - Rectangle", class:"topIcon3", isActive: false,
                                action: () => {
-                                this.handleSelectTool('selectrectangle');
+                                this.handleSelectTool('rectangle');
                                 console.log("rectangle selected")
-                                                                this.multiselectOptions[0].isActive = !this.multiselectOptions[0].isActive;
+                                if (this.multiselectOptions[1].isActive == true) {   
+                                    this.multiselectOptions[1].isActive = false; 
+                                }
+                                this.multiselectOptions[0].isActive = !this.multiselectOptions[0].isActive;
+                                
 
                                 return
                                },
                             
                                 },
-                               {title:"Lasso", icon: 'mdi-vector-polygon', color: "#D9D9D9", name: "Lasso", class:"topIcon2", isActive: false,
+                               {title:"Lasso", icon: 'mdi-vector-polygon', color: "#D9D9D9", name: "Multi-Select - Lasso", class:"topIcon2", isActive: false,
                                action: () =>{
                                 this.handleSelectTool('selecttoolfreehand');
+                                if (this.multiselectOptions[0].isActive == true) {   
+                                    this.multiselectOptions[0].isActive = false; 
+                                }
+                                this.multiselectOptions[1].isActive = !this.multiselectOptions[1].isActive;
                                 return
                                },
                             
                                 }
-
 
                 ],
                             
@@ -742,26 +759,32 @@
                        
                     },
                     handleSelectTool(tooltype) { 
-                        if (store.isSelectEnabled  === false){
-                            store.isSelectEnabled = !store.isSelectEnabled
-                            this.retsToolsBottom[2].isActive = true
-                            if (tooltype === "selectrectangle"){
-                                
-                                selecttool(store.isSelectEnabled, sketchWidgetselect, graphics, "rectangle","freehand")
- 
-                            }
-                            else if (tooltype="selecttoolfreehand"){
-                                
-                                selecttool(store.isSelectEnabled, sketchWidgetselect, graphics, "polygon","freehand")
- 
-                            }
-                        }
-                        else{
-                            sketchWidgetselect.cancel()
-                            // this.selectfunction.remove()
+                        if ((tooltype === sketchWidgetselect.activeTool) || (tooltype === 'selecttoolfreehand' && sketchWidgetselect.activeTool === 'polygon')) {
+                            sketchWidgetselect.cancel();
                             this.retsToolsBottom[2].isActive = false
-                            store.isSelectEnabled = !store.isSelectEnabled
+                            return
                         }
+                        // if (store.isSelectEnabled  === false){
+                            // store.isSelectEnabled = !store.isSelectEnabled
+                            this.retsToolsBottom[2].isActive = true
+                            if (tooltype === "rectangle"){
+                                
+                                selecttool(true, sketchWidgetselect, graphics, "rectangle","freehand")
+ 
+                            }
+                            else if (tooltype === "selecttoolfreehand"){
+                                
+                                selecttool(true, sketchWidgetselect, graphics, "polygon","freehand")
+ 
+                            }
+                            
+                        // }
+                        // else{
+                        //     sketchWidgetselect.cancel()
+                        //     // this.selectfunction.remove()
+                        //     this.retsToolsBottom[2].isActive = false
+                        //     store.isSelectEnabled = !store.isSelectEnabled
+                        // }
 
                         
                     },
@@ -1202,8 +1225,11 @@
         bottom: 7.5%; */
         width: 40px;
         justify-items: center;
-        top: 85%;
-        left: 40px;
+        top: 80%;
+        left: 38px;
+       padding-top: 0;
+       padding-bottom: 0;
+       padding: 0;
     }
 
 
