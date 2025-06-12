@@ -143,23 +143,12 @@
            <div id="notis">
                 <v-card-item v-for="(item, index) in switches" :key="index"  class="switch-item">
                     <div style="height: auto;">
-                        <v-switch :model-value="item.value" color="primary"  @update:modelValue="item.value= $event" :disabled="isDisabled(index)"  :style="{color: fontColor, height: '50px'}"   >
+                        <v-switch :model-value="item.value" color="primary"  @update:modelValue="item.value= $event" :disabled="isDisabled(index)"  :style="{color: fontColor, height: '50px', marginTop : '20px'}"   >
                         <template #prepend >
                             <v-label @mouseover="testfunction(index) " >
                                 {{ item.label }}
                                 
                             </v-label>
-                            <!-- <v-card class="daysDropdown" v-if="this.showDropdown === true" @mouseleave="this.showDropdown = false">
-                                <v-label >
-                                    30
-                                </v-label>
-                                <v-label>
-                                    60
-                                </v-label>
-                                <v-label>
-                                    90
-                                </v-label>
-                            </v-card> -->
                         <template v-if="item.label === 'No activty in ______ days'">
                             <v-select :items="noActivityDays" class="daysDropdown" base-color="transparent" bg-color="transparent" :center-affix=true chips density="compact" variant="plain" max-width="20px" v-model="item.value3"></v-select>
                         </template>
@@ -686,7 +675,7 @@
                         this.isAutoZoom = store.autozoomtest
                         this.isAutoZoomExtent = store.autozoomextent
                         const settingsObject = {attributes: {OBJECTID : appConstants.defaultUserValue[0].objectid, SETTINGS : JSON.stringify(store.settings)}}
-                       // await addSettings(settingsObject)
+                        await addSettings(settingsObject)
                        console.log(store.settings)
 
                         const userOBJECTID = await getUserOBJECTID(store.loggedInUser)
@@ -787,26 +776,46 @@
                        
                     },
                     handleSelectTool(tooltype) { 
-                        if (store.isSelectEnabled  === false){
-                            store.isSelectEnabled = !store.isSelectEnabled
-                            this.retsToolsBottom[2].isActive = true
-                            if (tooltype === "selectrectangle"){
+                        // if (store.isSelectEnabled  === false){
+                        //     store.isSelectEnabled = !store.isSelectEnabled
+                        //     this.retsToolsBottom[2].isActive = true
+                        //     if (tooltype === "selectrectangle"){
+                                
+                        //         selecttool(store.isSelectEnabled, sketchWidgetselect, graphics)
+ 
+                        //     }
+                        //     else if (tooltype="selecttoolfreehand"){
+                                
+                        //         selecttoolfreehand(store.isSelectEnabled, sketchWidgetselect, graphics)
+ 
+                        //     }
+                        // }
+                        // else{
+                        //     sketchWidgetselect.cancel()
+                        //     // this.selectfunction.remove()
+                        //     this.retsToolsBottom[2].isActive = false
+                        //     store.isSelectEnabled = !store.isSelectEnabled
+                        // }
+                        store.isSelectEnabled = true
+                        console.log(tooltype)
+                        if(tooltype === "selectrectangle" && sketchWidgetselect.activeTool === "rectangle" || tooltype === "selecttoolfreehand" && sketchWidgetselect.activeTool === "polygon"){
+                            sketchWidgetselect.cancel()
+                            this.retsToolsBottom[2].isActive = false
+
+                            return
+                        }
+                        this.retsToolsBottom[2].isActive = true
+                        if (tooltype === "selectrectangle"){
                                 
                                 selecttool(store.isSelectEnabled, sketchWidgetselect, graphics)
  
                             }
-                            else if (tooltype="selecttoolfreehand"){
-                                
-                                selecttoolfreehand(store.isSelectEnabled, sketchWidgetselect, graphics)
- 
-                            }
+                        else if (tooltype="selecttoolfreehand"){
+                            
+                            selecttoolfreehand(store.isSelectEnabled, sketchWidgetselect, graphics)
+
                         }
-                        else{
-                            sketchWidgetselect.cancel()
-                            // this.selectfunction.remove()
-                            this.retsToolsBottom[2].isActive = false
-                            store.isSelectEnabled = !store.isSelectEnabled
-                        }
+                       
 
                         
                     },
