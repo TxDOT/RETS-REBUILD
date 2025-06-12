@@ -149,7 +149,10 @@ try{
 
                 
                 store.roadHighlightObj.clear()
-                store.roadHighlightObj.add(retsPt)
+                if (retsPt){
+                    store.roadHighlightObj.add(retsPt)
+
+                }
 
                 if (store.isSaveBtnDisable && !store.isEmptyRow){
                     removeOutline()
