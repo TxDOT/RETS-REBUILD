@@ -915,23 +915,38 @@ const handleextent = reactiveUtils.watch(
   ([stationary, extent]) => {
     // Only print the new zoom value when the view is stationary
 
-    if(stationary && !store.isDetailsPage && !store.autozoomextent != true){
+    if(stationary && !store.isDetailsPage && !store.autozoomextent != true ){
       let query = retsLayer.createQuery();
       query.geometry = view.extent
       query.spatialRelationship = "intersects"
       query.returnGeometry = false
       query.outFields = ["RETS_ID"]
       const featurestring = []
-
+      const selectedstring = []
+      if (store.roadHighlightObj.size){
+        store.roadHighlightObj.forEach((value) => selectedstring.push(value.attributes.RETS_ID))
+      }
+     
       retsLayer.queryFeatures(query)
         .then(function(response){
           response.features.forEach((feature) =>
             featurestring.push(feature.attributes.RETS_ID)
-
+          
           )  
           let stringex = null
           if (response.features.length > 0){
-            stringex = featurestring.join(" OR RETS_ID = ")
+            if (store.isShowSelected){
+              
+              stringex = featurestring.filter(value => selectedstring.includes(value)).join(" OR RETS_ID = ")
+              if (stringex.length === 0){
+                stringex = null
+              }
+
+            }
+            else{
+              stringex = featurestring.join(" OR RETS_ID = ")
+
+            }
           }        
           if (store.CREATE_DT){
             store.getRetsLayer(store.loggedInUser, `RETS_ID = ${stringex}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
