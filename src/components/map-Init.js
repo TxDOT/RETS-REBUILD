@@ -934,20 +934,14 @@ const handleextent = reactiveUtils.watch(
           
           )  
           let stringex = null
-          if (response.features.length > 0){
-            if (store.isShowSelected){
-              
+          if (response.features.length > 0 && store.isShowSelected){
               stringex = featurestring.filter(value => selectedstring.includes(value)).join(" OR RETS_ID = ").length === 0 ? null :  featurestring.filter(value => selectedstring.includes(value)).join(" OR RETS_ID = ")
-              // if (stringex.length === 0){
-              //   stringex = null
-              // }
-
-            }
-            else{
+            
+          } 
+          else if (response.features.length > 0 && !store.isShowSelected){
               stringex = featurestring.join(" OR RETS_ID = ")
 
-            }
-          }        
+          }       
           if (store.CREATE_DT){
             store.getRetsLayer(store.loggedInUser, `RETS_ID = ${stringex}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
                 //check if features are highlighted, if they are run the outlinefeedcards
