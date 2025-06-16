@@ -937,10 +937,10 @@ const handleextent = reactiveUtils.watch(
           if (response.features.length > 0){
             if (store.isShowSelected){
               
-              stringex = featurestring.filter(value => selectedstring.includes(value)).join(" OR RETS_ID = ")
-              if (stringex.length === 0){
-                stringex = null
-              }
+              stringex = featurestring.filter(value => selectedstring.includes(value)).join(" OR RETS_ID = ").length === 0 ? null :  featurestring.filter(value => selectedstring.includes(value)).join(" OR RETS_ID = ")
+              // if (stringex.length === 0){
+              //   stringex = null
+              // }
 
             }
             else{
