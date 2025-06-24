@@ -291,6 +291,7 @@ import { sk } from 'vuetify/locale';
                 currentSwitchValue: [],
                 statuses: ['Not Started', 'In Progress', 'Completed', 'On Hold'],
                 showDropdown: false,
+                multiselectTool: 'rectangle',
                 latestReleaseNotes: [
                     [
                         `Latest Release Version ${store.retsVersion}`,'User Story 110: Multi Select Tool: Lasso', 'User Story 357: Card return to previous in feed pane', 'Bug 360: Selected features counter on the select button increases when opening a selected point', 
@@ -452,14 +453,31 @@ import { sk } from 'vuetify/locale';
                                 },
                                 {title:"Select", icon: 'mdi-select-multiple', color: "#D9D9D9", name: "Multi-Select", isActive: false,
                                action: () =>{
+
                                 // store.isSelectEnabled = !store.isSelectEnabled
                                 // this.retsToolsBottom[2].isActive = !this.retsToolsBottom[2].isActive
                                 // this.handleSelectTool();
-            
+                                
+                                if(store.isSelectEnabled){
+
                                 sketchWidgetselect.cancel()                           
                                 this.retsToolsBottom[2].isActive = false
                                 this.multiselectOptions[0].isActive = false
                                 this.multiselectOptions[1].isActive = false
+                                // store.isSelectEnabled = !store.isSelectEnabled
+                                }
+                                else{
+
+                                    this.handleSelectTool(this.multiselectTool);
+                                    
+
+            
+                                }
+
+                                // sketchWidgetselect.cancel()                           
+                                // this.retsToolsBottom[2].isActive = false
+                                // this.multiselectOptions[0].isActive = false
+                                // this.multiselectOptions[1].isActive = false
                                 store.isSelectEnabled = !store.isSelectEnabled
                                 
                                },
@@ -511,9 +529,7 @@ import { sk } from 'vuetify/locale';
                                 if (this.multiselectOptions[1].isActive == true) {   
                                     this.multiselectOptions[1].isActive = false; 
                                 }
-                                this.multiselectOptions[0].isActive = !this.multiselectOptions[0].isActive;
-                                
-
+                            
                                 return
                                },
                             
@@ -524,7 +540,7 @@ import { sk } from 'vuetify/locale';
                                 if (this.multiselectOptions[0].isActive == true) {   
                                     this.multiselectOptions[0].isActive = false; 
                                 }
-                                this.multiselectOptions[1].isActive = !this.multiselectOptions[1].isActive;
+                                
                                 return
                                },
                             
@@ -767,6 +783,8 @@ import { sk } from 'vuetify/locale';
                         if ((tooltype === sketchWidgetselect.activeTool) || (tooltype === 'selecttoolfreehand' && sketchWidgetselect.activeTool === 'polygon')) {
                             sketchWidgetselect.cancel();
                             this.retsToolsBottom[2].isActive = false
+                            this.multiselectOptions[0].isActive = false
+                            this.multiselectOptions[1].isActive = false
                             return
                         }
                         // if (store.isSelectEnabled  === false){
@@ -775,11 +793,16 @@ import { sk } from 'vuetify/locale';
                             if (tooltype === "rectangle"){
                                 
                                 selecttool(true, sketchWidgetselect, graphics, "rectangle","freehand")
+                                this.multiselectTool = "rectangle"
+                                this.multiselectOptions[0].isActive = true
  
                             }
                             else if (tooltype === "selecttoolfreehand"){
                                 
                                 selecttool(true, sketchWidgetselect, graphics, "polygon","freehand")
+                                this.multiselectTool = "selecttoolfreehand"
+                                this.multiselectOptions[1].isActive = true
+                                
  
                             }
                             
