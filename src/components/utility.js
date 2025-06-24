@@ -101,9 +101,10 @@ try{
                 navigator.clipboard.writeText(coordinate);
                 store.latlonstring = coordinate
                 store.alertTextInfo = {"text": ` ${coordinate} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
+               
                 store.isAlert = true
 
-                setTimeout(() => {
+                 setTimeout(() => {
                     store.isAlert = false
 
                   }, 10000);
@@ -891,52 +892,143 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                 {
                                     graphics.removeAll();
                                     var selectedFeatures = result.features;
+                                    store.retsSelection = selectedFeatures.map((feature) => {
+                                    return {
+                                            attributes: { ...feature.attributes, flagColor: {FLAG: null}, historyUpdate : null, mdiaccountgroup : null, mdiaccountmultiplecheck :  null, mdialarm :  {bool: null, color: null}, mdicheckdecagramoutline : null, mdiexclamation : null, mdipaperclip : null,
+                                                mdipencilboxoutline : null, mditimersand : {bool: null, numDays: null}
+                                            },
+                                            geometry: feature.geometry, // or clone if needed
+                                        
+                                       
+                                    };
+                                    });
+                                    
                                     if (pressedkey === false){
                                         
                                         removeHighlight("a", true); 
                                         store.roadHighlightObj.clear()
-                                        let i
-                                        for (i = 0; i < selectedFeatures.length; i++ ) {
+                                        store.retsSelection.clear
+                                        if (!selectedFeatures.length){
+                                            returnToFeedFunction()
+                                        }
+                                        for (let i = 0; i < selectedFeatures.length; i++ ) {
                                             store.roadHighlightObj.add(store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[i].attributes.OBJECTID))
                                             if ( store.isSaveBtnDisable){
                                                 highlightRETSPoint(selectedFeatures[i].attributes, true); 
 
                                             }
+                                            if (store.isShowSelected){
+                                                
+                                                    // store.roadHighlightObj.forEach((value) => {
+                                                    //      if (!value){
+                                                    //         console.log("ran")
+                                                    //         store.roadHighlightObj.clear()
+                                                    //         store.retsSelection.forEach((value) => {
+                                                    //             store.roadHighlightObj.add(value)
+                                                                
+                                                                
+                                                    //         })
+                                                            
+                                                            
+                                                    //     }
+                                                    // })
+                                                    let arr = []
+                                                    let string = ''
+                                                    store.roadHighlightObj.clear()
+                                                       store.retsSelection.forEach((value) => {
+                                                        store.roadHighlightObj.add(value)
+                                                        arr.push(value.attributes.RETS_ID)
+                                                        })
+
+                                                                      string = arr.join(" OR RETS_ID = ")
+
+                                                                    if (store.autozoomextent  && store.isShowSelected){
+                                                                          if (store.CREATE_DT ){
+                                                                        store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                                                                            //check if features are highlighted, if they are run the outlinefeedcards
+
+                                                                    }
+                                                                    else{
+                                                                        store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", "EDIT_DT DESC, PRIO")
+
+                                                                    }
+                                                                    }
+                                                                   
+
+
+                                                    
+                                                   
+                                            }
                                                     
                                         }
-                                        // if (store.roadHighlightObj.size && store.isSaveBtnDisable){
-                                        //     outlineFeedCards(store.roadHighlightObj); 
 
-                                        // }
                                         if (store.isSaveBtnDisable){
                                             outlineFeedCards(store.roadHighlightObj)
                                             scrollToTopOfFeed(store.roadHighlightObj.size)             
 
                                         }
-                                        
+
                                     }
                                     if (pressedkey === "Shift"){
-                                        let i
-                                        for (i = 0; i < selectedFeatures.length; i++ ) {
-                                            store.roadHighlightObj.add(store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[i].attributes.OBJECTID))
+                                        for (let i = 0; i < selectedFeatures.length; i++ ) {                                           
                                             highlightRETSPoint(selectedFeatures[i].attributes);
                                         }
+
+                                        let arr = []
+                                        let string = ''
+                                        store.retsSelection.forEach((value) => {
+                                            store.roadHighlightObj.add(value)
+
+                                        })
+
+                                        store.roadHighlightObj.forEach((value) => {
+                                            arr.push(value.attributes.RETS_ID)
+
+                                        })
                                         outlineFeedCards(store.roadHighlightObj);  
+                                                                                    string = arr.join(" OR RETS_ID = ")
+
+                                        if (store.autozoomextent && store.isShowSelected){
+                                            if (store.CREATE_DT){
+                                            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                                                //check if features are highlighted, if they are run the outlinefeedcards
+
+                                        }
+                                        else{
+                                            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", "EDIT_DT DESC, PRIO")
+
+                                        }
+                                        }
+                                        
+
+
+
                                     }
                                     
                                     if (pressedkey === "Control"){   
                                         graphics.removeAll();   
                                         if (selectedFeatures.length > 0){
-                                            let n
-                                            for (n = 0; n < selectedFeatures.length; n++){
+                                            store.retsSelection.forEach((valueToDelete) => {
+                                            const match = [...store.roadHighlightObj].find(item => 
+                                                item.attributes.OBJECTID === valueToDelete.attributes.OBJECTID
+                                            );
+                                            if (match) {
+                                                store.roadHighlightObj.delete(match);
+                                            }
+                                        });
+                                            for (let n = 0; n < selectedFeatures.length; n++){
                                                 removeHighlight(selectedFeatures[n]);
-                                                store.roadHighlightObj.delete(store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[n].attributes.OBJECTID))
                                                 scrollToTopOfFeed(store.roadHighlightObj.size) 
+
                                             } 
                                             if (store.roadHighlightObj.size){
                                                 outlineFeedCards(store.roadHighlightObj); 
 
                                             }  
+                                            else{
+                                                returnToFeedFunction()
+
+                                            }
                                         }
                                     }
                                     if (!store.isSaveBtnDisable){
@@ -969,7 +1061,7 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
 
 
                                     }
-
+                                    
                                     
                                 });          
                         }

@@ -910,7 +910,7 @@ retsPointRenderer.visualVariables = [
 
 
 
-const handleextent = reactiveUtils.watch(
+export const handleextent = reactiveUtils.watch(
   () => [view.stationary, view.extent],
   ([stationary, extent]) => {
     // Only print the new zoom value when the view is stationary
@@ -925,8 +925,7 @@ const handleextent = reactiveUtils.watch(
       const selectedstring = []
       if (store.roadHighlightObj.size){
         store.roadHighlightObj.forEach((value) => selectedstring.push(value.attributes.RETS_ID))
-      }
-     
+      }     
       retsLayer.queryFeatures(query)
         .then(function(response){
           response.features.forEach((feature) =>
@@ -943,12 +942,12 @@ const handleextent = reactiveUtils.watch(
 
           }       
           if (store.CREATE_DT){
-            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${stringex}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+              store.getRetsLayer(store.loggedInUser, `RETS_ID = ${stringex}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
                 //check if features are highlighted, if they are run the outlinefeedcards
 
           }
         else{
-            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${stringex}`, "retsLayer", "EDIT_DT DESC, PRIO")
+              store.getRetsLayer(store.loggedInUser, `RETS_ID = ${stringex}`, "retsLayer", "EDIT_DT DESC, PRIO")
 
         }
 
@@ -957,6 +956,7 @@ const handleextent = reactiveUtils.watch(
     }
   }
  );
+  
   
 
 //remove attribution and zoom information
