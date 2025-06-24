@@ -1,5 +1,5 @@
-import {view, retsLayer, homeWidget, retsGraphicLayer, TxDOTRoadways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate, 
-    retsPointRenderer, texasExtent, retsPointRendererout, retsRole, highlightLayer, map, retsPointRendererout2,
+import {view, retsLayer, retsGraphicLayer, TxDOTRoadways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate, 
+    retsPointRenderer, texasExtent, retsRole, highlightLayer, map,
     retsLabelclass,
     darkVTBasemap,
     standardVTBasemap,

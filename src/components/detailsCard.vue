@@ -5,7 +5,7 @@
                 <v-autocomplete :items="activityList" label="Activity" variant="underlined" density="compact" item-title="value" flat v-model="store.retsObj.attributes.ACTV" @update:model-value="completeDataSearch()"></v-autocomplete>
             </div>
             <div style="width: 30%; float: right;">
-                <v-text-field label="Number" density="compact" variant="underlined" :disabled="disableACTVNum(store.retsObj.attributes.ACTV)" v-model="store.retsObj.attributes.ACTV_NBR" @update:model-value="actvNbrUpdate(store.retsObj.attributes.ACTV_NBR) ; store.isSaveBtnDisable = false">
+                <v-text-field label="Number" density="compact" variant="underlined" :disabled="disableACTVNum(store.retsObj.attributes.ACTV)" v-model="store.retsObj.attributes.ACTV_NBR" @update:model-value="actvNbrUpdate(store.retsObj.attributes.ACTV_NBR);">
                     <template v-slot:append-inner >
                         <v-tooltip text="Find Minute Order/TxDOT Connect" location="top">
                             <template v-slot:activator="{props}">
@@ -20,7 +20,7 @@
         </div>
         <div no-gutters dense class="item">
             <div style="width: 60%; float: left;">
-                <v-text-field :disabled="store.retsObj.attributes.NO_RTE === false" label="Route" density="compact" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required, valueRequired.limitCharacter] : []" :class="!store.retsObj.attributes.NO_RTE && !store.retsObj.attributes.RTE_NM?.length ? 'route route-error' : 'route'" @update:model-value="store.retsObj.attributes.NO_RTE ? completeDataSearch() : store.isSaveBtnDisable = false" maxlength="17"></v-text-field>
+                <v-text-field :disabled="store.retsObj.attributes.NO_RTE === false" label="Route" density="compact" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required, valueRequired.limitCharacter] : []" :class="!store.retsObj.attributes.NO_RTE && !store.retsObj.attributes.RTE_NM?.length ? 'route route-error' : 'route'" @update:model-value="store.retsObj.attributes.NO_RTE ? completeDataSearch() : null" maxlength="17"></v-text-field>
             </div>
             <div style="width: 30%; float: right;">
                 <v-text-field :label="this.dfoLabel" density="compact" variant="underlined" :error ="(!store.retsObj.attributes.DFO || store.outOfRange) && !store.retsObj.attributes.NO_RTE ? returnErrMsg(store.retsObj.attributes.DFO, store.outOfRange) : false" v-model="store.retsObj.attributes.DFO" :rules="!store.retsObj.attributes.NO_RTE ? [onlyNumbers.required, onlyNumbers.numbers]: []" @update:model-value="!store.retsObj.attributes.NO_RTE ? manuallyUpdateDFO(store.retsObj.attributes.DFO) : null">
@@ -169,15 +169,10 @@ import {store} from './store.js'
 
             if(store.retsObj.attributes.NO_RTE === true){
                 store.isDisableValidations = true
-                //store.retsObj.attributes.NO_RTE = true
                 return
             }
-
-            //this.valueRequired()
+            
             this.retsRouteArchive = JSON.parse(store.archiveRetsDataString)
-            store.checkDetailsForComplete()
-            //createRoadGraphic(store.retsObj, true)
-
         },
         methods:{
             returnErrMsg(dfo, isOutOfRange){
@@ -301,7 +296,6 @@ import {store} from './store.js'
                 }
 
                 let isInRange = isDFOInRange(findRoad, roadDFO)
-                console.log(isInRange)
                 if(!isInRange[0]){
                     store.isAlert = true
                     store.alertTextInfo = {"text": `DFO is out of Range. Begin DFO: ${isInRange[1].toFixed(3)} End DFO: ${isInRange[2].toFixed(3)}`, "color": "red", "type":"error", "toggle": true}

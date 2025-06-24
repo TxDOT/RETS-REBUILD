@@ -203,7 +203,6 @@
         methods:{
             dataMetadataCheck(){
                 let items = store.checkDetailsForComplete()
-                console.log(items)
                 return
             },
             historyValue(){
