@@ -411,8 +411,9 @@
                 //////////////////////////// REMOVE LINE BELOW TO ENSURE CARD SELECTION REMAINS AFTER RETURNING TO FEED////////////////////////////
                 /////////////////////////// SUPPOSED TO BE UNCOMMENTED BY DEFAULT/////////////////////////////////////////////////////////////////
 
-                //await this.returnToFeed()
-
+                // await this.returnToFeed()
+                // store.roadHighlightObj.clear()
+                // removeHighlight(store.retsObj)
                 retsLayerView.layer.definitionExpression = store.savedFilter
                 store.toggleFeed = 1
                 store.cancelpopup = false

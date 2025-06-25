@@ -21,6 +21,7 @@ export const store = reactive({
 
         },
         retsVersion: "2.8",
+        alertObject: [],
         autozoomtest:true,
         autozoomextent: true,
         basemaptest: "Dark Grey",
@@ -132,6 +133,7 @@ export const store = reactive({
         latlonstring:"",
         isNewRets: false,
         userSettings: null,
+        retsSelection: new Set(),
         defaultFilterSetup(){
                 // this.CREATE_DT.push({title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"})
                 // this.STAT = appConstants.defaultStatValues

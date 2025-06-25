@@ -1,7 +1,15 @@
 <template>
     <v-alert max-width="550" v-model="store.isAlert" border="start" :border-color="store.alertTextInfo.color" class="detailsAlert" :color="store.alertTextInfo.color" closable variant="tonal" :type="store.alertTextInfo.type">
-        <span style="position: relative; display: flex; justify-content: left; padding-bottom: 0px; font-size: 15px;">{{ store.alertTextInfo.text }}</span>
+        <span >{{ store.alertTextInfo.text }}</span>
     </v-alert>
+    <!-- <div>
+
+         <v-alert v-for="value in store.alertObject"  :border-color="store.alertObject.color" :color="value.color" :type="value.type" closable variant="tonal" class="detailsAlert" border="start" max-width="550" width="527" >
+            <span style="position: relative; display: flex; justify-content: left; padding-bottom: 0px; font-size: 15px;">{{value.text}} </span>
+        </v-alert>
+    </div> -->
+
+   
 </template>
 
 <script>
@@ -13,6 +21,30 @@
                 store
             }
         },
+        methods: {
+            async timeoutAlert(){
+                setTimeout(() => {
+                    store.alertObject.shift()
+                }, 10000);
+            }
+
+        },
+        watch: {
+            'store.alertTextInfo': {
+                handler: function() { 
+                    store.alertObject.push({
+                        'color' : store.alertTextInfo.color,
+                        'type' : store.alertTextInfo.type,
+                        'text' : store.alertTextInfo.text 
+                    })
+                    this.timeoutAlert()
+                    return
+
+                },
+                immediate:true
+            },
+            
+        }
 
 
     }
@@ -25,6 +57,8 @@
         align-items: center;
         text-align: left;
         min-height: fit-content;
-        right: 50vh;
+        margin-bottom: 10px;
     }
+
+ 
 </style>

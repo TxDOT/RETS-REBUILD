@@ -232,84 +232,87 @@
 
 <script>
 
-import { appConstants } from '../common/constant.js';
-import { graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect } from '../components/map-Init.js';
-import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM, getUserOBJECTID} from '../components/utility.js';
-import { vuetify } from '../main.js';
-import { addSettings } from './crud.js';
-import { store } from './store';
-import { defineAsyncComponent } from 'vue'
-export default{
-    name: "NavBar",
-    components:{
-        RetsDetailPage: defineAsyncComponent(()=>import('./RetsDetail.vue')),
-        detailsAlert: defineAsyncComponent(()=>import('./detailsAlert.vue'))
-    },
-    data(){
-        return{
-            toggle: store.toggleFeed,
-            openedVlist: ['New Updates'],
-            isNewReleaseOpen: true,
-            expandedIndex: null,
-            expandedGroups: [],
-            isReleaseNotes: false,
-            mountedAutoZoom: null,
-            selectfunction : {},
-            store,
-            selecttoggle: false,
-            basemapArray: ['Dark Grey', 'Light Grey', 'Standard TxDOT', 'Open Street Map', 'Hybrid', 'Google', 'Imagery'],
-            shiftmap: false,
-            fontColor: '#D9D9D9',
-            releaseNotesColor: '#D9D9D9',
-            switchValueDark: true,
-            switchValue : false,
-            isAutoZoom: null,
-            isAutoZoomExtent: null,
-            userSettings: JSON.parse(appConstants.defaultUserValue[0].settings) || {},
-            currAutoZoomValue: null,
-            isActOpen: true,
-            shift: 200,
-            basemapcard: false,
-            jumptocard:false,
-            tester: false,
-            isLegendVisible: false,
-            clearSelection: false,
-            isCreateEnabled: true,
-            settingsstatus: false,
-            shiftKey: false,
-            userNames: Array.from(appConstants.userRoles, user => user.name),
-            isAnonymous: false,
-            feedbackStatus: false,
-            feedbackText: "",
-            feedbackSubmitStatus: true,
-            feedbackName: "",
-            notificationValue: false,
-            currentSwitchValue: [],
-            statuses: ['Not Started', 'In Progress', 'Completed', 'On Hold'],
-            showDropdown: false,
-            latestReleaseNotes: [
-                [
-                    `Latest Release Version ${store.retsVersion}`,'User Story 110: Multi Select Tool: Lasso', 'User Story 357: Card return to previous in feed pane', 'Bug 360: Selected features counter on the select button increases when opening a selected point', 
-                    'Bug 359: Jump to SPM button opens a blank map', 'Bug 344: User filter returning results outside the scope of that filter', 'Bug 337: Route and subtitle overlap', 
-                    'Bug 338: Save enabled with no description', 
-                ]
-            ],
-            previousReleaseNotes: [
-                [
-                    `Release 2.7.1`,'User Story 226: Add Lat/Long searching','User Story 230: Transition to prod create portal','User Story 119: Add links/URL to a comment in History',
-                    'User Story 256: History items should expand to fit all text',
-                    'User Story 62: Add Setting to filter feed based on map extent','User Story 139: Update default filter  (to show all RETS with your name associated with it, anywhere)',
-                    'Bug 219: Settings button activates the basemap button', 'Bug 271: Subtitle has blue highlight when editing', 'Bug 272: Custom query and map zoom interaction',
-                    'Bug 302: Multi select activates basemap button'
+    import { appConstants } from '../common/constant.js';
+    import { graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect } from '../components/map-Init.js';
+    import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM, home, restoreExtent, getUserOBJECTID} from '../components/utility.js';
+    import { vuetify } from '../main.js';
+    import { addSettings } from './crud.js';
+    import { store } from './store';
+    import { defineAsyncComponent } from 'vue'
+    import { setDefExpRets } from './login.js';
+import { sk } from 'vuetify/locale';
+    export default{
+        name: "NavBar",
+        components:{
+            RetsDetailPage: defineAsyncComponent(()=>import('./RetsDetail.vue')),
+            detailsAlert: defineAsyncComponent(()=>import('./detailsAlert.vue'))
+        },
+        data(){
+            return{
+                toggle: store.toggleFeed,
+                openedVlist: ['New Updates'],
+                isNewReleaseOpen: true,
+                expandedIndex: null,
+                expandedGroups: [],
+                isReleaseNotes: false,
+                mountedAutoZoom: null,
+                selectfunction : {},
+                store,
+                selecttoggle: false,
+                basemapArray: ['Dark Grey', 'Light Grey', 'Standard TxDOT', 'Open Street Map', 'Hybrid', 'Google', 'Imagery'],
+                shiftmap: false,
+                fontColor: '#D9D9D9',
+                releaseNotesColor: '#D9D9D9',
+                switchValueDark: true,
+                switchValue : false,
+                isAutoZoom: null,
+                isAutoZoomExtent: null,
+                userSettings: JSON.parse(appConstants.defaultUserValue[0].settings) || {},
+                currAutoZoomValue: null,
+                isActOpen: true,
+                shift: 200,
+                basemapcard: false,
+                jumptocard:false,
+                tester: false,
+                isLegendVisible: false,
+                clearSelection: false,
+                isCreateEnabled: true,
+                settingsstatus: false,
+                shiftKey: false,
+                userNames: Array.from(appConstants.userRoles, user => user.name),
+                isAnonymous: false,
+                feedbackStatus: false,
+                feedbackText: "",
+                feedbackSubmitStatus: true,
+                feedbackName: "",
+                notificationValue: false,
+                currentSwitchValue: [],
+                statuses: ['Not Started', 'In Progress', 'Completed', 'On Hold'],
+                showDropdown: false,
+                multiselectTool: 'rectangle',
+                latestReleaseNotes: [
+                    [
+                        `Latest Release Version ${store.retsVersion}`,'User Story 110: Multi Select Tool: Lasso', 'User Story 357: Card return to previous in feed pane', 'Bug 360: Selected features counter on the select button increases when opening a selected point', 
+                        'Bug 359: Jump to SPM button opens a blank map', 'Bug 344: User filter returning results outside the scope of that filter', 'Bug 337: Route and subtitle overlap', 
+                        'Bug 338: Save enabled with no description', 
+                    ]
                 ],
-                ['Release 2.7','User Story 96: Version and Release Notes',
-                    'User Story 157: RETS Labels turn on sooner',
-                    'User Story 193: Add option to disable automatic zoom',
-                    'User Story 204: Add setting to change the default basemap on load',
-                    'User Story 212: Move legend icon down and basemap button up', 
-                    'Bug 229: Date Filter overlaps with buttons','Bug 227: Interaction between feed and details tab not working properly',
-                    'Bug 228: Update the format of the RETS number in the browser tab','Bug 232: Date Filter','Bug 233: Custom Query/ filter interaction',
-                    'Bug 255: Filter: Date sorting reverts'
+                previousReleaseNotes: [
+                    [
+                        `Release 2.7.1`,'User Story 226: Add Lat/Long searching','User Story 230: Transition to prod create portal','User Story 119: Add links/URL to a comment in History',
+                        'User Story 256: History items should expand to fit all text',
+                        'User Story 62: Add Setting to filter feed based on map extent','User Story 139: Update default filter  (to show all RETS with your name associated with it, anywhere)',
+                        'Bug 219: Settings button activates the basemap button', 'Bug 271: Subtitle has blue highlight when editing', 'Bug 272: Custom query and map zoom interaction',
+                        'Bug 302: Multi select activates basemap button'
+                    ],
+                    ['Release 2.7','User Story 96: Version and Release Notes',
+                        'User Story 157: RETS Labels turn on sooner',
+                        'User Story 193: Add option to disable automatic zoom',
+                        'User Story 204: Add setting to change the default basemap on load',
+                        'User Story 212: Move legend icon down and basemap button up', 
+                        'Bug 229: Date Filter overlaps with buttons','Bug 227: Interaction between feed and details tab not working properly',
+                        'Bug 228: Update the format of the RETS number in the browser tab','Bug 232: Date Filter','Bug 233: Custom Query/ filter interaction',
+                        'Bug 255: Filter: Date sorting reverts'
 
                 ],
             ['Release 2.6',
@@ -443,44 +446,61 @@ export default{
                                             this.jumptocard = true
                                             this.selecttoggle = false
 
-                                        }
+                                            }
+                                    }
+                                },
+                                {title:"Select", icon: 'mdi-select-multiple', color: "#D9D9D9", name: "Multi-Select", isActive: false,
+                               action: () =>{
+
+                                // store.isSelectEnabled = !store.isSelectEnabled
+                                // this.retsToolsBottom[2].isActive = !this.retsToolsBottom[2].isActive
+                                // this.handleSelectTool();
+                                
+                                if(store.isSelectEnabled){
+
+                                sketchWidgetselect.cancel()                           
+                                this.retsToolsBottom[2].isActive = false
+                                this.multiselectOptions[0].isActive = false
+                                this.multiselectOptions[1].isActive = false
+                                // store.isSelectEnabled = !store.isSelectEnabled
                                 }
-                            },
-                            {title:"Select", icon: 'mdi-select-multiple', color: "#D9D9D9", name: "Multi-Select", isActive: false,
-                            action: () =>{
-                            // store.isSelectEnabled = !store.isSelectEnabled
-                            // this.retsToolsBottom[2].isActive = !this.retsToolsBottom[2].isActive
-                            // this.handleSelectTool();
-        
-                            sketchWidgetselect.cancel()                           
-                            this.retsToolsBottom[2].isActive = false
-                            this.multiselectOptions[0].isActive = false
-                            this.multiselectOptions[1].isActive = false
-                            store.isSelectEnabled = !store.isSelectEnabled
-                            
-                            },
-                            setActive: () => {
-                            return true
-                            },
-                            hover:(i) => 
-                                {
-                                    // store.isSelectEnabled = !store.isSelectEnabled
-                                    this.basemapcard = false;
-                                    this.jumptocard= false;
-                                    this.selecttoggle = true;
+                                else{
+
+                                    this.handleSelectTool(this.multiselectTool);
+                                    
+
+            
                                 }
-                            },
-                            {
-                            title:"Legend", icon: 'mdi-format-list-bulleted-type', color: "white", name: "Legend", 
-                            action: () =>{
-                            this.handleLegendTool();
-                            this.retsToolsBottom[3].isActive = !this.retsToolsBottom[3].isActive
-                            },
-                            hover:() => 
-                                {
-                                    this.basemapcard = false;
-                                    this.jumptocard= false;
-                                    this.selecttoggle = false
+
+                                // sketchWidgetselect.cancel()                           
+                                // this.retsToolsBottom[2].isActive = false
+                                // this.multiselectOptions[0].isActive = false
+                                // this.multiselectOptions[1].isActive = false
+                                store.isSelectEnabled = !store.isSelectEnabled
+                                
+                               },
+                               setActive: () => {
+                                return true
+                               },
+                               hover:(i) => 
+                                    {
+                                        // store.isSelectEnabled = !store.isSelectEnabled
+                                        this.basemapcard = false;
+                                        this.jumptocard= false;
+                                        this.selecttoggle = true;
+                                    }
+                                },
+                               {
+                                title:"Legend", icon: 'mdi-format-list-bulleted-type', color: "white", name: "Legend", 
+                               action: () =>{
+                                this.handleLegendTool();
+                                this.retsToolsBottom[3].isActive = !this.retsToolsBottom[3].isActive
+                               },
+                               hover:() => 
+                                    {
+                                        this.basemapcard = false;
+                                        this.jumptocard= false;
+                                        this.selecttoggle = false
 
                                 }
                             
@@ -501,30 +521,28 @@ export default{
                             }
                         ],
 
-            multiselectOptions: [ {title:"Rectangle", icon: 'mdi-rectangle-outline', color: "#D9D9D9", name: "Multi-Select - Rectangle", class:"topIcon3", isActive: false,
-                            action: () => {
-                            this.handleSelectTool('rectangle');
-                            if (this.multiselectOptions[1].isActive == true) {   
-                                this.multiselectOptions[1].isActive = false; 
-                            }
-                            this.multiselectOptions[0].isActive = !this.multiselectOptions[0].isActive;
+                multiselectOptions: [ {title:"Rectangle", icon: 'mdi-rectangle-outline', color: "#D9D9D9", name: "Multi-Select - Rectangle", class:"topIcon3", isActive: false,
+                               action: () => {
+                                this.handleSelectTool('rectangle');
+                                if (this.multiselectOptions[1].isActive == true) {   
+                                    this.multiselectOptions[1].isActive = false; 
+                                }
                             
-
-                            return
-                            },
-                        
-                            },
-                            {title:"Lasso", icon: 'mdi-vector-polygon', color: "#D9D9D9", name: "Multi-Select - Lasso", class:"topIcon2", isActive: false,
-                            action: () =>{
-                            this.handleSelectTool('selecttoolfreehand');
-                            if (this.multiselectOptions[0].isActive == true) {   
-                                this.multiselectOptions[0].isActive = false; 
-                            }
-                            this.multiselectOptions[1].isActive = !this.multiselectOptions[1].isActive;
-                            return
-                            },
-                        
-                            }
+                                return
+                               },
+                            
+                                },
+                               {title:"Lasso", icon: 'mdi-vector-polygon', color: "#D9D9D9", name: "Multi-Select - Lasso", class:"topIcon2", isActive: false,
+                               action: () =>{
+                                this.handleSelectTool('selecttoolfreehand');
+                                if (this.multiselectOptions[0].isActive == true) {   
+                                    this.multiselectOptions[0].isActive = false; 
+                                }
+                                
+                                return
+                               },
+                            
+                                }
 
             ],
                         
@@ -728,49 +746,56 @@ export default{
                     this.selecttoggle = false;
                 },
 
-                async handleCreateTool() {
-                    if (this.isCreateEnabled === true) {
-                        this.isCreateEnabled = !this.isCreateEnabled;
-                        const newPointGraphic = await createtool(sketchWidgetcreate, createretssym);
-                        // Process the newPointGraphic as needed
-                        this.isCreateEnabled = !this.isCreateEnabled;
-                        return newPointGraphic
-                        
-                    } else {
-                        sketchWidgetcreate.cancel();
-                        this.isCreateEnabled = !this.isCreateEnabled;
-                    }
-                    
-                    
-                    
-                },
-                handleSelectTool(tooltype) { 
-                    if ((tooltype === sketchWidgetselect.activeTool) || (tooltype === 'selecttoolfreehand' && sketchWidgetselect.activeTool === 'polygon')) {
-                        sketchWidgetselect.cancel();
-                        this.retsToolsBottom[2].isActive = false
-                        return
-                    }
-                    // if (store.isSelectEnabled  === false){
-                        // store.isSelectEnabled = !store.isSelectEnabled
-                        this.retsToolsBottom[2].isActive = true
-                        if (tooltype === "rectangle"){
+                    async handleCreateTool() {
+                        if (this.isCreateEnabled === true) {
+                            this.isCreateEnabled = !this.isCreateEnabled;
+                            const newPointGraphic = await createtool(sketchWidgetcreate, createretssym);
+                            // Process the newPointGraphic as needed
+                            this.isCreateEnabled = !this.isCreateEnabled;
+                            return newPointGraphic
                             
-                            selecttool(true, sketchWidgetselect, graphics, "rectangle","freehand")
-
-                        }
-                        else if (tooltype === "selecttoolfreehand"){
-                            
-                            selecttool(true, sketchWidgetselect, graphics, "polygon","freehand")
-
+                        } else {
+                            sketchWidgetcreate.cancel();
+                            this.isCreateEnabled = !this.isCreateEnabled;
                         }
                         
-                    // }
-                    // else{
-                    //     sketchWidgetselect.cancel()
-                    //     // this.selectfunction.remove()
-                    //     this.retsToolsBottom[2].isActive = false
-                    //     store.isSelectEnabled = !store.isSelectEnabled
-                    // }
+                        
+                       
+                    },
+                    handleSelectTool(tooltype) { 
+                        if ((tooltype === sketchWidgetselect.activeTool) || (tooltype === 'selecttoolfreehand' && sketchWidgetselect.activeTool === 'polygon')) {
+                            sketchWidgetselect.cancel();
+                            this.retsToolsBottom[2].isActive = false
+                            this.multiselectOptions[0].isActive = false
+                            this.multiselectOptions[1].isActive = false
+                            return
+                        }
+                        // if (store.isSelectEnabled  === false){
+                            // store.isSelectEnabled = !store.isSelectEnabled
+                            this.retsToolsBottom[2].isActive = true
+                            if (tooltype === "rectangle"){
+                                
+                                selecttool(true, sketchWidgetselect, graphics, "rectangle","freehand")
+                                this.multiselectTool = "rectangle"
+                                this.multiselectOptions[0].isActive = true
+ 
+                            }
+                            else if (tooltype === "selecttoolfreehand"){
+                                
+                                selecttool(true, sketchWidgetselect, graphics, "polygon","freehand")
+                                this.multiselectTool = "selecttoolfreehand"
+                                this.multiselectOptions[1].isActive = true
+                                
+ 
+                            }
+                            
+                        // }
+                        // else{
+                        //     sketchWidgetselect.cancel()
+                        //     // this.selectfunction.remove()
+                        //     this.retsToolsBottom[2].isActive = false
+                        //     store.isSelectEnabled = !store.isSelectEnabled
+                        // }
 
                     
                 },
