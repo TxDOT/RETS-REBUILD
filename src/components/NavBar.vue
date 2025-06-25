@@ -536,7 +536,7 @@ import { sk } from 'vuetify/locale';
                                 },
                                {title:"Lasso", icon: 'mdi-vector-polygon', color: "#D9D9D9", name: "Multi-Select - Lasso", class:"topIcon2", isActive: false,
                                action: () =>{
-                                this.handleSelectTool('selecttoolfreehand');
+                                this.handleSelectTool('polygon');
                                 if (this.multiselectOptions[0].isActive == true) {   
                                     this.multiselectOptions[0].isActive = false; 
                                 }
@@ -698,7 +698,6 @@ import { sk } from 'vuetify/locale';
                         }
                        
                         
-
                     },
                     cancelSettings(){
                         const { autoZoom, autoZoomExtent, notifications } = this.userSettings;
@@ -779,14 +778,21 @@ import { sk } from 'vuetify/locale';
                         
                        
                     },
+                    
                     handleSelectTool(tooltype) { 
-                        if ((tooltype === sketchWidgetselect.activeTool) || (tooltype === 'selecttoolfreehand' && sketchWidgetselect.activeTool === 'polygon')) {
+                        if ((tooltype === sketchWidgetselect.activeTool)) {
                             sketchWidgetselect.cancel();
                             this.retsToolsBottom[2].isActive = false
                             this.multiselectOptions[0].isActive = false
                             this.multiselectOptions[1].isActive = false
+                            console.log(tooltype)
                             return
                         }
+                        if (sketchWidgetselect.state === 'active') {
+                            sketchWidgetselect.cancel();
+                        }
+
+
                         // if (store.isSelectEnabled  === false){
                             // store.isSelectEnabled = !store.isSelectEnabled
                             this.retsToolsBottom[2].isActive = true
@@ -797,10 +803,10 @@ import { sk } from 'vuetify/locale';
                                 this.multiselectOptions[0].isActive = true
  
                             }
-                            else if (tooltype === "selecttoolfreehand"){
+                            else if (tooltype === "polygon"){
                                 
                                 selecttool(true, sketchWidgetselect, graphics, "polygon","freehand")
-                                this.multiselectTool = "selecttoolfreehand"
+                                this.multiselectTool = "polygon"
                                 this.multiselectOptions[1].isActive = true
                                 
  
