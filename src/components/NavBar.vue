@@ -234,13 +234,11 @@
 
     import { appConstants } from '../common/constant.js';
     import { graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect } from '../components/map-Init.js';
-    import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM, home, restoreExtent, getUserOBJECTID} from '../components/utility.js';
+    import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM, getUserOBJECTID} from '../components/utility.js';
     import { vuetify } from '../main.js';
     import { addSettings } from './crud.js';
     import { store } from './store';
     import { defineAsyncComponent } from 'vue'
-    import { setDefExpRets } from './login.js';
-import { sk } from 'vuetify/locale';
     export default{
         name: "NavBar",
         components:{
@@ -457,19 +455,14 @@ import { sk } from 'vuetify/locale';
                                 // this.handleSelectTool();
                                 
                                 if(store.isSelectEnabled){
-
-                                sketchWidgetselect.cancel()                           
-                                this.retsToolsBottom[2].isActive = false
-                                this.multiselectOptions[0].isActive = false
-                                this.multiselectOptions[1].isActive = false
+                                    sketchWidgetselect.cancel()                           
+                                    this.retsToolsBottom[2].isActive = false
+                                    this.multiselectOptions[0].isActive = false
+                                    this.multiselectOptions[1].isActive = false
                                 // store.isSelectEnabled = !store.isSelectEnabled
                                 }
                                 else{
-
                                     this.handleSelectTool(this.multiselectTool);
-                                    
-
-            
                                 }
 
                                 // sketchWidgetselect.cancel()                           
@@ -524,7 +517,7 @@ import { sk } from 'vuetify/locale';
                 multiselectOptions: [ {title:"Rectangle", icon: 'mdi-rectangle-outline', color: "#D9D9D9", name: "Multi-Select - Rectangle", class:"topIcon3", isActive: false,
                                action: () => {
                                 this.handleSelectTool('rectangle');
-                                if (this.multiselectOptions[1].isActive == true) {   
+                                if (this.multiselectOptions[1].isActive === true) {   
                                     this.multiselectOptions[1].isActive = false; 
                                 }
                             
@@ -535,7 +528,7 @@ import { sk } from 'vuetify/locale';
                                {title:"Lasso", icon: 'mdi-vector-polygon', color: "#D9D9D9", name: "Multi-Select - Lasso", class:"topIcon2", isActive: false,
                                action: () =>{
                                 this.handleSelectTool('selecttoolfreehand');
-                                if (this.multiselectOptions[0].isActive == true) {   
+                                if (this.multiselectOptions[0].isActive === true) {   
                                     this.multiselectOptions[0].isActive = false; 
                                 }
                                 
@@ -763,6 +756,7 @@ import { sk } from 'vuetify/locale';
                        
                     },
                     handleSelectTool(tooltype) { 
+                        console.log(tooltype)
                         if ((tooltype === sketchWidgetselect.activeTool) || (tooltype === 'selecttoolfreehand' && sketchWidgetselect.activeTool === 'polygon')) {
                             sketchWidgetselect.cancel();
                             this.retsToolsBottom[2].isActive = false
