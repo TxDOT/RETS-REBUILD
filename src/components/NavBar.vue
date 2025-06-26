@@ -527,8 +527,8 @@
                                 },
                                {title:"Lasso", icon: 'mdi-vector-polygon', color: "#D9D9D9", name: "Multi-Select - Lasso", class:"topIcon2", isActive: false,
                                action: () =>{
-                                this.handleSelectTool('selecttoolfreehand');
-                                if (this.multiselectOptions[0].isActive === true) {   
+                                this.handleSelectTool('polygon');
+                                if (this.multiselectOptions[0].isActive == true) {   
                                     this.multiselectOptions[0].isActive = false; 
                                 }
                                 
@@ -663,29 +663,28 @@
                     store.userSettings = this.userSettings
 
 
-                    if (store.updateRetsSearch.length != store.retspointlength && store.autozoomextent == false){
-                        if (store.CREATE_DT){
-                            await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                        if (store.updateRetsSearch.length != store.retspointlength && store.autozoomextent == false){
+                            if (store.CREATE_DT){
+                                await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                            }
+                            else{
+                                await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                            }
+                            return  
                         }
-                        else{
-                            await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                       
+                        
+                    },
+                    cancelSettings(){
+                        const { autoZoom, autoZoomExtent, notifications } = this.userSettings;
+                        store.autozoomtest = this.isAutoZoom ?? autoZoom ?? true;
+                        store.autozoomextent = this.isAutoZoomExtent ?? autoZoomExtent ?? false;
+              
+                        if (!notifications){
+                            return
                         }
-                        return  
-                    }
-                    
-                    
-
-                },
-                cancelSettings(){
-                    const { autoZoom, autoZoomExtent, notifications } = this.userSettings;
-                    store.autozoomtest = this.isAutoZoom ?? autoZoom ?? true;
-                    store.autozoomextent = this.isAutoZoomExtent ?? autoZoomExtent ?? false;
-            
-                    if (!notifications){
-                        return
-                    }
-                    for (let i =0; i < this.switches.length; i++){
-                        this.switches[i].value = notifications[i].value
+                        for (let i =0; i < this.switches.length; i++){
+                            this.switches[i].value = notifications[i].value
 
                     }
 
@@ -755,15 +754,21 @@
                         
                        
                     },
+                    
                     handleSelectTool(tooltype) { 
-                        console.log(tooltype)
-                        if ((tooltype === sketchWidgetselect.activeTool) || (tooltype === 'selecttoolfreehand' && sketchWidgetselect.activeTool === 'polygon')) {
+                        if ((tooltype === sketchWidgetselect.activeTool)) {
                             sketchWidgetselect.cancel();
                             this.retsToolsBottom[2].isActive = false
                             this.multiselectOptions[0].isActive = false
                             this.multiselectOptions[1].isActive = false
+                            console.log(tooltype)
                             return
                         }
+                        if (sketchWidgetselect.state === 'active') {
+                            sketchWidgetselect.cancel();
+                        }
+
+
                         // if (store.isSelectEnabled  === false){
                             // store.isSelectEnabled = !store.isSelectEnabled
                             this.retsToolsBottom[2].isActive = true
@@ -774,10 +779,10 @@
                                 this.multiselectOptions[0].isActive = true
  
                             }
-                            else if (tooltype === "selecttoolfreehand"){
+                            else if (tooltype === "polygon"){
                                 
                                 selecttool(true, sketchWidgetselect, graphics, "polygon","freehand")
-                                this.multiselectTool = "selecttoolfreehand"
+                                this.multiselectTool = "polygon"
                                 this.multiselectOptions[1].isActive = true
                                 
  
