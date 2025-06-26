@@ -984,9 +984,14 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                         let arr = []
                                         let string = ''
                                         store.retsSelection.forEach((value) => {
-                                            store.roadHighlightObj.add(value)
+                                        const existing = Array.from(store.roadHighlightObj).some(
+                                            (item) => item.attributes.OBJECTID === value.attributes.OBJECTID
+                                        );
 
-                                        })
+                                        if (!existing) {
+                                            store.roadHighlightObj.add(value);
+                                        }
+                                        });
 
                                         store.roadHighlightObj.forEach((value) => {
                                             arr.push(value.attributes.RETS_ID)
