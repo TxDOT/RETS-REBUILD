@@ -659,19 +659,26 @@ return
 }
 
 export function turnAllVisibleGraphicsOff(){
-const isVisible = retsGraphicLayer.graphics.items.filter(x => x.visible === true)
-isVisible.forEach(vis => vis.visible = false)
-return
-}
-export function removeRelatedRetsFromMap(retsoid, retsID){
-if(!store.retsObj.attributes.RELATED_RETS){
+    const isVisible = retsGraphicLayer.graphics.items.filter(x => x.visible === true)
+    isVisible.forEach(vis => vis.visible = false)
     return
 }
-let retsIndex = store.retsObj.attributes.RELATED_RETS.findIndex(ret => ret.RETS_ID === retsID)
-store.retsObj.attributes.RELATED_RETS.splice(retsIndex,1)
-const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === Number(retsoid))
-retsGraphicLayer.removeMany(findGraphic)
-return
+export function removeRelatedRetsFromMap(retsoid, retsID){
+    try{
+        if(!store.retsObj.attributes.RELATED_RETS){
+            return
+        }
+        let retsIndex = store.retsObj.attributes.RELATED_RETS.findIndex(ret => ret.RETS_ID === retsID)
+        store.retsObj.attributes.RELATED_RETS.splice(retsIndex,1)
+        const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === Number(retsoid))
+        retsGraphicLayer.removeMany(findGraphic)
+        return
+    }
+    catch(err){
+        console.warn(err)
+        console.log(store.retsObj.attributes.RELATED_RETS)
+    }
+
 }
 
 export function zoomToRelatedRets(relatedRets){
@@ -1395,8 +1402,8 @@ try{
                         completeMovePtSketch()
                         store.cancelEvent.remove()
                         getNewPoint.remove()
-                        //store.checkDetailsForComplete()
-                        store.isSaveBtnDisable = false
+                        store.checkDetailsForComplete()
+                        // store.isSaveBtnDisable = false
                         return
                     }
                     store.isAlert = false
@@ -1408,6 +1415,7 @@ try{
                     store.cancelEvent.remove()
                     store.isMoveRetsPt = false
                     getNewPoint.remove()
+                    store.checkDetailsForComplete()
                     return
                 })
                 .catch(() => {
