@@ -487,7 +487,7 @@ export const store = reactive({
 
                 const detailFieldsToCheck = [this.retsObj.attributes.STAT, this.retsObj.attributes.DESC_]
 
-                !this.retsObj.attributes.NO_RTE ? detailFieldsToCheck.push(this.retsObj.attributes.DFO) : null
+                !this.retsObj.attributes.NO_RTE ? detailFieldsToCheck.push(this.retsObj.attributes.DFO, this.retsObj.attributes.RTE_NM) : null
 
                 let totalFieldsToCheck = [...detailFieldsToCheck, ...metadataFieldsToCheck]
 
