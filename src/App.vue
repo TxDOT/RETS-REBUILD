@@ -20,16 +20,25 @@ export default{
       auth: {}
     }
   },
-
+  // beforeMount(){
+  //   console.log($route.params.retsid)
+  // },
+  beforeRouteUpdate(to, from){
+    console.log(to,from)
+  },
   mounted(){
     this.auth = login()
   },
   watch:{
     auth:{
       handler: function(){
+        console.log(this.$router)
         this.$router.push({name: "Inital"})
       },
       immediate: true,
+    },
+    $route(to, from){
+      console.log(to,from)
     }
   }
 }
