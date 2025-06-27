@@ -43,13 +43,24 @@ import {store} from './store.js'
 // import ShowChanges from './showChanges.vue'
 //import ESRI JS ESM class
 import { defineAsyncComponent } from 'vue'
+
 export default{
     name: "Map",
     components: {detailsAlert: defineAsyncComponent(()=>import('./detailsAlert.vue'))},
+    props:{
+        retsparam: String
+    },
     data(){
         return{
           store
         };
+    },
+    beforeMount(){
+        console.log(this.retsparam)
+    },
+    beforeRouteEnter(to, from){
+        console.log(from)
+        console.log(to)
     },
     async mounted(){
             //1.Check to see if user is signed in. If not sign them in without using the popup
@@ -57,8 +68,6 @@ export default{
             view.container = this.$el
             setBasemap();
             hoverRetsPoint();
-
-
     },
     methods:{
         async discardedits(){

@@ -659,26 +659,19 @@ return
 }
 
 export function turnAllVisibleGraphicsOff(){
-    const isVisible = retsGraphicLayer.graphics.items.filter(x => x.visible === true)
-    isVisible.forEach(vis => vis.visible = false)
-    return
+const isVisible = retsGraphicLayer.graphics.items.filter(x => x.visible === true)
+isVisible.forEach(vis => vis.visible = false)
+return
 }
 export function removeRelatedRetsFromMap(retsoid, retsID){
-    try{
-        if(!store.retsObj.attributes.RELATED_RETS){
-            return
-        }
-        let retsIndex = store.retsObj.attributes.RELATED_RETS.findIndex(ret => ret.RETS_ID === retsID)
-        store.retsObj.attributes.RELATED_RETS.splice(retsIndex,1)
-        const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === Number(retsoid))
-        retsGraphicLayer.removeMany(findGraphic)
-        return
-    }
-    catch(err){
-        console.warn(err)
-        console.log(store.retsObj.attributes.RELATED_RETS)
-    }
-
+if(!store.retsObj.attributes.RELATED_RETS){
+    return
+}
+let retsIndex = store.retsObj.attributes.RELATED_RETS.findIndex(ret => ret.RETS_ID === retsID)
+store.retsObj.attributes.RELATED_RETS.splice(retsIndex,1)
+const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === Number(retsoid))
+retsGraphicLayer.removeMany(findGraphic)
+return
 }
 
 export function zoomToRelatedRets(relatedRets){
@@ -984,14 +977,9 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                         let arr = []
                                         let string = ''
                                         store.retsSelection.forEach((value) => {
-                                        const existing = Array.from(store.roadHighlightObj).some(
-                                            (item) => item.attributes.OBJECTID === value.attributes.OBJECTID
-                                        );
+                                            store.roadHighlightObj.add(value)
 
-                                        if (!existing) {
-                                            store.roadHighlightObj.add(value);
-                                        }
-                                        });
+                                        })
 
                                         store.roadHighlightObj.forEach((value) => {
                                             arr.push(value.attributes.RETS_ID)
@@ -1046,7 +1034,7 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                     if (!store.isSaveBtnDisable){
                                         store.clickStatus = true
                                         store.cancelpopup = true
-                                        return
+                                        return selectretspoints
                                     }
                                     if (store.isDetailsPage && store.isSaveBtnDisable && (store.roadHighlightObj.size > 1)){
 
@@ -1078,7 +1066,7 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                 });          
                         }
                 });
-
+        console.log(selectretspoints)
         isSelectEnabled = !isSelectEnabled; 
         return selectretspoints
 
@@ -1407,8 +1395,8 @@ try{
                         completeMovePtSketch()
                         store.cancelEvent.remove()
                         getNewPoint.remove()
-                        store.checkDetailsForComplete()
-                        // store.isSaveBtnDisable = false
+                        //store.checkDetailsForComplete()
+                        store.isSaveBtnDisable = false
                         return
                     }
                     store.isAlert = false
@@ -1420,7 +1408,6 @@ try{
                     store.cancelEvent.remove()
                     store.isMoveRetsPt = false
                     getNewPoint.remove()
-                    store.checkDetailsForComplete()
                     return
                 })
                 .catch(() => {

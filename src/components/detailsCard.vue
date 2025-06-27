@@ -28,7 +28,7 @@
                         <v-tooltip text="Move RETS Point" location="top">
                             <template v-slot:activator="{props}">
                                 <div v-bind="props">
-                                    <v-btn id="dfoCrosshair"  variant="plain" density="compact" v-model="isCrossHair" @click="crossHairFunc()"><v-icon :icon="!store.isMoveRetsPt ? 'mdi-drag-variant' : 'mdi-close'" small ></v-icon></v-btn>
+                                    <v-btn id="dfoCrosshair"  variant="plain" density="compact" v-model="isCrossHair" @click="crossHairFunc"><v-icon :icon="!store.isMoveRetsPt ? 'mdi-drag-variant' : 'mdi-close'" small ></v-icon></v-btn>
                                 </div>
                             </template>
                         </v-tooltip>
