@@ -743,8 +743,8 @@ retsHistory.queryFeatures({
     retCard.attributes.historyUpdate = latestHistoryText
     return 
 })
-.catch(() => {
-    //
+.catch((err) => {
+    console.log('Error with history', err)
 })
 return
 

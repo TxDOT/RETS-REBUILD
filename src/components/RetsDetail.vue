@@ -69,7 +69,7 @@
                 </div>
                 <div style="position: relative; min-height:40px; max-height:40px; padding-bottom: 120px; width: 100%; flex: auto; z-index: 9999;">
                     <div style="position: relative; float: left; font-size: 11px; display: flex; flex-wrap: wrap; top: 3px; left: 6px;">
-                        <v-checkbox label="Asset Only Job" density="compact" class="checkbox-size" v-model="isAsset" @update:model-value="isAssetJob"></v-checkbox>
+                        <v-checkbox label="Asset Only Job" density="compact" class="checkbox-size" v-model="isAsset" @update:model-value="isAssetJob()"></v-checkbox>
                     </div>
                     <v-btn-toggle class="trigger-buttons" density="compact">
                         <v-btn @click="handlearchive()" variant="plain" size="small" class="secondary-button">Delete</v-btn>
@@ -202,7 +202,7 @@
         },
         methods:{
             dataMetadataCheck(){
-                let items = store.checkDetailsForComplete()
+                store.checkDetailsForComplete()
                 return
             },
             historyValue(){
@@ -331,7 +331,6 @@
                 store.retsObj.attributes.ACTV = !store.retsObj.attributes.ACTV ? null : store.retsObj.attributes.ACTV.value ?? store.retsObj.attributes.ACTV
                 store.retsObj.attributes.PRIO = store.retsObj.attributes.PRIO ?? 1
                 store.retsObj.attributes.JOB_TYPE = this.isAsset === true ? 2 : 1
-                
                 await updateRETSPT(store.retsObj)
                 
                 await this.returnToFeed()
@@ -339,28 +338,13 @@
                 deleteRetsGraphic()
                 retsLayerView.layer.definitionExpression = store.savedFilter
                 store.isSaveBtnDisable = true
-
-
-
-                //let distAnalysts = store.retsObj.attributes.DIST_ANALYST.split(",")
+                
                 this.userArray.push(`${store.retsObj.attributes.GIS_ANALYST}`)
-                //this.userArray.push(`${store.retsObj.attributes.GRID_ANALYST}`)
-
-
-
-                // for (let index = 0; index < distAnalysts.length; index++) {
-                //     this.userArray.push(distAnalysts[index]);
-                    
-                // }
+                
                 let userSettings = await getAllUserSettings(this.userArray)
-
-
 
                 await this.sendNotification(userSettings)
 
-
-                //store.updateRetsID()
-                //retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
                 return
             },
             async sendNotification(userSettings){
@@ -408,18 +392,10 @@
                     this.replaceArchiveContent(archiveRets)
                 }
                 
-                //////////////////////////// REMOVE LINE BELOW TO ENSURE CARD SELECTION REMAINS AFTER RETURNING TO FEED////////////////////////////
-                /////////////////////////// SUPPOSED TO BE UNCOMMENTED BY DEFAULT/////////////////////////////////////////////////////////////////
-
-                // await this.returnToFeed()
-                // store.roadHighlightObj.clear()
-                // removeHighlight(store.retsObj)
                 retsLayerView.layer.definitionExpression = store.savedFilter
                 store.toggleFeed = 1
                 store.cancelpopup = false
-                // setTimeout(() => {
-                //     outlineFeedCards(store.roadHighlightObj)
-                // }, 1000);
+
                 window.document.title = `RETS Application`
                 store.activityBanner = "Activity Feed"
                 store.toggleFeed = 1

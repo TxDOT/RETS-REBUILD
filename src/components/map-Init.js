@@ -19,13 +19,10 @@ import TileInfo from "@arcgis/core/layers/support/TileInfo.js";
 import Legend from "@arcgis/core/widgets/Legend";
 import LegendViewModel from "@arcgis/core/widgets/Legend/LegendViewModel";
 import Graphic from "@arcgis/core/Graphic";
-import { outlineFeedCards, removeOutline, home, scrollToTopOfFeed, retsLayerView} from "./utility.js";
+import { outlineFeedCards, removeOutline, scrollToTopOfFeed} from "./utility.js";
 import Extent from "@arcgis/core/geometry/Extent.js";
 import {store} from './store.js'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
-import { render } from "vue";
-
-
 
 export const texasExtent = new Extent({
   xmin: -106.649513,

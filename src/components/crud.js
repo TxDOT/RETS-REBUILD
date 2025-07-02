@@ -5,7 +5,6 @@ import {store} from './store.js'
 
 
 export async function addRETSPT(retsObj){
-    //retsObj.attributes.ACTV = retsObj.attributes.ACTV.value
     return retsLayer.applyEdits({
         addFeatures: [retsObj]
     })
@@ -54,14 +53,20 @@ export async function updateRETSPT(retsObj){
     delete enable.attributes?.mdiexclamation
     delete enable.attributes?.historyUpdate 
     delete enable.attributes?.mdipaperclip
-
+    
     let esriUpdateGraphic = createGraphic(enable)
     esriUpdateGraphic.geometry = createGeo
-
     try{
-        await retsLayer.applyEdits({
+        let updateResp = await retsLayer.applyEdits({
             updateFeatures: [esriUpdateGraphic]
         })
+
+        if(Object.hasOwn(updateResp.updateFeatureResults[0], "error")){
+            if(updateResp.updateFeatureResults[0].error){
+                console.error(updateResp.updateFeatureResults[0].error.message)
+            }
+            return
+        }
     }
     catch(err){
         console.log(err)
@@ -142,7 +147,10 @@ export async function sendChatHistory(chat, type){
 export function postFlagColor(rets){
     //if OBJECTID is blank, would mean its a new flag insert
     const flagGraphic = createGraphic(rets.attributes.flagColor)
+
     if(rets.attributes.flagColor.OBJECTID === ''){
+        flagGraphic.attributes.OBJECTID = rets.attributes.OBJECTID
+        flagGraphic.attributes.USERNAME = appConstants.defaultUserValue[0].value
         flagRetsColor.applyEdits({
             addFeatures: [flagGraphic]
         })
