@@ -47,9 +47,6 @@ import { defineAsyncComponent } from 'vue'
 export default{
     name: "Map",
     components: {detailsAlert: defineAsyncComponent(()=>import('./detailsAlert.vue'))},
-    props:{
-        retsparam: String
-    },
     data(){
         return{
           store
@@ -58,7 +55,7 @@ export default{
     beforeMount(){
         console.log(this.retsparam)
     },
-    beforeRouteEnter(to, from){
+    beforeCreate(to, from){
         console.log(from)
         console.log(to)
     },
@@ -97,12 +94,13 @@ export default{
                     store.activityBanner = `${store.openAfterDiscardRets.attributes.RETS_ID}`
                     return
                 }
-               
             }
 
             //runs when switching to other rets points by clicking on the points
             if (store.clickStatus && store.layerName === "TPP RETS"){
+                console.log(Array.from(store.roadHighlightObj))
                 const retsPt = Array.from(store.roadHighlightObj)[0]
+                console.log(retsPt)
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
                 let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
                 updateRetsObj(findItem, archiveRets)

@@ -1,6 +1,6 @@
 <template>
-    <Map :retsparam="this.retsid"/>
-    <RetsFeed/>
+    <Map />
+    <RetsFeed :retsparam="this.retsid"/>
     <NavBar/>
     <IsRoadExist/>
 </template>
@@ -12,7 +12,7 @@
     export default{
         name: "MapContainer",
         props:{
-            retsid: Number
+            retsid: String
         },
         components: {
             Map: defineAsyncComponent(() => import('../components/Map.vue')), 
@@ -20,14 +20,5 @@
             RetsFeed: defineAsyncComponent(() => import('../components/RetsFeedCards.vue')),
             IsRoadExist: defineAsyncComponent(() => import('../components/checkRoadExist.vue'))
         },
-        beforeRouteUpdate(to, from){
-            console.log(to, from)
-        },
-        beforeRouteLeave(){
-            return false
-        },
-        beforeCreate(){
-            console.log("mount")
-        }
     }
 </script>

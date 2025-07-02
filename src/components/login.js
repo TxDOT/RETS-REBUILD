@@ -57,7 +57,6 @@ async function signIn(){
   store.savedFilter = store.savedFilter.replace(/''/g, `'${userId}'`)
   if (store.CREATE_DT){
     await store.getRetsLayer(userId, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
-
   }
   else{
       await store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")

@@ -265,7 +265,7 @@ export const store = reactive({
                 return retsFlag ?? defaultValue
         },
 
-        async getRetsLayer(userid, where, layer, orderFields){ //////////////////////////remove userid from here
+        async getRetsLayer(userid, where, layer, orderFields){ 
                 this.loggedInUser = userid
                 const queryString = {"whereString": where, "queryLayer": layer}
                 //const orderField = "EDIT_DT DESC, PRIO"
