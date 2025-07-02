@@ -46,7 +46,7 @@
                         <div style="position:relative; float:right; font-size: 11px;  bottom: -65px; right: -8px;" >
                             <v-tooltip text="Assigned to you" location="top">
                                 <template v-slot:activator="{props}">
-                                    <v-icon icon="mdi-account-multiple-check" color="white" v-if="rd.attributes.mdiaccountmultiplecheck === true" class="cardPRIO" v-bind="props"></v-icon>
+                                    <v-icon icon="mdi-human-dolly" color="white" v-if="rd.attributes.mdiaccountmultiplecheck === true" class="cardPRIO" v-bind="props"></v-icon>
                                 </template>
                             </v-tooltip>
 
@@ -133,7 +133,7 @@ export default{
             swatchColor: ['', '#FF0000', '#FF7F00', '#FFFF00', '#008000', '#4472C4', '#B75CFF', '#FFFFFF'],
             colorTable: appConstants.CardColorMap,
             alertIcons:[
-                {name: "mdiaccountmultiplecheck", icon: "mdi-account-multiple-check", popup: "Assigned to you", color: "white", display: "ASSIGNED_TO", condition: `${store.loggedInUser}`, displaySup: "GIS_ANALYST", supplementCondition: `${store.loggedInUser}`},
+                {name: "mdiHumanDolly", icon: "mdi-human-dolly", popup: "Assigned to you", color: "white", display: "ASSIGNED_TO", condition: `${store.loggedInUser}`, displaySup: "GIS_ANALYST", supplementCondition: `${store.loggedInUser}`},
                 {name: "mdiaccountgroup", icon:"mdi-account-group", popup: "MO/TxDOT Connect", color: "white", display: "ACTV", condition: "TxDOTConnect"}, //ACTV === (Minute Order || TxDOTConnect)
                 // {icon:"mdi-account-group", popup: "MO/TxDOT Connect", color: "white", display: "ACTV", condition: "Minute Order"},
                 {name: "mdipencilboxoutline", icon:"mdi-pencil-box-outline", popup: "District Request", color: "white", display: "ACTV", condition: "Request"}, //keep null
