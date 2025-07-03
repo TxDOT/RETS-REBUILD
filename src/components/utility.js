@@ -101,14 +101,14 @@ try{
                 //navigator.clipboard.writeText(coordinate);
                 store.latlonstring = coordinate
                 // store.alertTextInfo = {"text": ` ${coordinate} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
-                store.alertTextInfo = {"text": `has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
+                store.alertTextInfo = {"text": `(23.2323432423423, 12.1234231235) has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
 
                 store.isAlert = true
 
-                 setTimeout(() => {
-                    store.isAlert = false
+                //  setTimeout(() => {
+                //     store.isAlert = false
 
-                  }, 10000);
+                //   }, 10000000);
             }
             else{
 
