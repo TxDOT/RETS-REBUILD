@@ -942,7 +942,7 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
 
                                                                       string = arr.join(" OR RETS_ID = ")
 
-                                                                    if (store.autozoomextent  && store.isShowSelected){
+                                                                    if (store.autozoomextent  && store.isShowSelected && i == 0){
                                                                           if (store.CREATE_DT ){
                                                                         store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
                                                                             //check if features are highlighted, if they are run the outlinefeedcards
@@ -1049,7 +1049,6 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                         //utlineFeedCards(store.roadHighlightObj)
                                     }
                                     if (store.isDetailsPage && store.isSaveBtnDisable && (store.roadHighlightObj.size === 0)){
-
                                         returnToFeedFunction()
                                         removeOutline()
                                     }

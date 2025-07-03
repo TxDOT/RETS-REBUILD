@@ -11,7 +11,7 @@
             </v-list-item>
         </v-list>
         <v-list id="icons-bottom" class="iconList">
-            <v-list-item id="popoutitems" class="iconList-item" v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" :active="tool.isActive" :active-class="tool.name !== 'Jump To' || tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
+            <v-list-item id="popoutitems" class="iconList-item" v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @mouseleave="tool.hoverout(tool.title)" @click="tool.action()" :active="tool.isActive" :active-class="tool.name !== 'Jump To' || tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
                 <template v-if="tool.name !== 'Basemaps' && tool.name !== 'Jump To' && tool.name !=='Multi-Select' ">
                     <v-tooltip location="right" :text="tool.name"> 
                             <template v-if="tool.name !== 'Multi-Select'" v-slot:activator="{ props }">
@@ -95,9 +95,8 @@
  
    </v-card>
    
-   <v-list class='Selecticons' @mouseleave="mouseleaveselect" v-if = "selecttoggle">
-
-        <v-list-item  v-for="(tool, i) in multiselectOptions" :key="i" :value="tool" @click="tool.action()":active="tool.isActive" style="margin: 0; padding-left: 0 !important;  width:39px; height: 39px; justify-items: center;">    
+   <v-list id='Selecticons' hover @mouseleave="mouseleaveselect" v-if = "selecttoggle" >
+        <v-list-item  v-for="(tool, i) in multiselectOptions" :key="i" :value="tool" @click="tool.action()":active="tool.isActive" style="margin: 0; padding: 0 !important;  width:39px; height: 39px; justify-items: center;">    
                 <v-tooltip location="right bottom" :text=tool.name >
                     <template v-slot:activator="{ props}">
                         <v-icon size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" style="justify-items: center; align-self: center;"></v-icon>
@@ -242,7 +241,6 @@
     import { store } from './store';
     import { defineAsyncComponent } from 'vue'
     import { setDefExpRets } from './login.js';
-import { sk } from 'vuetify/locale';
     export default{
         name: "NavBar",
         components:{
@@ -423,103 +421,115 @@ import { sk } from 'vuetify/locale';
                 retsToolsBottom: [
                                
                                 {title:"Basemap", icon: 'mdi-map-legend', color: "#D9D9D9", name: "Basemaps", isActive: false,
-                               action: () => {
-                                return
-                               },
-                                hover:(i) => { 
-                                    if (i === "Basemap")
+
+                                    action: () => 
                                         {
-                                            this.jumptocard = false;
-                                            this.basemapcard = true
-                                            this.selecttoggle = false
+                                            return
+                                        },
+                                    hover:(i) => 
+                                        {
+                                            if (i === "Basemap")
+                                                {
+                                                    this.basemapcard = true
+                                                }
+                                        },
+                                    hoverout: (i) => 
+                                        {
+                                            const myDiv = document.getElementById("basemaptoggle")
+                                            if (myDiv.matches(':hover') === false){
+                                                this.basemapcard = false
+                                            }
                                         }
-                                    }
-                                
+                                    
                                 },
                                {title:"JumpTo", icon: 'mdi-run', color: "#D9D9D9", name: "Jump To", isActive: false,
-                               action: () =>{
-                                return
-                               },
-                               hover:(i) => 
-                                    { 
-                                        if (i === "JumpTo")
-                                            {
-                                                this.basemapcard = false;
-                                                this.jumptocard = true
-                                                this.selecttoggle = false
+                                    action: () =>
+                                        {
+                                            return
+                                        },
+                                    hover:(i) => 
+                                        { 
+                                            if (i === "JumpTo")
+                                                {
+                                                    this.jumptocard = true
 
+                                                }
+                                        },
+                                    hoverout: (i) => 
+                                        {
+                                            const myDiv = document.getElementById("jumptotoggle")
+                                            if (myDiv.matches(':hover') === false)
+                                            {
+                                                this.jumptocard = false
                                             }
-                                    }
+                                        }
                                 },
                                 {title:"Select", icon: 'mdi-select-multiple', color: "#D9D9D9", name: "Multi-Select", isActive: false,
-                               action: () =>{
+                                    action: () =>
+                                        {
+                                            if(store.isSelectEnabled)
+                                                {
 
-                                // store.isSelectEnabled = !store.isSelectEnabled
-                                // this.retsToolsBottom[2].isActive = !this.retsToolsBottom[2].isActive
-                                // this.handleSelectTool();
-                                
-                                if(store.isSelectEnabled){
+                                                    sketchWidgetselect.cancel()                           
+                                                    this.retsToolsBottom[2].isActive = false
+                                                    this.multiselectOptions[0].isActive = false
+                                                    this.multiselectOptions[1].isActive = false
+                                                }
+                                            else
+                                                {
+                                                    this.handleSelectTool(this.multiselectTool);
+                                                }
 
-                                sketchWidgetselect.cancel()                           
-                                this.retsToolsBottom[2].isActive = false
-                                this.multiselectOptions[0].isActive = false
-                                this.multiselectOptions[1].isActive = false
-                                // store.isSelectEnabled = !store.isSelectEnabled
-                                }
-                                else{
-
-                                    this.handleSelectTool(this.multiselectTool);
-                                    
-
-            
-                                }
-
-                                // sketchWidgetselect.cancel()                           
-                                // this.retsToolsBottom[2].isActive = false
-                                // this.multiselectOptions[0].isActive = false
-                                // this.multiselectOptions[1].isActive = false
-                                store.isSelectEnabled = !store.isSelectEnabled
-                                
-                               },
-                               setActive: () => {
-                                return true
-                               },
-                               hover:(i) => 
-                                    {
-                                        // store.isSelectEnabled = !store.isSelectEnabled
-                                        this.basemapcard = false;
-                                        this.jumptocard= false;
-                                        this.selecttoggle = true;
-                                    }
+                                            store.isSelectEnabled = !store.isSelectEnabled
+                                            
+                                        },
+                                    setActive: () => {
+                                        return true
+                                    },
+                                    hover:(i) => 
+                                        {
+                                            this.selecttoggle = true;
+                                        },
+                                    hoverout: (i) => 
+                                        {
+                                            const myDiv = document.getElementById("Selecticons")
+                                            if (myDiv.matches(':hover') === false)
+                                                {
+                                                    this.selecttoggle = false
+                                                }
+                                        }
                                 },
                                {
                                 title:"Legend", icon: 'mdi-format-list-bulleted-type', color: "white", name: "Legend", 
-                               action: () =>{
-                                this.handleLegendTool();
-                                this.retsToolsBottom[3].isActive = !this.retsToolsBottom[3].isActive
-                               },
-                               hover:() => 
-                                    {
-                                        this.basemapcard = false;
-                                        this.jumptocard= false;
-                                        this.selecttoggle = false
-
-                                    }
+                                    action: () =>
+                                        {
+                                            this.handleLegendTool();
+                                            this.retsToolsBottom[3].isActive = !this.retsToolsBottom[3].isActive
+                                        },
+                                    hover:() => 
+                                        {
+                                            return
+                                        },
+                                    hoverout: (i) => 
+                                        {
+                                                return
+                                        }
                                 
                                },
                                {title:"Settings", icon: 'mdi-cog', color: "#D9D9D9", name: "Settings",
-                               action: () =>{
-                                this.handleSettingsTool();
-                                this.retsToolsBottom[4].isActive = !this.retsToolsBottom[4].isActive;
-                               },
-                               hover:(i) => 
-                                    {
-                                        this.basemapcard = false;
-                                        this.jumptocard= false;
-                                        this.selecttoggle = false
-
-                                        
-                                    }
+                                    action: () =>
+                                        {
+                                            this.handleSettingsTool();
+                                            this.retsToolsBottom[4].isActive = !this.retsToolsBottom[4].isActive;
+                                        },
+                                    hover:(i) => 
+                                        {
+                                            return
+                                        },
+                                    hoverout: (i) => 
+                                        {
+                                            return
+                                        }
                                 }
                             ],
 
@@ -552,383 +562,384 @@ import { sk } from 'vuetify/locale';
             }
         },
         
-                computed:{
-                    
+        computed:{
+            
 
+        },
+        created() { 
+            this.expandedGroups = this.previousReleaseNotes.map(() => false); 
+        },
+        watch: {
+            'store.toggleFeed':{
+                handler: function(){
+                    this.retsToolsTop[store.toggleFeed].action()
                 },
-                created() { 
-                    this.expandedGroups = this.previousReleaseNotes.map(() => false); 
-                },
-                watch: {
-                   'store.toggleFeed':{
-                        handler: function(){
-                            this.retsToolsTop[store.toggleFeed].action()
-                        },
-                        immediate: true
-                   },
-                   'store.activityBanner':{
-                        handler: function(){
-                            if(store.activityBanner !== "Activity Feed"){
-                                this.retsToolsTop[2].disabled = false
-                                return
-                            }
-                        
-                            this.retsToolsTop[2].disabled = true
-                            return
-                        },
-                        immediate: true
-                   },
-                   'feedbackText':{
-                        handler: function(){
-                            if (this.feedbackText.length){
-                                this.feedbackSubmitStatus = false
-                            }
-                            else{
-                                this.feedbackSubmitStatus = true
-                            }
-                        }
-                   },
-                   'isAnonymous':{
-                        handler: function(){
-                            if (this.isAnonymous){
-                                this.feedbackName = ""
-                            }
-                        }
-                   },
-                },
-                mounted() {
-                    this.setAutozoomSwitch()
-                    this.setAutozoomExtentSwitch()
-                    this.setNotifications()
-                    this.updateuserSettings()
-
-                },
+                immediate: true
+            },
+            'store.activityBanner':{
+                handler: function(){
+                    if(store.activityBanner !== "Activity Feed"){
+                        this.retsToolsTop[2].disabled = false
+                        return
+                    }
                 
-                methods: {
-                    testfunction(index){
-                        if (index === 4){
-                        console.log("clickkkkkk")
-                        this.showDropdown = !this.showDropdown
-                        console.log(this.showDropdown)
-                        return true
+                    this.retsToolsTop[2].disabled = true
+                    return
+                },
+                immediate: true
+            },
+            'feedbackText':{
+                handler: function(){
+                    if (this.feedbackText.length){
+                        this.feedbackSubmitStatus = false
+                    }
+                    else{
+                        this.feedbackSubmitStatus = true
+                    }
+                }
+            },
+            'isAnonymous':{
+                handler: function(){
+                    if (this.isAnonymous){
+                        this.feedbackName = ""
+                    }
+                }
+            },
+        },
+        mounted() {
+            this.setAutozoomSwitch()
+            this.setAutozoomExtentSwitch()
+            this.setNotifications()
+            this.updateuserSettings()
+
+        },
+        
+        methods: {
+            testfunction(index){
+                if (index === 4){
+                this.showDropdown = !this.showDropdown
+                return true
+                }
+                
+            },
+            addDays(index){
+                if (index === 2){
+                    return true
+
+                }
+                else{
+                    return false
+                }
+            },
+            addDropdown(index){
+                if (index > 3){
+                    return true
+                }
+                else{
+                    return false
+                }
+            },
+            updateuserSettings(){
+                store.userSettings = this.userSettings
+            },
+            setNotifications(){
+                const { notifications } = this.userSettings
+                if (notifications != null){
+                    for (let i = 0; i< notifications.length; i++ ){
+                        this.switches[i].value = notifications[i].value
+                    }
+                }
+                
+            },
+            isDisabled(index){
+                return
+                if (index > 0){
+                    return true
+                }
+                return false
+            },
+            setAutozoomExtentSwitch(){
+                const { autoZoomExtent } = this.userSettings;
+                if (autoZoomExtent != null){
+                    store.autozoomextent = autoZoomExtent
+                }
+                else{
+                    store.autozoomextent = false
+                }
+                return
+            },
+            setAutozoomSwitch(){
+                const { autoZoom } = this.userSettings;
+                if (autoZoom != null){
+                    store.autozoomtest = autoZoom
+                }
+                else{
+                    store.autozoomtest = true
+                }
+                return
+            },
+            async saveSettings(){
+                store.settings = {
+                    autoZoom : store.autozoomtest,
+                    autoZoomExtent: store.autozoomextent,
+                    basemap: store.basemaptest,
+                    notifications: this.switches
+                } 
+                this.isAutoZoom = store.autozoomtest
+                this.isAutoZoomExtent = store.autozoomextent
+                const settingsObject = {attributes: {OBJECTID : appConstants.defaultUserValue[0].objectid, SETTINGS : JSON.stringify(store.settings)}}
+                await addSettings(settingsObject)
+
+                const userOBJECTID = await getUserOBJECTID(store.loggedInUser)
+                this.userSettings = JSON.parse(userOBJECTID.SETTINGS)
+                store.userSettings = this.userSettings
+
+
+                if (store.updateRetsSearch.length != store.retspointlength && store.autozoomextent == false){
+                    if (store.CREATE_DT){
+                        await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                    }
+                    else{
+                        await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                    }
+                    return  
+                }
+                
+                
+
+            },
+            cancelSettings(){
+                const { autoZoom, autoZoomExtent, notifications } = this.userSettings;
+                store.autozoomtest = this.isAutoZoom ?? autoZoom ?? true;
+                store.autozoomextent = this.isAutoZoomExtent ?? autoZoomExtent ?? false;
+        
+                if (!notifications){
+                    return
+                }
+                for (let i =0; i < this.switches.length; i++){
+                    this.switches[i].value = notifications[i].value
+
+                }
+
+                return
+            },
+            shiftDiv(){
+                const viewSurface = document.querySelector('.esri-view');
+                viewSurface.classList.toggle('translateX-500px');
+                return
+            },
+            // newSwitchTurnedOn() {
+            //     if (this.switchValue) {
+            //         this.fontColor = '#FFFFFF';
+                    
+            //     } else {
+            //         this.fontColor = "#D9D9D9";
+            //     }
+            // },
+            // switchTurnedOn(index) {
+            //     if (this.switches[index].value) {
+            //         this.switches[index].fontColor = '#FFFFFF';
+            //     } 
+            //     else {
+            //         this.switches[index].fontColor = '#D9D9D9';
+            //     }
+                
+            //     },
+            switchStyle(fontColor) {
+                return { color: fontColor };
+            },
+            handleactiveclass(){
+                this.settingsstatus = false
+                this.retsToolsBottom[4].isActive = false
+
+            },
+            logoutMethod(){
+                logoutUser();
+                location.reload()
+            },
+            resizemap(){
+                togglemenu(this.isActOpen, this.shift);
+                this.isActOpen =! this.isActOpen
+            },
+            mouseleavebasemap(){
+                this.basemapcard = false;
+            },
+            mouseleavejumpto(){
+                this.jumptocard = false;
+            },
+            mouseleaveselect(){
+                this.selecttoggle = false;
+            },
+
+            async handleCreateTool() {
+                if (this.isCreateEnabled === true) {
+                    this.isCreateEnabled = !this.isCreateEnabled;
+                    const newPointGraphic = await createtool(sketchWidgetcreate, createretssym);
+                    // Process the newPointGraphic as needed
+                    this.isCreateEnabled = !this.isCreateEnabled;
+                    return newPointGraphic
+                    
+                } else {
+                    sketchWidgetcreate.cancel();
+                    this.isCreateEnabled = !this.isCreateEnabled;
+                }
+                
+                
+                
+            },
+            handleSelectTool(tooltype) { 
+                if ((tooltype === sketchWidgetselect.activeTool) || (tooltype === 'selecttoolfreehand' && sketchWidgetselect.activeTool === 'polygon')) {
+                    sketchWidgetselect.cancel();
+                    this.retsToolsBottom[2].isActive = false
+                    this.multiselectOptions[0].isActive = false
+                    this.multiselectOptions[1].isActive = false
+                    return
+                }
+                // if (store.isSelectEnabled  === false){
+                    // store.isSelectEnabled = !store.isSelectEnabled
+                    if (sketchWidgetselect.state === "active"){
+                        sketchWidgetselect.cancel()
                         }
+                    this.retsToolsBottom[2].isActive = true
+                    if (tooltype === "rectangle"){
                         
-                    },
-                    addDays(index){
-                        if (index === 2){
-                            return true
+                        selecttool(true, sketchWidgetselect, graphics, "rectangle","freehand")
+                        this.multiselectTool = "rectangle"
+                        this.multiselectOptions[0].isActive = true
 
-                        }
-                        else{
-                            return false
-                        }
-                    },
-                    addDropdown(index){
-                        if (index > 3){
-                            return true
-                        }
-                        else{
-                            return false
-                        }
-                    },
-                    updateuserSettings(){
-                        store.userSettings = this.userSettings
-                    },
-                    setNotifications(){
-                        const { notifications } = this.userSettings
-                        if (notifications != null){
-                            for (let i = 0; i< notifications.length; i++ ){
-                                this.switches[i].value = notifications[i].value
-                            }
-                        }
-                       
-                    },
-                    isDisabled(index){
-                        return
-                        if (index > 0){
-                            return true
-                        }
-                        return false
-                    },
-                    setAutozoomExtentSwitch(){
-                        const { autoZoomExtent } = this.userSettings;
-                        if (autoZoomExtent != null){
-                            store.autozoomextent = autoZoomExtent
-                        }
-                        else{
-                            store.autozoomextent = false
-                        }
-                        return
-                    },
-                    setAutozoomSwitch(){
-                        const { autoZoom } = this.userSettings;
-                        if (autoZoom != null){
-                            store.autozoomtest = autoZoom
-                        }
-                        else{
-                            store.autozoomtest = true
-                        }
-                        return
-                    },
-                    async saveSettings(){
-                        store.settings = {
-                            autoZoom : store.autozoomtest,
-                            autoZoomExtent: store.autozoomextent,
-                            basemap: store.basemaptest,
-                            notifications: this.switches
-                        } 
-                        this.isAutoZoom = store.autozoomtest
-                        this.isAutoZoomExtent = store.autozoomextent
-                        const settingsObject = {attributes: {OBJECTID : appConstants.defaultUserValue[0].objectid, SETTINGS : JSON.stringify(store.settings)}}
-                        await addSettings(settingsObject)
-
-                        const userOBJECTID = await getUserOBJECTID(store.loggedInUser)
-                        this.userSettings = JSON.parse(userOBJECTID.SETTINGS)
-                        store.userSettings = this.userSettings
-
-
-                        if (store.updateRetsSearch.length != store.retspointlength && store.autozoomextent == false){
-                            if (store.CREATE_DT){
-                                await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
-                            }
-                            else{
-                                await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
-                            }
-                            return  
-                        }
-                       
+                    }
+                    else if (tooltype === "selecttoolfreehand"){
+                        
+                        selecttool(true, sketchWidgetselect, graphics, "polygon","freehand")
+                        this.multiselectTool = "selecttoolfreehand"
+                        this.multiselectOptions[1].isActive = true
                         
 
-                    },
-                    cancelSettings(){
-                        const { autoZoom, autoZoomExtent, notifications } = this.userSettings;
-                        store.autozoomtest = this.isAutoZoom ?? autoZoom ?? true;
-                        store.autozoomextent = this.isAutoZoomExtent ?? autoZoomExtent ?? false;
-              
-                        if (!notifications){
-                            return
-                        }
-                        for (let i =0; i < this.switches.length; i++){
-                            this.switches[i].value = notifications[i].value
+                    }
+                    
+                // }
+                // else{
+                //     sketchWidgetselect.cancel()
+                //     // this.selectfunction.remove()
+                //     this.retsToolsBottom[2].isActive = false
+                //     store.isSelectEnabled = !store.isSelectEnabled
+                // }
 
-                        }
+                
+            },
 
-                        return
-                    },
-                    shiftDiv(){
-                        const viewSurface = document.querySelector('.esri-view');
-                        viewSurface.classList.toggle('translateX-500px');
-                        return
-                    },
-                    // newSwitchTurnedOn() {
-                    //     if (this.switchValue) {
-                    //         this.fontColor = '#FFFFFF';
-                            
-                    //     } else {
-                    //         this.fontColor = "#D9D9D9";
-                    //     }
-                    // },
-                    // switchTurnedOn(index) {
-                    //     if (this.switches[index].value) {
-                    //         this.switches[index].fontColor = '#FFFFFF';
-                    //     } 
-                    //     else {
-                    //         this.switches[index].fontColor = '#D9D9D9';
-                    //     }
-                        
-                    //     },
-                    switchStyle(fontColor) {
-                        return { color: fontColor };
-                    },
-                    handleactiveclass(){
-                        this.settingsstatus = false
-                        this.retsToolsBottom[4].isActive = false
+            handleJumpToToolGoogle() {
+                var ctr = view.center;                
+                var lat = ctr.latitude;                
+                var lon = ctr.longitude;     
+                var level = view.zoom ;
+                window.open("https://www.google.com/maps/@"+lat+","+lon+","+level+"z");
+                this.jumptocard = false;
 
-                    },
-                    logoutMethod(){
-                        logoutUser();
-                        location.reload()
-                    },
-                    resizemap(){
-                        togglemenu(this.isActOpen, this.shift);
-                        this.isActOpen =! this.isActOpen
-                    },
-                    mouseleavebasemap(){
-                        this.basemapcard = false;
-                    },
-                    mouseleavejumpto(){
-                        this.jumptocard = false;
-                    },
-                    mouseleaveselect(){
-                        this.selecttoggle = false;
-                    },
+            },
+            handleJumpToToolSPM() {
+                var ctr = view.center;                
+                var lat = ctr.latitude;                
+                var lon = ctr.longitude;                
+                var level = view.zoom -1 ;                
+                window.open("https://www.txdot.gov/apps/statewide_mapping/StatewidePlanningMap.html?map=txdot&coords="+lat+","+lon+","+level);
+                this.jumptocard = false;
+            },
 
-                    async handleCreateTool() {
-                        if (this.isCreateEnabled === true) {
-                            this.isCreateEnabled = !this.isCreateEnabled;
-                            const newPointGraphic = await createtool(sketchWidgetcreate, createretssym);
-                            // Process the newPointGraphic as needed
-                            this.isCreateEnabled = !this.isCreateEnabled;
-                            return newPointGraphic
-                            
-                        } else {
-                            sketchWidgetcreate.cancel();
-                            this.isCreateEnabled = !this.isCreateEnabled;
-                        }
-                        
-                        
-                       
-                    },
-                    handleSelectTool(tooltype) { 
-                        if ((tooltype === sketchWidgetselect.activeTool) || (tooltype === 'selecttoolfreehand' && sketchWidgetselect.activeTool === 'polygon')) {
-                            sketchWidgetselect.cancel();
-                            this.retsToolsBottom[2].isActive = false
-                            this.multiselectOptions[0].isActive = false
-                            this.multiselectOptions[1].isActive = false
-                            return
-                        }
-                        // if (store.isSelectEnabled  === false){
-                            // store.isSelectEnabled = !store.isSelectEnabled
-                            this.retsToolsBottom[2].isActive = true
-                            if (tooltype === "rectangle"){
-                                
-                                selecttool(true, sketchWidgetselect, graphics, "rectangle","freehand")
-                                this.multiselectTool = "rectangle"
-                                this.multiselectOptions[0].isActive = true
- 
-                            }
-                            else if (tooltype === "selecttoolfreehand"){
-                                
-                                selecttool(true, sketchWidgetselect, graphics, "polygon","freehand")
-                                this.multiselectTool = "selecttoolfreehand"
-                                this.multiselectOptions[1].isActive = true
-                                
- 
-                            }
-                            
-                        // }
-                        // else{
-                        //     sketchWidgetselect.cancel()
-                        //     // this.selectfunction.remove()
-                        //     this.retsToolsBottom[2].isActive = false
-                        //     store.isSelectEnabled = !store.isSelectEnabled
-                        // }
+            handleLegendTool() {
+                this.isLegendVisible =! this.isLegendVisible
+                if(this.isLegendVisible === true){
+                    legendWidget.visible = true;
+                }
+                else{
+                    legendWidget.visible = false;
+                }
+                },
 
-                        
-                    },
+                handleSettingsTool(){
+                if (this.feedbackStatus){
+                    this.feedbackStatus = false
+                    this.settingsstatus = false
+                    return
+                }
+                if (this.settingsstatus){
+                    this.cancelSettings()
+                }
+                this.settingsstatus = !this.settingsstatus;
 
-                    handleJumpToToolGoogle() {
-                        var ctr = view.center;                
-                        var lat = ctr.latitude;                
-                        var lon = ctr.longitude;     
-                        var level = view.zoom ;
-                        window.open("https://www.google.com/maps/@"+lat+","+lon+","+level+"z");
-                        this.jumptocard = false;
+                },
+            toggledarkgrey(){
+                applyDarkGrey()
+            },
+            togglelightgrey(){
+                applyLightGrey()
+            },
+            togglestandard(){
+                applyStandard()
 
-                    },
-                    handleJumpToToolSPM() {
-                        var ctr = view.center;                
-                        var lat = ctr.latitude;                
-                        var lon = ctr.longitude;                
-                        var level = view.zoom -1 ;                
-                        window.open("https://www.txdot.gov/apps/statewide_mapping/StatewidePlanningMap.html?map=txdot&coords="+lat+","+lon+","+level);
-                        this.jumptocard = false;
-                    },
+            },  
+            toggleimagery(){
+                applyImagery()
+            },
+            togglehybrid(){
+                applyHybrid()
+            },
+            togglegoogle(){
+                applyGoogle()
+            },
+            toggleosm(){
+                applyOSM()
+            },
 
-                    handleLegendTool() {
-                        this.isLegendVisible =! this.isLegendVisible
-                        if(this.isLegendVisible === true){
-                            legendWidget.visible = true;
-                        }
-                        else{
-                            legendWidget.visible = false;
-                        }
-                     },
+            toggledarkmode(){
+                vuetify.theme.defaultTheme = 'light';
 
-                     handleSettingsTool(){
-                        if (this.feedbackStatus){
-                            this.feedbackStatus = false
-                            this.settingsstatus = false
-                            return
-                        }
-                        if (this.settingsstatus){
-                            this.cancelSettings()
-                        }
-                        this.settingsstatus = !this.settingsstatus;
+            },
+            cancelFeedback(){
+                this.feedbackStatus = false
+                this.settingsstatus = true
+                this.feedbackText = ""
+                this.isAnonymous = false
 
-                     },
-                    toggledarkgrey(){
-                       applyDarkGrey()
-                    },
-                    togglelightgrey(){
-                       applyLightGrey()
-                    },
-                    togglestandard(){
-                        applyStandard()
-
-                    },  
-                    toggleimagery(){
-                        applyImagery()
-                    },
-                    togglehybrid(){
-                        applyHybrid()
-                    },
-                    togglegoogle(){
-                        applyGoogle()
-                    },
-                    toggleosm(){
-                        applyOSM()
-                    },
-
-                    toggledarkmode(){
-                        vuetify.theme.defaultTheme = 'light';
-
-                    },
-                    cancelFeedback(){
+            },
+            activateFeedback(){
+                this.feedbackStatus = true
+                this.settingsstatus = false
+                
+            },
+            async sendWebhookRequest(feedbackString, user){
+                this.feedbackSubmitStatus = true
+                let url = `https://gis-batch-dev.txdot.gov/fmejobsubmitter/TPP/TPP_DEV_RETS_Emailer.fmw?FEEDBACK=${feedbackString}&USERNAME=${user}&opt_showresult=false&opt_servicemode=sync&token=27a9777b0f14467fcfc09b854466559d14c24e43`
+                try{
+                    const response = await fetch(url)
+                    if (!response.ok){
+                    }
+                    else{
                         this.feedbackStatus = false
                         this.settingsstatus = true
                         this.feedbackText = ""
                         this.isAnonymous = false
+                        store.alertTextInfo = {"text": "Thank you for your feedback!", "color": "#70ad47", "type":"success", "toggle": true}
+                        store.isAlert = true
+                        this.feedbackSubmitStatus = false
 
-                    },
-                    activateFeedback(){
-                        this.feedbackStatus = true
-                        this.settingsstatus = false
-                        
-                    },
-                    async sendWebhookRequest(feedbackString, user){
-                        this.feedbackSubmitStatus = true
-                        let url = `https://gis-batch-dev.txdot.gov/fmejobsubmitter/TPP/TPP_DEV_RETS_Emailer.fmw?FEEDBACK=${feedbackString}&USERNAME=${user}&opt_showresult=false&opt_servicemode=sync&token=27a9777b0f14467fcfc09b854466559d14c24e43`
-                        try{
-                            const response = await fetch(url)
-                            if (!response.ok){
-                            }
-                            else{
-                                this.feedbackStatus = false
-                                this.settingsstatus = true
-                                this.feedbackText = ""
-                                this.isAnonymous = false
-                                store.alertTextInfo = {"text": "Thank you for your feedback!", "color": "#70ad47", "type":"success", "toggle": true}
-                                store.isAlert = true
-                                this.feedbackSubmitStatus = false
+                        setTimeout(() => {
+                            store.isAlert = false
 
-                                setTimeout(() => {
-                                    store.isAlert = false
-
-                                }, 10000);
-                            }
-                        }
-                        catch(error){
-                            console.log(error)
-                        }
-                    },
-                    submitFeedback(){
-                        this.isAnonymous ? this.sendWebhookRequest(this.feedbackText, 'Anonymous') : this.sendWebhookRequest(this.feedbackText, store.loggedInUser)
-                       
+                        }, 10000);
                     }
+                }
+                catch(error){
+                    console.log(error)
+                }
+            },
+            submitFeedback(){
+                this.isAnonymous ? this.sendWebhookRequest(this.feedbackText, 'Anonymous') : this.sendWebhookRequest(this.feedbackText, store.loggedInUser)
+                
+            }
 
-                    
-                },
+            
+        },
     }
 </script>
 
@@ -986,7 +997,6 @@ import { sk } from 'vuetify/locale';
     #icons-bottom{
         position: relative;
         bottom: 170px;
-        left: 12%;
     }
     #icons-top{
         bottom: 10px;
@@ -1007,7 +1017,7 @@ import { sk } from 'vuetify/locale';
         width: 158px;
         height: 330px;
         bottom: 18.3%;
-        left: 38px;
+        left: 37px;
         z-index: 9999;
         border-radius: 0px;
 
@@ -1020,7 +1030,7 @@ import { sk } from 'vuetify/locale';
         width: 165px;
         height: 90px;
         bottom: 14%;
-        left: 38px;
+        left: 37px;
         z-index: 9999;
         border-radius: 0px;
     }
@@ -1163,7 +1173,6 @@ import { sk } from 'vuetify/locale';
         position: absolute;
         top: -4px !important;
         left: 6px !important;
-        margin-right: 14px;
         padding-right: 5px !important;
         padding-bottom: 4px !important;
     }
@@ -1246,18 +1255,14 @@ import { sk } from 'vuetify/locale';
         
     }
 
-    .Selecticons{
-        /* position: absolute;
-        height: 90px;
-        width: 70px;
-        bottom: 7.5%; */
-        width: 40px;
-        justify-items: center;
+    #Selecticons{
+        width: fit-content;
         top: 81.8%;
-        left: 38px;
-       padding-top: 0;
-       padding-bottom: 0;
-       padding: 0;
+        padding: 0;
+        left: 37px;
+        z-index: 9999;
+        border-radius: 0px;
+        
     }
 
 
