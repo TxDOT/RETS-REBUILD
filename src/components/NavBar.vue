@@ -795,36 +795,25 @@
                     this.multiselectOptions[1].isActive = false
                     return
                 }
-                // if (store.isSelectEnabled  === false){
-                    // store.isSelectEnabled = !store.isSelectEnabled
-                    if (sketchWidgetselect.state === "active"){
-                        sketchWidgetselect.cancel()
-                        }
-                    this.retsToolsBottom[2].isActive = true
-                    if (tooltype === "rectangle"){
-                        
-                        selecttool(true, sketchWidgetselect, graphics, "rectangle","freehand")
-                        this.multiselectTool = "rectangle"
-                        this.multiselectOptions[0].isActive = true
-
+                if (sketchWidgetselect.state === "active"){
+                    sketchWidgetselect.cancel()
                     }
-                    else if (tooltype === "selecttoolfreehand"){
-                        
-                        selecttool(true, sketchWidgetselect, graphics, "polygon","freehand")
-                        this.multiselectTool = "selecttoolfreehand"
-                        this.multiselectOptions[1].isActive = true
-                        
-
-                    }
+                this.retsToolsBottom[2].isActive = true
+                if (tooltype === "rectangle"){
                     
-                // }
-                // else{
-                //     sketchWidgetselect.cancel()
-                //     // this.selectfunction.remove()
-                //     this.retsToolsBottom[2].isActive = false
-                //     store.isSelectEnabled = !store.isSelectEnabled
-                // }
+                    selecttool(true, sketchWidgetselect, graphics, "rectangle","freehand")
+                    this.multiselectTool = "rectangle"
+                    this.multiselectOptions[0].isActive = true
 
+                }
+                else if (tooltype === "selecttoolfreehand"){
+                    
+                    selecttool(true, sketchWidgetselect, graphics, "polygon","freehand")
+                    this.multiselectTool = "selecttoolfreehand"
+                    this.multiselectOptions[1].isActive = true
+                    
+
+                }
                 
             },
 
