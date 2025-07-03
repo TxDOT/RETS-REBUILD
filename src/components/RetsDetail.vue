@@ -41,7 +41,7 @@
                             <div style="max-height: 30px; display: flex; flex-direction: row;">
                                 <v-card-title style="font-size: 15px; position: relative;" class="flex">
                                     <span style="position: relative; bottom: 10px !important;">History</span>
-                                    <v-btn icon="mdi-arrow-expand" variant="plain" density="compact" @click="expandChatHistory" style="font-size: .6rem; float: right; position: relative; left: 20px; bottom: 10px;"></v-btn>
+                                    <v-btn icon="mdi-arrow-expand" variant="plain" density="compact" @click="expandChatHistory" style="font-size: .6rem; float: right; position: relative; left: 20px; bottom: 7px;"></v-btn>
                                 </v-card-title>
                             </div>
                             <div style="flex: 5;">
@@ -81,15 +81,15 @@
             </div>
             <div id="commentDiv" v-if="editText">
                 <v-card style="position: relative; height: 100%; border-radius: 0%;" >
-                    <v-card-title style="padding-bottom: 30px;">History</v-card-title>
-                    <div style="float: right; position: relative; bottom: 3.7rem;" >
+                    <v-card-title style="height: 75px;">History</v-card-title>
+                    <div style="float: right; position: relative; bottom: 4.1rem;" >
                         <v-btn icon="mdi-close" variant="plain" density="compact" @click="editText = false" style="font-size: .9rem;"></v-btn>
                     </div>
                     <historyView/>
                     <div class="marginSetting" style="padding-top: 10px; position: relative; width: 98%; bottom: 0rem;">
                         <v-text-field label="Type a message" density="compact" tile v-model="addHistoryChat" style="margin-left: 0px; margin-right: 5px;" :error-messages= "initRules ? 'Write a note. Submit your thought to History!' : null" @update:modelValue="historyValue"></v-text-field>
                         <div style="float: left; bottom: 1rem; position: relative;">
-                            <v-btn prepend-icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px !important; top: 10px; text-transform: none;" @click="displayAttachments()">Add an Attachment</v-btn>
+                            <v-btn prepend-icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px !important; top: 0px; text-transform: none;" @click="displayAttachments()">Add an attachment</v-btn>
                         </div>
                         
                         <div style="float:right; bottom: 1.3rem; position: relative; left: 7px;">
@@ -593,7 +593,7 @@
     width: 50rem;
     padding:0%;
     margin:0%;
-    height: 31rem;
+    height: 31.5rem;
 }
 
 .details-div{
@@ -683,7 +683,7 @@
 }
 
 #history-notes{
-    border-left: 3px solid #4472C4 !important;
+    border-left: 5px solid #4472C4 !important;
     position: relative;
     bottom: 2rem !important;
     border-radius: 0%;
@@ -736,6 +736,7 @@
 #gem-id:focus{
     outline: none;
 }
+
 
 #gem-search-icon{
     top: 0.2rem;

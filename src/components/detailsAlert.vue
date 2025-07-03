@@ -60,5 +60,13 @@
         margin-bottom: 10px;
     }
 
- 
+    .detailsAlert :deep(.v-alert__underlay){
+        opacity: .3 !important;
+        
+    }
+
+    .detailsAlert :deep(.v-alert__content){
+        opacity: 1;
+        text-shadow: black .5px .5px .5px ;
+    }
 </style>

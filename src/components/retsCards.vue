@@ -221,7 +221,7 @@ export default{
             this.timer = setTimeout(()=>{
                 const zoomToRETS = rets.geometry
                 highlightRETSPoint(rets.attributes)
-               
+
                 zoomTo(zoomToRETS)
             },250)
         },
