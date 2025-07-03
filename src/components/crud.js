@@ -117,10 +117,6 @@ export async function sendChatHistory(chat, type){
         },
         modify:() => {
             let setRetsEditDate = new Date().getTime()
-            // console.log(setRetsEditDate)
-            // console.log(store.roadObj.find(ret => ret.attributes.RETS_ID === chat.RETS_ID))
-            // let findStoreRetsObj = store.roadObj.find(ret => ret.attributes.RETS_ID === chat.RETS_ID)
-            // findStoreRetsObj.attributes.EDIT_DT = setRetsEditDate
 
             let a = createGraphic({"OBJECTID": chat.RETS_ID, "EDIT_DT": setRetsEditDate})
             retsLayer.applyEdits({

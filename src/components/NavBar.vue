@@ -118,7 +118,7 @@
                     </v-label>
                 </template>
             </v-switch>
-            <v-switch v-model="store.autozoomextent"   class="autozoom-switch" color="primary" :style="{color: fontColor}" density="compact" >
+            <v-switch v-model="store.autozoomextent" class="autozoom-switch" color="primary" :style="{color: fontColor}" density="compact" >
                 <template #prepend >
                     <v-label>
                         Automatically filter the activity feed based on the map extent
@@ -662,7 +662,6 @@
                     this.userSettings = JSON.parse(userOBJECTID.SETTINGS)
                     store.userSettings = this.userSettings
 
-
                         if (store.updateRetsSearch.length != store.retspointlength && store.autozoomextent == false){
                             if (store.CREATE_DT){
                                 await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
@@ -761,7 +760,6 @@
                             this.retsToolsBottom[2].isActive = false
                             this.multiselectOptions[0].isActive = false
                             this.multiselectOptions[1].isActive = false
-                            console.log(tooltype)
                             return
                         }
                         if (sketchWidgetselect.state === 'active') {

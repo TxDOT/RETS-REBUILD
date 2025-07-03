@@ -64,14 +64,6 @@ reactiveUtils.once(() => !rdLayerView.dataUpdating)
     try{
         console.log("roads ready")
         store.isAddBtn = false
-        // if( rdLayerView.view.zoom > 9 ){
-        //     if(TxDOTRoadways.definitionExpression === "") return
-        //     rdLayerView.layer.definitionExpression = ""
-        // }
-        // if(rdLayerView.view.zoom < 10 ){
-        //     if(TxDOTRoadways.definitionExpression === "RTE_PRFX = 'IH'") return
-        //     rdLayerView.layer.definitionExpression = "RTE_PRFX = 'IH'"
-        // }
         roadLayerView = rdLayerView
         sketchWidgetcreate.snappingOptions.featureSources.push({layer: roadLayerView.layer, enable: true})
     }
@@ -676,7 +668,6 @@ export function removeRelatedRetsFromMap(retsoid, retsID){
     }
     catch(err){
         console.warn(err)
-        console.log(store.retsObj.attributes.RELATED_RETS)
     }
 
 }

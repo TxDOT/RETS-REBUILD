@@ -872,25 +872,6 @@ homeWidget.on("go", function() {
             })
 });
 
-// const handlescale = reactiveUtils.watch(
-//   () => [view.stationary, view.scale],
-//   ([stationary, scale]) => {
-//     if (stationary){
-//       console.log("ok")
-//       if (view.scale < 1000000 ) { 
-//         retsLayer.renderer = retsPointRenderer;
-//       } 
-//       else if(view.scale > 1000000 && view.scale < 2000000){
-//         retsLayer.renderer = retsPointRendererout2
-//       }
-//       else {
-//         retsLayer.renderer = retsPointRendererout;
-//       }
-//       }
-//     }
-    
-//  );
-
 retsPointRenderer.visualVariables = [
   {
     type : "size",

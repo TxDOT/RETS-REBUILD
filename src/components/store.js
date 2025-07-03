@@ -274,37 +274,35 @@ export const store = reactive({
                         this.retsIDList.length = 0
                         this.updateRetsSearch.length = 0
                         let obj = await getQueryLayer(queryString, orderFields)
-                                //.then((obj) => {
-                                        if(obj.features.length){
-                                                let holdingArr = []
-                                                obj.features.forEach((x, i) => {
-                                                        x.attributes.flagColor = this.setFlagColor(x.attributes)
-                                                        x.attributes.CREATE_NM = this.returnUserName(x.attributes.CREATE_NM)
-                                                        x.attributes.EDIT_NM = this.returnUserName(x.attributes.EDIT_NM)
-                                                        x.attributes.CREATE_DT = this.returnDateFormat(x.attributes.CREATE_DT)
-                                                        x.attributes.EDIT_DT = this.returnDateFormat(x.attributes.EDIT_DT)
-                                                        x.attributes.mdiaccountmultiplecheck = this.isAssigned(x.attributes.ASSIGNED_TO)
-                                                        x.attributes.mdiaccountgroup = this.isMOTxDOTConnct(x.attributes.ACTV)
-                                                        x.attributes.mdipencilboxoutline = this.isRequest(x.attributes.ACTV)
-                                                        x.attributes.mdialarm = this.isDeadline(x.attributes.DEADLINE)
-                                                        x.attributes.mdicheckdecagramoutline = this.isComplete(x.attributes.STAT)
-                                                        x.attributes.mditimersand = this.isNoActivity(x.attributes.STAT, x.attributes.EDIT_DT)
-                                                        x.attributes.mdiexclamation = this.isPrio(x.attributes.PRIO)
-                                                        x.attributes.mdipaperclip = false
-                                                        x.attributes.DFO = x.attributes.DFO ? x.attributes.DFO.toFixed(3) : x.attributes.DFO
-                                                        x.attributes.historyUpdate = "Loading"
-                                                        holdingArr.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]}) 
-                                                        this.retsIDList.push(x.attributes.RETS_ID)
-                                                        //store.archiveRetsData.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
-                                                })
-                                                this.roadObj = holdingArr
-                                                return
-                                        }
-                                        if(!obj.features.length){
-                                                this.RetsCardStatus = "Bummer or lucky?? No Rets for you!"
-                                                return 
-                                        }
-                                //})
+                        if(obj.features.length){
+                                let holdingArr = []
+                                obj.features.forEach((x, i) => {
+                                        x.attributes.flagColor = this.setFlagColor(x.attributes)
+                                        x.attributes.CREATE_NM = this.returnUserName(x.attributes.CREATE_NM)
+                                        x.attributes.EDIT_NM = this.returnUserName(x.attributes.EDIT_NM)
+                                        x.attributes.CREATE_DT = this.returnDateFormat(x.attributes.CREATE_DT)
+                                        x.attributes.EDIT_DT = this.returnDateFormat(x.attributes.EDIT_DT)
+                                        x.attributes.mdiaccountmultiplecheck = this.isAssigned(x.attributes.ASSIGNED_TO)
+                                        x.attributes.mdiaccountgroup = this.isMOTxDOTConnct(x.attributes.ACTV)
+                                        x.attributes.mdipencilboxoutline = this.isRequest(x.attributes.ACTV)
+                                        x.attributes.mdialarm = this.isDeadline(x.attributes.DEADLINE)
+                                        x.attributes.mdicheckdecagramoutline = this.isComplete(x.attributes.STAT)
+                                        x.attributes.mditimersand = this.isNoActivity(x.attributes.STAT, x.attributes.EDIT_DT)
+                                        x.attributes.mdiexclamation = this.isPrio(x.attributes.PRIO)
+                                        x.attributes.mdipaperclip = false
+                                        x.attributes.DFO = x.attributes.DFO ? x.attributes.DFO.toFixed(3) : x.attributes.DFO
+                                        x.attributes.historyUpdate = "Loading"
+                                        holdingArr.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]}) 
+                                        this.retsIDList.push(x.attributes.RETS_ID)
+                                        //store.archiveRetsData.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
+                                })
+                                this.roadObj = holdingArr
+                                return
+                        }
+                        if(!obj.features.length){
+                                this.RetsCardStatus = "Bummer or lucky?? No Rets for you!"
+                                return 
+                        }
                         
 
 

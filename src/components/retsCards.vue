@@ -153,12 +153,10 @@ export default{
     },
 
     mounted(){
-        //outlineFeedCards()
         this.setLayer
         store.isSaving = false
         loadData()
         return
-        //outlineFeedCards(store.roadHighlightObj)
     },
 
     updated(){
@@ -170,10 +168,6 @@ export default{
         this.setLayer
         loadData()
         return
-        // loadData()
-        // store.toggleFeed = 1
-        // console.log('updated')
-        //store.activityBanner = "Activity Feed"
     },
     methods:{
         checkhighlight(retsid){
