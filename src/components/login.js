@@ -55,11 +55,14 @@ async function signIn(){
   await setDefExpRets(userId)
   //store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
   store.savedFilter = store.savedFilter.replace(/''/g, `'${userId}'`)
+  
   if (store.CREATE_DT){
-    await store.getRetsLayer(userId, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+    store.getRetsLayer(userId, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+      .then((res) => store.roadObj = res)
   }
   else{
-      await store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+    store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+      .then((res) => store.roadObj = res)
   }
 
   appConstants.userQueryField = appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]

@@ -162,7 +162,7 @@ export default{
     },
 
     updated(){
-        store.toggleFeed = 1
+        //store.toggleFeed = 1
         if(store.isSearch){
             loadData()
             return

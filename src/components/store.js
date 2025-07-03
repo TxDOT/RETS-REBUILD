@@ -297,8 +297,8 @@ export const store = reactive({
                                                         this.retsIDList.push(x.attributes.RETS_ID)
                                                         //store.archiveRetsData.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                                                 })
-                                                this.roadObj = holdingArr
-                                                return
+                                                // this.roadObj = holdingArr
+                                                return holdingArr
                                         }
                                         if(!obj.features.length){
                                                 this.RetsCardStatus = "Bummer or lucky?? No Rets for you!"
@@ -325,6 +325,8 @@ export const store = reactive({
                                 const query = {"whereString": `${resp}`, "queryLayer": "retsLayerLayerView"}
                                 const orderField = `${this.filter.createDt.filter} ${this.filter.createDt.sortType}`
                                 this.getRetsLayer(store.loggedInUser, query.whereString, query.queryLayer, orderField)
+                                        .then(res => this.roadObj = res)
+                                        .catch(err => console.log(err))
                                 this.isDetailsPage = false
                                 this.isNoRets = true
                                 return

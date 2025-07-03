@@ -190,7 +190,10 @@ export default{
 
     },
     mounted(){
-        this.isRetsParamOpen(this.retsparam)
+        if(this.retsparam){
+            this.isRetsParamOpen(this.retsparam)
+        }
+        
         reactiveUtils.on(() => view.popup, "trigger-action",
             async (event) => {
                 if (event.action.id === "open-details") {
@@ -219,13 +222,12 @@ export default{
     methods:{
         isRetsParamOpen(retsParam){
             let queryParams = {'whereString': `RETS_ID = ${retsParam}`, 'queryLayer': 'retsLayer'}
-            store.getRetsLayer('DPROSACK', queryParams.whereString, queryParams.queryLayer, )
+            store.getRetsLayer('DPROSACK', queryParams.whereString, queryParams.queryLayer, "RETS_ID")
             .then((x) => {
-                console.log(x.features[0])
-                let {attributes, geometry} = x.features[0]
-                let subRets = {attributes, geometry}
-                console.log(subRets)
-                openDetails({attributes, geometry})
+                console.log(x)
+                openDetails(x[0])
+                
+                console.log(store.toggleFeed)
                 return
             })
             .catch(err => console.log(err))
@@ -369,10 +371,10 @@ export default{
             return
         },
 
-        updateSelection(e){
+        async updateSelection(e){
             if(!e){
                 store.activityBanner = "Activity Feed"
-                store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                store.roadObj = await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
                 store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                 outlineFeedCards(store.roadHighlightObj)
                 return
