@@ -35,12 +35,17 @@
 
                 <!-- history section -->
                 <div class="history-div">
+                    <div id="historyCmntError" v-if="retCmnt.isError">
+                        <v-alert type="error" dense>
+                            Error adding a comment. {{ retCmnt.err }}
+                        </v-alert>
+                    </div>
                     <div style="display: flex; flex-direction: column; height: calc(100% + 9px);">
                         <v-card class="flex" style="display: flex; flex-direction: column; position: relative; border-radius: 0%; gap: 0px; overflow-y: auto;">
                             <div style="max-height: 30px; display: flex; flex-direction: row;">
                                 <v-card-title style="font-size: 15px; position: relative;" class="flex">
                                     <span style="position: relative; bottom: 10px !important;">History</span>
-                                    <v-btn icon="mdi-arrow-expand" variant="plain" density="compact" @click="expandChatHistory" style="font-size: .6rem; float: right; position: relative; left: 20px; bottom: 10px;"></v-btn>
+                                    <v-btn icon="mdi-arrow-expand" variant="plain" density="compact" @click="expandChatHistory()" style="font-size: .6rem; float: right; position: relative; left: 20px; bottom: 10px;"></v-btn>
                                 </v-card-title>
                             </div>
                             <div style="flex: 5;">
@@ -79,6 +84,11 @@
                 </div>
             </div>
             <div id="commentDiv" v-if="editText">
+                <div id="historyCmntErrorL" v-if="retCmntL.isError">
+                    <v-alert type="error" dense>
+                        Error adding a comment. {{ retCmntL.err }}
+                    </v-alert>
+                </div>
                 <v-card style="position: relative; height: 100%; border-radius: 0%;" >
                     <v-card-title style="padding-bottom: 30px;">History</v-card-title>
                     <div style="float: right; position: relative; bottom: 3.7rem;" >
@@ -185,7 +195,9 @@
                     required: value => !!value || "Write a note. Submit your thought to History!"
                 },
                 initRules: false,
-                userArray: []
+                userArray: [],
+                retCmnt: {err: null},
+                retCmntL: {}
             }
         },
         mounted(){
@@ -490,16 +502,35 @@
                 return
             },
             async addHistoryNote(size){
-                if(!this.addHistoryChat.length){
-                    this.initRules = true
+                try{
+                    if(!this.addHistoryChat.length){
+                        this.initRules = true
+                        return
+                    }
+                    const attach = store.attachment.length ? true : false 
+                    await store.addNote(this.addHistoryChat, attach, store.attachment, true)
+                    this.clearMessage()
+                    this.addAttach.length = 0
+                    document.getElementById(`${store.addNoteOid}${size}`).scrollIntoView({block: "end", inline: "nearest"})
                     return
                 }
-                const attach = store.attachment.length ? true : false 
-                await store.addNote(this.addHistoryChat, attach, store.attachment, true)
-                this.clearMessage()
-                this.addAttach.length = 0
-                document.getElementById(`${store.addNoteOid}${size}`).scrollIntoView({block: "end", inline: "nearest"})
-                return
+                catch(err){
+                    if(size === 'Expand'){
+                        console.log(err)
+                        this.retCmntL.isError = true
+                        this.retCmntL.err = "Unable to complete operation."
+                    }
+                    else{
+                        console.log(err)
+                        this.retCmnt.isError = true
+                        this.retCmnt.err = "Unable to complete operation."
+                    }
+
+                    setTimeout(()=>{
+                        this.retCmntL.isError = this.retCmnt.isError = false
+                    },3500)
+                }
+
             },
             clearMessage(){
                 this.addHistoryChat = ""
@@ -796,6 +827,20 @@
     width: 20rem;
     right: 8px;
     justify-content: end;
+}
+
+#historyCmntError{
+    position: absolute; 
+    z-index: 9999; 
+    width: 100%; 
+    font-size: 13px;
+}
+
+#historyCmntErrorL{
+    position: absolute; 
+    z-index: 9999; 
+    width: 100%; 
+    font-size: 13px;
 }
 
 </style>

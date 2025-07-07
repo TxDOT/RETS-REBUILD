@@ -10,7 +10,7 @@
                         <v-tooltip text="Find Minute Order/TxDOT Connect" location="top">
                             <template v-slot:activator="{props}">
                                 <div v-bind="props">
-                                    <v-icon icon="mdi-link" small class="number-field-icon" @click="paperClipFunc" ></v-icon>
+                                    <v-icon icon="mdi-link" small class="number-field-icon" @click="paperClipFunc()" ></v-icon>
                                 </div>
                             </template>
                         </v-tooltip>
@@ -275,7 +275,7 @@ import {store} from './store.js'
                 //         store.isSaveBtnDisable = true
                 //         return
                 //     }
-                //     store.isAlert = false
+                    store.isAlert = false
                 //     store.isSaveBtnDisable = false
                 //     this.dfoLabel = 'DFO'
                     this.completeDataSearch()
