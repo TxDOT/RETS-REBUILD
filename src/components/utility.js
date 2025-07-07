@@ -87,7 +87,6 @@ try{
     view.on("click", (event)=>{
         if (view.popup.visible === true){
             view.closePopup()
-            removeHighlight
         }
         event.stopPropagation()
         view.hitTest(event, {include: [retsLayer, retsGraphicLayer, roadLayerView.layer]}).then((evt) =>{
@@ -110,15 +109,24 @@ try{
                   }, 10000);
             }
             else{
-
+           
                 highlightLayer.removeAll()
                 removeHighlightRoadways('a', true)
+                removeHighlight('a', true)
                 if(!evt.results.length){
                     if (!store.isSaveBtnDisable){
                         store.cancelpopup = true
                         return
                     }
-                    store.activityBanner = "Activity Feed"
+                    if (store.isShowSelected){
+                        store.isShowSelected = false
+                        store.roadHighlightObj.clear()
+                        setTimeout(() => {
+                            returntofeedcopy()
+
+                        }, 500);
+                        return
+                    }
                     removeOutline()
                     removeHighlight("a", true)
                     clearRoadHighlightObj()
@@ -126,10 +134,6 @@ try{
                     return
                 }
                 store.layerName = evt.results[0].layer.title
-
-                if ( store.retsObj.attributes.CREATE_DT === store.retsObj.attributes.EDIT_DT && store.archiveRetsDataString.length != 0){
-                    return
-                }
                 if (evt.results[0].layer.title === "TxDOT Roadways"){
                     highlightRoadways(evt.results[0].graphic.attributes)
                     if (evt.results.length === 1){
@@ -138,31 +142,50 @@ try{
                             location: event.mapPoint
                         });
                     }
-
+                    
                 }
-
-                    const retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
-                   
-                    if (store.isDetailsPage && store.isSaveBtnDisable && !store.isEmptyRow){
-                        //canceldetailsfunction()
-                        openDetails(retsPt)
+                else{
+                    if ( store.retsObj.attributes.CREATE_DT === store.retsObj.attributes.EDIT_DT && store.archiveRetsDataString.length != 0){
+                        return
                     }
 
-                
-                store.roadHighlightObj.clear()
-                if (retsPt){
-                    store.roadHighlightObj.add(retsPt)
+                    store.roadHighlightObj.clear()
+                    let retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
+                    
+                    if (retsPt){
+                        store.roadHighlightObj.add(retsPt)
 
-                }
+                    }
+                    if (store.isDetailsPage && store.isSaveBtnDisable && !store.isEmptyRow){
+                        openDetails(retsPt)
+                        return
+                    }
+                    if (retsPt === undefined && store.isShowSelected){
+                        const retsId = evt.results[0].graphic.attributes.RETS_ID
+                        
+                   
+                        let sorting = store.CREATE_DT ? `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO` : "EDIT_DT DESC, PRIO"
 
-                if (store.isSaveBtnDisable && !store.isEmptyRow){
-                    removeOutline()
-                    removeHighlight("a", true)
-                    const firstResult = Array.isArray(evt.results) ? evt.results[0] : null;
-                    firstResult.graphic.layer.title ? highlightRETSPoint(firstResult.graphic.attributes) : highlightGraphicPt(firstResult.graphic.attributes)
-                    outlineFeedCards(evt.results.splice(0,1))
-             
-                }
+                        store.getRetsLayer(store.loggedInUser, `RETS_ID = ${evt.results[0].graphic.attributes.RETS_ID}`, "retsLayer", sorting).then((value) => {
+                            store.isShowSelected = true
+                            retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === retsId)
+                            store.roadHighlightObj.add(retsPt)
+
+
+                        
+                        })
+                    
+                    }
+                        if (store.isSaveBtnDisable && !store.isEmptyRow){
+                                removeOutline()
+                                removeHighlight("a", true)
+                                const firstResult = Array.isArray(evt.results) ? evt.results[0] : null;
+                                firstResult.graphic.layer.title ? highlightRETSPoint(firstResult.graphic.attributes) : highlightGraphicPt(firstResult.graphic.attributes)
+                                outlineFeedCards(evt.results.splice(0,1))
+                        
+                            }
+                        }
+               
                 
             }
             
@@ -909,7 +932,11 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                         store.roadHighlightObj.clear()
                                         store.retsSelection.clear
                                         if (!selectedFeatures.length){
-                                            returnToFeedFunction()
+                                            store.roadHighlightObj.clear()
+                                             setTimeout(() => {
+                                                returntofeedcopy()
+
+                                            }, 500);
                                         }
                                         for (let i = 0; i < selectedFeatures.length; i++ ) {
                                             store.roadHighlightObj.add(store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[i].attributes.OBJECTID))
@@ -944,14 +971,14 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
 
                                                                     if (store.autozoomextent  && store.isShowSelected && i == 0){
                                                                           if (store.CREATE_DT ){
-                                                                        store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                                                                            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
                                                                             //check if features are highlighted, if they are run the outlinefeedcards
 
-                                                                    }
-                                                                    else{
-                                                                        store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", "EDIT_DT DESC, PRIO")
+                                                                        }
+                                                                        else{
+                                                                            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", "EDIT_DT DESC, PRIO")
 
-                                                                    }
+                                                                        }
                                                                     }
                                                                    
 
@@ -995,14 +1022,14 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
 
                                         if (store.autozoomextent && store.isShowSelected){
                                             if (store.CREATE_DT){
-                                            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                                                store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
                                                 //check if features are highlighted, if they are run the outlinefeedcards
 
-                                        }
-                                        else{
-                                            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", "EDIT_DT DESC, PRIO")
+                                            }
+                                            else{
+                                                store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", "EDIT_DT DESC, PRIO")
 
-                                        }
+                                            }
                                         }
                                         
 
@@ -1031,7 +1058,9 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
 
                                             }  
                                             else{
-                                                returnToFeedFunction()
+                                                store.roadHighlightObj.clear()
+                                                returntofeedcopy()
+
 
                                             }
                                         }
