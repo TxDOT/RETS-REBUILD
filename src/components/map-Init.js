@@ -903,7 +903,7 @@ export const handleextent = reactiveUtils.watch(
       const selectedstring = []
       if (store.roadHighlightObj.size){
         store.roadHighlightObj.forEach((value) => selectedstring.push(value.attributes.RETS_ID))
-      }     
+      } 
       retsLayer.queryFeatures(query)
         .then(function(response){
           response.features.forEach((feature) =>
@@ -918,7 +918,7 @@ export const handleextent = reactiveUtils.watch(
           else if (response.features.length > 0 && !store.isShowSelected){
               stringex = featurestring.join(" OR RETS_ID = ")
 
-          }       
+          }  
           if (store.CREATE_DT){
               store.getRetsLayer(store.loggedInUser, `RETS_ID = ${stringex}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
                 //check if features are highlighted, if they are run the outlinefeedcards

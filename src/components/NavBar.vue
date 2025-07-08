@@ -11,7 +11,7 @@
             </v-list-item>
         </v-list>
         <v-list id="icons-bottom" class="iconList">
-            <v-list-item id="popoutitems" class="iconList-item" v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @click="tool.action()" :active="tool.isActive" :active-class="tool.name !== 'Jump To' || tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
+            <v-list-item id="popoutitems" class="iconList-item" v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @mouseleave="tool.hoverout(tool.title)" @click="tool.action()" :active="tool.isActive" :active-class="tool.name !== 'Jump To' || tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
                 <template v-if="tool.name !== 'Basemaps' && tool.name !== 'Jump To' && tool.name !=='Multi-Select' ">
                     <v-tooltip location="right" :text="tool.name"> 
                             <template v-if="tool.name !== 'Multi-Select'" v-slot:activator="{ props }">
@@ -95,36 +95,37 @@
  
    </v-card>
    
-   <v-list class='Selecticons' @mouseleave="mouseleaveselect" v-if = "selecttoggle">
-    <v-list-item  v-for="(tool, i) in multiselectOptions" :key="i" :value="tool" @click="tool.action()":active="tool.isActive" style="margin: 0; padding-left: 0 !important;  width:39px; height: 39px; justify-items: center;">    
-        <v-tooltip location="right bottom" :text=tool.name >
-            <template v-slot:activator="{ props}">
-                <v-icon size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" style="justify-items: center; align-self: center;"></v-icon>
-            </template>
-        </v-tooltip>
-    </v-list-item>
-</v-list>
-<v-card id = "containersettings" height = "655" v-show = "settingsstatus">
-<v-card-item>
-    <span class="banner-txt">Settings</span>
-    &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
-    <span id='releaseNotes' :style="{color: releaseNotesColor, fontSize: '13px'}" @mouseover="releaseNotesColor = 'white'" @mouseleave="releaseNotesColor = '#D9D9D9'" @click="isReleaseNotes = true">Version {{ store.retsVersion }}</span>
-</v-card-item>
-    <v-card-item class = "topSettings" >
-            <v-switch v-model="store.autozoomtest"   class="autozoom-switch" color="primary" :style="{color: fontColor}" density="compact" >
-                <template #prepend >
-                    <v-label>
-                        Automatically zoom when I change filters
-                    </v-label>
-                </template>
-            </v-switch>
-            <v-switch v-model="store.autozoomextent" class="autozoom-switch" color="primary" :style="{color: fontColor}" density="compact" >
-                <template #prepend >
-                    <v-label>
-                        Automatically filter the activity feed based on the map extent
-                    </v-label>
-                </template>
-            </v-switch>
+   <v-list id='Selecticons' hover @mouseleave="mouseleaveselect" v-if = "selecttoggle" >
+        <v-list-item  v-for="(tool, i) in multiselectOptions" :key="i" :value="tool" @click="tool.action()":active="tool.isActive" style="margin: 0; padding: 0 !important;  width:39px; height: 39px; justify-items: center;">    
+                <v-tooltip location="right bottom" :text=tool.name >
+                    <template v-slot:activator="{ props}">
+                        <v-icon size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" style="justify-items: center; align-self: center;"></v-icon>
+                    </template>
+                </v-tooltip>
+                
+            </v-list-item>
+        </v-list>
+   <v-card id = "containersettings" height = "655" v-show = "settingsstatus">
+    <v-card-item>
+        <span class="banner-txt">Settings</span>
+        &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+        <span id='releaseNotes' :style="{color: releaseNotesColor, fontSize: '13px'}" @mouseover="releaseNotesColor = 'white'" @mouseleave="releaseNotesColor = '#D9D9D9'" @click="isReleaseNotes = true">Version {{ store.retsVersion }}</span>
+    </v-card-item>
+        <v-card-item class = "topSettings" >
+                <v-switch v-model="store.autozoomtest"   class="autozoom-switch" color="primary" :style="{color: fontColor}" density="compact" >
+                    <template #prepend >
+                        <v-label>
+                            Automatically zoom when I change filters
+                        </v-label>
+                    </template>
+                </v-switch>
+                <v-switch v-model="store.autozoomextent"   class="autozoom-switch" color="primary" :style="{color: fontColor}" density="compact" >
+                    <template #prepend >
+                        <v-label>
+                            Automatically filter the activity feed based on the map extent
+                        </v-label>
+                    </template>
+                </v-switch>
 
             <v-label style="font-size: 10px; color: #D9D9D9; margin-left: 10px;">Display selected basemap on load</v-label>
             <v-select style="width: 22rem; margin-left: 10px; margin: top 0; margin-bottom: 0;" class="basemap-select" variant="underlined" density="compact" v-model=store.basemaptest :items=basemapArray></v-select>
@@ -330,189 +331,206 @@
                 'Bug 220: New, Proposed check box in wrong place'
 
 
-            ],
-            ['Release 2.5', ' User Story 95: Add a count to the header', 'User Story 111: Use most recent history item in the card footer ', 'User Story 133: Filter: Add Custom Filter option',
-            'User Story 146: Job Detail Pane: Update', 'User Story 171: Resize app','User Sory 150: Add ability to save custom filters', 'User Story 170: Add update triggers for all updates made to a RETS',
-            'User Story 195: Add time-gated limiter to triggers to prevent 3 or more comments being added when new RETS is created', 'User Story 205: Update tables and filter for multiple district users',
-                'Bug 178: Activity feed detail pane selection interaction', 'Bug 192: Changing status duplicates job feed', 'Bug 176: 1969 date corrupting history update in card footer',
-            'Bug 180: New job cards are not at the top of the feed', 'Bug 181: No route check box not checked for new jobs', 'Bug 123: Map Pane Search still not working properly for Minute Orders'],
-            ['Release 2.4', 'User Story 146: Job Detail Pane: Update', ' Bug 158: Selection not respected when JD pane is open', 'Bug 172: RETS number and subtitle too close'],
-            ['Release 2.3', 'User Story 107: Create tab buttons for Activity Feed and Details', 'User Story 108: Cancel button warning popup for unsaved changes', 'User Story 137: Add "Created" by info to metadata tab',
-            'User Story 146: Job Detail Pane: Update', 'User Story 148: Update trigger for history items to reflect username instead of RETSBOT','User Story 156: Add right click to get coordinates function',
-            'Bug 120: Flags not persisting', 'Bug 161: Assigned to default incorrect', 'Bug 210: Search: Value that does not exist zooms to random street', 'Bug 221: Double Click of RETS doesnt ask to save/discard changes on RETS',
-            'Bug 223: Discard popup appears when right click while details pane is open'],
-            ['Release 2.2', 'User Story 79: Related RETS Interaction', 'User Story 109: Add Activity and Detail Pane tabs', 'User Story 144: Job Detail Pane: Disable GEM task icon',
-            'User Story 149: Set up a test environment', 'User Story 139: Update default filter (to show all RETS with your name associated with it, anywhere)', 'Bug 116: Activity feed/Filter interaction',
-            'Bug 117: Card Selection', 'Bug 86: Add new point spinner is off center for certain screen sizes', 'Bug 93: Save not enabled after changes', 'Bug 97: Add attachment issues','Bug 98: Filter: User drop down not sorted',
-            'Bug 99: Filter: Count bubble', 'Bug 100: Add new point: New points show at bottom of feed', 'Bug 101: DFO field: Limit to 3 decimal places', 'Bug 102: Add new point: Orange route remains',
-            'Bug 145: Detail Pane Save button errors', 'Bug 125: Invalid route data and description lost when making new point', 'Bug 127: Date Picker in Detail Pane cant be closed unless a date is picked',
-            'Bug 114: Marking a RETS as Complete still shows in feed even if that filter is off', 'Bug 115: Center map on Texas when no cards are loaded in the feed (not off the coast of Africa)',
-            'Bug 118: "Add" comment button does not scroll to the entry location', 'Bug 121: Left Nav Bar: Icons shift when activated', 'Bug 124: Cursor in Map Pan still shows as pointer when hovering over a road in some circumstances',
-            'Bug 126: Points remain selected in the map after cards are unselected/closed','Bug 129: Filter popup dropdowns close method', 'Bug 132: Filter: Calendar allows too many dates to be selected',
-            'Bug 141: Form field validation bugs', 'Bug 128: Filter: Count doesnt reset','Bug 134: Form Validation: MO/TxDOT Connect number', 'Bug 135: Form Validation: Number field can not be NULL',
-            'Bug 136: Route field editable','Bug 140: Setting', 'Bug 142: Show Selected: Feed does not return when selection is cleared', 'Bug 143: Show Selected: Clears selection when diactivated',
-            'Bug 151: Activity Feed does not refresh after making a change to a RETS that would exclude that card from the feed based on the current filters', 'Bug 189: Linework is not aligning with basemap in RETS'],
-            ['Release 2.1','User Story 41: Map Pane', 'User Story 42: Initial Schema','User Story 44: Activity Feed Pane','User Story 45: Left Nav Menu Bar','User Story 46: Job Detail Pane',
-            'User Story 47: Add New Job Point','User Story 50: UI: Style Guide','User Story 52: Filter','User Story 55: Form Field Validations','User Story 58: Triggers','User Story 60: Show Selected',
-            'User Story 61: History','User Story 65: History Enhancements','User Story 66: Settings','User Story 74: RETS Subtitle','User Story 76: Archive RETS jobs','User Story 77: Move existing point',
-            'Bug 84: Filter: Cancel button doesnt cancel and count doesnt reset','Bug 87: DFO error notification','Bug 88: MO link greyed out','Bug 89: Home button zooms to wrong location',
-            'Bug 91: Default deadline date','Bug 103: Map pane: Home button, filter interaction zoom', 'Bug 104: Route Name field validation and auto-update' ],  
-            ['Release 2.0','RETS V2 first release'],  
-            ],
-            switches: [
-                        { label: "New RETS in my district(s)", value: false},
-                        { label: "RETS assigned to me", value: false},
-                        { label: "Someone tags me", value: false},
-                        { label: "RETS marked high priority", value: false},
-                        { label: "No activty in ______ days", value: false},
-                        { label: "A RETS is deleted", value: false},
-                        { label: "Status changes to", value: false},
-                    ],
-            retsToolsTop: [
-                            {
-                            title:"Toggle",
-                            icon: 'mdi-menu', 
-                            color: "#D9D9D9", 
-                            name: "Menu",
-                            value: 0,
-                            action: () =>{
-                                document.getElementById("card-container").style.display = document.getElementById("card-container").style.display === "none" ? "flex" : "none",
-                                //this.resizemap();
-                                this.shiftDiv();
-                            }, 
-                            isActive: this.tester,
-                            disabled: false
-                            },
-                            {
-                            title: "Activity Pane",
-                            icon: "mdi-map-marker-outline",
-                            name: "Activity Feed",
-                            value: 1,
-                            action: ()=>{
-                                //open feed
-                                store.isCard = true
-                                store.isDetailsPage = false
-                                this.toggle = 1
-                                store.toggleFeed = 1                                    
-                                
-                            },
-                            disabled: false
-                            },
-                            {
-                            title: "Details Pane",
-                            icon: "mdi-clipboard-text-outline",
-                            color: "#D9D9D9",
-                            name: "Details",
-                            value: 2,
-                            props:{},
-                            action: ()=>{
-                                //open details pane
-                                store.isDetailsPage = true
-                                store.isCard = false
-                                this.toggle = 2
-                                store.toggleFeed = 2
-                            },
-                            disabled: true
-                            }
+                ],
+                ['Release 2.5', ' User Story 95: Add a count to the header', 'User Story 111: Use most recent history item in the card footer ', 'User Story 133: Filter: Add Custom Filter option',
+                'User Story 146: Job Detail Pane: Update', 'User Story 171: Resize app','User Sory 150: Add ability to save custom filters', 'User Story 170: Add update triggers for all updates made to a RETS',
+                'User Story 195: Add time-gated limiter to triggers to prevent 3 or more comments being added when new RETS is created', 'User Story 205: Update tables and filter for multiple district users',
+                 'Bug 178: Activity feed detail pane selection interaction', 'Bug 192: Changing status duplicates job feed', 'Bug 176: 1969 date corrupting history update in card footer',
+                'Bug 180: New job cards are not at the top of the feed', 'Bug 181: No route check box not checked for new jobs', 'Bug 123: Map Pane Search still not working properly for Minute Orders'],
+                ['Release 2.4', 'User Story 146: Job Detail Pane: Update', ' Bug 158: Selection not respected when JD pane is open', 'Bug 172: RETS number and subtitle too close'],
+                ['Release 2.3', 'User Story 107: Create tab buttons for Activity Feed and Details', 'User Story 108: Cancel button warning popup for unsaved changes', 'User Story 137: Add "Created" by info to metadata tab',
+                'User Story 146: Job Detail Pane: Update', 'User Story 148: Update trigger for history items to reflect username instead of RETSBOT','User Story 156: Add right click to get coordinates function',
+                'Bug 120: Flags not persisting', 'Bug 161: Assigned to default incorrect', 'Bug 210: Search: Value that does not exist zooms to random street', 'Bug 221: Double Click of RETS doesnt ask to save/discard changes on RETS',
+                'Bug 223: Discard popup appears when right click while details pane is open'],
+                ['Release 2.2', 'User Story 79: Related RETS Interaction', 'User Story 109: Add Activity and Detail Pane tabs', 'User Story 144: Job Detail Pane: Disable GEM task icon',
+                'User Story 149: Set up a test environment', 'User Story 139: Update default filter (to show all RETS with your name associated with it, anywhere)', 'Bug 116: Activity feed/Filter interaction',
+                'Bug 117: Card Selection', 'Bug 86: Add new point spinner is off center for certain screen sizes', 'Bug 93: Save not enabled after changes', 'Bug 97: Add attachment issues','Bug 98: Filter: User drop down not sorted',
+                'Bug 99: Filter: Count bubble', 'Bug 100: Add new point: New points show at bottom of feed', 'Bug 101: DFO field: Limit to 3 decimal places', 'Bug 102: Add new point: Orange route remains',
+                'Bug 145: Detail Pane Save button errors', 'Bug 125: Invalid route data and description lost when making new point', 'Bug 127: Date Picker in Detail Pane cant be closed unless a date is picked',
+                'Bug 114: Marking a RETS as Complete still shows in feed even if that filter is off', 'Bug 115: Center map on Texas when no cards are loaded in the feed (not off the coast of Africa)',
+                'Bug 118: "Add" comment button does not scroll to the entry location', 'Bug 121: Left Nav Bar: Icons shift when activated', 'Bug 124: Cursor in Map Pan still shows as pointer when hovering over a road in some circumstances',
+                'Bug 126: Points remain selected in the map after cards are unselected/closed','Bug 129: Filter popup dropdowns close method', 'Bug 132: Filter: Calendar allows too many dates to be selected',
+                'Bug 141: Form field validation bugs', 'Bug 128: Filter: Count doesnt reset','Bug 134: Form Validation: MO/TxDOT Connect number', 'Bug 135: Form Validation: Number field can not be NULL',
+                'Bug 136: Route field editable','Bug 140: Setting', 'Bug 142: Show Selected: Feed does not return when selection is cleared', 'Bug 143: Show Selected: Clears selection when diactivated',
+                'Bug 151: Activity Feed does not refresh after making a change to a RETS that would exclude that card from the feed based on the current filters', 'Bug 189: Linework is not aligning with basemap in RETS'],
+                ['Release 2.1','User Story 41: Map Pane', 'User Story 42: Initial Schema','User Story 44: Activity Feed Pane','User Story 45: Left Nav Menu Bar','User Story 46: Job Detail Pane',
+                'User Story 47: Add New Job Point','User Story 50: UI: Style Guide','User Story 52: Filter','User Story 55: Form Field Validations','User Story 58: Triggers','User Story 60: Show Selected',
+                'User Story 61: History','User Story 65: History Enhancements','User Story 66: Settings','User Story 74: RETS Subtitle','User Story 76: Archive RETS jobs','User Story 77: Move existing point',
+                'Bug 84: Filter: Cancel button doesnt cancel and count doesnt reset','Bug 87: DFO error notification','Bug 88: MO link greyed out','Bug 89: Home button zooms to wrong location',
+                'Bug 91: Default deadline date','Bug 103: Map pane: Home button, filter interaction zoom', 'Bug 104: Route Name field validation and auto-update' ],  
+                ['Release 2.0','RETS V2 first release'],  
+                ],
+                switches: [
+                            { label: "New RETS in my district(s)", value: false},
+                            { label: "RETS assigned to me", value: false},
+                            { label: "Someone tags me", value: false},
+                            { label: "RETS marked high priority", value: false},
+                            { label: "No activty in ______ days", value: false},
+                            { label: "A RETS is deleted", value: false},
+                            { label: "Status changes to", value: false},
                         ],
+                retsToolsTop: [
+                               {
+                                title:"Toggle",
+                                icon: 'mdi-menu', 
+                                color: "#D9D9D9", 
+                                name: "Menu",
+                                value: 0,
+                                action: () =>{
+                                    document.getElementById("card-container").style.display = document.getElementById("card-container").style.display === "none" ? "flex" : "none",
+                                    //this.resizemap();
+                                    this.shiftDiv();
+                                }, 
+                                isActive: this.tester,
+                                disabled: false
+                               },
+                               {
+                                title: "Activity Pane",
+                                icon: "mdi-map-marker-outline",
+                                name: "Activity Feed",
+                                value: 1,
+                                action: ()=>{
+                                    //open feed
+                                    store.isCard = true
+                                    store.isDetailsPage = false
+                                    this.toggle = 1
+                                    store.toggleFeed = 1                                    
+                                    
+                                },
+                                disabled: false
+                               },
+                               {
+                                title: "Details Pane",
+                                icon: "mdi-clipboard-text-outline",
+                                color: "#D9D9D9",
+                                name: "Details",
+                                value: 2,
+                                props:{},
+                                action: ()=>{
+                                    //open details pane
+                                    store.isDetailsPage = true
+                                    store.isCard = false
+                                    this.toggle = 2
+                                    store.toggleFeed = 2
+                                },
+                                disabled: true
+                               }
+                            ],
+ 
+                retsToolsBottom: [
+                               
+                                {title:"Basemap", icon: 'mdi-map-legend', color: "#D9D9D9", name: "Basemaps", isActive: false,
 
-            retsToolsBottom: [
-                            
-                            {title:"Basemap", icon: 'mdi-map-legend', color: "#D9D9D9", name: "Basemaps", isActive: false,
-                            action: () => {
-                            return
-                            },
-                            hover:(i) => { 
-                                if (i === "Basemap")
-                                    {
-                                        this.jumptocard = false;
-                                        this.basemapcard = true
-                                        this.selecttoggle = false
-                                    }
-                                }
-                            
-                            },
-                            {title:"JumpTo", icon: 'mdi-run', color: "#D9D9D9", name: "Jump To", isActive: false,
-                            action: () =>{
-                            return
-                            },
-                            hover:(i) => 
-                                { 
-                                    if (i === "JumpTo")
+                                    action: () => 
                                         {
-                                            this.basemapcard = false;
-                                            this.jumptocard = true
-                                            this.selecttoggle = false
-
+                                            return
+                                        },
+                                    hover:(i) => 
+                                        {
+                                            if (i === "Basemap")
+                                                {
+                                                    this.basemapcard = true
+                                                }
+                                        },
+                                    hoverout: (i) => 
+                                        {
+                                            const myDiv = document.getElementById("basemaptoggle")
+                                            if (myDiv.matches(':hover') === false){
+                                                this.basemapcard = false
                                             }
-                                    }
+                                        }
+                                    
+                                },
+                               {title:"JumpTo", icon: 'mdi-run', color: "#D9D9D9", name: "Jump To", isActive: false,
+                                    action: () =>
+                                        {
+                                            return
+                                        },
+                                    hover:(i) => 
+                                        { 
+                                            if (i === "JumpTo")
+                                                {
+                                                    this.jumptocard = true
+
+                                                }
+                                        },
+                                    hoverout: (i) => 
+                                        {
+                                            const myDiv = document.getElementById("jumptotoggle")
+                                            if (myDiv.matches(':hover') === false)
+                                            {
+                                                this.jumptocard = false
+                                            }
+                                        }
                                 },
                                 {title:"Select", icon: 'mdi-select-multiple', color: "#D9D9D9", name: "Multi-Select", isActive: false,
-                               action: () =>{
+                                    action: () =>
+                                        {
+                                            if(store.isSelectEnabled)
+                                                {
 
-                                // store.isSelectEnabled = !store.isSelectEnabled
-                                // this.retsToolsBottom[2].isActive = !this.retsToolsBottom[2].isActive
-                                // this.handleSelectTool();
-                                
-                                if(store.isSelectEnabled){
-                                    sketchWidgetselect.cancel()                           
-                                    this.retsToolsBottom[2].isActive = false
-                                    this.multiselectOptions[0].isActive = false
-                                    this.multiselectOptions[1].isActive = false
-                                // store.isSelectEnabled = !store.isSelectEnabled
-                                }
-                                else{
-                                    this.handleSelectTool(this.multiselectTool);
-                                }
+                                                    sketchWidgetselect.cancel()                           
+                                                    this.retsToolsBottom[2].isActive = false
+                                                    this.multiselectOptions[0].isActive = false
+                                                    this.multiselectOptions[1].isActive = false
+                                                }
+                                            else
+                                                {
+                                                    this.handleSelectTool(this.multiselectTool);
+                                                }
 
-                                // sketchWidgetselect.cancel()                           
-                                // this.retsToolsBottom[2].isActive = false
-                                // this.multiselectOptions[0].isActive = false
-                                // this.multiselectOptions[1].isActive = false
-                                store.isSelectEnabled = !store.isSelectEnabled
-                                
-                               },
-                               setActive: () => {
-                                return true
-                               },
-                               hover:(i) => 
-                                    {
-                                        // store.isSelectEnabled = !store.isSelectEnabled
-                                        this.basemapcard = false;
-                                        this.jumptocard= false;
-                                        this.selecttoggle = true;
-                                    }
+                                            store.isSelectEnabled = !store.isSelectEnabled
+                                            
+                                        },
+                                    setActive: () => {
+                                        return true
+                                    },
+                                    hover:(i) => 
+                                        {
+                                            this.selecttoggle = true;
+                                        },
+                                    hoverout: (i) => 
+                                        {
+                                            const myDiv = document.getElementById("Selecticons")
+                                            if (myDiv.matches(':hover') === false)
+                                                {
+                                                    this.selecttoggle = false
+                                                }
+                                        }
                                 },
                                {
                                 title:"Legend", icon: 'mdi-format-list-bulleted-type', color: "white", name: "Legend", 
-                               action: () =>{
-                                this.handleLegendTool();
-                                this.retsToolsBottom[3].isActive = !this.retsToolsBottom[3].isActive
+                                    action: () =>
+                                        {
+                                            this.handleLegendTool();
+                                            this.retsToolsBottom[3].isActive = !this.retsToolsBottom[3].isActive
+                                        },
+                                    hover:() => 
+                                        {
+                                            return
+                                        },
+                                    hoverout: (i) => 
+                                        {
+                                                return
+                                        }
+                                
                                },
-                               hover:() => 
-                                    {
-                                        this.basemapcard = false;
-                                        this.jumptocard= false;
-                                        this.selecttoggle = false
-
+                               {title:"Settings", icon: 'mdi-cog', color: "#D9D9D9", name: "Settings",
+                                    action: () =>
+                                        {
+                                            this.handleSettingsTool();
+                                            this.retsToolsBottom[4].isActive = !this.retsToolsBottom[4].isActive;
+                                        },
+                                    hover:(i) => 
+                                        {
+                                            return
+                                        },
+                                    hoverout: (i) => 
+                                        {
+                                            return
+                                        }
                                 }
-                            
-                            },
-                            {title:"Settings", icon: 'mdi-cog', color: "#D9D9D9", name: "Settings",
-                            action: () =>{
-                            this.handleSettingsTool();
-                            this.retsToolsBottom[4].isActive = !this.retsToolsBottom[4].isActive;
-                            },
-                            hover:(i) => 
-                                {
-                                    this.basemapcard = false;
-                                    this.jumptocard= false;
-                                    this.selecttoggle = false
-
-                                    
-                                }
-                            }
-                        ],
+                            ],
 
                 multiselectOptions: [ {title:"Rectangle", icon: 'mdi-rectangle-outline', color: "#D9D9D9", name: "Multi-Select - Rectangle", class:"topIcon3", isActive: false,
                                action: () => {
@@ -540,376 +558,377 @@
             ],
                         
 
-        }
-    },
-    
-            computed:{
+            }
+        },
+        
+        computed:{
+            
+
+        },
+        created() { 
+            this.expandedGroups = this.previousReleaseNotes.map(() => false); 
+        },
+        watch: {
+            'store.toggleFeed':{
+                handler: function(){
+                    this.retsToolsTop[store.toggleFeed].action()
+                },
+                immediate: true
+            },
+            'store.activityBanner':{
+                handler: function(){
+                    if(store.activityBanner !== "Activity Feed"){
+                        this.retsToolsTop[2].disabled = false
+                        return
+                    }
+                
+                    this.retsToolsTop[2].disabled = true
+                    return
+                },
+                immediate: true
+            },
+            'feedbackText':{
+                handler: function(){
+                    if (this.feedbackText.length){
+                        this.feedbackSubmitStatus = false
+                    }
+                    else{
+                        this.feedbackSubmitStatus = true
+                    }
+                }
+            },
+            'isAnonymous':{
+                handler: function(){
+                    if (this.isAnonymous){
+                        this.feedbackName = ""
+                    }
+                }
+            },
+        },
+        mounted() {
+            this.setAutozoomSwitch()
+            this.setAutozoomExtentSwitch()
+            this.setNotifications()
+            this.updateuserSettings()
+
+        },
+        
+        methods: {
+            testfunction(index){
+                if (index === 4){
+                this.showDropdown = !this.showDropdown
+                return true
+                }
+                
+            },
+            addDays(index){
+                if (index === 2){
+                    return true
+
+                }
+                else{
+                    return false
+                }
+            },
+            addDropdown(index){
+                if (index > 3){
+                    return true
+                }
+                else{
+                    return false
+                }
+            },
+            updateuserSettings(){
+                store.userSettings = this.userSettings
+            },
+            setNotifications(){
+                const { notifications } = this.userSettings
+                if (notifications != null){
+                    for (let i = 0; i< notifications.length; i++ ){
+                        this.switches[i].value = notifications[i].value
+                    }
+                }
+                
+            },
+            isDisabled(index){
+                return
+                if (index > 0){
+                    return true
+                }
+                return false
+            },
+            setAutozoomExtentSwitch(){
+                const { autoZoomExtent } = this.userSettings;
+                if (autoZoomExtent != null){
+                    store.autozoomextent = autoZoomExtent
+                }
+                else{
+                    store.autozoomextent = false
+                }
+                return
+            },
+            setAutozoomSwitch(){
+                const { autoZoom } = this.userSettings;
+                if (autoZoom != null){
+                    store.autozoomtest = autoZoom
+                }
+                else{
+                    store.autozoomtest = true
+                }
+                return
+            },
+            async saveSettings(){
+                store.settings = {
+                    autoZoom : store.autozoomtest,
+                    autoZoomExtent: store.autozoomextent,
+                    basemap: store.basemaptest,
+                    notifications: this.switches
+                } 
+                this.isAutoZoom = store.autozoomtest
+                this.isAutoZoomExtent = store.autozoomextent
+                const settingsObject = {attributes: {OBJECTID : appConstants.defaultUserValue[0].objectid, SETTINGS : JSON.stringify(store.settings)}}
+                await addSettings(settingsObject)
+
+                const userOBJECTID = await getUserOBJECTID(store.loggedInUser)
+                this.userSettings = JSON.parse(userOBJECTID.SETTINGS)
+                store.userSettings = this.userSettings
+
+
+                if (store.updateRetsSearch.length != store.retspointlength && store.autozoomextent == false){
+                    if (store.CREATE_DT){
+                        await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                    }
+                    else{
+                        await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                    }
+                    return  
+                }
+                
                 
 
             },
-            created() { 
-                this.expandedGroups = this.previousReleaseNotes.map(() => false); 
-            },
-            watch: {
-                'store.toggleFeed':{
-                    handler: function(){
-                        this.retsToolsTop[store.toggleFeed].action()
-                    },
-                    immediate: true
-                },
-                'store.activityBanner':{
-                    handler: function(){
-                        if(store.activityBanner !== "Activity Feed"){
-                            this.retsToolsTop[2].disabled = false
-                            return
-                        }
-                    
-                        this.retsToolsTop[2].disabled = true
-                        return
-                    },
-                    immediate: true
-                },
-                'feedbackText':{
-                    handler: function(){
-                        if (this.feedbackText.length){
-                            this.feedbackSubmitStatus = false
-                        }
-                        else{
-                            this.feedbackSubmitStatus = true
-                        }
-                    }
-                },
-                'isAnonymous':{
-                    handler: function(){
-                        if (this.isAnonymous){
-                            this.feedbackName = ""
-                        }
-                    }
-                },
-            },
-            mounted() {
-                this.setAutozoomSwitch()
-                this.setAutozoomExtentSwitch()
-                this.setNotifications()
-                this.updateuserSettings()
-
-            },
-            
-            methods: {
-                addDays(index){
-                    if (index === 2){
-                        return true
-
-                    }
-                    else{
-                        return false
-                    }
-                },
-                addDropdown(index){
-                    if (index > 3){
-                        return true
-                    }
-                    else{
-                        return false
-                    }
-                },
-                updateuserSettings(){
-                    store.userSettings = this.userSettings
-                },
-                setNotifications(){
-                    const { notifications } = this.userSettings
-                    if (notifications != null){
-                        for (let i = 0; i< notifications.length; i++ ){
-                            this.switches[i].value = notifications[i].value
-                        }
-                    }
-                    
-                },
-
-                setAutozoomExtentSwitch(){
-                    const { autoZoomExtent } = this.userSettings;
-                    if (autoZoomExtent != null){
-                        store.autozoomextent = autoZoomExtent
-                    }
-                    else{
-                        store.autozoomextent = false
-                    }
+            cancelSettings(){
+                const { autoZoom, autoZoomExtent, notifications } = this.userSettings;
+                store.autozoomtest = this.isAutoZoom ?? autoZoom ?? true;
+                store.autozoomextent = this.isAutoZoomExtent ?? autoZoomExtent ?? false;
+        
+                if (!notifications){
                     return
-                },
-                setAutozoomSwitch(){
-                    const { autoZoom } = this.userSettings;
-                    if (autoZoom != null){
-                        store.autozoomtest = autoZoom
-                    }
-                    else{
-                        store.autozoomtest = true
-                    }
-                    return
-                },
-                async saveSettings(){
-                    store.settings = {
-                        autoZoom : store.autozoomtest,
-                        autoZoomExtent: store.autozoomextent,
-                        basemap: store.basemaptest,
-                        notifications: this.switches
-                    } 
-                    this.isAutoZoom = store.autozoomtest
-                    this.isAutoZoomExtent = store.autozoomextent
-                    const settingsObject = {attributes: {OBJECTID : appConstants.defaultUserValue[0].objectid, SETTINGS : JSON.stringify(store.settings)}}
-                    await addSettings(settingsObject)
+                }
+                for (let i =0; i < this.switches.length; i++){
+                    this.switches[i].value = notifications[i].value
 
-                    const userOBJECTID = await getUserOBJECTID(store.loggedInUser)
-                    this.userSettings = JSON.parse(userOBJECTID.SETTINGS)
-                    store.userSettings = this.userSettings
-
-                        if (store.updateRetsSearch.length != store.retspointlength && store.autozoomextent == false){
-                            if (store.CREATE_DT){
-                                await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
-                            }
-                            else{
-                                await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
-                            }
-                            return  
-                        }
-                       
-                        
-                    },
-                    cancelSettings(){
-                        const { autoZoom, autoZoomExtent, notifications } = this.userSettings;
-                        store.autozoomtest = this.isAutoZoom ?? autoZoom ?? true;
-                        store.autozoomextent = this.isAutoZoomExtent ?? autoZoomExtent ?? false;
-              
-                        if (!notifications){
-                            return
-                        }
-                        for (let i =0; i < this.switches.length; i++){
-                            this.switches[i].value = notifications[i].value
-
-                    }
-
-                    return
-                },
-                shiftDiv(){
-                    const viewSurface = document.querySelector('.esri-view');
-                    viewSurface.classList.toggle('translateX-500px');
-                    return
-                },
-                // newSwitchTurnedOn() {
-                //     if (this.switchValue) {
-                //         this.fontColor = '#FFFFFF';
-                        
-                //     } else {
-                //         this.fontColor = "#D9D9D9";
-                //     }
-                // },
-                // switchTurnedOn(index) {
-                //     if (this.switches[index].value) {
-                //         this.switches[index].fontColor = '#FFFFFF';
-                //     } 
-                //     else {
-                //         this.switches[index].fontColor = '#D9D9D9';
-                //     }
-                    
-                //     },
-                switchStyle(fontColor) {
-                    return { color: fontColor };
-                },
-                handleactiveclass(){
-                    this.settingsstatus = false
-                    this.retsToolsBottom[4].isActive = false
-
-                },
-                logoutMethod(){
-                    logoutUser();
-                    location.reload()
-                },
-                resizemap(){
-                    togglemenu(this.isActOpen, this.shift);
-                    this.isActOpen =! this.isActOpen
-                },
-                mouseleavebasemap(){
-                    this.basemapcard = false;
-                },
-                mouseleavejumpto(){
-                    this.jumptocard = false;
-                },
-                mouseleaveselect(){
-                    this.selecttoggle = false;
-                },
-
-                    async handleCreateTool() {
-                        if (this.isCreateEnabled === true) {
-                            this.isCreateEnabled = !this.isCreateEnabled;
-                            const newPointGraphic = await createtool(sketchWidgetcreate, createretssym);
-                            // Process the newPointGraphic as needed
-                            this.isCreateEnabled = !this.isCreateEnabled;
-                            return newPointGraphic
-                            
-                        } else {
-                            sketchWidgetcreate.cancel();
-                            this.isCreateEnabled = !this.isCreateEnabled;
-                        }
-                        
-                        
-                       
-                    },
-                    
-                    handleSelectTool(tooltype) { 
-                        if ((tooltype === sketchWidgetselect.activeTool)) {
-                            sketchWidgetselect.cancel();
-                            this.retsToolsBottom[2].isActive = false
-                            this.multiselectOptions[0].isActive = false
-                            this.multiselectOptions[1].isActive = false
-                            return
-                        }
-                        if (sketchWidgetselect.state === 'active') {
-                            sketchWidgetselect.cancel();
-                        }
-
-
-                        // if (store.isSelectEnabled  === false){
-                            // store.isSelectEnabled = !store.isSelectEnabled
-                            this.retsToolsBottom[2].isActive = true
-                            if (tooltype === "rectangle"){
-                                
-                                selecttool(true, sketchWidgetselect, graphics, "rectangle","freehand")
-                                this.multiselectTool = "rectangle"
-                                this.multiselectOptions[0].isActive = true
- 
-                            }
-                            else if (tooltype === "polygon"){
-                                
-                                selecttool(true, sketchWidgetselect, graphics, "polygon","freehand")
-                                this.multiselectTool = "polygon"
-                                this.multiselectOptions[1].isActive = true
-                                
- 
-                            }
-                            
-                        // }
-                        // else{
-                        //     sketchWidgetselect.cancel()
-                        //     // this.selectfunction.remove()
-                        //     this.retsToolsBottom[2].isActive = false
-                        //     store.isSelectEnabled = !store.isSelectEnabled
-                        // }
-
-                    
-                },
-
-                handleJumpToToolGoogle() {
-                    var ctr = view.center;                
-                    var lat = ctr.latitude;                
-                    var lon = ctr.longitude;     
-                    var level = view.zoom ;
-                    window.open("https://www.google.com/maps/@"+lat+","+lon+","+level+"z");
-                    this.jumptocard = false;
-
-                },
-                handleJumpToToolSPM() {
-                    var ctr = view.center;                
-                    var lat = ctr.latitude;                
-                    var lon = ctr.longitude;                
-                    var level = view.zoom -1 ;                
-                    window.open("https://www.txdot.gov/apps/statewide_mapping/StatewidePlanningMap.html?map=txdot&coords="+lat+","+lon+","+level);
-                    this.jumptocard = false;
-                },
-
-                handleLegendTool() {
-                    this.isLegendVisible =! this.isLegendVisible
-                    if(this.isLegendVisible === true){
-                        legendWidget.visible = true;
-                    }
-                    else{
-                        legendWidget.visible = false;
-                    }
-                    },
-
-                    handleSettingsTool(){
-                    if (this.feedbackStatus){
-                        this.feedbackStatus = false
-                        this.settingsstatus = false
-                        return
-                    }
-                    if (this.settingsstatus){
-                        this.cancelSettings()
-                    }
-                    this.settingsstatus = !this.settingsstatus;
-
-                    },
-                toggledarkgrey(){
-                    applyDarkGrey()
-                },
-                togglelightgrey(){
-                    applyLightGrey()
-                },
-                togglestandard(){
-                    applyStandard()
-
-                },  
-                toggleimagery(){
-                    applyImagery()
-                },
-                togglehybrid(){
-                    applyHybrid()
-                },
-                togglegoogle(){
-                    applyGoogle()
-                },
-                toggleosm(){
-                    applyOSM()
-                },
-
-                toggledarkmode(){
-                    vuetify.theme.defaultTheme = 'light';
-
-                },
-                cancelFeedback(){
-                    this.feedbackStatus = false
-                    this.settingsstatus = true
-                    this.feedbackText = ""
-                    this.isAnonymous = false
-
-                },
-                activateFeedback(){
-                    this.feedbackStatus = true
-                    this.settingsstatus = false
-                    
-                },
-                async sendWebhookRequest(feedbackString, user){
-                    this.feedbackSubmitStatus = true
-                    let url = `https://gis-batch-dev.txdot.gov/fmejobsubmitter/TPP/TPP_DEV_RETS_Emailer.fmw?FEEDBACK=${feedbackString}&USERNAME=${user}&opt_showresult=false&opt_servicemode=sync&token=27a9777b0f14467fcfc09b854466559d14c24e43`
-                    try{
-                        const response = await fetch(url)
-                        if (!response.ok){
-                        }
-                        else{
-                            this.feedbackStatus = false
-                            this.settingsstatus = true
-                            this.feedbackText = ""
-                            this.isAnonymous = false
-                            store.alertTextInfo = {"text": "Thank you for your feedback!", "color": "#70ad47", "type":"success", "toggle": true}
-                            store.isAlert = true
-                            this.feedbackSubmitStatus = false
-
-                            setTimeout(() => {
-                                store.isAlert = false
-
-                            }, 10000);
-                        }
-                    }
-                    catch(error){
-                        console.log(error)
-                    }
-                },
-                submitFeedback(){
-                    this.isAnonymous ? this.sendWebhookRequest(this.feedbackText, 'Anonymous') : this.sendWebhookRequest(this.feedbackText, store.loggedInUser)
-                    
                 }
 
+                return
+            },
+            shiftDiv(){
+                const viewSurface = document.querySelector('.esri-view');
+                viewSurface.classList.toggle('translateX-500px');
+                return
+            },
+            // newSwitchTurnedOn() {
+            //     if (this.switchValue) {
+            //         this.fontColor = '#FFFFFF';
+                    
+            //     } else {
+            //         this.fontColor = "#D9D9D9";
+            //     }
+            // },
+            // switchTurnedOn(index) {
+            //     if (this.switches[index].value) {
+            //         this.switches[index].fontColor = '#FFFFFF';
+            //     } 
+            //     else {
+            //         this.switches[index].fontColor = '#D9D9D9';
+            //     }
+                
+            //     },
+            switchStyle(fontColor) {
+                return { color: fontColor };
+            },
+            handleactiveclass(){
+                this.settingsstatus = false
+                this.retsToolsBottom[4].isActive = false
+
+            },
+            logoutMethod(){
+                logoutUser();
+                location.reload()
+            },
+            resizemap(){
+                togglemenu(this.isActOpen, this.shift);
+                this.isActOpen =! this.isActOpen
+            },
+            mouseleavebasemap(){
+                this.basemapcard = false;
+            },
+            mouseleavejumpto(){
+                this.jumptocard = false;
+            },
+            mouseleaveselect(){
+                this.selecttoggle = false;
+            },
+
+            async handleCreateTool() {
+                if (this.isCreateEnabled === true) {
+                    this.isCreateEnabled = !this.isCreateEnabled;
+                    const newPointGraphic = await createtool(sketchWidgetcreate, createretssym);
+                    // Process the newPointGraphic as needed
+                    this.isCreateEnabled = !this.isCreateEnabled;
+                    return newPointGraphic
+                    
+                } else {
+                    sketchWidgetcreate.cancel();
+                    this.isCreateEnabled = !this.isCreateEnabled;
+                }
+                
+                
                 
             },
-}
+            handleSelectTool(tooltype) { 
+                if ((tooltype === sketchWidgetselect.activeTool) || (tooltype === 'selecttoolfreehand' && sketchWidgetselect.activeTool === 'polygon')) {
+                    sketchWidgetselect.cancel();
+                    this.retsToolsBottom[2].isActive = false
+                    this.multiselectOptions[0].isActive = false
+                    this.multiselectOptions[1].isActive = false
+                    return
+                }
+                if (sketchWidgetselect.state === "active"){
+                    sketchWidgetselect.cancel()
+                    }
+                this.retsToolsBottom[2].isActive = true
+                if (tooltype === "rectangle"){
+                    
+                    selecttool(true, sketchWidgetselect, graphics, "rectangle","freehand")
+                    this.multiselectTool = "rectangle"
+                    this.multiselectOptions[0].isActive = true
+
+                }
+                else if (tooltype === "selecttoolfreehand"){
+                    
+                    selecttool(true, sketchWidgetselect, graphics, "polygon","freehand")
+                    this.multiselectTool = "selecttoolfreehand"
+                    this.multiselectOptions[1].isActive = true
+                    
+
+                }
+                
+            },
+
+            handleJumpToToolGoogle() {
+                var ctr = view.center;                
+                var lat = ctr.latitude;                
+                var lon = ctr.longitude;     
+                var level = view.zoom ;
+                window.open("https://www.google.com/maps/@"+lat+","+lon+","+level+"z");
+                this.jumptocard = false;
+
+            },
+            handleJumpToToolSPM() {
+                var ctr = view.center;                
+                var lat = ctr.latitude;                
+                var lon = ctr.longitude;                
+                var level = view.zoom -1 ;                
+                window.open("https://www.txdot.gov/apps/statewide_mapping/StatewidePlanningMap.html?map=txdot&coords="+lat+","+lon+","+level);
+                this.jumptocard = false;
+            },
+
+            handleLegendTool() {
+                this.isLegendVisible =! this.isLegendVisible
+                if(this.isLegendVisible === true){
+                    legendWidget.visible = true;
+                }
+                else{
+                    legendWidget.visible = false;
+                }
+                },
+
+                handleSettingsTool(){
+                if (this.feedbackStatus){
+                    this.feedbackStatus = false
+                    this.settingsstatus = false
+                    return
+                }
+                if (this.settingsstatus){
+                    this.cancelSettings()
+                }
+                this.settingsstatus = !this.settingsstatus;
+
+                },
+            toggledarkgrey(){
+                applyDarkGrey()
+            },
+            togglelightgrey(){
+                applyLightGrey()
+            },
+            togglestandard(){
+                applyStandard()
+
+            },  
+            toggleimagery(){
+                applyImagery()
+            },
+            togglehybrid(){
+                applyHybrid()
+            },
+            togglegoogle(){
+                applyGoogle()
+            },
+            toggleosm(){
+                applyOSM()
+            },
+
+            toggledarkmode(){
+                vuetify.theme.defaultTheme = 'light';
+
+            },
+            cancelFeedback(){
+                this.feedbackStatus = false
+                this.settingsstatus = true
+                this.feedbackText = ""
+                this.isAnonymous = false
+
+            },
+            activateFeedback(){
+                this.feedbackStatus = true
+                this.settingsstatus = false
+                
+            },
+            async sendWebhookRequest(feedbackString, user){
+                this.feedbackSubmitStatus = true
+                let url = `https://gis-batch-dev.txdot.gov/fmejobsubmitter/TPP/TPP_DEV_RETS_Emailer.fmw?FEEDBACK=${feedbackString}&USERNAME=${user}&opt_showresult=false&opt_servicemode=sync&token=27a9777b0f14467fcfc09b854466559d14c24e43`
+                try{
+                    const response = await fetch(url)
+                    if (!response.ok){
+                    }
+                    else{
+                        this.feedbackStatus = false
+                        this.settingsstatus = true
+                        this.feedbackText = ""
+                        this.isAnonymous = false
+                        store.alertTextInfo = {"text": "Thank you for your feedback!", "color": "#70ad47", "type":"success", "toggle": true}
+                        store.isAlert = true
+                        this.feedbackSubmitStatus = false
+
+                        setTimeout(() => {
+                            store.isAlert = false
+
+                        }, 10000);
+                    }
+                }
+                catch(error){
+                    console.log(error)
+                }
+            },
+            submitFeedback(){
+                this.isAnonymous ? this.sendWebhookRequest(this.feedbackText, 'Anonymous') : this.sendWebhookRequest(this.feedbackText, store.loggedInUser)
+                
+            }
+
+            
+        },
+    }
 </script>
 
 <style>
@@ -946,87 +965,86 @@
     transform: translate(-25%, -25%);
 }
 
-.v-list-item:hover{
-    cursor: pointer;
-    background-color: rgba(128,128,128,.3);
-}
-#popoutitems{
-    bottom: 0px;
-    margin: 0px !important;
-    min-height: 39px !important;
-}
-#iconcontent  {
-    position: absolute;
-    width: 320px !important;
-    top: 9px;
-}
-#iconcontent i {
-    right: 5px;
-}
-#icons-bottom{
-    position: relative;
-    bottom: 170px;
-    left: 12%;
-}
-#icons-top{
-    bottom: 10px;
-}
-.v-navigation-drawer{
-    overflow-y: hidden !important;
-    height: 100% !important;
-    width: 38px !important;
-    color: black;
-    border: 0;
-}
+    .v-list-item:hover{
+        cursor: pointer;
+        background-color: rgba(128,128,128,.3);
+    }
+    #popoutitems{
+       bottom: 0px;
+       margin: 0px !important;
+       min-height: 39px !important;
+    }
+    #iconcontent  {
+        position: absolute;
+        width: 320px !important;
+        top: 9px;
+    }
+    #iconcontent i {
+        right: 5px;
+    }
+    #icons-bottom{
+        position: relative;
+        bottom: 170px;
+    }
+    #icons-top{
+        bottom: 10px;
+    }
+    .v-navigation-drawer{
+        overflow-y: hidden !important;
+        height: 100% !important;
+        width: 38px !important;
+        color: black;
+        border: 0;
+    }
 
-.v-navigation-drawer__content{
-    overflow-y: hidden !important;
-}
-#basemaptoggle{
-    position: absolute;
-    width: 158px;
-    height: 330px;
-    bottom: 18.3%;
-    left: 38px;
-    z-index: 9999;
-    border-radius: 0px;
+    .v-navigation-drawer__content{
+        overflow-y: hidden !important;
+    }
+    #basemaptoggle{
+        position: absolute;
+        width: 158px;
+        height: 330px;
+        bottom: 18.3%;
+        left: 37px;
+        z-index: 9999;
+        border-radius: 0px;
 
-}
-#basemapfont{
-    font-size: 13px;
-}
-#jumptotoggle{
-    position: absolute;
-    width: 165px;
-    height: 90px;
-    bottom: 14%;
-    left: 38px;
-    z-index: 9999;
-    border-radius: 0px;
-}
-#jumptofont{
-    font-size: 13px;
-}
-.esri-legend--card__service-caption-container{
-    display: none;
-}
-.esri-legend--card__service-content{
-    height: 45px;
-    
-}
-#containersettings{
-    position: absolute;
-    margin:auto;
-    top: 0;
-    bottom: 0;
-    left: 0;;
-    right: 0;
-    width: 400px;
-    z-index: 999;
-    border-radius: 0px;
-    /* height: 655px; */
-    height: 655px;
-}
+    }
+    #basemapfont{
+        font-size: 13px;
+    }
+    #jumptotoggle{
+        position: absolute;
+        width: 165px;
+        height: 90px;
+        bottom: 14%;
+        left: 37px;
+        z-index: 9999;
+        border-radius: 0px;
+    }
+    #jumptofont{
+        font-size: 13px;
+    }
+    .esri-legend--card__service-caption-container{
+        display: none;
+    }
+    .esri-legend--card__service-content{
+        height: 45px;
+        
+    }
+    #containersettings{
+        position: absolute;
+        margin:auto;
+        top: 0;
+        bottom: 0;
+        left: 0;;
+        right: 0;
+        width: 400px;
+        z-index: 999;
+        border-radius: 0px;
+        /* height: 655px; */
+        height: 655px;
+    }
 
 #headerfont{
     left: 10px;
@@ -1139,14 +1157,13 @@
     height: 100% !important;
 }
 
-#badge .v-badge__badge{
-    position: absolute;
-    top: -4px !important;
-    left: 6px !important;
-    margin-right: 14px;
-    padding-right: 5px !important;
-    padding-bottom: 4px !important;
-}
+    #badge .v-badge__badge{
+        position: absolute;
+        top: -4px !important;
+        left: 6px !important;
+        padding-right: 5px !important;
+        padding-bottom: 4px !important;
+    }
 
 #suggestionsSection{
     position:absolute;
@@ -1226,18 +1243,14 @@
     
 }
 
-.Selecticons{
-        /* position: absolute;
-        height: 90px;
-        width: 70px;
-        bottom: 7.5%; */
-        width: 40px;
-        justify-items: center;
+    #Selecticons{
+        width: fit-content;
         top: 81.8%;
-        left: 38px;
-       padding-top: 0;
-       padding-bottom: 0;
-       padding: 0;
+        padding: 0;
+        left: 37px;
+        z-index: 9999;
+        border-radius: 0px;
+        
     }
 
 
