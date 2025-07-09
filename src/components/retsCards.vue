@@ -184,7 +184,7 @@ export default{
         closeFlagDiv(){
             this.flagClickedId = ""
         },
-        assignColorToFlag(clr){ `   1111111111111   `
+        assignColorToFlag(clr){
             document.getElementById(`${this.flagClickedId}Icon`).style.color = clr
             const rets = store.updateRetsSearch.find(rd => rd.attributes.RETS_ID === this.flagClickedId)
             rets.attributes.flagColor.FLAG = clr
