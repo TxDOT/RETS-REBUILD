@@ -723,11 +723,19 @@
                             basemap: store.basemaptest,
                             notifications: this.switches
                         } 
+                        console.log(this.switches)
+
+                        for (let index = 0; index < this.switches.length; index++) {
+                            const element = this.switches[index];
+                            console.log(element)
+                            
+                        }
+
                         this.isAutoZoom = store.autozoomtest
                         this.isAutoZoomExtent = store.autozoomextent
                         const settingsObject = {attributes: {OBJECTID : appConstants.defaultUserValue[0].objectid, SETTINGS : JSON.stringify(store.settings)}}
-                        await addSettings(settingsObject)
-                       console.log(store.settings)
+                        // await addSettings(settingsObject)
+                    //    console.log(store.settings)
 
                 const userOBJECTID = await getUserOBJECTID(store.loggedInUser)
                 this.userSettings = JSON.parse(userOBJECTID.SETTINGS)

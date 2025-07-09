@@ -113,29 +113,31 @@ try{
            
                 highlightLayer.removeAll()
                 removeHighlightRoadways('a', true)
-                removeHighlight('a', true)
                 if(!evt.results.length){
                     if (!store.isSaveBtnDisable){
                         store.cancelpopup = true
                         return
                     }
+                    if (store.isDetailsPage){
+                        
+                    }
+                    store.roadHighlightObj.clear()
+                    removeOutline()
+                    removeHighlight("a", true)
                     if (store.isShowSelected){
                         store.isShowSelected = false
-                        store.roadHighlightObj.clear()
                         setTimeout(() => {
                             returntofeedcopy()
 
                         }, 500);
                         return
                     }
-                    removeOutline()
-                    removeHighlight("a", true)
-                    clearRoadHighlightObj()
+                    
                     store.isDetailsPage ? canceldetailsfunction() : null
                     return
                 }
                 store.layerName = evt.results[0].layer.title
-                if (evt.results[0].layer.title === "TxDOT Roadways"){
+                if (evt.results[0].layer.title === "TxDOT Roadways" ){
                     highlightRoadways(evt.results[0].graphic.attributes)
                     if (evt.results.length === 1){
                         view.openPopup({
@@ -149,11 +151,24 @@ try{
                     if ( store.retsObj.attributes.CREATE_DT === store.retsObj.attributes.EDIT_DT && store.archiveRetsDataString.length != 0){
                         return
                     }
-
-                    store.roadHighlightObj.clear()
+                   
+                    // store.roadHighlightObj.clear()
                     let retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
-                    
+                    //  store.roadHighlightObj.forEach((value) => {
+                    //     console.log(value.attributes.RETS_ID)
+                    //     if (value.attributes.RETS_ID != retsPt.attributes.RETS_ID){
+
+                    //     }
+                    // })
+                    console.log(store.roadHighlightObj.has(retsPt))
+                    if (!store.roadHighlightObj.has(retsPt)){
+                        console.log("cleared")
+                        store.roadHighlightObj.clear()
+                        removeHighlight("a", true)
+
+                    }
                     if (retsPt){
+                        console.log("added")
                         store.roadHighlightObj.add(retsPt)
 
                     }
@@ -177,18 +192,16 @@ try{
                         })
                     
                     }
-                        if (store.isSaveBtnDisable && !store.isEmptyRow){
-                                removeOutline()
-                                removeHighlight("a", true)
-                                const firstResult = Array.isArray(evt.results) ? evt.results[0] : null;
-                                firstResult.graphic.layer.title ? highlightRETSPoint(firstResult.graphic.attributes) : highlightGraphicPt(firstResult.graphic.attributes)
-                                outlineFeedCards(evt.results.splice(0,1))
-                        
-                            }
+                    
+                    if (store.isSaveBtnDisable && !store.isEmptyRow){
+                            // removeOutline()
+                            const firstResult = Array.isArray(evt.results) ? evt.results[0] : null;
+                            firstResult.graphic.layer.title ? highlightRETSPoint(firstResult.graphic.attributes) : highlightGraphicPt(firstResult.graphic.attributes)
+                            outlineFeedCards(evt.results.splice(0,1))
+                    
                         }
-               
-                
-            }
+                    }
+                    }
             
         })
     })
@@ -204,14 +217,72 @@ export function doubleClickRetsPoint(){
         view.on("double-click", (event)=> {
             event.stopPropagation()
             view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt)=>{
-                if (evt.results.length && !store.isDetailsPage){
-                    openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID))
-                    let obj = {}
-                    obj.attributes = evt.results[0].graphic.attributes
-                    obj.geometry =evt.results[0].graphic.geometry
-                    let proxy = new Proxy(obj, {})
-                    ///////////////////////////////////ADD CLICKED RETS POINT TO THE HIGHLIGHR OBJECT//////////////////////////////////////////////////
-                    store.roadHighlightObj.add(proxy)
+                if (evt.results.length){
+                    let retsPt
+                    if (store.isShowSelected){
+                        const retsId = evt.results[0].graphic.attributes.RETS_ID       
+                        console.log(retsId)       
+                                            retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
+
+                                            if (!store.roadHighlightObj.has(retsPt)){
+                                                console.log("not included")
+                                                store.roadHighlightObj.clear()
+                                                removeHighlight("", true)
+                                                store.roadHighlightObj.add(retsPt)
+
+                                            }
+                                            else{
+
+                                            }
+     
+                        // let sorting = store.CREATE_DT ? `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO` : "EDIT_DT DESC, PRIO"
+
+                        // store.getRetsLayer(store.loggedInUser, `RETS_ID = ${retsId}`, "retsLayer", sorting).then((value) => {
+                            
+                        //     retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === retsId)
+                           
+                        //     if (!store.roadHighlightObj.has(retsPt)){
+                        //         console.log("trigger")
+                        //          console.log("Current roadhiglht: ", store.roadHighlightObj)
+                        //     console.log("retsPt: ", retsPt)
+                        //         store.roadHighlightObj.clear()
+                        //     removeHighlight("", true)
+                        //         store.roadHighlightObj.add(retsPt)
+                        //     }
+                        //     openDetails(retsPt)
+                            
+                        
+                        // })
+                        // setTimeout(() => {
+                                                    openDetails(retsPt)
+
+                        // }, 2000);
+
+
+                    }
+                    else{
+                    retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
+                            console.log("Current roadhiglht: ", store.roadHighlightObj)
+
+                    if (!store.roadHighlightObj.has(retsPt)){
+                         store.roadHighlightObj.clear()
+                        removeHighlight("a", true)
+                        // let obj = {}
+                        // obj.attributes = evt.results[0].graphic.attributes
+                        // obj.geometry =evt.results[0].graphic.geometry
+                        // let proxy = new Proxy(obj, {})
+                        // console.log("added proxy here")
+                        // // store.roadHighlightObj.add(proxy)
+                        store.roadHighlightObj.add(retsPt)
+
+
+                    }
+                    console.log(retsPt)
+                     openDetails(retsPt)
+                    }
+                    // openDetails(retsPt)
+
+                    
 
             }
         })
@@ -1579,6 +1650,7 @@ catch{
 }
 
 export function openDetails(road){
+    console.log(road)
 clearGraphicsLayer()
 if (store.alertTextInfo.type == "error"){
     store.isAlert = false
