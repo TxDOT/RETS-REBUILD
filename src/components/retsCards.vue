@@ -125,6 +125,7 @@ import {postFlagColor} from '../components/crud.js'
 import {zoomTo, highlightRETSPoint, removeHighlight, removeOutline, includes, checkhighlightfunction, loadData, openDetails} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {store} from './store.js'
+import { view } from './map-Init.js'
 
 export default{
     name: "RetsCards",
@@ -215,7 +216,13 @@ export default{
             this.timer = setTimeout(()=>{
                 const zoomToRETS = rets.geometry
                 highlightRETSPoint(rets.attributes)
-               
+                if ( Math.floor(view.center.longitude/ .0000000000001)===  Math.floor(rets.geometry[0]/ .0000000000001)  && Math.floor(view.center.latitude/ .0000000000001) === Math.floor(rets.geometry[1]/ .0000000000001) && store.roadHighlightObj.size != 0){
+                    return
+                }
+                if (!store.roadHighlightObj.has(rets)){
+                    store.roadHighlightObj.add(rets)
+
+                }
                 zoomTo(zoomToRETS)
             },250)
         },

@@ -173,13 +173,19 @@ export function doubleClickRetsPoint(){
             event.stopPropagation()
             view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt)=>{
                 if (evt.results.length && !store.isDetailsPage){
-                    openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID))
-                    let obj = {}
-                    obj.attributes = evt.results[0].graphic.attributes
-                    obj.geometry =evt.results[0].graphic.geometry
-                    let proxy = new Proxy(obj, {})
+                    // openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID))
+
+                    let retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
+                    openDetails(retsPt)
+
                     ///////////////////////////////////ADD CLICKED RETS POINT TO THE HIGHLIGHR OBJECT//////////////////////////////////////////////////
-                    store.roadHighlightObj.add(proxy)
+                    if (!store.roadHighlightObj.has(retsPt)){
+                        store.roadHighlightObj.clear()
+                        store.roadHighlightObj.add(retsPt)
+
+                    }
+                    // openDetails(retsPt)
+
 
             }
         })
