@@ -222,7 +222,7 @@ export default{
             this.timer = setTimeout(()=>{
                 const zoomToRETS = rets.geometry
                 highlightRETSPoint(rets.attributes)
-                if ( Math.floor(view.center.longitude/ .0000000000001)===  Math.floor(rets.geometry[0]/ .0000000000001)  && Math.floor(view.center.latitude/ .0000000000001) === Math.floor(rets.geometry[1]/ .0000000000001)){
+                if ( Math.floor(view.center.longitude/ .0000000000001)===  Math.floor(rets.geometry[0]/ .0000000000001)  && Math.floor(view.center.latitude/ .0000000000001) === Math.floor(rets.geometry[1]/ .0000000000001) && store.roadHighlightObj.size != 0){
                     return
                 }
                 if (!store.roadHighlightObj.has(rets)){
