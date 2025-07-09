@@ -432,7 +432,7 @@ export default{
                     },600)
                 }
                 catch(a){
-                    console.log(a)
+                    console.log("err", a)
                 }
             },
             immediate: true

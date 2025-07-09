@@ -516,12 +516,10 @@
                 }
                 catch(err){
                     if(size === 'Expand'){
-                        console.log(err)
                         this.retCmntL.isError = true
                         this.retCmntL.err = "Unable to complete operation."
                     }
                     else{
-                        console.log(err)
                         this.retCmnt.isError = true
                         this.retCmnt.err = "Unable to complete operation."
                     }

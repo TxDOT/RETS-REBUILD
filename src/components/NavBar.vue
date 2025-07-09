@@ -240,6 +240,7 @@
     import { addSettings } from './crud.js';
     import { store } from './store';
     import { defineAsyncComponent } from 'vue'
+
     export default{
         name: "NavBar",
         components:{
@@ -545,7 +546,7 @@
                                 },
                                {title:"Lasso", icon: 'mdi-vector-polygon', color: "#D9D9D9", name: "Multi-Select - Lasso", class:"topIcon2", isActive: false,
                                action: () =>{
-                                this.handleSelectTool('polygon');
+                                this.handleSelectTool('selecttoolfreehand');
                                 if (this.multiselectOptions[0].isActive == true) {   
                                     this.multiselectOptions[0].isActive = false; 
                                 }

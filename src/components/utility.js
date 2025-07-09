@@ -712,6 +712,7 @@ retsHistory.queryFeatures({
 })
 .then((res) => {
     let retCard = store.roadObj.find(ret => ret.attributes.RETS_ID === Number(retsid))
+
     if(!res.features[0]){
         retCard.attributes.historyUpdate = "Champ, there's no history for the RETS."
         return
@@ -728,7 +729,7 @@ retsHistory.queryFeatures({
         retCard.attributes.historyUpdate = latestHistoryText
         return
     }
-    
+
     let {CMNT_NM, CREATE_DT, CMNT_TYPE_ID} = returnItem[0].attributes
     let latestHistoryText = appConstants.defineCMNT[CMNT_TYPE_ID ? CMNT_TYPE_ID : 0](CMNT_NM, CREATE_DT) ?? 'Status Change issue'
     retCard.attributes.historyUpdate = latestHistoryText
