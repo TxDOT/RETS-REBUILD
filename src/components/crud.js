@@ -111,6 +111,7 @@ export async function sendChatHistory(chat, type){
     const chatType = {
         add: () => {
             newGraphic = createGraphic(chat)
+            console.log(newGraphic)
             return retsHistory.applyEdits({
                 addFeatures: [newGraphic]
             })
