@@ -116,7 +116,6 @@
                 let findURL = index.CMNT.match(/(\S+(?<=www|https)((?=)\S+))/g)
                 if(findURL){
                     index.URL = findURL
-                    //console.log(findURL)
                     findURL.forEach((url, i) => {
                         let returnUpdateCMNT = index.CMNT.replace(url, `see Link ${i + 1}`)
                         index.CMNT = returnUpdateCMNT
@@ -229,9 +228,6 @@
                 return
                 
             },
-            getAttachmentCount(){
-
-            },
             openAttachement(url){
                 window.open(url, "_blank")
             },
@@ -261,10 +257,6 @@
                                 if(String(x).toLowerCase().includes(searchString) && (acceptedObj.findIndex(oid => oid.OBJECTID === s.OBJECTID) === -1)){
                                     acceptedObj.push(s)
                                 }
-                                // else{
-                                //     this.noSearch = true
-                                // }
-
                             })
 
                         }

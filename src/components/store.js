@@ -5,7 +5,7 @@ import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapA
 import { retsHistory } from './map-Init.js';
 
 export const store = reactive({
-        devStatus: "dev",
+        devStatus: "prod",
         userFilters: {
                 createDt: '',
                 jobType: '',
@@ -21,6 +21,7 @@ export const store = reactive({
 
         },
         retsVersion: "2.8",
+        alertObject: [],
         autozoomtest:true,
         autozoomextent: true,
         basemaptest: "Dark Grey",
@@ -132,6 +133,7 @@ export const store = reactive({
         latlonstring:"",
         isNewRets: false,
         userSettings: null,
+        retsSelection: new Set(),
         defaultFilterSetup(){
                 // this.CREATE_DT.push({title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"})
                 // this.STAT = appConstants.defaultStatValues
@@ -272,37 +274,35 @@ export const store = reactive({
                         this.retsIDList.length = 0
                         this.updateRetsSearch.length = 0
                         let obj = await getQueryLayer(queryString, orderFields)
-                                //.then((obj) => {
-                                        if(obj.features.length){
-                                                let holdingArr = []
-                                                obj.features.forEach((x, i) => {
-                                                        x.attributes.flagColor = this.setFlagColor(x.attributes)
-                                                        x.attributes.CREATE_NM = this.returnUserName(x.attributes.CREATE_NM)
-                                                        x.attributes.EDIT_NM = this.returnUserName(x.attributes.EDIT_NM)
-                                                        x.attributes.CREATE_DT = this.returnDateFormat(x.attributes.CREATE_DT)
-                                                        x.attributes.EDIT_DT = this.returnDateFormat(x.attributes.EDIT_DT)
-                                                        x.attributes.mdiaccountmultiplecheck = this.isAssigned(x.attributes.ASSIGNED_TO)
-                                                        x.attributes.mdiaccountgroup = this.isMOTxDOTConnct(x.attributes.ACTV)
-                                                        x.attributes.mdipencilboxoutline = this.isRequest(x.attributes.ACTV)
-                                                        x.attributes.mdialarm = this.isDeadline(x.attributes.DEADLINE)
-                                                        x.attributes.mdicheckdecagramoutline = this.isComplete(x.attributes.STAT)
-                                                        x.attributes.mditimersand = this.isNoActivity(x.attributes.STAT, x.attributes.EDIT_DT)
-                                                        x.attributes.mdiexclamation = this.isPrio(x.attributes.PRIO)
-                                                        x.attributes.mdipaperclip = false
-                                                        x.attributes.DFO = x.attributes.DFO ? x.attributes.DFO.toFixed(3) : x.attributes.DFO
-                                                        x.attributes.historyUpdate = "Loading"
-                                                        holdingArr.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]}) 
-                                                        this.retsIDList.push(x.attributes.RETS_ID)
-                                                        //store.archiveRetsData.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
-                                                })
-                                                this.roadObj = holdingArr
-                                                return
-                                        }
-                                        if(!obj.features.length){
-                                                this.RetsCardStatus = "Bummer or lucky?? No Rets for you!"
-                                                return 
-                                        }
-                                //})
+                        if(obj.features.length){
+                                let holdingArr = []
+                                obj.features.forEach((x, i) => {
+                                        x.attributes.flagColor = this.setFlagColor(x.attributes)
+                                        x.attributes.CREATE_NM = this.returnUserName(x.attributes.CREATE_NM)
+                                        x.attributes.EDIT_NM = this.returnUserName(x.attributes.EDIT_NM)
+                                        x.attributes.CREATE_DT = this.returnDateFormat(x.attributes.CREATE_DT)
+                                        x.attributes.EDIT_DT = this.returnDateFormat(x.attributes.EDIT_DT)
+                                        x.attributes.mdiaccountmultiplecheck = this.isAssigned(x.attributes.ASSIGNED_TO)
+                                        x.attributes.mdiaccountgroup = this.isMOTxDOTConnct(x.attributes.ACTV)
+                                        x.attributes.mdipencilboxoutline = this.isRequest(x.attributes.ACTV)
+                                        x.attributes.mdialarm = this.isDeadline(x.attributes.DEADLINE)
+                                        x.attributes.mdicheckdecagramoutline = this.isComplete(x.attributes.STAT)
+                                        x.attributes.mditimersand = this.isNoActivity(x.attributes.STAT, x.attributes.EDIT_DT)
+                                        x.attributes.mdiexclamation = this.isPrio(x.attributes.PRIO)
+                                        x.attributes.mdipaperclip = false
+                                        x.attributes.DFO = x.attributes.DFO ? x.attributes.DFO.toFixed(3) : x.attributes.DFO
+                                        x.attributes.historyUpdate = "Loading"
+                                        holdingArr.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]}) 
+                                        this.retsIDList.push(x.attributes.RETS_ID)
+                                        //store.archiveRetsData.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
+                                })
+                                this.roadObj = holdingArr
+                                return
+                        }
+                        if(!obj.features.length){
+                                this.RetsCardStatus = "Bummer or lucky?? No Rets for you!"
+                                return 
+                        }
                         
 
 
@@ -477,22 +477,38 @@ export const store = reactive({
                 return true
         },
         checkDetailsForComplete(){
-                let item = [this.retsObj.attributes.RTE_NM, this.retsObj.attributes.DFO, this.retsObj.attributes.STAT, this.retsObj.attributes.DESC_].filter(x => !x)
-
-                const fieldsToCheck = [
+                const metadataFieldsToCheck = [
                         this.retsObj.attributes.GIS_ANALYST, this.retsObj.attributes.GRID_ANALYST, 
-                        this.retsObj.attributes.DIST_ANALYST, this.retsObj.attributes.DIST_NM, 
+                        [...this.retsObj.attributes.DIST_ANALYST].length === 0 ? false : true, this.retsObj.attributes.DIST_NM, 
                         this.retsObj.attributes.CNTY_NM
-                    ]
-                
-                !this.retsObj.attributes.NO_RTE ? fieldsToCheck.push(this.retsObj.attributes.DFO) : null    
-                const metadataIsUpdate = fieldsToCheck.some(x => !x)
-                
-                if(item.length && !this.retsObj.attributes.NO_RTE){
-                    this.isSaveBtnDisable = true
-                    return
+                ]
+
+                const detailFieldsToCheck = [this.retsObj.attributes.STAT, this.retsObj.attributes.DESC_]
+
+                !this.retsObj.attributes.NO_RTE ? detailFieldsToCheck.push(this.retsObj.attributes.DFO, this.retsObj.attributes.RTE_NM) : null
+
+                let totalFieldsToCheck = [...detailFieldsToCheck, ...metadataFieldsToCheck]
+
+                let item = totalFieldsToCheck.filter(f => !f)
+                if(item.length){
+                        this.isSaveBtnDisable = true
+                        return
                 }
-                this.isSaveBtnDisable = metadataIsUpdate
+
+                this.isSaveBtnDisable = false
+                return
+                // if(!this.retsObj.attributes.NO_RTE){
+                //         this.isSaveBtnDisable = item.length || !this.retsObj.attributes.RTE_NM || !this.retsObj.attributes.DFO
+                //         return
+                // }
+
+                
+                    
+
+                // const metadataIsUpdate = metadataFieldsToCheck.some(x => !x)
+                
+
+                // this.isSaveBtnDisable = metadataIsUpdate
         }         
         // async returnTopCMNT(retsID){
         //         const topCMNT = returnTopHistory(retsID)

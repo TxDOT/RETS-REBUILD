@@ -1,6 +1,5 @@
 <template>
     <!-- details section -->
-    
         <div id="detailsHeaderIcon">
             <v-btn density="compact" flat @click="changeColor(store.retsObj.attributes.RETS_ID);" id="flagBtnDetails">
                 <template v-slot:prepend>
@@ -19,8 +18,8 @@
                 <div class="details-div">
                     <v-card class="details-page">
                         <v-btn-toggle selected-class="active-button" variant="plain" mandatory v-model="isBtnSet" id="retsDetailMeta" density="compact">
-                            <v-btn flat class="retsMetaBtn" @click="this.isDetails = true; this.isMetadata = false" density="compact">Details</v-btn>
-                            <v-btn flat class="retsMetaBtn" @click="this.isMetadata = true; this.isDetails = false" density="compact">Metadata</v-btn>
+                            <v-btn flat class="retsMetaBtn" @click="isDetails = true; isMetadata = false" density="compact">Details</v-btn>
+                            <v-btn flat class="retsMetaBtn" @click="isMetadata = true; isDetails = false" density="compact">Metadata</v-btn>
                         </v-btn-toggle>
                         <DetailsCard v-if="isDetails"/>
                         <MetadataCard v-if="isMetadata"/>
@@ -36,12 +35,17 @@
 
                 <!-- history section -->
                 <div class="history-div">
+                    <div id="historyCmntError" v-if="retCmnt.isError">
+                        <v-alert type="error" dense>
+                            Error adding a comment. {{ retCmnt.err }}
+                        </v-alert>
+                    </div>
                     <div style="display: flex; flex-direction: column; height: calc(100% + 9px);">
                         <v-card class="flex" style="display: flex; flex-direction: column; position: relative; border-radius: 0%; gap: 0px; overflow-y: auto;">
                             <div style="max-height: 30px; display: flex; flex-direction: row;">
                                 <v-card-title style="font-size: 15px; position: relative;" class="flex">
                                     <span style="position: relative; bottom: 10px !important;">History</span>
-                                    <v-btn icon="mdi-arrow-expand" variant="plain" density="compact" @click="expandChatHistory" style="font-size: .6rem; float: right; position: relative; left: 20px; bottom: 10px;"></v-btn>
+                                    <v-btn icon="mdi-arrow-expand" variant="plain" density="compact" @click="expandChatHistory()" style="font-size: .6rem; float: right; position: relative; left: 20px; bottom: 10px;"></v-btn>
                                 </v-card-title>
                             </div>
                             <div style="flex: 5;">
@@ -70,7 +74,7 @@
                 </div>
                 <div style="position: relative; min-height:40px; max-height:40px; padding-bottom: 120px; width: 100%; flex: auto; z-index: 9999;">
                     <div style="position: relative; float: left; font-size: 11px; display: flex; flex-wrap: wrap; top: 3px; left: 6px;">
-                        <v-checkbox label="Asset Only Job" density="compact" class="checkbox-size" v-model="isAsset" @update:model-value="isAssetJob"></v-checkbox>
+                        <v-checkbox label="Asset Only Job" density="compact" class="checkbox-size" v-model="isAsset" @update:model-value="isAssetJob()"></v-checkbox>
                     </div>
                     <v-btn-toggle class="trigger-buttons" density="compact">
                         <v-btn @click="handlearchive()" variant="plain" size="small" class="secondary-button">Delete</v-btn>
@@ -80,6 +84,11 @@
                 </div>
             </div>
             <div id="commentDiv" v-if="editText">
+                <div id="historyCmntErrorL" v-if="retCmntL.isError">
+                    <v-alert type="error" dense>
+                        Error adding a comment. {{ retCmntL.err }}
+                    </v-alert>
+                </div>
                 <v-card style="position: relative; height: 100%; border-radius: 0%;" >
                     <v-card-title style="padding-bottom: 30px;">History</v-card-title>
                     <div style="float: right; position: relative; bottom: 3.7rem;" >
@@ -186,7 +195,9 @@
                     required: value => !!value || "Write a note. Submit your thought to History!"
                 },
                 initRules: false,
-                userArray: []
+                userArray: [],
+                retCmnt: {err: null},
+                retCmntL: {}
             }
         },
         mounted(){
@@ -202,12 +213,16 @@
             return
         },
         methods:{
+            dataMetadataCheck(){
+                store.checkDetailsForComplete()
+                return
+            },
             historyValue(){
                 this.initRules = false
                 return
             },
             updatePRIO(){
-                store.checkDetailsForComplete()
+                this.dataMetadataCheck()
                 return
             },
             removeAttachment(index){
@@ -241,7 +256,7 @@
                 store.retsObj.attributes.flagColor.FLAG = clr
                 this.isColorPicked = false;
                 this.closeFlagDiv()
-                store.checkDetailsForComplete()
+                this.dataMetadataCheck()
                 return
             },
             changeColor(id){
@@ -328,7 +343,6 @@
                 store.retsObj.attributes.ACTV = !store.retsObj.attributes.ACTV ? null : store.retsObj.attributes.ACTV.value ?? store.retsObj.attributes.ACTV
                 store.retsObj.attributes.PRIO = store.retsObj.attributes.PRIO ?? 1
                 store.retsObj.attributes.JOB_TYPE = this.isAsset === true ? 2 : 1
-                
                 await updateRETSPT(store.retsObj)
                 
                 await this.returnToFeed()
@@ -336,28 +350,13 @@
                 deleteRetsGraphic()
                 retsLayerView.layer.definitionExpression = store.savedFilter
                 store.isSaveBtnDisable = true
-
-
-
-                //let distAnalysts = store.retsObj.attributes.DIST_ANALYST.split(",")
+                
                 this.userArray.push(`${store.retsObj.attributes.GIS_ANALYST}`)
-                //this.userArray.push(`${store.retsObj.attributes.GRID_ANALYST}`)
-
-
-
-                // for (let index = 0; index < distAnalysts.length; index++) {
-                //     this.userArray.push(distAnalysts[index]);
-                    
-                // }
+                
                 let userSettings = await getAllUserSettings(this.userArray)
-
-
 
                 await this.sendNotification(userSettings)
 
-
-                //store.updateRetsID()
-                //retsLayerView.layer.definitionExpression = appConstants['defaultQuery'](store.loggedInUser)
                 return
             },
             async sendNotification(userSettings){
@@ -405,17 +404,10 @@
                     this.replaceArchiveContent(archiveRets)
                 }
                 
-                //////////////////////////// REMOVE LINE BELOW TO ENSURE CARD SELECTION REMAINS AFTER RETURNING TO FEED////////////////////////////
-                /////////////////////////// SUPPOSED TO BE UNCOMMENTED BY DEFAULT/////////////////////////////////////////////////////////////////
-
-                //await this.returnToFeed()
-
                 retsLayerView.layer.definitionExpression = store.savedFilter
                 store.toggleFeed = 1
                 store.cancelpopup = false
-                // setTimeout(() => {
-                //     outlineFeedCards(store.roadHighlightObj)
-                // }, 1000);
+
                 window.document.title = `RETS Application`
                 store.activityBanner = "Activity Feed"
                 store.toggleFeed = 1
@@ -497,7 +489,7 @@
                 return
             },
             isAssetJob(){
-                store.checkDetailsForComplete()
+                this.dataMetadataCheck()
                 return
             },
             closeGEMTask(){
@@ -510,16 +502,33 @@
                 return
             },
             async addHistoryNote(size){
-                if(!this.addHistoryChat.length){
-                    this.initRules = true
+                try{
+                    if(!this.addHistoryChat.length){
+                        this.initRules = true
+                        return
+                    }
+                    const attach = store.attachment.length ? true : false 
+                    await store.addNote(this.addHistoryChat, attach, store.attachment, true)
+                    this.clearMessage()
+                    this.addAttach.length = 0
+                    document.getElementById(`${store.addNoteOid}${size}`).scrollIntoView({block: "end", inline: "nearest"})
                     return
                 }
-                const attach = store.attachment.length ? true : false 
-                await store.addNote(this.addHistoryChat, attach, store.attachment, true)
-                this.clearMessage()
-                this.addAttach.length = 0
-                document.getElementById(`${store.addNoteOid}${size}`).scrollIntoView({block: "end", inline: "nearest"})
-                return
+                catch(err){
+                    if(size === 'Expand'){
+                        this.retCmntL.isError = true
+                        this.retCmntL.err = "Unable to complete operation."
+                    }
+                    else{
+                        this.retCmnt.isError = true
+                        this.retCmnt.err = "Unable to complete operation."
+                    }
+
+                    setTimeout(()=>{
+                        this.retCmntL.isError = this.retCmnt.isError = false
+                    },3500)
+                }
+
             },
             clearMessage(){
                 this.addHistoryChat = ""
@@ -816,6 +825,20 @@
     width: 20rem;
     right: 8px;
     justify-content: end;
+}
+
+#historyCmntError{
+    position: absolute; 
+    z-index: 9999; 
+    width: 100%; 
+    font-size: 13px;
+}
+
+#historyCmntErrorL{
+    position: absolute; 
+    z-index: 9999; 
+    width: 100%; 
+    font-size: 13px;
 }
 
 </style>

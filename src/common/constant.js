@@ -4,9 +4,9 @@ export const appConstants = {
     retsCMNTDev: "https://maps.txdot.gov/createags/rest/services/RETS_CMNT_UAT/FeatureServer/0",
     retsCMNTProd: "https://maps.txdot.gov/createags/rest/services/RETS_CMNT/FeatureServer/0",
     retsUserRoleDev: "https://maps.txdot.gov/createags/rest/services/RETS_SUPPORT_UAT/FeatureServer/1",
-    retsUserRoleProd: "https://maps.txdot.gov/createags/rest/services/RETS_SUPPORT/FeatureServer/11",
+    retsUserRoleProd: "https://maps.txdot.gov/createags/rest/services/RETS_SUPPORT/FeatureServer/1",
     retsFlagColorDev: "https://maps.txdot.gov/createags/rest/services/RETS_SUPPORT_UAT/FeatureServer/3",
-    retsFlagColorProd: "https://maps.txdot.gov/createags/rest/services/RETS_SUPPORT/FeatureServer/8",
+    retsFlagColorProd: "https://maps.txdot.gov/createags/rest/services/RETS_SUPPORT/FeatureServer/3",
     RetsStatus: ['Not Started', 'On Hold', 'In Progress'],
     CardColorMap:{
         '1': '#FF00C5',

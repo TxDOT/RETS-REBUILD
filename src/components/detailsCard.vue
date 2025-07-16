@@ -5,12 +5,12 @@
                 <v-autocomplete :items="activityList" label="Activity" variant="underlined" density="compact" item-title="value" flat v-model="store.retsObj.attributes.ACTV" @update:model-value="completeDataSearch()"></v-autocomplete>
             </div>
             <div style="width: 30%; float: right;">
-                <v-text-field label="Number" density="compact" variant="underlined" :disabled="disableACTVNum(store.retsObj.attributes.ACTV)" v-model="store.retsObj.attributes.ACTV_NBR" @update:model-value="actvNbrUpdate(store.retsObj.attributes.ACTV_NBR) ; store.isSaveBtnDisable = false">
+                <v-text-field label="Number" density="compact" variant="underlined" :disabled="disableACTVNum(store.retsObj.attributes.ACTV)" v-model="store.retsObj.attributes.ACTV_NBR" @update:model-value="actvNbrUpdate(store.retsObj.attributes.ACTV_NBR);">
                     <template v-slot:append-inner >
                         <v-tooltip text="Find Minute Order/TxDOT Connect" location="top">
                             <template v-slot:activator="{props}">
                                 <div v-bind="props">
-                                    <v-icon icon="mdi-link" small class="number-field-icon" @click="paperClipFunc" ></v-icon>
+                                    <v-icon icon="mdi-link" small class="number-field-icon" @click="paperClipFunc()" ></v-icon>
                                 </div>
                             </template>
                         </v-tooltip>
@@ -20,7 +20,7 @@
         </div>
         <div no-gutters dense class="item">
             <div style="width: 60%; float: left;">
-                <v-text-field :disabled="store.retsObj.attributes.NO_RTE === false" label="Route" density="compact" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required, valueRequired.limitCharacter] : []" :class="!store.retsObj.attributes.NO_RTE && !store.retsObj.attributes.RTE_NM?.length ? 'route route-error' : 'route'" @update:model-value="!store.retsObj.attributes.NO_RTE ? completeDataSearch() : store.isSaveBtnDisable = false" maxlength="17"></v-text-field>
+                <v-text-field :disabled="store.retsObj.attributes.NO_RTE === false" label="Route" density="compact" variant="underlined" v-model="store.retsObj.attributes.RTE_NM" :rules="!store.retsObj.attributes.NO_RTE ? [valueRequired.required, valueRequired.limitCharacter] : []" :class="!store.retsObj.attributes.NO_RTE && !store.retsObj.attributes.RTE_NM?.length ? 'route route-error' : 'route'" @update:model-value="store.retsObj.attributes.NO_RTE ? completeDataSearch() : null" maxlength="17"></v-text-field>
             </div>
             <div style="width: 30%; float: right;">
                 <v-text-field :label="this.dfoLabel" density="compact" variant="underlined" :error ="(!store.retsObj.attributes.DFO || store.outOfRange) && !store.retsObj.attributes.NO_RTE ? returnErrMsg(store.retsObj.attributes.DFO, store.outOfRange) : false" v-model="store.retsObj.attributes.DFO" :rules="!store.retsObj.attributes.NO_RTE ? [onlyNumbers.required, onlyNumbers.numbers]: []" @update:model-value="!store.retsObj.attributes.NO_RTE ? manuallyUpdateDFO(store.retsObj.attributes.DFO) : null">
@@ -28,7 +28,7 @@
                         <v-tooltip text="Move RETS Point" location="top">
                             <template v-slot:activator="{props}">
                                 <div v-bind="props">
-                                    <v-btn id="dfoCrosshair"  variant="plain" density="compact" v-model="isCrossHair" @click="crossHairFunc"><v-icon :icon="!store.isMoveRetsPt ? 'mdi-drag-variant' : 'mdi-close'" small ></v-icon></v-btn>
+                                    <v-btn id="dfoCrosshair"  variant="plain" density="compact" v-model="isCrossHair" @click="crossHairFunc()"><v-icon :icon="!store.isMoveRetsPt ? 'mdi-drag-variant' : 'mdi-close'" small ></v-icon></v-btn>
                                 </div>
                             </template>
                         </v-tooltip>
@@ -38,7 +38,7 @@
         </div>
         <div no-gutters dense class="item" style="height: 10%; position: relative; bottom: 4px;">
             <div>
-                <v-checkbox density="compact" class="checkbox-size" v-model="store.retsObj.attributes.NO_RTE" @update:model-value="noRTECheck(store.retsObj.attributes.RTE_NM) ; store.isSaveBtnDisable = false">
+                <v-checkbox density="compact" class="checkbox-size" v-model="store.retsObj.attributes.NO_RTE" @update:model-value="noRTECheck(store.retsObj.attributes.RTE_NM)">
                     <template v-slot:label>
                         <v-label class="main-color" id="newProposedText" text="New, Proposed, or Unspecified"></v-label>
                     </template>
@@ -74,7 +74,7 @@
             </v-select>
         </div>
         <div no-gutters dense class="item">
-            <v-textarea :error="!store.retsObj.attributes.DESC_?.length ? (this.descLabel = 'Description is empty', true)  : false" :rules=[descRequired.required] rows="4" density="compact" :label="this.descLabel" variant="underlined" v-model="store.retsObj.attributes.DESC_" no-resize @update:model-value="descCheck(store.retsObj.attributes.DESC_) ; store.isSaveBtnDisable = false" @keydown.space="preventSpace">
+            <v-textarea :error="!store.retsObj.attributes.DESC_?.length ? (this.descLabel = 'Description is empty', true)  : false" :rules=[descRequired.required] rows="4" density="compact" :label="this.descLabel" variant="underlined" v-model="store.retsObj.attributes.DESC_" no-resize @update:model-value="descCheck(store.retsObj.attributes.DESC_)" @keydown.space="preventSpace">
             </v-textarea>
         </div>
         <div class="item" style="position: relative; top: 32px; width: 100%;">
@@ -166,16 +166,13 @@ import {store} from './store.js'
             this.datePicker = !store.retsObj.attributes.DEADLINE ? "Add a deadline" : this.returnDateFormat(new Date(store.retsObj.attributes.DEADLINE)) 
             
             store.retsObj.attributes.NO_RTE = this.convertNoRTE(store.retsObj.attributes.NO_RTE)
+
             if(store.retsObj.attributes.NO_RTE === true){
                 store.isDisableValidations = true
-                store.retsObj.attributes.NO_RTE = true
                 return
             }
-
-            //this.valueRequired()
+            
             this.retsRouteArchive = JSON.parse(store.archiveRetsDataString)
-            //createRoadGraphic(store.retsObj, true)
-
         },
         methods:{
             returnErrMsg(dfo, isOutOfRange){
@@ -184,7 +181,7 @@ import {store} from './store.js'
                     return false
                 }
                 this.dfoLabel = "I'm blank!"
-                store.isSaveBtnDisable = false
+                store.isSaveBtnDisable = true
                 store.isAlert = true
                 store.alertTextInfo = {"text": `Route and/or DFO are not valid. Use the Move (icon) to move to a valid location.`, "color": "red", "type":"error", "toggle": true}
                 return true
@@ -274,18 +271,20 @@ import {store} from './store.js'
                 let roadDFO = store.retsObj.attributes.DFO
                 let routeName = store.retsObj.attributes.RTE_NM
                 if(store.retsObj.attributes.NO_RTE){
-                    if(!store.retsObj.attributes.DESC_ ){
-                        store.isSaveBtnDisable = true
-                        return
-                    }
+                //     if(!store.retsObj.attributes.DESC_ ){
+                //         store.isSaveBtnDisable = true
+                //         return
+                //     }
                     store.isAlert = false
-                    store.isSaveBtnDisable = false
-                    this.dfoLabel = 'DFO'
+                //     store.isSaveBtnDisable = false
+                //     this.dfoLabel = 'DFO'
+                    this.completeDataSearch()
                     return
-                }
-                if(!store.retsObj.attributes.DESC_ || !roadDFO){
-                    store.isSaveBtnDisable = true
-                    return
+                //     return
+                // }
+                // if(!store.retsObj.attributes.DESC_ || !roadDFO){
+                //     store.isSaveBtnDisable = true
+                //     return
                 }
                 const findRoad = await queryRoads("RTE_NM", `'${routeName}'`)
                 if(!findRoad.features.length && !store.retsObj.attributes.NO_RTE){
@@ -295,8 +294,8 @@ import {store} from './store.js'
                     store.isSaveBtnDisable = true
                     return
                 }
-                let isInRange = isDFOInRange(findRoad, roadDFO)
 
+                let isInRange = isDFOInRange(findRoad, roadDFO)
                 if(!isInRange[0]){
                     store.isAlert = true
                     store.alertTextInfo = {"text": `DFO is out of Range. Begin DFO: ${isInRange[1].toFixed(3)} End DFO: ${isInRange[2].toFixed(3)}`, "color": "red", "type":"error", "toggle": true}

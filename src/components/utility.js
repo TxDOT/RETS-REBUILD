@@ -1,5 +1,5 @@
-import {view, retsLayer, homeWidget, retsGraphicLayer, TxDOTRoadways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate, 
-    retsPointRenderer, texasExtent, retsPointRendererout, retsRole, highlightLayer, map, retsPointRendererout2,
+import {view, retsLayer, retsGraphicLayer, TxDOTRoadways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate, 
+    retsPointRenderer, texasExtent, retsRole, highlightLayer, map,
     retsLabelclass,
     darkVTBasemap,
     standardVTBasemap,
@@ -64,14 +64,6 @@ reactiveUtils.once(() => !rdLayerView.dataUpdating)
     try{
         console.log("roads ready")
         store.isAddBtn = false
-        // if( rdLayerView.view.zoom > 9 ){
-        //     if(TxDOTRoadways.definitionExpression === "") return
-        //     rdLayerView.layer.definitionExpression = ""
-        // }
-        // if(rdLayerView.view.zoom < 10 ){
-        //     if(TxDOTRoadways.definitionExpression === "RTE_PRFX = 'IH'") return
-        //     rdLayerView.layer.definitionExpression = "RTE_PRFX = 'IH'"
-        // }
         roadLayerView = rdLayerView
         sketchWidgetcreate.snappingOptions.featureSources.push({layer: roadLayerView.layer, enable: true})
     }
@@ -87,7 +79,7 @@ try{
     view.on("click", (event)=>{
         if (view.popup.visible === true){
             view.closePopup()
-            removeHighlight
+            removeHighlight()
         }
         event.stopPropagation()
         view.hitTest(event, {include: [retsLayer, retsGraphicLayer, roadLayerView.layer]}).then((evt) =>{
@@ -101,9 +93,10 @@ try{
                 navigator.clipboard.writeText(coordinate);
                 store.latlonstring = coordinate
                 store.alertTextInfo = {"text": ` ${coordinate} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
+               
                 store.isAlert = true
 
-                setTimeout(() => {
+                 setTimeout(() => {
                     store.isAlert = false
 
                   }, 10000);
@@ -180,13 +173,19 @@ export function doubleClickRetsPoint(){
             event.stopPropagation()
             view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt)=>{
                 if (evt.results.length && !store.isDetailsPage){
-                    openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID))
-                    let obj = {}
-                    obj.attributes = evt.results[0].graphic.attributes
-                    obj.geometry =evt.results[0].graphic.geometry
-                    let proxy = new Proxy(obj, {})
+                    // openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID))
+
+                    let retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
+                    openDetails(retsPt)
+
                     ///////////////////////////////////ADD CLICKED RETS POINT TO THE HIGHLIGHR OBJECT//////////////////////////////////////////////////
-                    store.roadHighlightObj.add(proxy)
+                    if (!store.roadHighlightObj.has(retsPt)){
+                        store.roadHighlightObj.clear()
+                        store.roadHighlightObj.add(retsPt)
+
+                    }
+                    // openDetails(retsPt)
+
 
             }
         })
@@ -658,19 +657,25 @@ return
 }
 
 export function turnAllVisibleGraphicsOff(){
-const isVisible = retsGraphicLayer.graphics.items.filter(x => x.visible === true)
-isVisible.forEach(vis => vis.visible = false)
-return
-}
-export function removeRelatedRetsFromMap(retsoid, retsID){
-if(!store.retsObj.attributes.RELATED_RETS){
+    const isVisible = retsGraphicLayer.graphics.items.filter(x => x.visible === true)
+    isVisible.forEach(vis => vis.visible = false)
     return
 }
-let retsIndex = store.retsObj.attributes.RELATED_RETS.findIndex(ret => ret.RETS_ID === retsID)
-store.retsObj.attributes.RELATED_RETS.splice(retsIndex,1)
-const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === Number(retsoid))
-retsGraphicLayer.removeMany(findGraphic)
-return
+export function removeRelatedRetsFromMap(retsoid, retsID){
+    try{
+        if(!store.retsObj.attributes.RELATED_RETS){
+            return
+        }
+        let retsIndex = store.retsObj.attributes.RELATED_RETS.findIndex(ret => ret.RETS_ID === retsID)
+        store.retsObj.attributes.RELATED_RETS.splice(retsIndex,1)
+        const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === Number(retsoid))
+        retsGraphicLayer.removeMany(findGraphic)
+        return
+    }
+    catch(err){
+        console.warn(err)
+    }
+
 }
 
 export function zoomToRelatedRets(relatedRets){
@@ -713,6 +718,7 @@ retsHistory.queryFeatures({
 })
 .then((res) => {
     let retCard = store.roadObj.find(ret => ret.attributes.RETS_ID === Number(retsid))
+
     if(!res.features[0]){
         retCard.attributes.historyUpdate = "Champ, there's no history for the RETS."
         return
@@ -729,14 +735,14 @@ retsHistory.queryFeatures({
         retCard.attributes.historyUpdate = latestHistoryText
         return
     }
-    
+
     let {CMNT_NM, CREATE_DT, CMNT_TYPE_ID} = returnItem[0].attributes
     let latestHistoryText = appConstants.defineCMNT[CMNT_TYPE_ID ? CMNT_TYPE_ID : 0](CMNT_NM, CREATE_DT) ?? 'Status Change issue'
     retCard.attributes.historyUpdate = latestHistoryText
     return 
 })
-.catch(() => {
-    //
+.catch((err) => {
+    console.log('Error with history', err)
 })
 return
 
@@ -891,52 +897,148 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                 {
                                     graphics.removeAll();
                                     var selectedFeatures = result.features;
+                                    store.retsSelection = selectedFeatures.map((feature) => {
+                                    return {
+                                            attributes: { ...feature.attributes, flagColor: {FLAG: null}, historyUpdate : null, mdiaccountgroup : null, mdiaccountmultiplecheck :  null, mdialarm :  {bool: null, color: null}, mdicheckdecagramoutline : null, mdiexclamation : null, mdipaperclip : null,
+                                                mdipencilboxoutline : null, mditimersand : {bool: null, numDays: null}
+                                            },
+                                            geometry: feature.geometry, // or clone if needed
+                                        
+                                       
+                                    };
+                                    });
+                                    
                                     if (pressedkey === false){
                                         
                                         removeHighlight("a", true); 
                                         store.roadHighlightObj.clear()
-                                        let i
-                                        for (i = 0; i < selectedFeatures.length; i++ ) {
+                                        store.retsSelection.clear
+                                        if (!selectedFeatures.length){
+                                            returnToFeedFunction()
+                                        }
+                                        for (let i = 0; i < selectedFeatures.length; i++ ) {
                                             store.roadHighlightObj.add(store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[i].attributes.OBJECTID))
                                             if ( store.isSaveBtnDisable){
                                                 highlightRETSPoint(selectedFeatures[i].attributes, true); 
 
                                             }
+                                            if (store.isShowSelected){
+                                                
+                                                    // store.roadHighlightObj.forEach((value) => {
+                                                    //      if (!value){
+                                                    //         console.log("ran")
+                                                    //         store.roadHighlightObj.clear()
+                                                    //         store.retsSelection.forEach((value) => {
+                                                    //             store.roadHighlightObj.add(value)
+                                                                
+                                                                
+                                                    //         })
+                                                            
+                                                            
+                                                    //     }
+                                                    // })
+                                                    let arr = []
+                                                    let string = ''
+                                                    store.roadHighlightObj.clear()
+                                                       store.retsSelection.forEach((value) => {
+                                                        store.roadHighlightObj.add(value)
+                                                        arr.push(value.attributes.RETS_ID)
+                                                        })
+
+                                                                      string = arr.join(" OR RETS_ID = ")
+
+                                                                    if (store.autozoomextent  && store.isShowSelected){
+                                                                          if (store.CREATE_DT ){
+                                                                        store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                                                                            //check if features are highlighted, if they are run the outlinefeedcards
+
+                                                                    }
+                                                                    else{
+                                                                        store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", "EDIT_DT DESC, PRIO")
+
+                                                                    }
+                                                                    }
+                                                                   
+
+
+                                                    
+                                                   
+                                            }
                                                     
                                         }
-                                        // if (store.roadHighlightObj.size && store.isSaveBtnDisable){
-                                        //     outlineFeedCards(store.roadHighlightObj); 
 
-                                        // }
                                         if (store.isSaveBtnDisable){
                                             outlineFeedCards(store.roadHighlightObj)
                                             scrollToTopOfFeed(store.roadHighlightObj.size)             
 
                                         }
-                                        
+
                                     }
                                     if (pressedkey === "Shift"){
-                                        let i
-                                        for (i = 0; i < selectedFeatures.length; i++ ) {
-                                            store.roadHighlightObj.add(store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[i].attributes.OBJECTID))
+                                        for (let i = 0; i < selectedFeatures.length; i++ ) {                                           
                                             highlightRETSPoint(selectedFeatures[i].attributes);
                                         }
+
+                                        let arr = []
+                                        let string = ''
+                                        store.retsSelection.forEach((value) => {
+                                        const existing = Array.from(store.roadHighlightObj).some(
+                                            (item) => item.attributes.OBJECTID === value.attributes.OBJECTID
+                                        );
+
+                                        if (!existing) {
+                                            store.roadHighlightObj.add(value);
+                                        }
+                                        });
+
+                                        store.roadHighlightObj.forEach((value) => {
+                                            arr.push(value.attributes.RETS_ID)
+
+                                        })
                                         outlineFeedCards(store.roadHighlightObj);  
+                                                                                    string = arr.join(" OR RETS_ID = ")
+
+                                        if (store.autozoomextent && store.isShowSelected){
+                                            if (store.CREATE_DT){
+                                            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                                                //check if features are highlighted, if they are run the outlinefeedcards
+
+                                        }
+                                        else{
+                                            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", "EDIT_DT DESC, PRIO")
+
+                                        }
+                                        }
+                                        
+
+
+
                                     }
                                     
                                     if (pressedkey === "Control"){   
                                         graphics.removeAll();   
                                         if (selectedFeatures.length > 0){
-                                            let n
-                                            for (n = 0; n < selectedFeatures.length; n++){
+                                            store.retsSelection.forEach((valueToDelete) => {
+                                            const match = [...store.roadHighlightObj].find(item => 
+                                                item.attributes.OBJECTID === valueToDelete.attributes.OBJECTID
+                                            );
+                                            if (match) {
+                                                store.roadHighlightObj.delete(match);
+                                            }
+                                        });
+                                            for (let n = 0; n < selectedFeatures.length; n++){
                                                 removeHighlight(selectedFeatures[n]);
-                                                store.roadHighlightObj.delete(store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[n].attributes.OBJECTID))
                                                 scrollToTopOfFeed(store.roadHighlightObj.size) 
+
                                             } 
                                             if (store.roadHighlightObj.size){
                                                 outlineFeedCards(store.roadHighlightObj); 
 
                                             }  
+                                            else{
+                                                returnToFeedFunction()
+
+                                            }
                                         }
                                     }
                                     if (!store.isSaveBtnDisable){
@@ -969,7 +1071,7 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
 
 
                                     }
-
+                                    
                                     
                                 });          
                         }
@@ -1303,8 +1405,8 @@ try{
                         completeMovePtSketch()
                         store.cancelEvent.remove()
                         getNewPoint.remove()
-                        //store.checkDetailsForComplete()
-                        store.isSaveBtnDisable = false
+                        store.checkDetailsForComplete()
+                        // store.isSaveBtnDisable = false
                         return
                     }
                     store.isAlert = false
@@ -1316,6 +1418,7 @@ try{
                     store.cancelEvent.remove()
                     store.isMoveRetsPt = false
                     getNewPoint.remove()
+                    store.checkDetailsForComplete()
                     return
                 })
                 .catch(() => {
@@ -1430,14 +1533,14 @@ return movePointHitTest
 }
 
 export async function isRoadExist(){
-const exist = await roadLayerView.queryFeatures({
-    where: `RTE_NM = '${store.retsObj.attributes.RTE_NM}'`
-})
+    const exist = await roadLayerView.queryFeatures({
+        where: `RTE_NM = '${store.retsObj.attributes.RTE_NM}'`
+    })
 
-if(!exist.features.length){
-    return true
-}
-return false
+    if(!exist.features.length){
+        return true
+    }
+    return false
 }
 
 export function checkhighlightfunction(retsid){
@@ -1446,8 +1549,8 @@ try{
     const found = objarray.some(feature => feature.attributes.RETS_ID.toString() === retsid);
     return found ? "card-rets highlight-card" : "card-rets";
 }
-catch{
-    //nada
+catch(err){
+    console.log(err)
 }
 
 }
@@ -1622,35 +1725,36 @@ return
 }
 
 export function discardeditcopy(){
-if(store.clickStatus){
+    if(store.clickStatus){
+        const archiveRets = JSON.parse(store.archiveRetsDataString)
+        let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
+        updateRetsObj(findItem, archiveRets)
+        store.roadHighlightObj.forEach(entry => {
+            if (store.retsObj.attributes.RETS_ID != entry.attributes.RETS_ID){
+                openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === entry.attributes.RETS_ID))
+                removeHighlight("a", true)
+                highlightRETSPoint(entry.attributes)
+                outlineFeedCards(store.roadHighlightObj)
+            }
+            });                                           
+        store.clickStatus = false
+        store.cancelpopup = false
+        store.isSaveBtnDisable = true
+        return
+    }
+
     const archiveRets = JSON.parse(store.archiveRetsDataString)
-    let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
-    updateRetsObj(findItem, archiveRets)
-    store.roadHighlightObj.forEach(entry => {
-        if (store.retsObj.attributes.RETS_ID != entry.attributes.RETS_ID){
-            openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === entry.attributes.RETS_ID))
-            removeHighlight("a", true)
-            highlightRETSPoint(entry.attributes)
-            outlineFeedCards(store.roadHighlightObj)
-        }
-        });                                           
-    store.clickStatus = false
+    replacearchivecopy(archiveRets)
+    clearGraphicsLayer()
+    //returntofeedcopy()
+    retsLayerView.layer.definitionExpression = store.savedFilter
+    store.isCard = true
+    store.toggleFeed = 1
     store.cancelpopup = false
     store.isSaveBtnDisable = true
+    store.isAlert = false
+    outlineFeedCards(store.roadHighlightObj)
     return
-}
-const archiveRets = JSON.parse(store.archiveRetsDataString)
-replacearchivecopy(archiveRets)
-clearGraphicsLayer()
-//returntofeedcopy()
-retsLayerView.layer.definitionExpression = store.savedFilter
-store.isCard = true
-store.toggleFeed = 1
-store.cancelpopup = false
-store.isSaveBtnDisable = true
-store.isAlert = false
-outlineFeedCards(store.roadHighlightObj)
-return
 }
 
 export async function getUserOBJECTID(userId){
@@ -1677,16 +1781,16 @@ export async function getAllUserSettings(users){
 }
 
 export function setFilterProperties(userFilterObject){
-store.CREATE_DT = userFilterObject.createDt
-store.JOB_TYPE = userFilterObject.jobType
-store.EDIT_DT = userFilterObject.editDt
-store.STAT = userFilterObject.stat
-store.ACTV = userFilterObject.actv
-store.DIST_NM = userFilterObject.distNM
-store.CNTY_NM = userFilterObject.cntyNM
-store.USER = userFilterObject.user
-store.isAssignedTo = userFilterObject.isAssignedTo
-store.isAssociated = userFilterObject.isAssociated
+    store.CREATE_DT = userFilterObject.createDt
+    store.JOB_TYPE = userFilterObject.jobType
+    store.EDIT_DT = userFilterObject.editDt
+    store.STAT = userFilterObject.stat
+    store.ACTV = userFilterObject.actv
+    store.DIST_NM = userFilterObject.distNM
+    store.CNTY_NM = userFilterObject.cntyNM
+    store.USER = userFilterObject.user
+    store.isAssignedTo = userFilterObject.isAssignedTo
+    store.isAssociated = userFilterObject.isAssociated
 return
 
 
@@ -1721,55 +1825,52 @@ export function setBasemap(){
 }
 
 export function applyDarkGrey(){
-map.basemap = darkVTBasemap;
-retsLabelclass.symbol.color = "white"
-retsLabelclass.symbol.haloSize = 0
-TxDOTRoadways.labelsVisible = false
+    map.basemap = darkVTBasemap;
+    retsLabelclass.symbol.color = "white"
+    retsLabelclass.symbol.haloSize = 0
+    TxDOTRoadways.labelsVisible = false
 TxDOTRoadways.renderer.symbol.width = 0
 }
 export function applyLightGrey(){
-map.basemap = lightVTBasemap
-retsLabelclass.symbol.color = "black"                        
-retsLabelclass.symbol.haloSize = 0
-TxDOTRoadways.labelsVisible = false,
-TxDOTRoadways.renderer.symbol.width = 0
-
-
+    map.basemap = lightVTBasemap
+    retsLabelclass.symbol.color = "black"                        
+    retsLabelclass.symbol.haloSize = 0
+    TxDOTRoadways.labelsVisible = false,
+    TxDOTRoadways.renderer.symbol.width = 0
 }
 
 export function applyStandard(){
-map.basemap = standardVTBasemap;
-retsLabelclass.symbol.color = "black"
-retsLabelclass.symbol.haloSize = 0
-TxDOTRoadways.labelsVisible = false,
-TxDOTRoadways.renderer.symbol.width = 0
-
+    map.basemap = standardVTBasemap;
+    retsLabelclass.symbol.color = "black"
+    retsLabelclass.symbol.haloSize = 0
+    TxDOTRoadways.labelsVisible = false,
+    TxDOTRoadways.renderer.symbol.width = 0
 }
 
 export function applyImagery(){
-map.basemap = imageryBasemap;
-retsLabelclass.symbol.color = "black"
-retsLabelclass.symbol.haloColor = "gray"
-retsLabelclass.symbol.haloSize = 1
-TxDOTRoadways.labelsVisible = false,
-TxDOTRoadways.renderer.symbol.width = 0
+    map.basemap = imageryBasemap;
+    retsLabelclass.symbol.color = "black"
+    retsLabelclass.symbol.haloColor = "gray"
+    retsLabelclass.symbol.haloSize = 1
+    TxDOTRoadways.labelsVisible = false,
+    TxDOTRoadways.renderer.symbol.width = 0
 }
 
 export function applyHybrid(){
-map.basemap = hybridBasemap;
-retsLabelclass.symbol.color = "black"
-retsLabelclass.symbol.haloColor = "gray"
-retsLabelclass.symbol.haloSize = 1
-TxDOTRoadways.labelsVisible = true,
-TxDOTRoadways.renderer.symbol.width = 8
+    map.basemap = hybridBasemap;
+    retsLabelclass.symbol.color = "black"
+    retsLabelclass.symbol.haloColor = "gray"
+    retsLabelclass.symbol.haloSize = 1
+    TxDOTRoadways.labelsVisible = true,
+    TxDOTRoadways.renderer.symbol.width = 8
 }
 
 export function applyGoogle(){
-map.basemap = googleVTBasemap;
-retsLabelclass.symbol.color = "black"
-retsLabelclass.symbol.haloSize = 0
-TxDOTRoadways.labelsVisible = false,
-TxDOTRoadways.renderer.symbol.width = 0
+    map.basemap = googleVTBasemap;
+    retsLabelclass.symbol.color = "black"
+    retsLabelclass.symbol.haloSize = 0
+    TxDOTRoadways.labelsVisible = false,
+    TxDOTRoadways.renderer.symbol.width = 0
 }
 
 export function applyOSM(){
@@ -1780,26 +1881,14 @@ export function applyOSM(){
     TxDOTRoadways.renderer.symbol.width = 1
 }
 
-export function applybasemap(basemap){
-
-}
 
 export async function deleteRets(){
-store.retsObj.attributes.isDelete = true
-await deleteRETSPT(store.retsObj)
-removeRelatedRetsFromMap(store.retsObj.attributes.OBJECTID)
-store.deleteRetsID()
-deleteRetsGraphic()
-//this.returnToFeed()
-store.toggleFeed = 1
-return
-}
-
-export function restoreExtent(){
-return retsLayer.queryExtent().then((response) => {
-    view.goTo(response.extent)
-    .catch((error) => {
-      console.error(error);
-    });
-  });
+    store.retsObj.attributes.isDelete = true
+    await deleteRETSPT(store.retsObj)
+    removeRelatedRetsFromMap(store.retsObj.attributes.OBJECTID)
+    store.deleteRetsID()
+    deleteRetsGraphic()
+    //this.returnToFeed()
+    store.toggleFeed = 1
+    return
 }

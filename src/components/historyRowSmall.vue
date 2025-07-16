@@ -123,7 +123,6 @@
                 let findURL = index.CMNT.match(/(\S+(?<=www|https)((?=)\S+))/g)
                 if(findURL){
                     index.URL = findURL
-                    //console.log(findURL)
                     findURL.forEach((url, i) => {
                         let returnUpdateCMNT = index.CMNT.replace(url, `see Link ${i + 1}`)
                         index.CMNT = returnUpdateCMNT

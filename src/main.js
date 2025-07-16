@@ -22,9 +22,6 @@ import router from './router/index.js';
     },
     theme: {
        defaultTheme: 'dark',
-       
-      
-      
     }
   })
   
