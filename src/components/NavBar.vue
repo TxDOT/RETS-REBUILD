@@ -233,7 +233,8 @@
 
 <script>
 
-    import { appConstants } from '../common/constant.js';
+    import { tr } from 'vuetify/locale';
+import { appConstants } from '../common/constant.js';
     import { graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect } from '../components/map-Init.js';
     import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM, getUserOBJECTID} from '../components/utility.js';
     import { vuetify } from '../main.js';
@@ -467,20 +468,27 @@
                                 {title:"Select", icon: 'mdi-select-multiple', color: "#D9D9D9", name: "Multi-Select", isActive: false,
                                     action: () =>
                                         {
-                                            if(store.isSelectEnabled)
+                                            
+                                            if(store.isSelectEnabled || sketchWidgetselect.state === 'active')
                                                 {
 
                                                     sketchWidgetselect.cancel()                           
                                                     this.retsToolsBottom[2].isActive = false
                                                     this.multiselectOptions[0].isActive = false
                                                     this.multiselectOptions[1].isActive = false
+                                                    store.isSelectEnabled = false
+                                                    
                                                 }
+                                                
                                             else
                                                 {
-                                                    this.handleSelectTool(this.multiselectTool);
+                                                    this.retsToolsBottom[2].isActive = true
+                                                    this.handleSelectTool(this.multiselectTool)
+                                                    store.isSelectEnabled = true
+                                                   
                                                 }
 
-                                            store.isSelectEnabled = !store.isSelectEnabled
+                    
                                             
                                         },
                                     setActive: () => {
@@ -535,9 +543,18 @@
 
                 multiselectOptions: [ {title:"Rectangle", icon: 'mdi-rectangle-outline', color: "#D9D9D9", name: "Multi-Select - Rectangle", class:"topIcon3", isActive: false,
                                action: () => {
-                                this.handleSelectTool('rectangle');
-                                if (this.multiselectOptions[1].isActive === true) {   
-                                    this.multiselectOptions[1].isActive = false; 
+                                this.multiselectOptions[0].isActive =! this.multiselectOptions[0].isActive
+                               
+                                this.retsToolsBottom[2].isActive = this.multiselectOptions[0].isActive
+                                
+
+                                if (this.multiselectOptions[0].isActive === true) {   
+                                    this.multiselectTool = 'rectangle'
+                                    this.handleSelectTool(this.multiselectTool)
+                                    this.multiselectOptions[1].isActive = false
+                                }
+                                else {
+                                    sketchWidgetselect.cancel()
                                 }
                             
                                 return
@@ -546,11 +563,20 @@
                                 },
                                {title:"Lasso", icon: 'mdi-vector-polygon', color: "#D9D9D9", name: "Multi-Select - Lasso", class:"topIcon2", isActive: false,
                                action: () =>{
-                                this.handleSelectTool('selecttoolfreehand');
-                                if (this.multiselectOptions[0].isActive == true) {   
-                                    this.multiselectOptions[0].isActive = false; 
-                                }
+                                this.multiselectOptions[1].isActive =! this.multiselectOptions[1].isActive
                                 
+                                this.retsToolsBottom[2].isActive = this.multiselectOptions[1].isActive
+                               
+
+                                if (this.multiselectOptions[1].isActive === true) {   
+                                    this.multiselectTool = 'selecttoolfreehand'
+                                    this.handleSelectTool(this.multiselectTool)
+                                    this.multiselectOptions[0].isActive = false
+                                }
+                                else {
+                                    sketchWidgetselect.cancel()
+                                }
+
                                 return
                                },
                             
@@ -787,35 +813,53 @@
                 
                 
             },
-            handleSelectTool(tooltype) { 
-                if ((tooltype === sketchWidgetselect.activeTool) || (tooltype === 'selecttoolfreehand' && sketchWidgetselect.activeTool === 'polygon')) {
-                    sketchWidgetselect.cancel();
-                    this.retsToolsBottom[2].isActive = false
-                    this.multiselectOptions[0].isActive = false
-                    this.multiselectOptions[1].isActive = false
-                    return
-                }
-                if (sketchWidgetselect.state === "active"){
-                    sketchWidgetselect.cancel()
-                    }
-                this.retsToolsBottom[2].isActive = true
-                if (tooltype === "rectangle"){
-                    
+
+
+
+
+            handleSelectTool(tooltype) {
+                // if (sketchWidgetselect.state === "active"){
+                //     sketchWidgetselect.cancel()
+                //     }
+                if (this.multiselectTool === 'rectangle') {
+                    this.multiselectOptions[0].isActive = true;
                     selecttool(true, sketchWidgetselect, graphics, "rectangle","freehand")
-                    this.multiselectTool = "rectangle"
-                    this.multiselectOptions[0].isActive = true
-
-                }
-                else if (tooltype === "selecttoolfreehand"){
-                    
+                } else if (this.multiselectTool === 'selecttoolfreehand') {
+                    this.multiselectOptions[1].isActive = true;
                     selecttool(true, sketchWidgetselect, graphics, "polygon","freehand")
-                    this.multiselectTool = "selecttoolfreehand"
-                    this.multiselectOptions[1].isActive = true
-                    
-
                 }
                 
+
+                // if ((tooltype === sketchWidgetselect.activeTool) || (tooltype === 'selecttoolfreehand' && sketchWidgetselect.activeTool === 'polygon')) {
+                //     sketchWidgetselect.cancel();
+                //     this.retsToolsBottom[2].isActive = false
+                //     this.multiselectOptions[0].isActive = false
+                //     this.multiselectOptions[1].isActive = false
+                //     return
+                // }
+                // if (sketchWidgetselect.state === "active"){
+                //     sketchWidgetselect.cancel()
+                //     }
+                // this.retsToolsBottom[2].isActive = true
+                // if (tooltype === "rectangle"){
+                    
+                //     selecttool(true, sketchWidgetselect, graphics, "rectangle","freehand")
+                //     this.multiselectTool = "rectangle"
+                //     this.multiselectOptions[0].isActive = true
+
+                // }
+                // else if (tooltype === "selecttoolfreehand"){
+                    
+                //     selecttool(true, sketchWidgetselect, graphics, "polygon","freehand")
+                //     this.multiselectTool = "selecttoolfreehand"
+                //     this.multiselectOptions[1].isActive = true
+                    
+
+                // }
+                
             },
+
+
 
             handleJumpToToolGoogle() {
                 var ctr = view.center;                
