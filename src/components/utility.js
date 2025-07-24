@@ -1,5 +1,5 @@
-import {view, retsLayer, retsGraphicLayer, TxDOTRoadways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate, 
-    retsPointRenderer, texasExtent, retsRole, highlightLayer, map,
+import {view, retsLayer, homeWidget, retsGraphicLayer, TxDOTRoadways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate, 
+    retsPointRenderer, texasExtent, retsPointRendererout, retsRole, highlightLayer, map, retsPointRendererout2,
     retsLabelclass,
     darkVTBasemap,
     standardVTBasemap,
@@ -64,6 +64,14 @@ reactiveUtils.once(() => !rdLayerView.dataUpdating)
     try{
         console.log("roads ready")
         store.isAddBtn = false
+        // if( rdLayerView.view.zoom > 9 ){
+        //     if(TxDOTRoadways.definitionExpression === "") return
+        //     rdLayerView.layer.definitionExpression = ""
+        // }
+        // if(rdLayerView.view.zoom < 10 ){
+        //     if(TxDOTRoadways.definitionExpression === "RTE_PRFX = 'IH'") return
+        //     rdLayerView.layer.definitionExpression = "RTE_PRFX = 'IH'"
+        // }
         roadLayerView = rdLayerView
         sketchWidgetcreate.snappingOptions.featureSources.push({layer: roadLayerView.layer, enable: true})
     }
@@ -79,7 +87,6 @@ try{
     view.on("click", (event)=>{
         if (view.popup.visible === true){
             view.closePopup()
-            removeHighlight()
         }
         event.stopPropagation()
         view.hitTest(event, {include: [retsLayer, retsGraphicLayer, roadLayerView.layer]}).then((evt) =>{
@@ -102,15 +109,24 @@ try{
                   }, 10000);
             }
             else{
-
+           
                 highlightLayer.removeAll()
                 removeHighlightRoadways('a', true)
+                removeHighlight('a', true)
                 if(!evt.results.length){
                     if (!store.isSaveBtnDisable){
                         store.cancelpopup = true
                         return
                     }
-                    store.activityBanner = "Activity Feed"
+                    if (store.isShowSelected){
+                        store.isShowSelected = false
+                        store.roadHighlightObj.clear()
+                        setTimeout(() => {
+                            returntofeedcopy()
+
+                        }, 500);
+                        return
+                    }
                     removeOutline()
                     removeHighlight("a", true)
                     clearRoadHighlightObj()
@@ -118,43 +134,58 @@ try{
                     return
                 }
                 store.layerName = evt.results[0].layer.title
-
-                if ( store.retsObj.attributes.CREATE_DT === store.retsObj.attributes.EDIT_DT && store.archiveRetsDataString.length != 0){
-                    return
-                }
                 if (evt.results[0].layer.title === "TxDOT Roadways"){
                     highlightRoadways(evt.results[0].graphic.attributes)
-                    if (evt.results.length === 1){
+                    if (evt.results.length === 1 && map.basemap.title === "Hybrid"){
                         view.openPopup({
                             fetchFeatures: true,
                             location: event.mapPoint
                         });
                     }
-
+                    
                 }
-
-                    const retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
-                   
-                    if (store.isDetailsPage && store.isSaveBtnDisable && !store.isEmptyRow){
-                        //canceldetailsfunction()
-                        openDetails(retsPt)
+                else{
+                    if ( store.retsObj.attributes.CREATE_DT === store.retsObj.attributes.EDIT_DT && store.archiveRetsDataString.length != 0){
+                        return
                     }
 
-                
-                store.roadHighlightObj.clear()
-                if (retsPt){
-                    store.roadHighlightObj.add(retsPt)
+                    store.roadHighlightObj.clear()
+                    let retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
+                    
+                    if (retsPt){
+                        store.roadHighlightObj.add(retsPt)
 
-                }
+                    }
+                    if (store.isDetailsPage && store.isSaveBtnDisable && !store.isEmptyRow){
+                        openDetails(retsPt)
+                        return
+                    }
+                    if (retsPt === undefined && store.isShowSelected){
+                        const retsId = evt.results[0].graphic.attributes.RETS_ID
+                        
+                   
+                        let sorting = store.CREATE_DT ? `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO` : "EDIT_DT DESC, PRIO"
 
-                if (store.isSaveBtnDisable && !store.isEmptyRow){
-                    removeOutline()
-                    removeHighlight("a", true)
-                    const firstResult = Array.isArray(evt.results) ? evt.results[0] : null;
-                    firstResult.graphic.layer.title ? highlightRETSPoint(firstResult.graphic.attributes) : highlightGraphicPt(firstResult.graphic.attributes)
-                    outlineFeedCards(evt.results.splice(0,1))
-             
-                }
+                        store.getRetsLayer(store.loggedInUser, `RETS_ID = ${evt.results[0].graphic.attributes.RETS_ID}`, "retsLayer", sorting).then((value) => {
+                            store.isShowSelected = true
+                            retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === retsId)
+                            store.roadHighlightObj.add(retsPt)
+
+
+                        
+                        })
+                    
+                    }
+                        if (store.isSaveBtnDisable && !store.isEmptyRow){
+                                removeOutline()
+                                removeHighlight("a", true)
+                                const firstResult = Array.isArray(evt.results) ? evt.results[0] : null;
+                                firstResult.graphic.layer.title ? highlightRETSPoint(firstResult.graphic.attributes) : highlightGraphicPt(firstResult.graphic.attributes)
+                                outlineFeedCards(evt.results.splice(0,1))
+                        
+                            }
+                        }
+               
                 
             }
             
@@ -657,25 +688,19 @@ return
 }
 
 export function turnAllVisibleGraphicsOff(){
-    const isVisible = retsGraphicLayer.graphics.items.filter(x => x.visible === true)
-    isVisible.forEach(vis => vis.visible = false)
-    return
+const isVisible = retsGraphicLayer.graphics.items.filter(x => x.visible === true)
+isVisible.forEach(vis => vis.visible = false)
+return
 }
 export function removeRelatedRetsFromMap(retsoid, retsID){
-    try{
-        if(!store.retsObj.attributes.RELATED_RETS){
-            return
-        }
-        let retsIndex = store.retsObj.attributes.RELATED_RETS.findIndex(ret => ret.RETS_ID === retsID)
-        store.retsObj.attributes.RELATED_RETS.splice(retsIndex,1)
-        const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === Number(retsoid))
-        retsGraphicLayer.removeMany(findGraphic)
-        return
-    }
-    catch(err){
-        console.warn(err)
-    }
-
+if(!store.retsObj.attributes.RELATED_RETS){
+    return
+}
+let retsIndex = store.retsObj.attributes.RELATED_RETS.findIndex(ret => ret.RETS_ID === retsID)
+store.retsObj.attributes.RELATED_RETS.splice(retsIndex,1)
+const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === Number(retsoid))
+retsGraphicLayer.removeMany(findGraphic)
+return
 }
 
 export function zoomToRelatedRets(relatedRets){
@@ -718,7 +743,6 @@ retsHistory.queryFeatures({
 })
 .then((res) => {
     let retCard = store.roadObj.find(ret => ret.attributes.RETS_ID === Number(retsid))
-
     if(!res.features[0]){
         retCard.attributes.historyUpdate = "Champ, there's no history for the RETS."
         return
@@ -735,14 +759,14 @@ retsHistory.queryFeatures({
         retCard.attributes.historyUpdate = latestHistoryText
         return
     }
-
+    
     let {CMNT_NM, CREATE_DT, CMNT_TYPE_ID} = returnItem[0].attributes
     let latestHistoryText = appConstants.defineCMNT[CMNT_TYPE_ID ? CMNT_TYPE_ID : 0](CMNT_NM, CREATE_DT) ?? 'Status Change issue'
     retCard.attributes.historyUpdate = latestHistoryText
     return 
 })
-.catch((err) => {
-    console.log('Error with history', err)
+.catch(() => {
+    //
 })
 return
 
@@ -914,7 +938,11 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                         store.roadHighlightObj.clear()
                                         store.retsSelection.clear
                                         if (!selectedFeatures.length){
-                                            returnToFeedFunction()
+                                            store.roadHighlightObj.clear()
+                                             setTimeout(() => {
+                                                returntofeedcopy()
+
+                                            }, 500);
                                         }
                                         for (let i = 0; i < selectedFeatures.length; i++ ) {
                                             store.roadHighlightObj.add(store.roadObj.find(rd => rd.attributes.OBJECTID === selectedFeatures[i].attributes.OBJECTID))
@@ -947,16 +975,16 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
 
                                                                       string = arr.join(" OR RETS_ID = ")
 
-                                                                    if (store.autozoomextent  && store.isShowSelected){
+                                                                    if (store.autozoomextent  && store.isShowSelected && i == 0){
                                                                           if (store.CREATE_DT ){
-                                                                        store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                                                                            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
                                                                             //check if features are highlighted, if they are run the outlinefeedcards
 
-                                                                    }
-                                                                    else{
-                                                                        store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", "EDIT_DT DESC, PRIO")
+                                                                        }
+                                                                        else{
+                                                                            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", "EDIT_DT DESC, PRIO")
 
-                                                                    }
+                                                                        }
                                                                     }
                                                                    
 
@@ -996,18 +1024,18 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
 
                                         })
                                         outlineFeedCards(store.roadHighlightObj);  
-                                                                                    string = arr.join(" OR RETS_ID = ")
+                                        string = arr.join(" OR RETS_ID = ")
 
                                         if (store.autozoomextent && store.isShowSelected){
                                             if (store.CREATE_DT){
-                                            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                                                store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
                                                 //check if features are highlighted, if they are run the outlinefeedcards
 
-                                        }
-                                        else{
-                                            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", "EDIT_DT DESC, PRIO")
+                                            }
+                                            else{
+                                                store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", "EDIT_DT DESC, PRIO")
 
-                                        }
+                                            }
                                         }
                                         
 
@@ -1036,7 +1064,9 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
 
                                             }  
                                             else{
-                                                returnToFeedFunction()
+                                                store.roadHighlightObj.clear()
+                                                returntofeedcopy()
+
 
                                             }
                                         }
@@ -1054,7 +1084,6 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                         //utlineFeedCards(store.roadHighlightObj)
                                     }
                                     if (store.isDetailsPage && store.isSaveBtnDisable && (store.roadHighlightObj.size === 0)){
-
                                         returnToFeedFunction()
                                         removeOutline()
                                     }
@@ -1405,8 +1434,8 @@ try{
                         completeMovePtSketch()
                         store.cancelEvent.remove()
                         getNewPoint.remove()
-                        store.checkDetailsForComplete()
-                        // store.isSaveBtnDisable = false
+                        //store.checkDetailsForComplete()
+                        store.isSaveBtnDisable = false
                         return
                     }
                     store.isAlert = false
@@ -1418,7 +1447,6 @@ try{
                     store.cancelEvent.remove()
                     store.isMoveRetsPt = false
                     getNewPoint.remove()
-                    store.checkDetailsForComplete()
                     return
                 })
                 .catch(() => {
@@ -1533,14 +1561,14 @@ return movePointHitTest
 }
 
 export async function isRoadExist(){
-    const exist = await roadLayerView.queryFeatures({
-        where: `RTE_NM = '${store.retsObj.attributes.RTE_NM}'`
-    })
+const exist = await roadLayerView.queryFeatures({
+    where: `RTE_NM = '${store.retsObj.attributes.RTE_NM}'`
+})
 
-    if(!exist.features.length){
-        return true
-    }
-    return false
+if(!exist.features.length){
+    return true
+}
+return false
 }
 
 export function checkhighlightfunction(retsid){
@@ -1549,8 +1577,8 @@ try{
     const found = objarray.some(feature => feature.attributes.RETS_ID.toString() === retsid);
     return found ? "card-rets highlight-card" : "card-rets";
 }
-catch(err){
-    console.log(err)
+catch{
+    //nada
 }
 
 }
@@ -1725,36 +1753,35 @@ return
 }
 
 export function discardeditcopy(){
-    if(store.clickStatus){
-        const archiveRets = JSON.parse(store.archiveRetsDataString)
-        let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
-        updateRetsObj(findItem, archiveRets)
-        store.roadHighlightObj.forEach(entry => {
-            if (store.retsObj.attributes.RETS_ID != entry.attributes.RETS_ID){
-                openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === entry.attributes.RETS_ID))
-                removeHighlight("a", true)
-                highlightRETSPoint(entry.attributes)
-                outlineFeedCards(store.roadHighlightObj)
-            }
-            });                                           
-        store.clickStatus = false
-        store.cancelpopup = false
-        store.isSaveBtnDisable = true
-        return
-    }
-
+if(store.clickStatus){
     const archiveRets = JSON.parse(store.archiveRetsDataString)
-    replacearchivecopy(archiveRets)
-    clearGraphicsLayer()
-    //returntofeedcopy()
-    retsLayerView.layer.definitionExpression = store.savedFilter
-    store.isCard = true
-    store.toggleFeed = 1
+    let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
+    updateRetsObj(findItem, archiveRets)
+    store.roadHighlightObj.forEach(entry => {
+        if (store.retsObj.attributes.RETS_ID != entry.attributes.RETS_ID){
+            openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === entry.attributes.RETS_ID))
+            removeHighlight("a", true)
+            highlightRETSPoint(entry.attributes)
+            outlineFeedCards(store.roadHighlightObj)
+        }
+        });                                           
+    store.clickStatus = false
     store.cancelpopup = false
     store.isSaveBtnDisable = true
-    store.isAlert = false
-    outlineFeedCards(store.roadHighlightObj)
     return
+}
+const archiveRets = JSON.parse(store.archiveRetsDataString)
+replacearchivecopy(archiveRets)
+clearGraphicsLayer()
+//returntofeedcopy()
+retsLayerView.layer.definitionExpression = store.savedFilter
+store.isCard = true
+store.toggleFeed = 1
+store.cancelpopup = false
+store.isSaveBtnDisable = true
+store.isAlert = false
+outlineFeedCards(store.roadHighlightObj)
+return
 }
 
 export async function getUserOBJECTID(userId){
@@ -1781,16 +1808,16 @@ export async function getAllUserSettings(users){
 }
 
 export function setFilterProperties(userFilterObject){
-    store.CREATE_DT = userFilterObject.createDt
-    store.JOB_TYPE = userFilterObject.jobType
-    store.EDIT_DT = userFilterObject.editDt
-    store.STAT = userFilterObject.stat
-    store.ACTV = userFilterObject.actv
-    store.DIST_NM = userFilterObject.distNM
-    store.CNTY_NM = userFilterObject.cntyNM
-    store.USER = userFilterObject.user
-    store.isAssignedTo = userFilterObject.isAssignedTo
-    store.isAssociated = userFilterObject.isAssociated
+store.CREATE_DT = userFilterObject.createDt
+store.JOB_TYPE = userFilterObject.jobType
+store.EDIT_DT = userFilterObject.editDt
+store.STAT = userFilterObject.stat
+store.ACTV = userFilterObject.actv
+store.DIST_NM = userFilterObject.distNM
+store.CNTY_NM = userFilterObject.cntyNM
+store.USER = userFilterObject.user
+store.isAssignedTo = userFilterObject.isAssignedTo
+store.isAssociated = userFilterObject.isAssociated
 return
 
 
@@ -1825,52 +1852,55 @@ export function setBasemap(){
 }
 
 export function applyDarkGrey(){
-    map.basemap = darkVTBasemap;
-    retsLabelclass.symbol.color = "white"
-    retsLabelclass.symbol.haloSize = 0
-    TxDOTRoadways.labelsVisible = false
+map.basemap = darkVTBasemap;
+retsLabelclass.symbol.color = "white"
+retsLabelclass.symbol.haloSize = 0
+TxDOTRoadways.labelsVisible = false
 TxDOTRoadways.renderer.symbol.width = 0
 }
 export function applyLightGrey(){
-    map.basemap = lightVTBasemap
-    retsLabelclass.symbol.color = "black"                        
-    retsLabelclass.symbol.haloSize = 0
-    TxDOTRoadways.labelsVisible = false,
-    TxDOTRoadways.renderer.symbol.width = 0
+map.basemap = lightVTBasemap
+retsLabelclass.symbol.color = "black"                        
+retsLabelclass.symbol.haloSize = 0
+TxDOTRoadways.labelsVisible = false,
+TxDOTRoadways.renderer.symbol.width = 0
+
+
 }
 
 export function applyStandard(){
-    map.basemap = standardVTBasemap;
-    retsLabelclass.symbol.color = "black"
-    retsLabelclass.symbol.haloSize = 0
-    TxDOTRoadways.labelsVisible = false,
-    TxDOTRoadways.renderer.symbol.width = 0
+map.basemap = standardVTBasemap;
+retsLabelclass.symbol.color = "black"
+retsLabelclass.symbol.haloSize = 0
+TxDOTRoadways.labelsVisible = false,
+TxDOTRoadways.renderer.symbol.width = 0
+
 }
 
 export function applyImagery(){
-    map.basemap = imageryBasemap;
-    retsLabelclass.symbol.color = "black"
-    retsLabelclass.symbol.haloColor = "gray"
-    retsLabelclass.symbol.haloSize = 1
-    TxDOTRoadways.labelsVisible = false,
-    TxDOTRoadways.renderer.symbol.width = 0
+map.basemap = imageryBasemap;
+retsLabelclass.symbol.color = "black"
+retsLabelclass.symbol.haloColor = "gray"
+retsLabelclass.symbol.haloSize = 1
+TxDOTRoadways.labelsVisible = false,
+TxDOTRoadways.renderer.symbol.width = 0
 }
 
 export function applyHybrid(){
-    map.basemap = hybridBasemap;
-    retsLabelclass.symbol.color = "black"
-    retsLabelclass.symbol.haloColor = "gray"
-    retsLabelclass.symbol.haloSize = 1
-    TxDOTRoadways.labelsVisible = true,
-    TxDOTRoadways.renderer.symbol.width = 8
+map.basemap = hybridBasemap;
+retsLabelclass.symbol.color = "black"
+retsLabelclass.symbol.haloColor = "gray"
+retsLabelclass.symbol.haloSize = 1
+TxDOTRoadways.labelsVisible = true,
+TxDOTRoadways.renderer.symbol.width = 8
 }
 
 export function applyGoogle(){
-    map.basemap = googleVTBasemap;
-    retsLabelclass.symbol.color = "black"
-    retsLabelclass.symbol.haloSize = 0
-    TxDOTRoadways.labelsVisible = false,
-    TxDOTRoadways.renderer.symbol.width = 0
+map.basemap = googleVTBasemap;
+retsLabelclass.symbol.color = "black"
+retsLabelclass.symbol.haloSize = 0
+TxDOTRoadways.labelsVisible = false,
+TxDOTRoadways.renderer.symbol.width = 0
 }
 
 export function applyOSM(){
@@ -1881,14 +1911,26 @@ export function applyOSM(){
     TxDOTRoadways.renderer.symbol.width = 1
 }
 
+export function applybasemap(basemap){
+
+}
 
 export async function deleteRets(){
-    store.retsObj.attributes.isDelete = true
-    await deleteRETSPT(store.retsObj)
-    removeRelatedRetsFromMap(store.retsObj.attributes.OBJECTID)
-    store.deleteRetsID()
-    deleteRetsGraphic()
-    //this.returnToFeed()
-    store.toggleFeed = 1
-    return
+store.retsObj.attributes.isDelete = true
+await deleteRETSPT(store.retsObj)
+removeRelatedRetsFromMap(store.retsObj.attributes.OBJECTID)
+store.deleteRetsID()
+deleteRetsGraphic()
+//this.returnToFeed()
+store.toggleFeed = 1
+return
+}
+
+export function restoreExtent(){
+return retsLayer.queryExtent().then((response) => {
+    view.goTo(response.extent)
+    .catch((error) => {
+      console.error(error);
+    });
+  });
 }
