@@ -550,11 +550,12 @@ import { appConstants } from '../common/constant.js';
 
                                 if (this.multiselectOptions[0].isActive === true) {   
                                     this.multiselectTool = 'rectangle'
-                                    this.handleSelectTool(this.multiselectTool)
+                                    this.handleSelectTool()
                                     this.multiselectOptions[1].isActive = false
                                 }
                                 else {
                                     sketchWidgetselect.cancel()
+                                    store.isSelectEnabled = false
                                 }
                             
                                 return
@@ -570,11 +571,12 @@ import { appConstants } from '../common/constant.js';
 
                                 if (this.multiselectOptions[1].isActive === true) {   
                                     this.multiselectTool = 'selecttoolfreehand'
-                                    this.handleSelectTool(this.multiselectTool)
+                                    this.handleSelectTool()
                                     this.multiselectOptions[0].isActive = false
                                 }
                                 else {
                                     sketchWidgetselect.cancel()
+                                    store.isSelectEnabled = false
                                 }
 
                                 return
@@ -817,10 +819,10 @@ import { appConstants } from '../common/constant.js';
 
 
 
-            handleSelectTool(tooltype) {
-                // if (sketchWidgetselect.state === "active"){
-                //     sketchWidgetselect.cancel()
-                //     }
+            handleSelectTool() {
+                if (sketchWidgetselect.state === "active"){
+                    sketchWidgetselect.cancel()
+                    }
                 if (this.multiselectTool === 'rectangle') {
                     this.multiselectOptions[0].isActive = true;
                     selecttool(true, sketchWidgetselect, graphics, "rectangle","freehand")
@@ -829,34 +831,7 @@ import { appConstants } from '../common/constant.js';
                     selecttool(true, sketchWidgetselect, graphics, "polygon","freehand")
                 }
                 
-
-                // if ((tooltype === sketchWidgetselect.activeTool) || (tooltype === 'selecttoolfreehand' && sketchWidgetselect.activeTool === 'polygon')) {
-                //     sketchWidgetselect.cancel();
-                //     this.retsToolsBottom[2].isActive = false
-                //     this.multiselectOptions[0].isActive = false
-                //     this.multiselectOptions[1].isActive = false
-                //     return
-                // }
-                // if (sketchWidgetselect.state === "active"){
-                //     sketchWidgetselect.cancel()
-                //     }
-                // this.retsToolsBottom[2].isActive = true
-                // if (tooltype === "rectangle"){
-                    
-                //     selecttool(true, sketchWidgetselect, graphics, "rectangle","freehand")
-                //     this.multiselectTool = "rectangle"
-                //     this.multiselectOptions[0].isActive = true
-
-                // }
-                // else if (tooltype === "selecttoolfreehand"){
-                    
-                //     selecttool(true, sketchWidgetselect, graphics, "polygon","freehand")
-                //     this.multiselectTool = "selecttoolfreehand"
-                //     this.multiselectOptions[1].isActive = true
-                    
-
-                // }
-                
+            
             },
 
 
