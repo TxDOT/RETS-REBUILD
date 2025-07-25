@@ -299,29 +299,6 @@ export const popupTemplateRoadways = {
   ]
 }
 
-//TxDOTRoadways Layer construction
-export const TxDOTRoadways = new FeatureLayer ({
-  url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Roadways/FeatureServer/0",
-  visible: true,
-  renderer: roadwaysRenderer,
-  outFields: ["*"],
-  returnM: true,
-  hasM: true,
-  // definitionExpression: `RTE_PRFX = 'IH'`,
-  popupTemplate: popupTemplateRoadways,
-  labelsVisible: false,
-  opacity: 0
-})
-
-export const TxDOTRoadwayscopy = new FeatureLayer ({
-  url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Roadways/FeatureServer/0",
-  visible: true,
-  renderer: roadwaysRenderer,
-  outFields: ["*"],
-  returnM: true,
-  hasM: true,
-  definitionExpression: "",
-})
 
 //Rets Layer construction
 export const retsLayer = new FeatureLayer({
@@ -388,9 +365,7 @@ export const roadwaysLabelClass = new LabelClass({
   repeatLabel: 200
 })
 
-//Applies label class to rets layer
-retsLayer.labelingInfo = [retsLabelclass];
-TxDOTRoadways.labelingInfo = [roadwaysLabelClass];
+
 
 export const retsGraphicLayer = new GraphicsLayer({});
 
@@ -444,6 +419,24 @@ export const map = new Map({
   basemap: darkVTBasemap,
   
 })
+
+//TxDOTRoadways Layer construction
+export const TxDOTRoadways = new FeatureLayer ({
+  url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Roadways/FeatureServer/0",
+  visible: true,
+  renderer: roadwaysRenderer,
+  outFields: ["*"],
+  returnM: true,
+  hasM: true,
+  // definitionExpression: `RTE_PRFX = 'IH'`,
+  popupTemplate:popupTemplateRoadways,
+  labelsVisible: false,
+  opacity: 0
+})
+
+//Applies label class to rets layer
+retsLayer.labelingInfo = [retsLabelclass];
+TxDOTRoadways.labelingInfo = [roadwaysLabelClass];
 
 //add  map to the mapview, set zoom and center of screen when the application loads
 export const view = new MapView({
@@ -581,7 +574,7 @@ export const searchWidget = new Search({
 
     {
       name: "Roadways",
-      layer: TxDOTRoadwayscopy, 
+      layer: TxDOTRoadways, 
       placeholder: "Roadways",
       searchFields: ["RTE_NM", "GID"],
       displayField: "RTE_NM", 
@@ -813,6 +806,7 @@ searchWidget.on("select-result", function(event) {
     
   } else if (selectedFeature.geometry.type === "polyline") {
     // Highlight the selected polyline feature with highlightSymbolRoadways
+    view.popup.close()
     highlightLayer.add(new Graphic({
       geometry: selectedFeature.geometry,
       symbol: highlightSymbolroadways
@@ -887,50 +881,46 @@ retsPointRenderer.visualVariables = [
 ]
 
 
-
-export const handleextent = reactiveUtils.watch(
-  () => [view.stationary, view.extent],
-  ([stationary, extent]) => {
-    // Only print the new zoom value when the view is stationary
-
-    if(stationary && !store.isDetailsPage && !store.autozoomextent != true ){
-      let query = retsLayer.createQuery();
-      query.geometry = view.extent
-      query.spatialRelationship = "intersects"
-      query.returnGeometry = false
-      query.outFields = ["RETS_ID"]
-      const featurestring = []
-      const selectedstring = []
-      if (store.roadHighlightObj.size){
-        store.roadHighlightObj.forEach((value) => selectedstring.push(value.attributes.RETS_ID))
-      } 
-      retsLayer.queryFeatures(query)
-        .then(function(response){
-          response.features.forEach((feature) =>
-            featurestring.push(feature.attributes.RETS_ID)
-          
-          )  
-          let stringex = null
-          if (response.features.length > 0 && store.isShowSelected){
-              stringex = featurestring.filter(value => selectedstring.includes(value)).join(" OR RETS_ID = ").length === 0 ? null :  featurestring.filter(value => selectedstring.includes(value)).join(" OR RETS_ID = ")
-            
-          } 
-          else if (response.features.length > 0 && !store.isShowSelected){
-              stringex = featurestring.join(" OR RETS_ID = ")
-
-          }  
-          if (store.CREATE_DT){
-              store.getRetsLayer(store.loggedInUser, `RETS_ID = ${stringex}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
-                //check if features are highlighted, if they are run the outlinefeedcards
-
+export function queryExtent(){
+  let query = retsLayer.createQuery();
+    query.geometry = view.extent
+    query.spatialRelationship = "intersects"
+    query.returnGeometry = false
+    query.outFields = ["RETS_ID"]
+  var appendstring = ''
+  retsLayer.queryFeatures(query)
+    .then(function(response){
+      if (!response.features.length){
+        store.roadObj.length = 0
+        return
+      }
+      for (const feature of response.features)
+        {
+          if (store.isShowSelected){
+            store.roadHighlightObj.forEach((value) => value.attributes.RETS_ID === feature.attributes.RETS_ID ?  appendstring = appendstring.concat(` OR RETS_ID = ${value.attributes.RETS_ID}`) : null )
+            continue
           }
-        else{
-              store.getRetsLayer(store.loggedInUser, `RETS_ID = ${stringex}`, "retsLayer", "EDIT_DT DESC, PRIO")
 
+          appendstring = appendstring.concat(` OR RETS_ID = ${feature.attributes.RETS_ID}`)
+          
         }
 
-          
-        })
+    store.getRetsLayer(store.loggedInUser, appendstring.slice(4), "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+
+    })
+
+  return
+}
+
+let vieww = null
+reactiveUtils.watch(
+  () => [view.stationary],
+  ([stationary]) => {   
+    if(stationary && !store.isDetailsPage && store.autozoomextent === true){
+       if (vieww !== `${view.center.x},${view.center.y}`){
+        queryExtent()
+        vieww = `${view.center.x},${view.center.y}`
+      }
     }
   }
  );

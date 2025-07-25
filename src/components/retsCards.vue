@@ -154,10 +154,12 @@ export default{
     },
 
     mounted(){
+        //outlineFeedCards()
         this.setLayer
         store.isSaving = false
         loadData()
         return
+        //outlineFeedCards(store.roadHighlightObj)
     },
 
     updated(){
@@ -169,6 +171,10 @@ export default{
         this.setLayer
         loadData()
         return
+        // loadData()
+        // store.toggleFeed = 1
+        // console.log('updated')
+        //store.activityBanner = "Activity Feed"
     },
     methods:{
         checkhighlight(retsid){
@@ -184,7 +190,7 @@ export default{
         closeFlagDiv(){
             this.flagClickedId = ""
         },
-        assignColorToFlag(clr){
+        assignColorToFlag(clr){ `   1111111111111   `
             document.getElementById(`${this.flagClickedId}Icon`).style.color = clr
             const rets = store.updateRetsSearch.find(rd => rd.attributes.RETS_ID === this.flagClickedId)
             rets.attributes.flagColor.FLAG = clr
@@ -193,38 +199,13 @@ export default{
             this.closeFlagDiv()
         },
         async zoomToRetsPt(rets){
-            if ( store.retsObj.attributes.CREATE_DT === store.retsObj.attributes.EDIT_DT && store.archiveRetsDataString.length != 0){
-                return
-            }
-            await includes(rets.attributes).then(result => {
-                 var isIncluded = result
-                 if (isIncluded === false){
-                    removeHighlight("a", true)
-                    removeOutline()
-                    store.roadHighlightObj.clear()
-                    const elementId = String(rets.attributes.RETS_ID).concat('-', rets.attributes.OBJECTID);
-                    const element = document.getElementById(elementId);
-
-                    if (element) {
-                        element.classList.toggle('highlight-card');
-                    } 
-                    return
-                }
-            });
-            clearTimeout(this.timer)
-            this.timer = ""
-            this.timer = setTimeout(()=>{
-                const zoomToRETS = rets.geometry
-                highlightRETSPoint(rets.attributes)
-                if ( Math.floor(view.center.longitude/ .0000000000001)===  Math.floor(rets.geometry[0]/ .0000000000001)  && Math.floor(view.center.latitude/ .0000000000001) === Math.floor(rets.geometry[1]/ .0000000000001) && store.roadHighlightObj.size != 0){
-                    return
-                }
-                if (!store.roadHighlightObj.has(rets)){
-                    store.roadHighlightObj.add(rets)
-
-                }
-                zoomTo(zoomToRETS)
-            },250)
+            removeHighlight("a", true)
+            store.roadHighlightObj.clear()
+            store.roadHighlightObj.add(rets);
+            highlightRETSPoint(rets.attributes)
+            zoomTo(rets.geometry)
+            return
+            
         },
         double(road, index){  
             store.openAfterDiscardRets = road
