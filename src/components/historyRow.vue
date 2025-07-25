@@ -21,52 +21,52 @@
             </div>
         </div>
         <div id="displayHistoryL">
-                <div v-for="(note, i) in histNotes" :key="note.OBJECTID" track-by="OBJECTID" v-if="!isHistNotesEmpty">
-                    <v-banner :id="`${note.OBJECTID}Expand`" v-model="note[i]" density="compact" style="padding: 0px; padding-left: 5px; border-left: 3px solid #4472C4 !important;">
-                        <div style="max-width: 100%;">
-                            <span v-if="note.PARENT_ID" style="margin:0% !important;">
-                                <p id="replyingToCmnt">Replying to "{{store.historyChat.find(x => x.OBJECTID === note.PARENT_ID)?.CMNT ?? "Referenced Note has been deleted"}}"</p>
+            <div v-for="(note, i) in histNotes" :key="note.OBJECTID" track-by="OBJECTID" v-if="!isHistNotesEmpty">
+                <v-banner :id="`${note.OBJECTID}Expand`" v-model="note[i]" density="compact" style="padding: 0px; padding-left: 5px; border-left: 3px solid #4472C4 !important;">
+                    <div style="max-width: 100%;">
+                        <span v-if="note.PARENT_ID" style="margin:0% !important;">
+                            <p id="replyingToCmnt">Replying to "{{store.historyChat.find(x => x.OBJECTID === note.PARENT_ID)?.CMNT ?? "Referenced Note has been deleted"}}"</p>
+                        </span>
+                    
+                        <v-textarea class="history-note" rows="1" auto-grow density="compact" :disabled="note.OBJECTID !== updateOID" variant="plain" v-model="note.CMNT" placeholder="Enter Comment" autofocus></v-textarea>
+                    
+                        <span v-for="(i,n) in note.URL" style="display: flex; flex-direction: row; max-width: 99%; font-size: 12px;">
+                            <span v-html="returnHyperLink(i, n)" style="max-width: 99%;"></span>
+                        </span>
+                    
+                        <div style="flex: auto; position: relative; top: 00px; width: 100%;">
+                            <span style="font-size: 10px; color: grey; padding-left: 2px; position: relative; bottom: 0px; padding: 0px;">{{ returnUserName(note.CMNT_NM) }} {{ returnDateFormat(note.CREATE_DT) }} <b v-if="note.CREATE_DT !== note.EDIT_DT && note.SYS_GEN === 0" class="main-color">{{ `Edited ${returnDateFormat(note.EDIT_DT)}` }}</b></span>
+                        </div>
+                        <div style="position: relative; top: 0px;" v-if="note.attachments">
+                            <span v-for="attach in note.attachments" style="padding-right: 3px;">
+                                <v-chip :text="attach.name" color="#4472C4" :closable="editContent && updateOID === note.OBJECTID ? true: false" density="compact" rounded="0" variant="flat" @click="openAttachement(attach.url)" @click:close="deleteAttach(note.OBJECTID, attach.name)"></v-chip>
                             </span>
-                        
-                            <v-textarea class="history-note" rows="1" auto-grow density="compact" :disabled="note.OBJECTID !== updateOID" variant="plain" v-model="note.CMNT" placeholder="Enter Comment" autofocus></v-textarea>
-                        
-                            <span v-for="(i,n) in note.URL" style="display: flex; flex-direction: row; max-width: 99%; font-size: 12px;">
-                                <span v-html="returnHyperLink(i, n)" style="max-width: 99%;"></span>
-                            </span>
-                        
-                            <div style="flex: auto; position: relative; top: 00px; width: 100%;">
-                                <span style="font-size: 10px; color: grey; padding-left: 2px; position: relative; bottom: 0px; padding: 0px;">{{ returnUserName(note.CMNT_NM) }} {{ returnDateFormat(note.CREATE_DT) }} <b v-if="note.CREATE_DT !== note.EDIT_DT && note.SYS_GEN === 0" class="main-color">{{ `Edited ${returnDateFormat(note.EDIT_DT)}` }}</b></span>
-                            </div>
-                            <div style="position: relative; top: 0px;" v-if="note.attachments">
-                                <span v-for="attach in note.attachments" style="padding-right: 3px;">
-                                    <v-chip :text="attach.name" color="#4472C4" :closable="editContent && updateOID === note.OBJECTID ? true: false" density="compact" rounded="0" variant="flat" @click="openAttachement(attach.url)" @click:close="deleteAttach(note.OBJECTID, attach.name)"></v-chip>
-                                </span>
-                            </div>
                         </div>
-                        <div v-if="note.SYS_GEN === 0" style="width: 11%; position: relative; right: 10px;">
-                            <div style="position: relative; float: right; top: 14px; right: 15px;" v-if="note.SYS_GEN === 0">
-                                <v-btn variant="plain" density="compact" icon="mdi-pencil-outline" style="font-size: 13px; bottom: 15px;" @click="openNote(note)" :disabled="note.CMNT_NM !== loggedInUserName"></v-btn>
-                                <v-btn variant="plain" density="compact" icon="mdi-reply" style="font-size: 13px; bottom: 15px;" @click="replyNote(note)"></v-btn>
-                            </div>
+                    </div>
+                    <div v-if="note.SYS_GEN === 0" style="width: 11%; position: relative; right: 10px;">
+                        <div style="position: relative; float: right; top: 14px; right: 15px;" v-if="note.SYS_GEN === 0">
+                            <v-btn variant="plain" density="compact" icon="mdi-pencil-outline" style="font-size: 13px; bottom: 15px;" @click="openNote(note)" :disabled="note.CMNT_NM !== loggedInUserName"></v-btn>
+                            <v-btn variant="plain" density="compact" icon="mdi-reply" style="font-size: 13px; bottom: 15px;" @click="replyNote(note)"></v-btn>
                         </div>
- 
-                    </v-banner>
-                    <span v-if="updateOID === note.OBJECTID && note.SYS_GEN === 0" :id="note.OBJECTID">
-                        <div style="position: relative; float: right; top: 15px; margin: 0% !important; padding: 0% !important">                           
-                            <v-btn icon="mdi-delete" variant="plain" density="compact" style="font-size: 10px; bottom: 15px;" @click="deleteNote(note.CMNT, note.OBJECTID)"></v-btn>
-                            <v-btn icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px; bottom: 15px;" @click="attachToNote(note.CMNT, note.OBJECTID)"></v-btn>
-                            <v-btn icon="mdi-close" variant="plain" density="compact" style="font-size: 10px; bottom: 15px;" @click="closeNotes(note)"></v-btn>
-                            <v-btn icon="mdi-check"  variant="plain" density="compact" style="font-size: 10px; bottom: 15px;" @click="updateNote(note)"></v-btn>
-                        </div>
-                    </span>
-                </div>
+                    </div>
 
-                <div v-if="emptyHist">
-                    <v-text-field disabled variant="plain">No History for this RETS</v-text-field>
-                </div>
-                <div v-if="noSearch">
-                    <v-text-field disabled variant="plain">No Search Results</v-text-field>
-                </div>
+                </v-banner>
+                <span v-if="updateOID === note.OBJECTID && note.SYS_GEN === 0" :id="note.OBJECTID">
+                    <div style="position: relative; float: right; top: 15px; margin: 0% !important; padding: 0% !important">                           
+                        <v-btn icon="mdi-delete" variant="plain" density="compact" style="font-size: 10px; bottom: 15px;" @click="deleteNote(note.OBJECTID)"></v-btn>
+                        <v-btn icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px; bottom: 15px;" @click="attachToNote(note.OBJECTID)"></v-btn>
+                        <v-btn icon="mdi-close" variant="plain" density="compact" style="font-size: 10px; bottom: 15px;" @click="closeNotes(note)"></v-btn>
+                        <v-btn icon="mdi-check"  variant="plain" density="compact" style="font-size: 10px; bottom: 15px;" @click="updateNote(note)"></v-btn>
+                    </div>
+                </span>
+            </div>
+
+            <div v-if="emptyHist">
+                <v-text-field disabled variant="plain">No History for this RETS</v-text-field>
+            </div>
+            <div v-if="noSearch">
+                <v-text-field disabled variant="plain">No Search Results</v-text-field>
+            </div>
         </div>
     </div>
 </template>
@@ -88,7 +88,6 @@
                 editText: false,
                 editContent: false,
                 updateOID: -1,
-                isClose: false,
                 ogNote: "",
                 loggedInUserName: "",
                 hasAttachment: false,
@@ -135,7 +134,6 @@
             },
             openNote(n){
                 this.editContent = true
-                this.isClose = true;
                 this.updateOID = n.OBJECTID
                 this.ogNote = n.CMNT
                 const oidFlag = `${n.OBJECTID}`    
@@ -143,7 +141,7 @@
                 this.switchHyperlink(n)
                 return
             },
-            deleteNote(n,oid){
+            deleteNote(oid){
                 store.deleteNote(oid)
                 this.orderList
                 if(!this.histNotes.length){
@@ -155,7 +153,6 @@
             async updateNote(n){
                 const findItem = await store.modifyNote(n.CMNT, n.OBJECTID)
                 this.editContent = false
-                //this.updateOID = findItem.OBJECTID
                 this.updateOID = -1
                 const oidFlag = `${n.OBJECTID}Expand`
                 document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
@@ -165,7 +162,6 @@
             closeNotes(note){
                 note.CMNT = this.ogNote
                 this.editContent = false
-                this.isClose = false;
                 this.updateOID = -1
                 const oidFlag = `${note.OBJECTID}Expand`
                 document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
@@ -177,13 +173,11 @@
                 const cmnt = null
                 const sortType = "end"
                 const returnOid = await store.replyNote(note, sortType)
-                this.openNote(cmnt, returnOid)
+                this.openNote({OBJECTID: returnOid, CMNT: cmnt})
                 this.testOid = returnOid
                 return
             },
-            attachToNote(cmnt, oid){
-                // this.updateOID = oid
-                // this.hasAttachment = true
+            attachToNote(oid){
                 const input = document.createElement('input')
                 input.type = "file"
                 input.name = "attachment"
@@ -198,6 +192,7 @@
                 document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
             },
             switchHyperlink(note){
+                if(!note.URL) return
                 note.URL.forEach((url, i) => {
                     let switchHyper = note.CMNT.replace(`see Link ${i+1}`, url)
                     note.CMNT = switchHyper

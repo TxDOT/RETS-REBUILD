@@ -597,7 +597,7 @@
 #commentDiv{
     position: absolute;
     top: calc(100% + -91vh); 
-    left: 70vh; 
+    left: calc(100% + 7vw); 
     width: 50rem;
     padding:0%;
     margin:0%;

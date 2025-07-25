@@ -770,9 +770,11 @@ getQueryLayer(queryString, "CREATE_DT DESC")
                         })
                         //store.historyChat.push(x.attributes)
                     }
-                    store.historyChat.push(x.attributes)
+                    // store.historyChat.push(x.attributes)
                 })
         })
+
+        store.historyChat = hist.features.map(h => h.attributes)
         store.isHistNotesEmpty = true
     })
     .catch(err => console.log(err))
@@ -1128,30 +1130,27 @@ return await retsHistory.queryFeatures({
 }
 
 export function addAttachments(oid, files, flag){
-const arr = Array.from(files)
-const formData = new FormData()
-formData.append("attachment", arr[0], arr[0].name)
-esriRequest(`${retsHistory.url}/0/${oid}/addAttachment`, {
-    body: formData,
-    method: "post",
-    responseType: "html",
-})
-.then(() => {
-    store.numAttachments += 1
-    flag ? null : store.attachToNote(oid, arr)
-})
-.then(() => console.log(`${store.loggedInUser} added an attachment!`))
-.catch((err) => {
-    store.alertTextInfo.type = "error"
-    store.alertTextInfo.color = 'red'
-    store.alertTextInfo.text = 'Error Uploading attachment. File Size or Type issue. Try a smaller or different file type.'
-    store.isAlert = true
-    console.log(err)
-})
+    const arr = Array.from(files)
+    const formData = new FormData()
+    formData.append("attachment", arr[0], arr[0].name)
+    esriRequest(`${retsHistory.url}/0/${oid}/addAttachment`, {
+        body: formData,
+        method: "post",
+        responseType: "html",
+    })
+    .then(() => {
+        store.numAttachments += 1
+        flag ? null : store.attachToNote(oid, arr)
+    })
+    .then(() => console.log(`${store.loggedInUser} added an attachment!`))
+    .catch((err) => {
+        store.alertTextInfo.type = "error"
+        store.alertTextInfo.color = 'red'
+        store.alertTextInfo.text = 'Error Uploading attachment. File Size or Type issue. Try a smaller or different file type.'
+        store.isAlert = true
+        console.log(err)
+    })
 }
-
-
-
 
 export function deleteAttachment(oid, attachName){
 const attachGraphic = new Graphic({
@@ -1167,6 +1166,7 @@ retsHistory.queryAttachments({
     let getAttachment = x[oid].find((attach) => attach.name === attachName) 
         retsHistory.deleteAttachments(attachGraphic, [getAttachment.id])
             .then((y) => {
+                console.log(y)
                 const chat = store.historyChat.find(z => z.OBJECTID === getAttachment.parentObjectId)
                 const index = chat.attachments.findIndex(att => att.name === getAttachment.name)
                 chat.attachments.splice(index, 1)

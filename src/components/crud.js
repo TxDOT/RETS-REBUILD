@@ -111,18 +111,17 @@ export async function sendChatHistory(chat, type){
     const chatType = {
         add: () => {
             newGraphic = createGraphic(chat)
-            console.log(newGraphic)
             return retsHistory.applyEdits({
                 addFeatures: [newGraphic]
             })
         },
         modify:() => {
-            let setRetsEditDate = new Date().getTime()
+            // let setRetsEditDate = new Date().getTime()
 
-            let a = createGraphic({"OBJECTID": chat.RETS_ID, "EDIT_DT": setRetsEditDate})
-            retsLayer.applyEdits({
-                updateFeatures: [a]
-            })
+            // let a = createGraphic({"OBJECTID": Number(chat.RETS_ID), "EDIT_DT": setRetsEditDate})
+            // retsLayer.applyEdits({
+            //     updateFeatures: [a]
+            // })
             newGraphic = createGraphic(chat)
             return retsHistory.applyEdits({
                 updateFeatures: [newGraphic]

@@ -22,10 +22,10 @@
             </div>
         </div>
         
-        <div v-if="isHistNotesEmpty" style="flex: auto;">
+        <div class="display-history" v-if="this.isHistNotesEmpty">
             <v-text-field disabled variant="plain">No History for this RETS</v-text-field>
         </div>
-        <div id="displayHistory" v-if="!this.isHistNotesEmpty">
+        <div class="display-history" v-if="!this.isHistNotesEmpty">
             <div v-for="(note, i) in histNotes" :key="note.OBJECTID" track-by="OBJECTID">
                 <v-banner :id="`${note.OBJECTID}Small`" v-model="note[i]" density="compact" class="note">
                     <div style="max-width: 84%;">
@@ -57,8 +57,8 @@
                 </v-banner>
                     <span v-if="updateOID === note.OBJECTID && note.SYS_GEN === 0" :id="note.OBJECTID">
                         <div style="position: relative; float: right; top: 15px; margin: 0% !important; padding: 0% !important; padding-right: 5px;">                           
-                            <v-btn icon="mdi-delete" variant="plain" density="compact" style="font-size: 10px; bottom: 15px;" @click="deleteNote(note.CMNT, note.OBJECTID)"></v-btn>
-                            <v-btn icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px; bottom: 15px;" @click="attachToNote(note.CMNT, note.OBJECTID)"></v-btn>
+                            <v-btn icon="mdi-delete" variant="plain" density="compact" style="font-size: 10px; bottom: 15px;" @click="deleteNote(note.OBJECTID)"></v-btn>
+                            <v-btn icon="mdi-paperclip" variant="plain" density="compact" style="font-size: 10px; bottom: 15px;" @click="attachToNote(note.OBJECTID)"></v-btn>
                             <v-btn icon="mdi-close" variant="plain" density="compact" style="font-size: 10px; bottom: 15px;" @click="closeNotes(note)"></v-btn>
                             <v-btn icon="mdi-check"  variant="plain" density="compact" style="font-size: 10px; bottom: 15px;" @click="updateNote(note)"></v-btn>
                         </div>
@@ -83,14 +83,13 @@
         data(){
             return{
                 store,
-                isHistNotesEmpty: false,
+                isHistNotesEmpty: true,
                 histNotes: [],
                 noHistResp: "No History for this RETS",
                 searchHistoryFilter: "",
                 editText: false,
                 editContent: false,
                 updateOID: -1,
-                isClose: false,
                 ogNote: "",
                 loggedInUserName: "",
                 hasAttachment: false,
@@ -107,8 +106,7 @@
             this.orderList
         },
         updated(){
-            document.querySelector('#displayHistory').scrollTop = document.querySelector('#displayHistory').scrollHeight - document.querySelector('#displayHistory').clientHeight
-           
+            document.querySelector('.display-history').scrollTop = document.querySelector('.display-history').scrollHeight - document.querySelector('.display-history').clientHeight
         },
         methods:{
             returnHyperLink(url, index){
@@ -144,7 +142,6 @@
             },
             openNote(n){
                 this.editContent = true
-                this.isClose = true;
                 this.updateOID = n.OBJECTID
                 this.ogNote = n.CMNT
                 const oidFlag = `${n.OBJECTID}`    
@@ -152,7 +149,7 @@
                 this.switchHyperlink(n)
                 return
             },
-            deleteNote(n,oid){
+            deleteNote(oid){
                 store.deleteNote(oid)
                 this.orderList
                 if(!this.histNotes.length){
@@ -164,7 +161,6 @@
             async updateNote(n){
                 const findItem = await store.modifyNote(n.CMNT, n.OBJECTID)
                 this.editContent = false
-                //this.updateOID = findItem.OBJECTID
                 this.updateOID = -1
                 const oidFlag = `${n.OBJECTID}Small`
                 document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
@@ -174,7 +170,6 @@
             closeNotes(note){
                 note.CMNT = this.ogNote
                 this.editContent = false
-                this.isClose = false;
                 this.updateOID = -1
                 const oidFlag = `${note.OBJECTID}Small`
                 document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
@@ -186,13 +181,11 @@
                 const cmnt = null
                 const sortType = "end"
                 const returnOid = await store.replyNote(note, sortType)
-                this.openNote(cmnt, returnOid)
+                this.openNote({OBJECTID: returnOid, CMNT: cmnt})
                 this.testOid = returnOid
                 return
             },
-            attachToNote(cmnt, oid){
-                // this.updateOID = oid
-                // this.hasAttachment = true
+            attachToNote(oid){
                 const input = document.createElement('input')
                 input.type = "file"
                 input.name = "attachment"
@@ -207,6 +200,7 @@
                 document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
             },
             switchHyperlink(note){
+                if(!note.URL) return
                 note.URL.forEach((url, i) => {
                     let switchHyper = note.CMNT.replace(`see Link ${i+1}`, url)
                     note.CMNT = switchHyper
@@ -241,13 +235,6 @@
                 window.open(url, "_blank")
             },
             deleteAttach(noteOid, attachName){
-                // const returnHistObj = this.histNotes.find(note => note.OBJECTID === noteOid)
-                // const returnAttchIndex = returnHistObj.attachments.findIndex(att => att.name === attachName)
-                // console.log(returnAttchIndex)
-                // console.log(JSON.stringify(returnHistObj.attachments))
-                // returnHistObj.attachments.splice(returnAttchIndex, 1)
-                // console.log(returnHistObj)
-                // console.log(this.histNotes.at(-1).attachments)
                 deleteAttachment(noteOid, attachName)
             }   
         },
@@ -293,7 +280,7 @@
             },
             'store.historyChat.length':{
                 handler: function(a,b){
-                    if(a.length === 0){
+                    if(a === 0){
                         this.isHistNotesEmpty = true
                         return
                     }
@@ -326,7 +313,7 @@
         min-height: 4px;
     }
 
-    #displayHistory{
+    .display-history{
         position: relative; 
         display: flex;
         flex-direction: column;
