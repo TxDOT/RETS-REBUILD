@@ -27,7 +27,7 @@ export default{
   watch:{
     auth:{
       handler: function(){
-        this.$router.push({name: "Inital"})
+        this.$router.push({name: "NicCage"})
       },
       immediate: true,
     }

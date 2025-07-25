@@ -19,8 +19,7 @@ export function login(){
     esriId.registerOAuthInfos([authen]);
     esriId.checkSignInStatus(`${authen.portalUrl}/sharing/rest`)
       .then(() => alreadySignedIn()) //signed in
-      .catch(() => console.log('go back to login page')) // generateLogin() not signed in; proceed to sign in 
-    return
+      .catch(() => console.log("re-login"))// generateLogin() not signed in; proceed to sign in 
 }
 
 // function generateLogin(){
