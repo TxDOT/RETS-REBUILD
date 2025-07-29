@@ -688,44 +688,44 @@ return
 }
 
 export function turnAllVisibleGraphicsOff(){
-const isVisible = retsGraphicLayer.graphics.items.filter(x => x.visible === true)
-isVisible.forEach(vis => vis.visible = false)
-return
-}
-export function removeRelatedRetsFromMap(retsoid, retsID){
-if(!store.retsObj.attributes.RELATED_RETS){
+    const isVisible = retsGraphicLayer.graphics.items.filter(x => x.visible === true)
+    isVisible.forEach(vis => vis.visible = false)
     return
 }
-let retsIndex = store.retsObj.attributes.RELATED_RETS.findIndex(ret => ret.RETS_ID === retsID)
-store.retsObj.attributes.RELATED_RETS.splice(retsIndex,1)
-const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === Number(retsoid))
-retsGraphicLayer.removeMany(findGraphic)
-return
+export function removeRelatedRetsFromMap(retsoid, retsID){
+    if(!store.retsObj.attributes.RELATED_RETS){
+        return
+    }
+    let retsIndex = store.retsObj.attributes.RELATED_RETS.findIndex(ret => ret.RETS_ID === retsID)
+    store.retsObj.attributes.RELATED_RETS.splice(retsIndex,1)
+    const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === Number(retsoid))
+    retsGraphicLayer.removeMany(findGraphic)
+    return
 }
 
 export function zoomToRelatedRets(relatedRets){
-const groupOfRets = retsGraphicLayer.graphics.items.filter(item => item.OBJECTID === relatedRets.oid)
-view.goTo(groupOfRets, {easing: "ease-in"})
-return
+    const groupOfRets = retsGraphicLayer.graphics.items.filter(item => item.OBJECTID === relatedRets.oid)
+    view.goTo(groupOfRets, {easing: "ease-in"})
+    return
 }
 
 export const toggleRelatedRets = (retsid) =>  {
-const parseRets = JSON.parse(retsid)
-if(!parseRets.attributes.RELATED_RETS) return
-const newRetsId = parseRets.attributes.RELATED_RETS.includes(",") ? parseRets.attributes.RELATED_RETS.split(",") : [parseRets.attributes.RELATED_RETS]
-store.retsObj.attributes.RELATED_RETS = newRetsId
-turnAllVisibleGraphicsOff()
-newRetsId.forEach((ret) =>{
-    let a = retsGraphicLayer.graphics.items.filter(item => item.attributes.retsId === Number(ret))
-    a.forEach(x => x.visible = true)
-})
-return
+    const parseRets = JSON.parse(retsid)
+    if(!parseRets.attributes.RELATED_RETS) return
+    const newRetsId = parseRets.attributes.RELATED_RETS.includes(",") ? parseRets.attributes.RELATED_RETS.split(",") : [parseRets.attributes.RELATED_RETS]
+    store.retsObj.attributes.RELATED_RETS = newRetsId
+    turnAllVisibleGraphicsOff()
+    newRetsId.forEach((ret) =>{
+        let a = retsGraphicLayer.graphics.items.filter(item => item.attributes.retsId === Number(ret))
+        a.forEach(x => x.visible = true)
+    })
+    return
 }
 
 function updateCreateDateStatus(res, findMaxCreateDT){
-let findItem = res.features.find(cmnt => cmnt.attributes.CREATE_DT === findMaxCreateDT)
+    let findItem = res.features.find(cmnt => cmnt.attributes.CREATE_DT === findMaxCreateDT)
 
-return [findItem, "create"]
+    return [findItem, "create"]
 }
 
 function updateEditDateStatus(res, findMaxEditDT){
