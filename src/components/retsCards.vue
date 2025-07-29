@@ -199,8 +199,11 @@ export default{
         },
         async zoomToRetsPt(rets){
             removeHighlight("a", true)
-            store.roadHighlightObj.clear()
-            store.roadHighlightObj.add(rets);
+            if (!store.isShowSelected){
+                store.roadHighlightObj.clear()
+                store.roadHighlightObj.add(rets);
+            }
+            
             highlightRETSPoint(rets.attributes)
             zoomTo(rets.geometry)
             return
