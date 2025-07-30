@@ -292,12 +292,17 @@
                 multiselectTool: 'rectangle',
                 latestReleaseNotes: [
                     [
-                        `Latest Release Version ${store.retsVersion}`,'User Story 110: Multi Select Tool: Lasso', 'User Story 357: Card return to previous in feed pane', 'Bug 360: Selected features counter on the select button increases when opening a selected point', 
-                        'Bug 359: Jump to SPM button opens a blank map', 'Bug 344: User filter returning results outside the scope of that filter', 'Bug 337: Route and subtitle overlap', 
-                        'Bug 338: Save enabled with no description', 
+                        `Latest Release Version ${store.retsVersion}`,'User Story 424: Refactor: Zoom To Rets', 'User Story 426: Refactor: Map Init', 'User Story 425: Refactor: Login', 
+                        'User Story 428: Refactor: History', 'User Story 423: Refactor: Multi-Select', 'User Story 427: Refactor: CRUD/Update', 
+                       
                     ]
                 ],
                 previousReleaseNotes: [
+                [
+                        `Release 2.8`,'User Story 110: Multi Select Tool: Lasso', 'User Story 357: Card return to previous in feed pane', 'Bug 360: Selected features counter on the select button increases when opening a selected point', 
+                        'Bug 359: Jump to SPM button opens a blank map', 'Bug 344: User filter returning results outside the scope of that filter', 'Bug 337: Route and subtitle overlap', 
+                        'Bug 338: Save enabled with no description', 
+                    ],
                     [
                         `Release 2.7.1`,'User Story 226: Add Lat/Long searching','User Story 230: Transition to prod create portal','User Story 119: Add links/URL to a comment in History',
                         'User Story 256: History items should expand to fit all text',
