@@ -5,7 +5,7 @@ import {getQueryLayer, getCmntOID, addAttachments, getAttachmentInfo, filterMapA
 import { retsHistory } from './map-Init.js';
 
 export const store = reactive({
-        devStatus: "prod",
+        devStatus: "dev",
         userFilters: {
                 createDt: '',
                 jobType: '',

@@ -353,9 +353,10 @@
                 
                 this.userArray.push(`${store.retsObj.attributes.GIS_ANALYST}`)
                 
-                let userSettings = await getAllUserSettings(this.userArray)
+                // let userSettings = await getAllUserSettings(this.userArray)
 
-                await this.sendNotification(userSettings)
+                // await this.sendNotification(userSettings)
+                store.isNewRets = false
 
                 return
             },
