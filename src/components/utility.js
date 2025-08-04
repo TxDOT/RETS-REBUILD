@@ -97,44 +97,47 @@ try{
                 let lon = Math.round(event.mapPoint.longitude * 100000000) / 100000000;
                 let coordinate = lon + ", " + lat
                 
-                navigator.clipboard.writeText(coordinate);
+                //navigator.clipboard.writeText(coordinate);
                 store.latlonstring = coordinate
-                store.alertTextInfo = {"text": ` ${coordinate} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
-               
+                // store.alertTextInfo = {"text": ` ${coordinate} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
+                store.alertTextInfo = {"text": `(23.2323432423423, 12.1234231235) has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
+
                 store.isAlert = true
 
-                 setTimeout(() => {
-                    store.isAlert = false
+                //  setTimeout(() => {
+                //     store.isAlert = false
 
-                  }, 10000);
+                //   }, 10000000);
             }
             else{
            
                 highlightLayer.removeAll()
                 removeHighlightRoadways('a', true)
-                removeHighlight('a', true)
                 if(!evt.results.length){
                     if (!store.isSaveBtnDisable){
                         store.cancelpopup = true
                         return
                     }
+                    if (store.isDetailsPage){
+                        
+                    }
+                    store.roadHighlightObj.clear()
+                    removeOutline()
+                    removeHighlight("a", true)
                     if (store.isShowSelected){
                         store.isShowSelected = false
-                        store.roadHighlightObj.clear()
                         setTimeout(() => {
                             returntofeedcopy()
 
                         }, 500);
                         return
                     }
-                    removeOutline()
-                    removeHighlight("a", true)
-                    clearRoadHighlightObj()
+                    
                     store.isDetailsPage ? canceldetailsfunction() : null
                     return
                 }
                 store.layerName = evt.results[0].layer.title
-                if (evt.results[0].layer.title === "TxDOT Roadways"){
+                if (evt.results[0].layer.title === "TxDOT Roadways" ){
                     highlightRoadways(evt.results[0].graphic.attributes)
                     if (evt.results.length === 1 && map.basemap.title === "Hybrid"){
                         view.openPopup({
@@ -150,8 +153,21 @@ try{
                     }
                     store.roadHighlightObj.clear()
                     let retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
-                    
+                    //  store.roadHighlightObj.forEach((value) => {
+                    //     console.log(value.attributes.RETS_ID)
+                    //     if (value.attributes.RETS_ID != retsPt.attributes.RETS_ID){
+
+                    //     }
+                    // })
+                    console.log(store.roadHighlightObj.has(retsPt))
+                    if (!store.roadHighlightObj.has(retsPt)){
+                        console.log("cleared")
+                        store.roadHighlightObj.clear()
+                        removeHighlight("a", true)
+
+                    }
                     if (retsPt){
+                        console.log("added")
                         store.roadHighlightObj.add(retsPt)
 
                     }
@@ -175,18 +191,16 @@ try{
                         })
                     
                     }
-                        if (store.isSaveBtnDisable && !store.isEmptyRow){
-                                removeOutline()
-                                removeHighlight("a", true)
-                                const firstResult = Array.isArray(evt.results) ? evt.results[0] : null;
-                                firstResult.graphic.layer.title ? highlightRETSPoint(firstResult.graphic.attributes) : highlightGraphicPt(firstResult.graphic.attributes)
-                                outlineFeedCards(evt.results.splice(0,1))
-                        
-                            }
+                    
+                    if (store.isSaveBtnDisable && !store.isEmptyRow){
+                            // removeOutline()
+                            const firstResult = Array.isArray(evt.results) ? evt.results[0] : null;
+                            firstResult.graphic.layer.title ? highlightRETSPoint(firstResult.graphic.attributes) : highlightGraphicPt(firstResult.graphic.attributes)
+                            outlineFeedCards(evt.results.splice(0,1))
+                    
                         }
-               
-                
-            }
+                    }
+                    }
             
         })
     })
@@ -1583,6 +1597,7 @@ catch{
 }
 
 export function openDetails(road){
+    console.log(road)
 clearGraphicsLayer()
 if (store.alertTextInfo.type == "error"){
     store.isAlert = false

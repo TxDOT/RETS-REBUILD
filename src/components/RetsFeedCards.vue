@@ -36,7 +36,7 @@
                     <div style="flex: auto;">
                         <v-tooltip location="bottom">
                             <template v-slot:activator="{props}">
-                                <v-switch style="position: relative; bottom: 4px;" v-bind="props" flat v-model="store.isShowSelected" density="compact" @update:modelValue="updateSelection(store.isShowSelected)" color="primary" :disabled="!store.roadHighlightObj.size"></v-switch>
+                                <v-switch @click="console.log(store.roadHighlightObj)" style="position: relative; bottom: 4px;" v-bind="props" flat v-model="store.isShowSelected" density="compact" @update:modelValue="updateSelection(store.isShowSelected)" color="primary" :disabled="!store.roadHighlightObj.size"></v-switch>
                             </template>
                             <span>Show Selected Cards</span>
                         </v-tooltip>

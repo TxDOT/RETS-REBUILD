@@ -1,15 +1,15 @@
 
 <template>
-    <hr class="popup-title-border"></hr>
+    <hr class="popup-title-border" style="width: 97.5%; justify-self: center;"></hr>
     <div style="margin-right: 10px; margin-left: 10px; width: 100%; height: 250px;">
         <div id="search">
             <v-text-field class="search-history" placeholder="Search..." flat rounded="0" prepend-inner-icon="mdi-magnify" density="compact" v-model="searchHistoryFilter" variant="solo-filled" elevation="0" >
                 <template v-slot:append-inner>
-                    <v-icon icon="mdi-close" @click="clearContent" v-if="searchHistoryFilter.length"></v-icon>
+                    <v-icon icon="mdi-close" @click="clearContent" v-if="searchHistoryFilter.length" class="close-icon"></v-icon>
                 </template>
             </v-text-field>
         </div>
-        <div style="position: relative; bottom: 2rem; left: 43px;">
+        <div style="position: relative; bottom: 1.2rem; left: 43px;">
             <v-btn variant="plain" density="compact" style="font-size: 10px; float: right; position: relative; top:2px; margin:0%; padding: 0%; padding:0px 10px 0px 10px; margin-right: 10px; margin-bottom: 0px; text-transform: none;" @click="queryAttachments" :disabled="store.numAttachments === 0" v-model="isAttachedActive" :active="isAttachedActive" active-class="active-button">
                 <template v-slot:prepend>
                     <v-icon icon="mdi-filter"></v-icon>
@@ -22,7 +22,7 @@
         </div>
         <div id="displayHistoryL">
                 <div v-for="(note, i) in histNotes" :key="note.OBJECTID" track-by="OBJECTID" v-if="!isHistNotesEmpty">
-                    <v-banner :id="`${note.OBJECTID}Expand`" v-model="note[i]" density="compact" style="padding: 0px; padding-left: 5px; border-left: 3px solid #4472C4 !important;">
+                    <v-banner :id="`${note.OBJECTID}Expand`" v-model="note[i]" density="compact" style="padding: 0px; padding-left: 5px; border-left: 5px solid #4472C4 !important; max-height: 60px;">
                         <div style="max-width: 100%;">
                             <span v-if="note.PARENT_ID" style="margin:0% !important;">
                                 <p id="replyingToCmnt">Replying to "{{store.historyChat.find(x => x.OBJECTID === note.PARENT_ID)?.CMNT ?? "Referenced Note has been deleted"}}"</p>
@@ -34,7 +34,7 @@
                                 <span v-html="returnHyperLink(i, n)" style="max-width: 99%;"></span>
                             </span>
                         
-                            <div style="flex: auto; position: relative; top: 00px; width: 100%;">
+                            <div style="flex: auto; position: relative; top: -20px; width: 100%;">
                                 <span style="font-size: 10px; color: grey; padding-left: 2px; position: relative; bottom: 0px; padding: 0px;">{{ returnUserName(note.CMNT_NM) }} {{ returnDateFormat(note.CREATE_DT) }} <b v-if="note.CREATE_DT !== note.EDIT_DT && note.SYS_GEN === 0" class="main-color">{{ `Edited ${returnDateFormat(note.EDIT_DT)}` }}</b></span>
                             </div>
                             <div style="position: relative; top: 0px;" v-if="note.attachments">
@@ -301,12 +301,29 @@
 
 <style scoped>
     .search-history{
-        height: 10px;
+        height: 0px;
         margin-left: 10px; 
         margin-right: 10px;
         max-width: 550px;
         min-width: 100px;
     }
+
+    .search-history :deep(.v-input__control) {
+        height: 30px !important;
+        margin-top: 8px;
+        
+    }
+
+    .search-history :deep(.v-field__prepend-inner){
+        padding-bottom:25px;
+    }
+
+      .search-history :deep(.v-field__input){
+        padding-bottom:30px;
+    }
+
+   
+    
     
     #displayHistoryL{
         display: flex;
@@ -380,6 +397,10 @@
         min-height: 2px; 
         max-height: 38px;
         overflow: hidden; */
+    }
+
+    .close-icon{
+        padding-bottom: 25px;
     }
 
 </style>
