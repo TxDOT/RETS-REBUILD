@@ -24,23 +24,14 @@
         methods: {
             async timeoutAlert(){
                 setTimeout(() => {
-                    // console.log(store.alertObject[0].text)
-                    // if (store.alertObject[0].text === 'No Route has been detected'){
-                    //     return
-                    // }
-                    store.alertObject.shift()
-                }, 10000);
-
-                // setTimeout(() => {
-                //    store.alertObject.forEach(element => {
-                //     console.log(element.)
-                //    });
-                // }, 10000);
-                // setTimeout(() => {
-                   
-                    
-                
-                // }, 5000);
+                    if (store.alertObject.length && store.alertObject.at(0).text !== 'No Route has been detected' && store.alertObject.at(0).text !== 'Route and/or DFO are not valid. Use the Move (icon) to move to a valid location.'){
+                        store.alertObject.shift()
+                    }
+                    else{
+                        store.alertObject.splice(1,1)
+                    }
+                  }, 10000);
+                 return
                 
             }
 
@@ -48,8 +39,10 @@
         watch: {
             'store.alertTextInfo': {
                 handler: function() { 
-                    if (store.alertTextInfo.text  ==='No Route has been detected'){
-                        console.log("error")
+                    const existing = (store.alertObject).some(
+                        (item) => item.text === 'Route and/or DFO are not valid. Use the Move (icon) to move to a valid location.'
+                    );
+                    if (existing && store.alertTextInfo.text === 'Route and/or DFO are not valid. Use the Move (icon) to move to a valid location.'){
                         return
                     }
                     store.alertObject.push({
@@ -57,12 +50,33 @@
                         'type' : store.alertTextInfo.type,
                         'text' : store.alertTextInfo.text 
                     })
-                    this.timeoutAlert()
+                    if (store.alertTextInfo.text != 'No Route has been detected' && store.alertTextInfo.text != 'Route and/or DFO are not valid. Use the Move (icon) to move to a valid location.'){
+                        this.timeoutAlert()
+                    }
+                  
                     return
 
                 },
                 immediate:true
             },
+            'store.isSaveBtnDisable': {
+                handler: function(){
+                    // if (store.alertObject(0).text === 'Route and/or DFO are not valid. Use the Move (icon) to move to a valid location.' && !store.isSaveBtnDisable){
+
+                    // } 
+                    if (store.isSaveBtnDisable){
+                        for (let index = 0; index < store.alertObject.length; index++) {
+                            if (store.alertObject.at(index).text === 'Route and/or DFO are not valid. Use the Move (icon) to move to a valid location.' || store.alertObject.at(index).text === 'No Route has been detected'){
+                                store.alertObject.splice(index, 1)
+                                
+                            }
+                        // continue
+                        }
+                    }
+                    
+                    return
+                }
+            }
             
         }
 
@@ -81,7 +95,7 @@
     }
 
     .detailsAlert :deep(.v-alert__underlay){
-        opacity: .3 !important;
+        opacity: .4 !important;
         
     }
 
@@ -98,7 +112,7 @@
         position: relative; 
         font-size: 15px;
         opacity: 1;
-        text-shadow: rgb(73, 70, 70) 0px -1px 0px ;
+        text-shadow: black 1px 1px 1px ;
         font-weight: bolder;
     }
 </style>

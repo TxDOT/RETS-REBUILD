@@ -41,7 +41,7 @@
                         <v-autocomplete :items="filterUser" item-title="name" item-value="value" return-object label="Users" multiple chips closable-chips variant="underlined" density="compact" v-model="store.USER" class="filterFields" :disabled="store.isAssignedTo || isDisabled || store.isAssociated" @update:modelValue="userSearch = ''" :search="userSearch" @update:search="userSearch = $event" @update:menu="userSearch = ''"></v-autocomplete>
                     </div>
                     <div no-gutters dense class="item">
-                        <v-select :disabled="isDisabled" :items="filterRouteType" return-object multiple label="Route Type" chips closable-chips variant="underlined" density="compact" v-model="store.SYSTYPE" class="filterFields" @update:modelValue=""  @update:search="" @update:menu=""></v-select>
+                        <v-select :disabled="isDisabled" :items="filterRouteType"  item-title="label" item-value="value" return-object multiple label="Route Type" chips closable-chips variant="underlined" density="compact" v-model="store.routeType" class="filterFields" @update:modelValue=""  @update:search="" @update:menu=""></v-select>
                     </div>
                     <div style="position: relative; width: 40% ; float: left; max-height: 40px !important; font-size: 11px; display: flex; flex-wrap: wrap; bottom: 0rem;" class="item">
                             <v-tooltip text="Filters for RETS with a history item in your name (e.g. created by you or updated by you)." location="right" >
@@ -140,7 +140,7 @@
                 </div>
                 <div>
                     <div style="float: left;">
-                        <v-btn id="restoreDefault" variant="plain" @click="restoreDefault()">Restore Default</v-btn>
+                        <v-btn id="restoreDefault" variant="plain" @click="restoreDefaultStep1(); isRestoreFeed = true">Restore Default</v-btn>
                     </div>
                 </div>    
             </div>
@@ -191,7 +191,7 @@ export default{
             filterCounty: appConstants.countyDomainValues,
             filterUser: appConstants.userRoles,
             filterActivity: appConstants.activityList,
-            filterRouteType: ["On System", "Off System", "Undefined"],
+            filterRouteType: [{label: 'On system', value : 1}, {label: 'Off system', value : 2}, {label: 'Undefined', value : 'null'}],
             numFilters: 0,
             defaultFilter: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, "JOB_TYPE": appConstants.defaultJobtypeValues, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
                      "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, 
@@ -212,7 +212,8 @@ export default{
             customqueryArray: [],
             fieldDiv: false,
             isExpandCustomQuery: true,
-            validationMessageColor: "red"
+            validationMessageColor: "red",
+            isRestoreFeed: false
         }
     },
     mounted(){
@@ -383,6 +384,10 @@ export default{
             return
         },
         setFilterNumber(){
+            if (this.isRestoreFeed){
+                this.restoreDefaultStep2()
+                return
+            }
             store.filter = {
                 createDt: store.CREATE_DT,
                 jobType: store.JOB_TYPE,
@@ -394,12 +399,13 @@ export default{
                 user: store.USER,
                 isAssignedTo: store.isAssignedTo,
                 isAssociated: store.isAssociated,
-                customQuery: store.userFilters.customQuery
+                customQuery: store.userFilters.customQuery,
+                routeType: store.routeType
 
             }
 
             if (store.customquery && this.validationMessage != "No features returned." && this.validationMessage != "Invalid Query." ){
-                store.isfilter = false
+                // store.isfilter = false
                 this.cancelsaveQuery(store.filter)
                 return
             }
@@ -415,11 +421,11 @@ export default{
             return
         },  
         calcFilterDiff(){
-            const typeField = [store.JOB_TYPE.length, store.STAT.length, store.ACTV.length, store.DIST_NM.length, store.CNTY_NM.length, store.USER.length, store.isAssignedTo]
+            const typeField = [store.JOB_TYPE.length, store.STAT.length, store.ACTV.length, store.DIST_NM.length, store.CNTY_NM.length, store.USER.length, store.isAssignedTo, store.routeType]
             store.filterTotal = typeField.filter(x => x).length
             return
         },
-        restoreDefault(){
+        restoreDefaultStep1(){
             store.CREATE_DT = {title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"}
             store.JOB_TYPE.length = 0 
             store.EDIT_DT = null
@@ -431,7 +437,17 @@ export default{
             store.isAssignedTo = false,
             store.isAssociated = false,
             store.customquery =  null
-            store.defaultFilterSetup()
+            store.routeType = []
+            // store.defaultFilterSetup()
+            
+            // filterMapActivityFeed(store.filter)
+            // this.setFilterNumber()
+            return
+        },
+        restoreDefaultStep2(){
+            this.isRestoreFeed = false
+
+             store.defaultFilterSetup()
             
             filterMapActivityFeed(store.filter)
             this.setFilterNumber()
@@ -493,7 +509,7 @@ export default{
                     
                 }
             }
-        }
+        },
     }
 
 }

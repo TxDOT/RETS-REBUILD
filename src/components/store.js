@@ -17,6 +17,7 @@ export const store = reactive({
                 user: '',
                 isAssignedTo: '',
                 isAssociated: '',
+                routeType:'',
                 customQuery: []
 
         },
@@ -114,6 +115,7 @@ export const store = reactive({
         USER:[],
         isAssignedTo: false,
         isAssociated: false,
+        routeType: [],
         filterTotal: 2,
         isfilter: false,
         filterQuery: "",
@@ -148,6 +150,7 @@ export const store = reactive({
                 this.filter.cntyNM = this.CNTY_NM
                 this.filter.user = this.USER
                 this.filter.isAssignedTo = this.isAssignedTo
+                this.filter.routeType = this.routeType
                 return
         },
         async getHistoryChatRet(){

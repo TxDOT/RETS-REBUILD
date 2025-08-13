@@ -881,14 +881,15 @@ retsPointRenderer.visualVariables = [
 ]
 
 
-export function queryExtent(){
+export async function queryExtent(){
   let query = retsLayer.createQuery();
-    query.geometry = view.extent
-    query.spatialRelationship = "intersects"
-    query.returnGeometry = false
-    query.outFields = ["RETS_ID"]
+  query.geometry = view.extent
+  query.spatialRelationship = "intersects"
+  query.returnGeometry = false
+  query.outFields = ["RETS_ID"]
   var appendstring = ''
-  retsLayer.queryFeatures(query)
+  return Promise.resolve(
+     retsLayer.queryFeatures(query)
     .then(function(response){
       if (!response.features.length){
         store.roadObj.length = 0
@@ -905,11 +906,14 @@ export function queryExtent(){
           
         }
 
-    store.getRetsLayer(store.loggedInUser, appendstring.slice(4), "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+      return store.getRetsLayer(store.loggedInUser, appendstring.slice(4), "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`).then(() => {
+              return store.roadObj
 
+      })
+    
     })
-
-  return
+  )
+ 
 }
 
 let vieww = null
