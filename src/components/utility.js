@@ -145,10 +145,9 @@ try{
                     
                 }
                 else{
-                    if ( store.retsObj.attributes.CREATE_DT === store.retsObj.attributes.EDIT_DT && store.archiveRetsDataString.length != 0){
+                    if (store.isNewRets){
                         return
                     }
-
                     store.roadHighlightObj.clear()
                     let retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
                     
