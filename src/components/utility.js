@@ -762,44 +762,44 @@ return
 }
 
 export function turnAllVisibleGraphicsOff(){
-const isVisible = retsGraphicLayer.graphics.items.filter(x => x.visible === true)
-isVisible.forEach(vis => vis.visible = false)
-return
-}
-export function removeRelatedRetsFromMap(retsoid, retsID){
-if(!store.retsObj.attributes.RELATED_RETS){
+    const isVisible = retsGraphicLayer.graphics.items.filter(x => x.visible === true)
+    isVisible.forEach(vis => vis.visible = false)
     return
 }
-let retsIndex = store.retsObj.attributes.RELATED_RETS.findIndex(ret => ret.RETS_ID === retsID)
-store.retsObj.attributes.RELATED_RETS.splice(retsIndex,1)
-const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === Number(retsoid))
-retsGraphicLayer.removeMany(findGraphic)
-return
+export function removeRelatedRetsFromMap(retsoid, retsID){
+    if(!store.retsObj.attributes.RELATED_RETS){
+        return
+    }
+    let retsIndex = store.retsObj.attributes.RELATED_RETS.findIndex(ret => ret.RETS_ID === retsID)
+    store.retsObj.attributes.RELATED_RETS.splice(retsIndex,1)
+    const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === Number(retsoid))
+    retsGraphicLayer.removeMany(findGraphic)
+    return
 }
 
 export function zoomToRelatedRets(relatedRets){
-const groupOfRets = retsGraphicLayer.graphics.items.filter(item => item.OBJECTID === relatedRets.oid)
-view.goTo(groupOfRets, {easing: "ease-in"})
-return
+    const groupOfRets = retsGraphicLayer.graphics.items.filter(item => item.OBJECTID === relatedRets.oid)
+    view.goTo(groupOfRets, {easing: "ease-in"})
+    return
 }
 
 export const toggleRelatedRets = (retsid) =>  {
-const parseRets = JSON.parse(retsid)
-if(!parseRets.attributes.RELATED_RETS) return
-const newRetsId = parseRets.attributes.RELATED_RETS.includes(",") ? parseRets.attributes.RELATED_RETS.split(",") : [parseRets.attributes.RELATED_RETS]
-store.retsObj.attributes.RELATED_RETS = newRetsId
-turnAllVisibleGraphicsOff()
-newRetsId.forEach((ret) =>{
-    let a = retsGraphicLayer.graphics.items.filter(item => item.attributes.retsId === Number(ret))
-    a.forEach(x => x.visible = true)
-})
-return
+    const parseRets = JSON.parse(retsid)
+    if(!parseRets.attributes.RELATED_RETS) return
+    const newRetsId = parseRets.attributes.RELATED_RETS.includes(",") ? parseRets.attributes.RELATED_RETS.split(",") : [parseRets.attributes.RELATED_RETS]
+    store.retsObj.attributes.RELATED_RETS = newRetsId
+    turnAllVisibleGraphicsOff()
+    newRetsId.forEach((ret) =>{
+        let a = retsGraphicLayer.graphics.items.filter(item => item.attributes.retsId === Number(ret))
+        a.forEach(x => x.visible = true)
+    })
+    return
 }
 
 function updateCreateDateStatus(res, findMaxCreateDT){
-let findItem = res.features.find(cmnt => cmnt.attributes.CREATE_DT === findMaxCreateDT)
+    let findItem = res.features.find(cmnt => cmnt.attributes.CREATE_DT === findMaxCreateDT)
 
-return [findItem, "create"]
+    return [findItem, "create"]
 }
 
 function updateEditDateStatus(res, findMaxEditDT){
@@ -868,9 +868,11 @@ getQueryLayer(queryString, "CREATE_DT DESC")
                         })
                         //store.historyChat.push(x.attributes)
                     }
-                    store.historyChat.push(x.attributes)
+                    // store.historyChat.push(x.attributes)
                 })
         })
+
+        store.historyChat = hist.features.map(h => h.attributes)
         store.isHistNotesEmpty = true
     })
     .catch(err => console.log(err))
@@ -1231,30 +1233,27 @@ return await retsHistory.queryFeatures({
 }
 
 export function addAttachments(oid, files, flag){
-const arr = Array.from(files)
-const formData = new FormData()
-formData.append("attachment", arr[0], arr[0].name)
-esriRequest(`${retsHistory.url}/0/${oid}/addAttachment`, {
-    body: formData,
-    method: "post",
-    responseType: "html",
-})
-.then(() => {
-    store.numAttachments += 1
-    flag ? null : store.attachToNote(oid, arr)
-})
-.then(() => console.log(`${store.loggedInUser} added an attachment!`))
-.catch((err) => {
-    store.alertTextInfo.type = "error"
-    store.alertTextInfo.color = 'red'
-    store.alertTextInfo.text = 'Error Uploading attachment. File Size or Type issue. Try a smaller or different file type.'
-    store.isAlert = true
-    console.log(err)
-})
+    const arr = Array.from(files)
+    const formData = new FormData()
+    formData.append("attachment", arr[0], arr[0].name)
+    esriRequest(`${retsHistory.url}/0/${oid}/addAttachment`, {
+        body: formData,
+        method: "post",
+        responseType: "html",
+    })
+    .then(() => {
+        store.numAttachments += 1
+        flag ? null : store.attachToNote(oid, arr)
+    })
+    .then(() => console.log(`${store.loggedInUser} added an attachment!`))
+    .catch((err) => {
+        store.alertTextInfo.type = "error"
+        store.alertTextInfo.color = 'red'
+        store.alertTextInfo.text = 'Error Uploading attachment. File Size or Type issue. Try a smaller or different file type.'
+        store.isAlert = true
+        console.log(err)
+    })
 }
-
-
-
 
 export function deleteAttachment(oid, attachName){
 const attachGraphic = new Graphic({
@@ -1270,6 +1269,7 @@ retsHistory.queryAttachments({
     let getAttachment = x[oid].find((attach) => attach.name === attachName) 
         retsHistory.deleteAttachments(attachGraphic, [getAttachment.id])
             .then((y) => {
+                console.log(y)
                 const chat = store.historyChat.find(z => z.OBJECTID === getAttachment.parentObjectId)
                 const index = chat.attachments.findIndex(att => att.name === getAttachment.name)
                 chat.attachments.splice(index, 1)

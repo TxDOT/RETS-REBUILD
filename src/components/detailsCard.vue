@@ -372,6 +372,7 @@ import {store} from './store.js'
                 document.querySelectorAll(".gem-search")[0].style.display =  document.querySelectorAll(".gem-search")[0].style.display === "block" ? "none" : "block"
             },
             async gimmeRETS(a, string){
+                store.checkDetailsForComplete()
                 if(a.length){
                     const queryString = string ?? `CAST(RETS_ID AS VARCHAR(12)) LIKE '%${a}%'`
                     const query = {"whereString" : queryString, "queryLayer": "retsLayer"}
@@ -403,6 +404,7 @@ import {store} from './store.js'
             },
             closeRelatedRetsChip(ret){
                 removeRelatedRetsFromMap(ret.value, ret)
+                store.checkDetailsForComplete()
             },
             hideDateBtns(i){
                 if(i === 'month'){

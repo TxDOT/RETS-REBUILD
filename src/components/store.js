@@ -224,6 +224,7 @@ export const store = reactive({
                 findItem.EDIT_DT = modDate
                 findItem.CMNT = cmt
                 findItem.CMNT_TYPE_ID = 0
+                findItem.OBJECTID = Number(findItem.OBJECTID)
                 await sendChatHistory(findItem, "modify")
                 return findItem
         },
@@ -256,7 +257,8 @@ export const store = reactive({
                 const chat = this.historyChat.find(x => x.OBJECTID === oid)
                 if(!chat.attachments){
                         chat.attachments = []
-                }userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO"
+                }
+                // userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO"
                 // addAttachments(oid)
                 fileList.forEach(x => chat.attachments.push({name: x.name}))
                 return

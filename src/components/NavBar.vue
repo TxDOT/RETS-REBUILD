@@ -247,7 +247,7 @@
 
 <script>
 
-import { appConstants } from '../common/constant.js';
+    import { appConstants } from '../common/constant.js';
     import { graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, map } from '../components/map-Init.js';
     import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM, getUserOBJECTID} from '../components/utility.js';
     import { vuetify } from '../main.js';

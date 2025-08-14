@@ -61,12 +61,12 @@
                     </span>
                 </div>
 
-                <div v-if="emptyHist">
-                    <v-text-field disabled variant="plain">No History for this RETS</v-text-field>
-                </div>
-                <div v-if="noSearch">
-                    <v-text-field disabled variant="plain">No Search Results</v-text-field>
-                </div>
+            <div v-if="emptyHist">
+                <v-text-field disabled variant="plain">No History for this RETS</v-text-field>
+            </div>
+            <div v-if="noSearch">
+                <v-text-field disabled variant="plain">No Search Results</v-text-field>
+            </div>
         </div>
     </div>
 </template>
@@ -88,7 +88,6 @@
                 editText: false,
                 editContent: false,
                 updateOID: -1,
-                isClose: false,
                 ogNote: "",
                 loggedInUserName: "",
                 hasAttachment: false,
@@ -135,7 +134,6 @@
             },
             openNote(n){
                 this.editContent = true
-                this.isClose = true;
                 this.updateOID = n.OBJECTID
                 this.ogNote = n.CMNT
                 const oidFlag = `${n.OBJECTID}`    
@@ -143,7 +141,7 @@
                 this.switchHyperlink(n)
                 return
             },
-            deleteNote(n,oid){
+            deleteNote(oid){
                 store.deleteNote(oid)
                 this.orderList
                 if(!this.histNotes.length){
@@ -155,7 +153,6 @@
             async updateNote(n){
                 const findItem = await store.modifyNote(n.CMNT, n.OBJECTID)
                 this.editContent = false
-                //this.updateOID = findItem.OBJECTID
                 this.updateOID = -1
                 const oidFlag = `${n.OBJECTID}Expand`
                 document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
@@ -165,7 +162,6 @@
             closeNotes(note){
                 note.CMNT = this.ogNote
                 this.editContent = false
-                this.isClose = false;
                 this.updateOID = -1
                 const oidFlag = `${note.OBJECTID}Expand`
                 document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
@@ -177,13 +173,11 @@
                 const cmnt = null
                 const sortType = "end"
                 const returnOid = await store.replyNote(note, sortType)
-                this.openNote(cmnt, returnOid)
+                this.openNote({OBJECTID: returnOid, CMNT: cmnt})
                 this.testOid = returnOid
                 return
             },
-            attachToNote(cmnt, oid){
-                // this.updateOID = oid
-                // this.hasAttachment = true
+            attachToNote(oid){
                 const input = document.createElement('input')
                 input.type = "file"
                 input.name = "attachment"
@@ -198,6 +192,7 @@
                 document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
             },
             switchHyperlink(note){
+                if(!note.URL) return
                 note.URL.forEach((url, i) => {
                     let switchHyper = note.CMNT.replace(`see Link ${i+1}`, url)
                     note.CMNT = switchHyper

@@ -13,7 +13,7 @@
                 <v-icon style="font-size: 13.5px;" v-for="i in 7" :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])" ></v-icon>
             </div>
 
-            <v-lazy :options="{'threshold': 0}" transition="expand-transition" height="100" width="439">
+            <v-lazy :options="{'threshold': 0, 'scrollMargin': '10px'}" transition="expand-transition" height="100" width="439">
                 <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `5px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="checkhighlight(String(rd.attributes.RETS_ID)) ?? 'card-rets'"  @dblclick="double(rd, road);" @click="zoomToRetsPt(rd)">
                     <!-- <div class="boundary-rets-card"> -->
                        <div style="display:flex;  bottom: 12px !important; position: relative;  width: 374px;">
@@ -122,7 +122,7 @@
 
 <script>
 import {postFlagColor} from '../components/crud.js'
-import {zoomTo, highlightRETSPoint, removeHighlight, removeOutline, includes, checkhighlightfunction, loadData, openDetails} from './utility.js'
+import {zoomTo, highlightRETSPoint, removeHighlight, checkhighlightfunction, loadData, openDetails} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {store} from './store.js'
 import { view, retsLayer } from './map-Init.js'
@@ -199,7 +199,7 @@ export default{
         closeFlagDiv(){
             this.flagClickedId = ""
         },
-        assignColorToFlag(clr){ `   1111111111111   `
+        assignColorToFlag(clr){
             document.getElementById(`${this.flagClickedId}Icon`).style.color = clr
             const rets = store.updateRetsSearch.find(rd => rd.attributes.RETS_ID === this.flagClickedId)
             rets.attributes.flagColor.FLAG = clr

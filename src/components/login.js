@@ -1,7 +1,8 @@
 import OAuthInfo from "@arcgis/core/identity/OAuthInfo.js";
 import esriId from "@arcgis/core/identity/IdentityManager.js";
 import { view, retsUserRole, retsLayer} from './map-Init.js'
-import {getDomainValues, getDistinctAttributeValues, getUniqueQueryValues, queryFlags, getRetsLayerView, getHistoryView, getTxDotRdWayLayerView, home, getUserOBJECTID, filterMapActivityFeed, setFilterProperties} from './utility.js'
+import {getDomainValues, getDistinctAttributeValues, getUniqueQueryValues, queryFlags, getRetsLayerView, getTxDotRdWayLayerView, 
+        home, getUserOBJECTID, filterMapActivityFeed, setFilterProperties} from './utility.js'
 import { appConstants } from "../common/constant.js";
 import router from '../router/index.js'
 import {store} from './store.js'
@@ -17,59 +18,57 @@ const authen = new OAuthInfo({
 export function login(){
     esriId.registerOAuthInfos([authen]);
     esriId.checkSignInStatus(`${authen.portalUrl}/sharing/rest`)
-      .then((x) => alreadySignedIn(x.userId)) //already signed in
-      .catch(() => generateLogin()) //not signed in; proceed to sign in 
+      .then(() => alreadySignedIn()) //signed in
+      .catch(() => console.log("re-login"))// generateLogin() not signed in; proceed to sign in 
 }
 
-function generateLogin(){
-  esriId.getCredential(`${authen.portalUrl}/sharing/rest`, {
-    oAuthPopupConfirmation: false
-  })
-  .then(() => signIn())
-}
+// function generateLogin(){
+//   esriId.getCredential(`${authen.portalUrl}/sharing/rest`, {
+//     oAuthPopupConfirmation: false
+//   })
+//   .then(() => signIn())
+// }
 
 async function signIn(){
+  try{
+    await getUniqueQueryValues(retsUserRole, appConstants.userRoles)
+    const userId = await getUserId()
+    await queryFlags(userId)
+    await setDefExpRets(userId)
+    //store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+    store.savedFilter = store.savedFilter.replace(/''/g, `'${userId}'`)
 
-  await getUniqueQueryValues(retsUserRole, appConstants.userRoles)
-  const userId = await getUserId()
-  
-  await queryFlags(userId)
-  await setDefExpRets(userId)
-  //store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
-  store.savedFilter = store.savedFilter.replace(/''/g, `'${userId}'`)
-  if (store.CREATE_DT){
-    await store.getRetsLayer(userId, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+    let sortFilter = store.CREATE_DT.filter ?? "EDIT_DT"
+    let sortType = store.CREATE_DT.sortType ?? "DESC"
 
-}
-else{
-    await store.getRetsLayer(userId, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+    await store.getRetsLayer(userId, store.savedFilter, "retsLayer", `${sortFilter} ${sortType}, PRIO`)
 
-}
-
-  appConstants.userQueryField = appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]
-  router.push({name: "Map"})
-  //needs to be worked on//
-  view.when(() => {
-    [{name: 'JOB_TYPE', prop: "jobTypeDomainValues"},{name: 'STAT', prop: "statDomainValues"}, {name: 'DIST_NM', prop: "districtDomainValues"}, {name: 'CNTY_NM', prop: "countyDomainValues"}].forEach((layer) => {
-      getDomainValues(layer.name).codedValues.forEach((x) => {
-         appConstants[layer.prop].push({"name" : x.name, "value": x.code})
+    appConstants.userQueryField = appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]
+    router.push({name: "Map"})
+    //needs to be worked on//
+    view.when(() => {
+      [{name: 'JOB_TYPE', prop: "jobTypeDomainValues"},{name: 'STAT', prop: "statDomainValues"}, {name: 'DIST_NM', prop: "districtDomainValues"}, {name: 'CNTY_NM', prop: "countyDomainValues"}].forEach((layer) => {
+        getDomainValues(layer.name).codedValues.forEach((x) => {
+          appConstants[layer.prop].push({"name" : x.name, "value": x.code})
+        })
       })
-    })
-    ///////////////INSERT HERE/////////////////////////////////
-    appConstants.districtDomainValues.sort((a,b) => a.name.localeCompare(b.name))
-    appConstants.userRoles.sort((a,b) => a.name.localeCompare(b.name))
+      ///////////////INSERT HERE/////////////////////////////////
+      appConstants.districtDomainValues.sort((a,b) => a.name.localeCompare(b.name))
+      appConstants.userRoles.sort((a,b) => a.name.localeCompare(b.name))
 
-    getDistinctAttributeValues('ACTV')
-    getRetsLayerView()
-    getTxDotRdWayLayerView()
-    //getHistoryView()
-    //home(true)
+      getDistinctAttributeValues('ACTV')
+      getRetsLayerView()
+      getTxDotRdWayLayerView()
+      // getHistoryView()
+      //home(true)
       home(true)
-
-
-  })
-  
-  return
+    })
+    return
+  }
+  catch(err){
+    router.push({name: "ErrorPage"})
+    console.log(err)
+  }
 }
 
 function alreadySignedIn(){
