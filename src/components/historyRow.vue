@@ -400,7 +400,7 @@
     }
 
     .history-note :deep(.v-input__details){
-        /* display: none !important; */
+        display: none !important;
     }
 
     .close-icon{

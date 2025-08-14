@@ -888,41 +888,39 @@ export async function queryExtent(){
   query.returnGeometry = false
   query.outFields = ["RETS_ID"]
   var appendstring = ''
-  return Promise.resolve(
-     retsLayer.queryFeatures(query)
-    .then(function(response){
+   const response = await retsLayer.queryFeatures(query)
+  
       if (!response.features.length){
-        store.roadObj.length = 0
-        return
+         store.roadObj.length = 0
+         return
       }
       for (const feature of response.features)
-        {
-          if (store.isShowSelected){
+       {
+        
+         if (store.isShowSelected){
             store.roadHighlightObj.forEach((value) => value.attributes.RETS_ID === feature.attributes.RETS_ID ?  appendstring = appendstring.concat(` OR RETS_ID = ${value.attributes.RETS_ID}`) : null )
             continue
           }
+                      appendstring = appendstring.concat(` OR RETS_ID = ${feature.attributes.RETS_ID}`)
 
-          appendstring = appendstring.concat(` OR RETS_ID = ${feature.attributes.RETS_ID}`)
           
         }
 
-      return store.getRetsLayer(store.loggedInUser, appendstring.slice(4), "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`).then(() => {
-              return store.roadObj
 
-      })
-    
-    })
-  )
+           
+       await store.getRetsLayer(store.loggedInUser, appendstring.slice(4), "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+
+   
  
 }
 
 let vieww = null
 reactiveUtils.watch(
   () => [view.stationary],
-  ([stationary]) => {   
-    if(stationary && !store.isDetailsPage && store.autozoomextent === true){
+  async([stationary]) => {   
+    if(stationary && store.autozoomextent === true){
        if (vieww !== `${view.center.x},${view.center.y}`){
-        queryExtent()
+        await queryExtent(true)
         vieww = `${view.center.x},${view.center.y}`
       }
     }

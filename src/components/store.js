@@ -300,7 +300,8 @@ export const store = reactive({
                                         //store.archiveRetsData.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                                 })
                                 this.roadObj = holdingArr
-                                return
+                                return this.roadObj
+
                         }
                         if(!obj.features.length){
                                 this.RetsCardStatus = "Bummer or lucky?? No Rets for you!"

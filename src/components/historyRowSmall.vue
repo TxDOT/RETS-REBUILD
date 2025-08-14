@@ -27,19 +27,19 @@
         </div>
         <div id="displayHistory" v-if="!this.isHistNotesEmpty">
             <div v-for="(note, i) in histNotes" :key="note.OBJECTID" track-by="OBJECTID">
-                <v-banner :id="`${note.OBJECTID}Small`" v-model="note[i]" density="compact" class="note">
-                    <div style="max-width: 84%;  ">
-                        <span v-if="note.PARENT_ID" style="margin:0% !important; ">
+                <v-banner :id="`${note.OBJECTID}Small`" v-model="note[i]" density="compact" class="note" style=" max-height: 60px;">
+                    <div style="max-width: 84%;">
+                        <span v-if="note.PARENT_ID" style="margin:0% !important;">
                             <p id="replyingToCmnt">Replying to "{{store.historyChat.find(x => x.OBJECTID === note.PARENT_ID)?.CMNT ?? "Referenced Note has been deleted"}}"</p>
                         </span>
                         
                         <v-textarea class="history-note" rows="1" auto-grow density="compact" :disabled="note.OBJECTID !== updateOID" variant="plain" v-model="note.CMNT" placeholder="Enter Comment" autofocus></v-textarea>
                         
-                        <span v-for="(i,n) in note.URL" style="display: flex; flex-direction: row; max-width: 99%; font-size: 12px; ">
+                        <span v-for="(i,n) in note.URL" style="display: flex; flex-direction: row; max-width: 99%; font-size: 12px;">
                             <span v-html="returnHyperLink(i, n)" style="max-width: 99%;"></span>
                         </span>
                         
-                        <div style="flex: auto; position: relative; top: 0px; width: 100%;">
+                        <div style="flex: auto; position: relative; top: -10px; width: 100%;">
                             <span style="font-size: 10px; color: grey; padding-left: 2px; position: relative; bottom: 0px; padding: 0px;">{{ returnUserName(note.CMNT_NM) }} {{ returnDateFormat(note.CREATE_DT) }} <b v-if="note.CREATE_DT !== note.EDIT_DT && note.SYS_GEN === 0" class="main-color">{{ `Edited ${returnDateFormat(note.EDIT_DT)}` }}</b></span>
                         </div>
                         <div style="position: relative; top: 0px;" v-if="note.attachments">
@@ -48,7 +48,7 @@
                             </span>
                         </div>
                     </div>
-                    <div v-if="note.SYS_GEN === 0" style="position: relative; flex: auto; ">
+                    <div v-if="note.SYS_GEN === 0" style="position: relative; flex: auto;">
                         <div style="position: relative; float: right; width: 60px;">
                             <v-btn variant="plain" density="compact" icon="mdi-pencil-outline" style="font-size: 10px;" @click="openNote(note)" :disabled="note.CMNT_NM !== loggedInUserName"></v-btn>
                             <v-btn variant="plain" density="compact" icon="mdi-reply" style="font-size: 10px;" @click="replyNote(note)"></v-btn>
@@ -207,7 +207,6 @@
                 document.getElementById(`${oidFlag}`).classList.remove("active-chat-box")
             },
             switchHyperlink(note){
-                if(!note.URL) return
                 note.URL.forEach((url, i) => {
                     let switchHyper = note.CMNT.replace(`see Link ${i+1}`, url)
                     note.CMNT = switchHyper
@@ -346,7 +345,7 @@
         padding-left: 5px;
         border-left: 5px solid #4472C4 !important; 
         margin-bottom: 0px;
-        gap: 0px;
+        gap: 5px;
     }
     #search{
         position: relative;
@@ -399,7 +398,8 @@
         height: fit-content;
     }
 
-    .history-note :deep(.v-input__details){
-        display: none;
+    :deep(.v-input__details){
+        min-height: 0px !important;
+        padding-top: 0px !important;
     }
 </style>

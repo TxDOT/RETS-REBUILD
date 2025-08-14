@@ -266,7 +266,6 @@ import { appConstants } from '../common/constant.js';
         data(){
             return{
                 favorites : shallowRef([]),
-                toggle: store.toggleFeed,
                 openedVlist: ['New Updates'],
                 isNewReleaseOpen: true,
                 expandedIndex: null,
@@ -422,7 +421,6 @@ import { appConstants } from '../common/constant.js';
                                     //open feed
                                     store.isCard = true
                                     store.isDetailsPage = false
-                                    this.toggle = 1
                                     store.toggleFeed = 1                                    
                                     
                                 },
@@ -439,7 +437,6 @@ import { appConstants } from '../common/constant.js';
                                     //open details pane
                                     store.isDetailsPage = true
                                     store.isCard = false
-                                    this.toggle = 2
                                     store.toggleFeed = 2
                                 },
                                 disabled: true
