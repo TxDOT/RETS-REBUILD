@@ -153,7 +153,7 @@
                         </template>
                     </v-switch>
 
-                    <v-select :key="index" v-if="addDropdown(index)" density="compact" variant="underlined" class="switchDropdown" v-model="item.value2" multiple :items=statuses  >
+                    <v-select :key="index" v-if="addDropdown(index)" :disabled="isDisabled(index)" density="compact" variant="underlined" class="switchDropdown" v-model="item.value2" multiple :items=statuses  >
                         <template #prepend>
                             <v-label >
                                 Applies to: 
@@ -719,8 +719,7 @@
                        
                     },
                     isDisabled(index){
-                        return
-                        if (index > 0){
+                        if (index => 0){
                             return true
                         }
                         return false
@@ -750,20 +749,18 @@
                             autoZoom : store.autozoomtest,
                             autoZoomExtent: store.autozoomextent,
                             basemap: store.basemaptest,
-                            notifications: this.switches
+                            // notifications: this.switches
                         } 
-                        console.log(this.switches)
 
-                        for (let index = 0; index < this.switches.length; index++) {
-                            const element = this.switches[index];
-                            console.log(element)
+                        // for (let index = 0; index < this.switches.length; index++) {
+                        //     const element = this.switches[index];
                             
-                        }
+                        // }
 
                         this.isAutoZoom = store.autozoomtest
                         this.isAutoZoomExtent = store.autozoomextent
                         const settingsObject = {attributes: {OBJECTID : appConstants.defaultUserValue[0].objectid, SETTINGS : JSON.stringify(store.settings)}}
-                        // await addSettings(settingsObject)
+                        await addSettings(settingsObject)
                     //    console.log(store.settings)
 
                 const userOBJECTID = await getUserOBJECTID(store.loggedInUser)
