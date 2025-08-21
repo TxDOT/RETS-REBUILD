@@ -61,6 +61,13 @@
                 </template>
             </v-text-field>
         </div>
+        <div id="retsURL" v-if="isShowRetsUrl && !store.isDetailsPage" @click="isShowRetsUrl = false; restoreFilters();">
+            <v-banner icon="mdi-restore" text="Filter settings updated. Click to restore." id="retsURLBanner" @click="">
+                <!-- <template v-slot:prepend>
+                    <icon icon="mdi-restore"></icon>
+                </template> -->
+            </v-banner>
+        </div>
         <div class="card-feed-div" v-show="store.isCard">
             <RetsCards/>
         </div>
@@ -109,7 +116,7 @@
 </template>
 
 <script>
-import {clickRetsPoint, getQueryLayer, getHighlightGraphic, removeHighlight, createtool, changeCursor, outlineFeedCards, openDetails, doubleClickRetsPoint} from './utility.js'
+import {clickRetsPoint, getQueryLayer, getHighlightGraphic, removeHighlight, createtool, changeCursor, outlineFeedCards, openDetails, doubleClickRetsPoint, filterMapActivityFeed} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import {store} from './store.js'
@@ -118,6 +125,7 @@ import { sketchWidgetcreate, createretssym } from './map-Init.js'
 import {addRETSPT} from '../components/crud.js'
 
 import { defineAsyncComponent } from 'vue'
+
 export default{
     name: "RetsFeed",
     components: {RetsDetailPage: defineAsyncComponent(()=>import('./RetsDetail.vue')),
@@ -178,7 +186,7 @@ export default{
                 }}
                           
             ],
-
+            isShowRetsUrl: false,
             isShowSelected: false,
             isSwitchDisabled: false,
             searchTimer: null
@@ -192,6 +200,7 @@ export default{
     mounted(){
         if(this.retsparam){
             this.isRetsParamOpen(this.retsparam)
+            this.isShowRetsUrl = true
         }
         
         reactiveUtils.on(() => view.popup, "trigger-action",
@@ -220,17 +229,26 @@ export default{
         store.retspointlength = store.updateRetsSearch.length
     },
     methods:{
-        isRetsParamOpen(retsParam){
-            let queryParams = {'whereString': `RETS_ID = ${retsParam}`, 'queryLayer': 'retsLayer'}
-            store.getRetsLayer('DPROSACK', queryParams.whereString, queryParams.queryLayer, "RETS_ID")
-            .then((x) => {
-                console.log(x)
-                openDetails(x[0])
-                
-                console.log(store.toggleFeed)
+        async restoreFilters(){
+            store.defaultFilterSetup()
+            filterMapActivityFeed(store.filter)
+            localStorage.removeItem("retsParam")
+            store.activityBanner = "Activity Feed"
+            await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+            return
+        },
+        async isRetsParamOpen(retsParam){
+            retsParam = Number(retsParam)
+            let returnRets = store.roadObj.find(rets => rets.attributes.RETS_ID === retsParam)
+            console.log(returnRets)
+            // let returnRets = await store.returnRetsNonFeed(retsParam)
+            if(!returnRets){
+                store.isAlert = true
+                store.alertTextInfo = {"text": `Rets not found try again.`, "color": "red", "type":"error", "toggle": true}
                 return
-            })
-            .catch(err => console.log(err))
+            }
+            openDetails(returnRets)
+            view.goTo({'target': returnRets.geometry, 'scale': 1000})
             return
         },
         retsSubtitleUpdate(){
@@ -573,6 +591,7 @@ export default{
         overflow-y: auto;
         overflow-x: hidden;
         position: relative;
+        gap: 5px;
         padding-top: 5px !important;
     }
 
@@ -690,5 +709,24 @@ export default{
     :deep(.v-switch__track){
         height: 10px !important;
     }
-
+    #retsURL{
+        position: relative;
+        width: 100%;
+        margin-top: 0px;
+        bottom: 15px !important;
+    }
+    #retsURL:hover{
+        cursor: pointer;
+    }
+    #retsURLBanner{
+        background-color: #B35512;
+        border-left-style: solid;
+        border-left-width: 5px;
+        border-left-color: white;
+        padding: 5px;
+        font-size: 15px;
+    }
+    .v-banner-text{
+        font-size: 15px !important;
+    }
 </style>

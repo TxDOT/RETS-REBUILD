@@ -68,8 +68,18 @@ export const store = reactive({
         showSelected:[],
         userRetsFlag: [],
         isColorPicked: false,
-        flagClickedId: "",
+        flagLabels:{
+                redCheckbox: "",
+                orangeCheckbox: "",
+                yellowCheckbox: "",
+                greenCheckbox: "",
+                blueCheckbox: "",
+                purpleCheckbox: ""
+        },
+        flagsChecked: [],
+        flagClickedId: null,
         flagRETSID: null,
+        showRetsFlag: false,
         archiveRetsData: [],
         zoomInToEnable: true,
         zoomInText: "Move RETS Point",
@@ -83,7 +93,6 @@ export const store = reactive({
                         DFO: 0
                 }
         },
-        retsIDList: [],
         updateRetsSearch:[],
         isSearch: false,
         updatedRetsPtName: "",
@@ -134,6 +143,7 @@ export const store = reactive({
         isNewRets: false,
         userSettings: null,
         retsSelection: new Set(),
+        retsParam: null,
         defaultFilterSetup(){
                 // this.CREATE_DT.push({title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"})
                 // this.STAT = appConstants.defaultStatValues
@@ -261,19 +271,40 @@ export const store = reactive({
                 return
         },
         setFlagColor(att){
-                const defaultValue = {FLAG: '', OBJECTID: '', RETS_ID: att.RETS_ID, USERNAME: this.loggedInUser}
-                const retsFlag = store.userRetsFlag.find((flag) => flag.RETS_ID === att.RETS_ID)
-                
-                return retsFlag ?? defaultValue
+                const retsFlag = store.userRetsFlag.find((flag) => flag.RETS_ID === att.RETS_ID)    
+                const defaultValue = {FLAG: '', OBJECTID: '', RETS_ID: att.RETS_ID, USERNAME: this.loggedInUser}                
+                    
+                // console.log(store.userRetsFlag)
+                console.log(retsFlag )
+                if(!retsFlag){
+                        return defaultValue
+                }
+                if(typeof retsFlag.FLAG === "object"){
+                        return {FLAG: retsFlag.FLAG, OBJECTID: retsFlag.OBJECTID, RETS_ID: att.RETS_ID, USERNAME: this.loggedInUser}   ?? defaultValue
+                }
+
+                if(retsFlag.FLAG.match(/^#.{0,6}$/g)){
+                        return defaultValue
+                }
+                // console.log(retsFlag.FLAG)
+                // let isHexCode = retsFlag.FLAG.match(/^#.{0,6}$/g)
+                // console.log(isHexCode)
+                // if(isHexCode)
+
+                let retsFlagObj = JSON.parse(retsFlag.FLAG)
+                console.log(retsFlagObj)
+                return {FLAG: retsFlagObj, OBJECTID: retsFlag.OBJECTID, RETS_ID: att.RETS_ID, USERNAME: this.loggedInUser}  
         },
 
-        async getRetsLayer(userid, where, layer, orderFields){ 
+        async getRetsLayer(userid, where, layer, orderFields){
                 this.loggedInUser = userid
+                where = localStorage.getItem("retsParam") ? `${where} or RETS_ID in (${localStorage.getItem("retsParam")})` : where
+                orderFields = localStorage.getItem("retsParam") ? `CASE RETS_ID WHEN ${localStorage.getItem("retsParam")} THEN 0 ELSE 1 END, EDIT_DT DESC` : orderFields
+                
                 const queryString = {"whereString": where, "queryLayer": layer}
                 //const orderField = "EDIT_DT DESC, PRIO"
                 try{
                         this.roadObj.length = 0
-                        this.retsIDList.length = 0
                         this.updateRetsSearch.length = 0
                         let obj = await getQueryLayer(queryString, orderFields)
                                 //.then((obj) => {
@@ -296,10 +327,9 @@ export const store = reactive({
                                                         x.attributes.DFO = x.attributes.DFO ? x.attributes.DFO.toFixed(3) : x.attributes.DFO
                                                         x.attributes.historyUpdate = "Loading"
                                                         holdingArr.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]}) 
-                                                        this.retsIDList.push(x.attributes.RETS_ID)
                                                         //store.archiveRetsData.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                                                 })
-                                                // this.roadObj = holdingArr
+                                                this.roadObj = holdingArr
                                                 return holdingArr
                                         }
                                         if(!obj.features.length){
@@ -317,6 +347,21 @@ export const store = reactive({
                 catch(err){
                         console.log(err)
                 }    
+        },
+        async returnRetsNonFeed(ids){
+                const queryString = {"whereString": `RETS_ID in (${ids})`, "queryLayer": "retsLayer"}
+                let returnRets = await getQueryLayer(queryString, "RETS_ID")
+                console.log(returnRets)
+                if(!returnRets.features.length){
+                        return false
+                }
+
+                let rets = returnRets.features[0]
+                console.log(rets)
+                let retsObj = {'attributes': rets.attributes, 'geometry': [rets.geometry.x, rets.geometry.y]}
+                this.updateRetsSearch.push(retsObj)
+                console.log(this.roadObj)
+                return retsObj
         },
         setFilterFeed(){
                 filterMapActivityFeed(this.filter)
