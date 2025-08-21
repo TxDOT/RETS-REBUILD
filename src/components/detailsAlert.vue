@@ -2,7 +2,7 @@
     <!-- <v-alert max-width="550" v-model="store.isAlert" border="start" :border-color="store.alertTextInfo.color" class="detailsAlert" :color="store.alertTextInfo.color" closable variant="tonal" :type="store.alertTextInfo.type">
         <span >{{ store.alertTextInfo.text }}</span>
     </v-alert> -->
-    <div>
+    <div style="overflow-y: auto; height: auto; max-height: 100vh;">
 
          <v-alert v-for="value in store.alertObject"  :border-color="store.alertObject.color" :color="value.color" :type="value.type" closable variant="tonal" class="detailsAlert" border="start" max-width="550" width="527" >
             <span id="alerttext">{{value.text}} </span>
@@ -13,7 +13,8 @@
 </template>
 
 <script>
-    import {store} from './store'
+    import { extractRuntimeEmits } from 'vue/compiler-sfc';
+import {store} from './store'
     export default{
         name: "detailsAlert",
         data(){
@@ -24,12 +25,13 @@
         methods: {
             async timeoutAlert(){
                 setTimeout(() => {
-                    if (store.alertObject.length && store.alertObject.at(0).text !== 'No Route has been detected' && store.alertObject.at(0).text !== 'Route and/or DFO are not valid. Use the Move (icon) to move to a valid location.'){
-                        store.alertObject.shift()
-                    }
-                    else{
-                        store.alertObject.splice(1,1)
-                    }
+                     store.alertObject.forEach((val, index) => {
+                            if (val.type === "success"){
+                                store.alertObject.splice(index, 1)
+                                return
+                            }
+                            
+                        })
                   }, 10000);
                  return
                 
@@ -50,33 +52,32 @@
                         'type' : store.alertTextInfo.type,
                         'text' : store.alertTextInfo.text 
                     })
-                    if (store.alertTextInfo.text != 'No Route has been detected' && store.alertTextInfo.text != 'Route and/or DFO are not valid. Use the Move (icon) to move to a valid location.'){
-                        this.timeoutAlert()
-                    }
+                    this.timeoutAlert()
                   
                     return
 
                 },
                 immediate:true
             },
-            'store.isSaveBtnDisable': {
-                handler: function(){
-                    // if (store.alertObject(0).text === 'Route and/or DFO are not valid. Use the Move (icon) to move to a valid location.' && !store.isSaveBtnDisable){
+            'store.isDetailsPage': {
 
-                    // } 
-                    if (store.isSaveBtnDisable){
-                        for (let index = 0; index < store.alertObject.length; index++) {
-                            if (store.alertObject.at(index).text === 'Route and/or DFO are not valid. Use the Move (icon) to move to a valid location.' || store.alertObject.at(index).text === 'No Route has been detected'){
+                handler: function(){
+                    if (!store.isDetailsPage){
+
+                        store.alertObject.forEach((val, index) => {
+                            if (val.type != "success"){
                                 store.alertObject.splice(index, 1)
-                                
                             }
-                        // continue
-                        }
+                        })
                     }
+                   
                     
                     return
-                }
-            },
+                },
+                immediate:true
+
+            }
+            
             
         }
 

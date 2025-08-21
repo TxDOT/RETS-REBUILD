@@ -888,29 +888,24 @@ export async function queryExtent(){
   query.returnGeometry = false
   query.outFields = ["RETS_ID"]
   var appendstring = ''
-   const response = await retsLayer.queryFeatures(query)
-  
-      if (!response.features.length){
-         store.roadObj.length = 0
-         return
+  const response = await retsLayer.queryFeatures(query)
+  if (!response.features.length ){
+      store.roadObj.length = 0
+      return
+  }
+  for (const feature of response.features)
+  {
+    
+      if (store.isShowSelected){
+        store.roadHighlightObj.forEach((value) => value.attributes.RETS_ID === feature.attributes.RETS_ID ?  appendstring = appendstring.concat(` OR RETS_ID = ${value.attributes.RETS_ID}`) : null )
+        continue
       }
-      for (const feature of response.features)
-       {
-        
-         if (store.isShowSelected){
-            store.roadHighlightObj.forEach((value) => value.attributes.RETS_ID === feature.attributes.RETS_ID ?  appendstring = appendstring.concat(` OR RETS_ID = ${value.attributes.RETS_ID}`) : null )
-            continue
-          }
-                      appendstring = appendstring.concat(` OR RETS_ID = ${feature.attributes.RETS_ID}`)
+        appendstring = appendstring.concat(` OR RETS_ID = ${feature.attributes.RETS_ID}`)
 
-          
-        }
+      
+  }
 
-
-           
-       await store.getRetsLayer(store.loggedInUser, appendstring.slice(4), "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
-
-   
+  appendstring.length ?  await store.getRetsLayer(store.loggedInUser, appendstring.slice(4), "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`) : store.roadObj.length = 0
  
 }
 

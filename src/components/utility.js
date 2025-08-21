@@ -95,9 +95,9 @@ try {
                 let lon = Math.round(event.mapPoint.longitude * 100000000) / 100000000;
                 let coordinate = lon + ", " + lat
                 
-                //navigator.clipboard.writeText(coordinate);
+                navigator.clipboard.writeText(coordinate);
                 store.latlonstring = coordinate
-                 store.alertTextInfo = {"text": ` ${coordinate} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
+                store.alertTextInfo = {"text": ` ${coordinate} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
 
                 store.isAlert = true
 
@@ -116,52 +116,36 @@ try {
                 switch (store.layerName){
                     case "RETS UAT":
                     case "RETS":
+
                         let retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
                         let retsId = evt.results[0].graphic.attributes.RETS_ID
-                       if (retsPt === undefined){
-                            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${retsId}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`).then(() => {
-                                removeHighlight("", true)
-                                store.roadHighlightObj.clear()
-                                let retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
-                                store.roadHighlightObj.add(retsPt)
-                                highlightRETSPoint(retsPt.attributes)
-
+                        if (retsPt === undefined){
+                            await store.getRetsLayer(store.loggedInUser, `RETS_ID = ${retsId}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                            retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
                             
-                        
-                                outlineFeedCards([retsPt])
-                                if (store.isDetailsPage && !store.isEmptyRow){
-                                        openDetails(retsPt)
+                        }
 
-                                }
-
-                            })
-                        return
-                        
-                       }
-
-                       includes(retsPt.attributes).then((value) => {
+                        includes(retsPt.attributes).then((value) => {
                             if (!value){
                                 removeHighlight("", true)
                                 store.roadHighlightObj.clear()
                                 store.roadHighlightObj.add(retsPt)
-                                 highlightRETSPoint(retsPt.attributes)
+                                highlightRETSPoint(retsPt.attributes)
 
                                 
                             }
                             outlineFeedCards([retsPt])
                             if (store.isDetailsPage && !store.isEmptyRow){
-                                // setTimeout(() => {
-                                                                         openDetails(retsPt)
+                                openDetails(retsPt)
 
-                                // },1000 );
                             }
 
-                       })
+                        })
 
                         break
                     case "TxDOT Roadways":
-                        removeHighlight("", true)
-                        store.roadHighlightObj.clear()
+                        // removeHighlight("", true)
+                        // store.roadHighlightObj.clear()
                         removeHighlightRoadways('a', true)
                         if (store.isShowSelected && store.autozoomextent){
                             queryExtent()
@@ -173,9 +157,9 @@ try {
                                 location: event.mapPoint
                             });
                         }
-                         if (store.isDetailsPage){
-                            canceldetailsfunction()
-                        }
+                        //  if (store.isDetailsPage){
+                        //     canceldetailsfunction()
+                        // }
 
                         break
                     case null:
@@ -220,26 +204,11 @@ export async function doubleClickRetsPoint(){
 
                     let retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
                     let retsId = evt.results[0].graphic.attributes.RETS_ID
-                       if (retsPt === undefined){
-                            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${retsId}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`).then(() => {
-                                removeHighlight("", true)
-                                store.roadHighlightObj.clear()
-                                let retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
-                                store.roadHighlightObj.add(retsPt)
-                                highlightRETSPoint(retsPt.attributes)
-
-                            
-                        
-                                outlineFeedCards([retsPt])
-                                if (store.isDetailsPage && !store.isEmptyRow){
-                                        openDetails(retsPt)
-
-                                }
-
-                            })
-                        return
-                        
-                       }
+                    if (retsPt === undefined){
+                        await store.getRetsLayer(store.loggedInUser, `RETS_ID = ${retsId}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                        retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
+                    
+                    }
                     includes(retsPt.attributes).then((value) => {
                         if (!value){
                             removeHighlight("", true)
@@ -251,26 +220,6 @@ export async function doubleClickRetsPoint(){
                         }
                     })
                     openDetails(retsPt)
-                    
-                    // if (retsPt === undefined){
-                    //     queryExtent(rets.attributes.RETS_ID).then((resp) => {
-                    //     retsPt = resp.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
-                    //     setTimeout(() => {
-                    //                  openDetails(retsPt)
-
-                    //             }, );
-
-                    //     })
-
-                    // }
-                    // else{
-                    //     setTimeout(() => {
-                    //                  openDetails(retsPt)
-
-                    //             }, );
-
-                    // }
-                         
 
             }
         })

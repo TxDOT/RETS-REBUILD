@@ -122,7 +122,7 @@
 
 <script>
 import {postFlagColor} from '../components/crud.js'
-import {zoomTo, highlightRETSPoint, removeHighlight, checkhighlightfunction, loadData, openDetails} from './utility.js'
+import {zoomTo, highlightRETSPoint, removeHighlight, checkhighlightfunction, loadData, openDetails, includes} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {store} from './store.js'
 import { view, retsLayer } from './map-Init.js'

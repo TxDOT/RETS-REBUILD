@@ -52,7 +52,7 @@
                                 <historyViewSmall/>
                             </div>
                             <div style="max-height: 200px; padding-top: 0px; padding-bottom: 4px;">
-                                <div style="margin-left: 10px; margin-right: 10px;">
+                                <div style="margin-left: 10px; margin-right: 10px; ">
                                     <v-text-field label="Type a message" density="compact" tile v-model="addHistoryChat" :error-messages= "initRules ? 'Write a note. Submit your thought to History!' : null" @update:modelValue="historyValue"></v-text-field>
                                 </div>
                                 
@@ -111,7 +111,7 @@
                         </div>
                 
                         <div style="float: right;">
-                            <v-btn variant="outlined" class="main-button-style" size="small" @click="saveNote('Expand')" :disabled="!this.addHistoryChat.length">Save & Close</v-btn>
+                            <v-btn variant="outlined" class="main-button-style" size="small" @click="saveNote('Expand')" :disabled="!this.addHistoryChat.length" style="position: relative; bottom: 0px !important;">Save & Close</v-btn>
                         </div>
 
                     </div>
@@ -842,5 +842,26 @@
     width: 100%; 
     font-size: 13px;
 }
+.marginSetting :deep(.v-messages__message){
+    /* margin-top: 20px; */
+    height: 40px;
+
+
+}
+
+.marginSetting :deep(.v-messages){
+    /* border: 1px solid pink; */
+        /* margin-top: 20px; */
+
+}
+
+
+
+
+
+
+
+
+
 
 </style>
