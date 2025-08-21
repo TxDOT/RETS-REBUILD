@@ -687,19 +687,19 @@ return
 }
 
 export function turnAllVisibleGraphicsOff(){
-    const isVisible = retsGraphicLayer.graphics.items.filter(x => x.visible === true)
-    isVisible.forEach(vis => vis.visible = false)
-    return
+const isVisible = retsGraphicLayer.graphics.items.filter(x => x.visible === true)
+isVisible.forEach(vis => vis.visible = false)
+return
 }
 export function removeRelatedRetsFromMap(retsoid, retsID){
-    if(!store.retsObj.attributes.RELATED_RETS){
-        return
-    }
-    let retsIndex = store.retsObj.attributes.RELATED_RETS.findIndex(ret => ret.RETS_ID === retsID)
-    store.retsObj.attributes.RELATED_RETS.splice(retsIndex,1)
-    const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === Number(retsoid))
-    retsGraphicLayer.removeMany(findGraphic)
+if(!store.retsObj.attributes.RELATED_RETS){
     return
+}
+let retsIndex = store.retsObj.attributes.RELATED_RETS.findIndex(ret => ret.RETS_ID === retsID)
+store.retsObj.attributes.RELATED_RETS.splice(retsIndex,1)
+const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === Number(retsoid))
+retsGraphicLayer.removeMany(findGraphic)
+return
 }
 
 export function zoomToRelatedRets(relatedRets){
@@ -1011,14 +1011,9 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                         let arr = []
                                         let string = ''
                                         store.retsSelection.forEach((value) => {
-                                        const existing = Array.from(store.roadHighlightObj).some(
-                                            (item) => item.attributes.OBJECTID === value.attributes.OBJECTID
-                                        );
+                                            store.roadHighlightObj.add(value)
 
-                                        if (!existing) {
-                                            store.roadHighlightObj.add(value);
-                                        }
-                                        });
+                                        })
 
                                         store.roadHighlightObj.forEach((value) => {
                                             arr.push(value.attributes.RETS_ID)
@@ -1075,7 +1070,7 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                     if (!store.isSaveBtnDisable){
                                         store.clickStatus = true
                                         store.cancelpopup = true
-                                        return
+                                        return selectretspoints
                                     }
                                     if (store.isDetailsPage && store.isSaveBtnDisable && (store.roadHighlightObj.size > 1)){
 
@@ -1106,7 +1101,7 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                 });          
                         }
                 });
-
+        console.log(selectretspoints)
         isSelectEnabled = !isSelectEnabled; 
         return selectretspoints
 
@@ -1583,30 +1578,30 @@ catch{
 }
 
 export function openDetails(road){
-clearGraphicsLayer()
-if (store.alertTextInfo.type == "error"){
-    store.isAlert = false
-}
-store.toggleFeed = 2
-store.isSaving = false
-//store.isSaveBtnDisable = true
-store.archiveRetsDataString = JSON.stringify(road)
-store.retsObj = road
-store.historyRetsId = road.attributes.RETS_ID
-returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
-//clearTimeout(this.timer)
-//this.timer=""
-store.isCard = false
-store.isDetailsPage = true
-store.activityBanner = `${road.attributes.RETS_ID}`
-//highlightRETSPoint(road.attributes)
-//outlineFeedCards()
-//this.zoomToRetsPt(road)
-//removeHighlight("a", true)
-highlightRETSPoint(road.attributes)
-toggleRelatedRets(JSON.stringify(road))
-window.document.title = `RETS: ${road.attributes.OBJECTID}`
-return
+    clearGraphicsLayer()
+    if (store.alertTextInfo.type == "error"){
+        store.isAlert = false
+    }
+    store.toggleFeed = 2
+    store.isSaving = false
+    //store.isSaveBtnDisable = true
+    store.archiveRetsDataString = JSON.stringify(road)
+    store.retsObj = road
+    store.historyRetsId = road.attributes.RETS_ID
+    returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
+    //clearTimeout(this.timer)
+    //this.timer=""
+    store.isCard = false
+    store.isDetailsPage = true
+    store.activityBanner = `${road.attributes.RETS_ID}`
+    //highlightRETSPoint(road.attributes)
+    //outlineFeedCards()
+    //this.zoomToRetsPt(road)
+    //removeHighlight("a", true)
+    highlightRETSPoint(road.attributes)
+    toggleRelatedRets(JSON.stringify(road))
+    window.document.title = `RETS: ${road.attributes.OBJECTID}`
+    return
 }
 
 export function loadData(){
@@ -1647,33 +1642,33 @@ return
 }
 
 export function returnToFeedFunction(){
-if(store.cancelEvent){
-    store.cancelEvent.remove()
-    cancelSketchPt()
-}
-store.isCard = true
-store.toggleFeed = 1
-store.isAlert = false
-clearGraphicsLayer()
-store.isDetailsPage = false
-store.isCancelBtnDisable = false
-store.activityBanner = "Activity Feed"
-window.document.title = 'RETS Application'
-store.isMoveRetsPt = false
-store.isCard = true
-store.historyChat.length = 0
-store.isSaveBtnDisable = true
-if (store.roadHighlightObj.size <= 1 && store.isSelectEnabled === false){
-    removeHighlight(store.retsObj)
-    const b = store.roadObj.find(rd => rd.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
-    store.roadHighlightObj.delete(b)
-    store.roadHighlightObj.clear()
-    store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
-    store.isShowSelected = false
-    return
-}
+    if(store.cancelEvent){
+        store.cancelEvent.remove()
+        cancelSketchPt()
+    }
+    store.isCard = true
+    //store.toggleFeed = 1
+    store.isAlert = false
+    clearGraphicsLayer()
+    store.isDetailsPage = false
+    store.isCancelBtnDisable = false
+    store.activityBanner = "Activity Feed"
+    window.document.title = 'RETS Application'
+    store.isMoveRetsPt = false
+    store.isCard = true
+    store.historyChat.length = 0
+    store.isSaveBtnDisable = true
+    if (store.roadHighlightObj.size <= 1 && store.isSelectEnabled === false){
+        removeHighlight(store.retsObj)
+        const b = store.roadObj.find(rd => rd.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
+        store.roadHighlightObj.delete(b)
+        store.roadHighlightObj.clear()
+        store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+        store.isShowSelected = false
+        return
+    }
 
-return
+    return
 }
 
 

@@ -109,7 +109,7 @@
 </template>
 
 <script>
-import {clickRetsPoint, getQueryLayer, returnHistory, getHighlightGraphic, removeHighlight, createtool, toggleRelatedRets, zoomTo, changeCursor, outlineFeedCards, openDetails, doubleClickRetsPoint} from './utility.js'
+import {clickRetsPoint, getQueryLayer, getHighlightGraphic, removeHighlight, createtool, changeCursor, outlineFeedCards, openDetails, doubleClickRetsPoint} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import {store} from './store.js'
@@ -124,6 +124,9 @@ export default{
                  Filter: defineAsyncComponent(()=>import('./RetsFilter.vue')),
                  RetsCards: defineAsyncComponent(()=> import('./retsCards.vue'))
                 }, 
+    props:{
+        retsparam: String
+    },
     data(){
         return{
             countHeaderColor: "gray",
@@ -184,8 +187,13 @@ export default{
     beforeMount(){
         clickRetsPoint(),
         doubleClickRetsPoint()
+
     },
     mounted(){
+        if(this.retsparam){
+            this.isRetsParamOpen(this.retsparam)
+        }
+        
         reactiveUtils.on(() => view.popup, "trigger-action",
             async (event) => {
                 if (event.action.id === "open-details") {
@@ -206,19 +214,33 @@ export default{
                     this.checkChanges()
                 }
         });
+
         this.retsFilters.loggedInUser = store.loggedInUser
         this.retsFilters[appConstants.queryField[appConstants.userRoles.find(x => x.value === store.loggedInUser).type]] = appConstants.defaultUserValue
         store.retspointlength = store.updateRetsSearch.length
     },
     methods:{
-        retsSubtitleUpdate(a){
-            store.checkDetailsForComplete()    
+        isRetsParamOpen(retsParam){
+            let queryParams = {'whereString': `RETS_ID = ${retsParam}`, 'queryLayer': 'retsLayer'}
+            store.getRetsLayer('DPROSACK', queryParams.whereString, queryParams.queryLayer, "RETS_ID")
+            .then((x) => {
+                console.log(x)
+                openDetails(x[0])
+                
+                console.log(store.toggleFeed)
+                return
+            })
+            .catch(err => console.log(err))
+            return
+        },
+        retsSubtitleUpdate(){
+            store.checkDetailsForComplete()
+            return  
         },
         async clearContent(){
             store.isSearch = false
             this.actvFeedSearch = ""
-            //await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
-            //store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+            return
         },
         async processAddPt(newPointGraphic){
             try{
@@ -228,7 +250,6 @@ export default{
                 const obj = await addRETSPT(newPointGraphic, "rets")
                 const objectid = obj.addFeatureResults[0].objectId
                 await this.addretss(objectid)
-                //this.addrets = objectid
                 this.isSpinner = false
                 this.Spinneractive = true
                 store.activityBanner = objectid
@@ -242,10 +263,6 @@ export default{
             }
             //handleaddrets(newPointGraphic, this.addrets);
         },
-        alert(s){
-            window.alert(s)
-        },
-
         checkChanges(){
             const beforeAtt = JSON.parse(store.currentInfo)
             const afterAtt = JSON.parse(JSON.stringify(store.retsObj))
@@ -262,37 +279,11 @@ export default{
             }
             issue === 0 ? openDetails({attributes: this.stageData.attributes, geometry: [this.stageData.geometry.x, this.stageData.geometry.y]}, 1) : null
         },
-        double(road){
-            store.isSaving = false
-            store.isSaveBtnDisable = true
-            store.archiveRetsDataString = JSON.stringify(road)
-            store.retsObj = road
-            store.historyRetsId = road.attributes.RETS_ID
-            
-            returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
-            clearTimeout(this.searchTimer)
-            this.searchTimer=""
-            store.isCard = false
-            store.isDetailsPage = true
-            store.activityBanner = `${road.attributes.RETS_ID}`
-            //outlineFeedCards()
-            this.zoomToRetsPt(road)
-            toggleRelatedRets(JSON.stringify(road))
-            return
-        },
-        zoomToRetsPt(rets){
-            clearTimeout(this.searchTimer)
-            this.searchTimer = ""
-            this.searchTimer = setTimeout(()=>{
-                const zoomToRETS = rets.geometry
-                //highlightRETSPoint(rets.attributes)
-                zoomTo(zoomToRETS)
-            },250)
-        },
 
         async addretss(objectid){
             const querystring = {"whereString":`OBJECTID = ${objectid}`, "queryLayer": "retsLayer"}
-            try{const querypromise = await getQueryLayer(querystring, "PRIO, CREATE_DT DESC")
+            try{
+                const querypromise = await getQueryLayer(querystring, "PRIO, CREATE_DT DESC")
                 if (querypromise.features.length){
                     querypromise.features.forEach(
                         (feat)=> {
@@ -312,7 +303,7 @@ export default{
                             feat.attributes.DFO = store.retsObj.attributes.DFO ? store.retsObj.attributes.DFO : null
                             feat.attributes.NO_RTE = store.retsObj.attributes.NO_RTE
                             const addNewRetsPt = {attributes:feat.attributes, geometry:[feat.geometry.x,feat.geometry.y]}
-                            this.double(addNewRetsPt)
+                            openDetails(addNewRetsPt)
                         }
                     )
                     store.isCancelBtnDisable = true
@@ -328,12 +319,15 @@ export default{
             const input = document.createElement('input')
             input.type = 'file',
             input.click()
+            return
         },
         dragover(){
             document.getElementById("dragndrop").style.color = "green"
+            return
         },
         dragLeave(){
             document.getElementById("dragndrop").style.color = "white"
+            return
         },
         changeNumFilter(filter){
             if(filter === 'cancel'){
@@ -343,6 +337,7 @@ export default{
             store.retsFilters = filter
             this.isfilter = false
             store.setFilterFeed()
+            return
         },
         changeFlagIcon(color){
             if(color === '#FFFFFF'){
@@ -363,31 +358,28 @@ export default{
                 this.addbtntext = "New"  
                 this.buttonIcon = "mdi-plus"
                 
-                return newPointGraphic
-                            
-                } 
-            else {
-                changeCursor("default")
-                store.isMoveRetsPt = false
-                sketchWidgetcreate.cancel();
-                store.isAdd = false
-                this.isCreateEnabled = !this.isCreateEnabled;
-                this.addbtntext = "New"
-                this.buttonIcon = "mdi-plus"
-                return
-            }
+                return newPointGraphic       
+            } 
+          
+            changeCursor("default")
+            store.isMoveRetsPt = false
+            sketchWidgetcreate.cancel();
+            store.isAdd = false
+            this.isCreateEnabled = !this.isCreateEnabled;
+            this.addbtntext = "New"
+            this.buttonIcon = "mdi-plus"
+            return
         },
 
-        updateSelection(e){
+        async updateSelection(e){
             if(!e){
                 store.activityBanner = "Activity Feed"
-                store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                store.roadObj = await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
                 store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                 outlineFeedCards(store.roadHighlightObj)
                 return
             }
             store.updateRetsSearch = store.roadHighlightObj
-            
             return
         },
     },
@@ -437,12 +429,7 @@ export default{
             },
             immediate: true
         },
-        // addrets:{
-        //     handler: async function(){
-        //         await this.addretss()
-        //     },
-        //     immediate: true
-        // },
+
         'store.retsObj.attributes.RETS_NM':{
             handler: function(b){
                 if(!b){
