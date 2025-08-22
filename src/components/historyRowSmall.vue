@@ -278,12 +278,25 @@
                 },
                 immediate:true
             },
+            'store.historyChat':{
+                handler: function(a,b){
+                    if(a === 0){
+                        this.isHistNotesEmpty = true
+                        return
+                    }
+                    this.orderList
+                    this.isHistNotesEmpty = false
+                    return
+                },
+                immediate: true
+            },
             'store.historyChat.length':{
                 handler: function(a,b){
                     if(a === 0){
                         this.isHistNotesEmpty = true
                         return
                     }
+        
                     this.orderList
                     this.isHistNotesEmpty = false
                     return

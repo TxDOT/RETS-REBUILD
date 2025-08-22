@@ -150,7 +150,7 @@ export const store = reactive({
                 // this.CREATE_DT.push({title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"})
                 // this.STAT = appConstants.defaultStatValues
                 // this.USER.push(appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value))
-                store.filterTotal = 2
+                this.filterTotal = 2
                 this.filter.createDt = this.CREATE_DT
                 this.filter.jobType = this.JOB_TYPE
                 this.filter.editDt = this.EDIT_DT
@@ -203,14 +203,14 @@ export const store = reactive({
 
                         
                         const returnComments = await getCmntOID(newHistory.RETS_ID)
-                        store.addNoteOid = returnComments.features[0].attributes.OBJECTID
-                        newHistory.OBJECTID = isExpand ? `${returnComments.features[0].attributes.OBJECTID}` : returnComments.features[0].attributes.OBJECTID
+                        this.addNoteOid = returnComments.features[0].attributes.OBJECTID
+                        newHistory.OBJECTID = isExpand ? `${returnComments.features[0].attributes.OBJECTID}` : String(returnComments.features[0].attributes.OBJECTID)
                         if(isAttach){
                                 const oid = returnComments.features[0].attributes.OBJECTID
-                                addAttachments(oid, store.attachment, true)
+                                addAttachments(oid, this.attachment, true)
                                 newHistory.attachments = []
-                                Array.from(store.attachment).forEach(x => newHistory.attachments.push({name: x.name}))
-                                store.attachment = []
+                                Array.from(this.attachment).forEach(x => newHistory.attachments.push({name: x.name}))
+                                this.attachment = []
                         }
                         this.historyChat.push(newHistory)
                 }
@@ -241,7 +241,7 @@ export const store = reactive({
         async deleteNote(oid){
                 const noteIndex = this.historyChat.findIndex(x => x.OBJECTID === oid)
                 if(this.historyChat.at(noteIndex).attachments){
-                        store.numAttachments -= 1
+                        this.numAttachments -= 1
                 }
                 this.historyChat.splice(noteIndex, 1)
                 await sendChatHistory({"OBJECTID": oid}, "delete")
@@ -274,11 +274,9 @@ export const store = reactive({
                 return
         },
         setFlagColor(att){
-                const retsFlag = store.userRetsFlag.find((flag) => flag.RETS_ID === att.RETS_ID)    
+                const retsFlag = this.userRetsFlag.find((flag) => flag.RETS_ID === att.RETS_ID)    
                 const defaultValue = {FLAG: '', OBJECTID: '', RETS_ID: att.RETS_ID, USERNAME: this.loggedInUser}                
                     
-                // console.log(store.userRetsFlag)
-                console.log(retsFlag )
                 if(!retsFlag){
                         return defaultValue
                 }
@@ -289,13 +287,8 @@ export const store = reactive({
                 if(retsFlag.FLAG.match(/^#.{0,6}$/g)){
                         return defaultValue
                 }
-                // console.log(retsFlag.FLAG)
-                // let isHexCode = retsFlag.FLAG.match(/^#.{0,6}$/g)
-                // console.log(isHexCode)
-                // if(isHexCode)
 
                 let retsFlagObj = JSON.parse(retsFlag.FLAG)
-                console.log(retsFlagObj)
                 return {FLAG: retsFlagObj, OBJECTID: retsFlag.OBJECTID, RETS_ID: att.RETS_ID, USERNAME: this.loggedInUser}  
         },
 
@@ -355,16 +348,13 @@ export const store = reactive({
         async returnRetsNonFeed(ids){
                 const queryString = {"whereString": `RETS_ID in (${ids})`, "queryLayer": "retsLayer"}
                 let returnRets = await getQueryLayer(queryString, "RETS_ID")
-                console.log(returnRets)
                 if(!returnRets.features.length){
                         return false
                 }
 
                 let rets = returnRets.features[0]
-                console.log(rets)
                 let retsObj = {'attributes': rets.attributes, 'geometry': [rets.geometry.x, rets.geometry.y]}
                 this.updateRetsSearch.push(retsObj)
-                console.log(this.roadObj)
                 return retsObj
         },
         setFilterFeed(){
@@ -375,7 +365,7 @@ export const store = reactive({
                                 this.updateRetsSearch = []
                                 const query = {"whereString": `${resp}`, "queryLayer": "retsLayerLayerView"}
                                 const orderField = `${this.filter.createDt.filter} ${this.filter.createDt.sortType}`
-                                this.getRetsLayer(store.loggedInUser, query.whereString, query.queryLayer, orderField)
+                                this.getRetsLayer(this.loggedInUser, query.whereString, query.queryLayer, orderField)
                                         .then(res => this.roadObj = res)
                                         .catch(err => console.log(err))
                                 this.isDetailsPage = false
@@ -392,7 +382,7 @@ export const store = reactive({
         async updateRetsID(){
                 //find updated rets
                 //find rets in roadObj and update that index
-                const resp = `${store.savedFilter}`
+                const resp = `${this.savedFilter}`
                 const query = {"whereString": `${resp}`, "queryLayer": "retsLayer"}
                 const orderField = `${this.CREATE_DT.filter} ${this.CREATE_DT.sortType}`
                 const obj = await getQueryLayer(query, orderField)
@@ -437,7 +427,7 @@ export const store = reactive({
                 return
         },
         deleteRetsID(){
-                const findIndex = this.roadObj.findIndex(ret => ret.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
+                const findIndex = this.roadObj.findIndex(ret => ret.attributes.OBJECTID === this.retsObj.attributes.OBJECTID)
                 this.updateRetsSearch.splice(findIndex, 1)
 
                 const cloneRets = [...this.roadObj]
@@ -457,7 +447,7 @@ export const store = reactive({
         },
    
         isAssigned(ASSIGNED_TO){
-                if(ASSIGNED_TO === store.loggedInUser){
+                if(ASSIGNED_TO === this.loggedInUser){
                         return true
                 }
                 return false

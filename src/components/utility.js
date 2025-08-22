@@ -90,17 +90,23 @@ try {
         view.hitTest(event, {include: [retsLayer, retsGraphicLayer, roadLayerView.layer]}).then(async (evt) =>{
             store.clickevent = event
             store.clickStatus = true
-            console.log(evt)
             if (event.button === 2){
-                let getRets = evt.results.find(i => i.layer.title === 'RETS UAT')
-                console.log(getRets)
+                let getRets = evt.results.find(i => i.graphic.geometry.type === 'point')
+                if(getRets){
+                    navigator.clipboard.writeText(coordinate);
+                    store.alertTextInfo = {"text": ` ${window.location.origin}${window.location.pathname} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
+                    store.alertObject.push(store.alertTextInfo)
+                    store.isAlert = true
+                    return
+                }
                 let lat = Math.round(event.mapPoint.latitude * 100000000) / 100000000;
                 let lon = Math.round(event.mapPoint.longitude * 100000000) / 100000000;
                 let coordinate = lon + ", " + lat
                 
-                // navigator.clipboard.writeText(coordinate);
+                navigator.clipboard.writeText(coordinate);
                 store.latlonstring = coordinate
                 store.alertTextInfo = {"text": ` ${coordinate} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
+                store.alertObject.push(store.alertTextInfo)
 
                 store.isAlert = true
 
@@ -510,11 +516,6 @@ export async function filterMapActivityFeed(filterOpt,val,userId){
         let filterDef = removeEmpty.join(" AND ")
         //let newFilter = filterDef.replace("AND OR", "OR")
         let newFilter = filterDef.replace(/AND OR/g, 'OR')
-        // if(!filterOpt.isAssignedTo){
-        //     const assignedToQuery = [...GIS_ANALYST, ...GRID_ANALYST, ...DIST_ANALYST]
-        //     assignedToQuery.map((i) => `${i}`).join(",")
-        //     filterDef = filterDef.concat(' OR (ASSIGNED_TO in (', assignedToQuery, '))')
-        console.log(newFilter)
 
     // }
         // return
@@ -1130,7 +1131,6 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                 });          
                         }
                 });
-        console.log(selectretspoints)
         isSelectEnabled = !isSelectEnabled; 
         return selectretspoints
 
@@ -1218,7 +1218,6 @@ retsHistory.queryAttachments({
     let getAttachment = x[oid].find((attach) => attach.name === attachName) 
         retsHistory.deleteAttachments(attachGraphic, [getAttachment.id])
             .then((y) => {
-                console.log(y)
                 const chat = store.historyChat.find(z => z.OBJECTID === getAttachment.parentObjectId)
                 const index = chat.attachments.findIndex(att => att.name === getAttachment.name)
                 chat.attachments.splice(index, 1)
@@ -1623,7 +1622,6 @@ export function openDetails(road){
     store.isSaving = false
     //store.isSaveBtnDisable = true
     store.archiveRetsDataString = JSON.stringify(road)
-    console.log(road)
     store.retsObj = road
     store.historyRetsId = road.attributes.RETS_ID
     returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
@@ -1966,7 +1964,6 @@ export function restoreExtent(){
 }
 
 export function createCheckboxFlagObj(e){
-    console.log(e)
     let checkboxLabels = {"redLabel": store.flagLabels.redCheckbox, "orangeLabel": store.flagLabels.orangeCheckbox, "yellowLabel": store.flagLabels.yellowCheckbox, 
                             "greenLabel": store.flagLabels.greenCheckbox, "blueLabel": store.flagLabels.blueCheckbox, "purpleLabel": store.flagLabels.purpleCheckbox}
     let checkboxLabelsStringfy = JSON.stringify(checkboxLabels)
@@ -1977,15 +1974,12 @@ export function createCheckboxFlagObj(e){
 
 export function updateCheckboxFlag(e, div){
     const rets = store.updateRetsSearch.find(rd => rd.attributes.RETS_ID === store.flagClickedId)
-    console.log(store.flagsChecked)
     if(!e || !e.length || !e.at(-1).label){
         store.flagsChecked.splice(-1)
-        console.log(store.flagsChecked)
         rets.attributes.flagColor.FLAG = store.flagsChecked
         e.length ? errorValidate(div) : postFlagColor(rets)
         return
     }
-    console.log(store.flagsChecked)
     removeLableError(div)
     // const rets = store.updateRetsSearch.find(rd => rd.attributes.RETS_ID === this.flagClickedId)
     rets.attributes.flagColor.FLAG = store.flagsChecked
@@ -1994,7 +1988,6 @@ export function updateCheckboxFlag(e, div){
 }
 
 export function errorValidate(div){
-    console.log(div)
     document.getElementById(`${div}`).style.display = "flex"
     return
 }

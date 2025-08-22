@@ -36,7 +36,7 @@ export async function updateRETSPT(retsObj){
         store.devStatus === "dev" ? sendWebhookEmail(enable.attributes.RETS_ID, getUserInfo.email) : null
     }
     
-    retsObj.attributes.flagColor.FLAG === "" ? null : postFlagColor(retsObj)
+    // retsObj.attributes.flagColor.FLAG === "" ? null : postFlagColor(retsObj)
     
     // delete enable.attributes?.retsPt
     // delete enable.attributes?.STATUS
@@ -54,25 +54,25 @@ export async function updateRETSPT(retsObj){
     // delete enable.attributes?.historyUpdate 
     // delete enable.attributes?.mdipaperclip
     
-    // let esriUpdateGraphic = createGraphic(enable)
-    // esriUpdateGraphic.geometry = createGeo
-    // try{
-    //     let updateResp = await retsLayer.applyEdits({
-    //         updateFeatures: [esriUpdateGraphic]
-    //     })
+    let esriUpdateGraphic = createGraphic(enable)
+    esriUpdateGraphic.geometry = createGeo
+    try{
+        let updateResp = await retsLayer.applyEdits({
+            updateFeatures: [esriUpdateGraphic]
+        })
 
-    //     if(Object.hasOwn(updateResp.updateFeatureResults[0], "error")){
-    //         if(updateResp.updateFeatureResults[0].error){
-    //             console.error(updateResp.updateFeatureResults[0].error.message)
-    //         }
-    //         return
-    //     }
-    // }
-    // catch(err){
-    //     console.log(err)
-    // }
+        if(Object.hasOwn(updateResp.updateFeatureResults[0], "error")){
+            if(updateResp.updateFeatureResults[0].error){
+                console.error(updateResp.updateFeatureResults[0].error.message)
+            }
+            return
+        }
+    }
+    catch(err){
+        console.log(err)
+    }
 
-    // console.log(`${retsObj.attributes.OBJECTID} updated`)
+    console.log(`${retsObj.attributes.OBJECTID} updated`)
 }
 
 
@@ -142,9 +142,7 @@ export async function sendChatHistory(chat, type){
 
 export function postFlagColor(rets){
     // let flagContainer = []
-    console.log(rets) 
     let newFlagGraphic = rets.attributes.flagColor.FLAG
-    console.log(newFlagGraphic)
     if(newFlagGraphic[0] === ""){
         newFlagGraphic.splice(0)
     }
@@ -164,12 +162,9 @@ export function postFlagColor(rets){
             addFeatures: [flagGraphic]
         })
         .then((res) => {
-            console.log("add", res.addFeatureResults[0].objectId)
             //do nothing
-            const findFlag = store.userRetsFlag.find(ret => ret.RETS_ID === flagGraphic.attributes.RETS_ID)
-            console.log(findFlag)
+            // const findFlag = store.userRetsFlag.find(ret => ret.RETS_ID === flagGraphic.attributes.RETS_ID)
             flagGraphic.attributes.OBJECTID = res.addFeatureResults[0].objectId
-            console.log(flagGraphic.attributes)
             store.userRetsFlag.push(flagGraphic.attributes)
             rets.attributes.flagColor.OBJECTID = res.addFeatureResults[0].objectId
             // flagGraphic.attributes.OBJECTID = res.addFeatureResults[0].objectId
@@ -178,23 +173,19 @@ export function postFlagColor(rets){
         .catch(err => console.log(err)) 
         return
     }
-    console.log(flagGraphic)
+
     flagGraphic.attributes.OBJECTID = rets.attributes.flagColor.OBJECTID
     //if OBJECTID is filled, would mean its a update flag insert
     flagRetsColor.applyEdits({
         updateFeatures: [flagGraphic]
     })
-    .then((res) => {
-        console.log("update", res.updateFeatureResults[0].objectId)
+    .then(() => {
         //do nothing
         const findFlag = store.userRetsFlag.find(ret => ret.RETS_ID === flagGraphic.attributes.RETS_ID)
         findFlag.OBJECTID = !flagGraphic.attributes.FLAG ? "" : flagGraphic.attributes.OBJECTID
         
-        console.log(findFlag)
-        
         findFlag.FLAG = flagGraphic.attributes.FLAG
         rets.attributes.flagColor.OBJECTID = findFlag.OBJECTID
-        console.log(findFlag)
     })
     .catch(err => console.log(err)) 
     return

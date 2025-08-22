@@ -52,13 +52,6 @@ export default{
           store
         };
     },
-    beforeMount(){
-        console.log(this.retsparam)
-    },
-    beforeCreate(to, from){
-        console.log(from)
-        console.log(to)
-    },
     async mounted(){
             //1.Check to see if user is signed in. If not sign them in without using the popup
             //2. If user is signed in, get username and set retLayer definition and load map

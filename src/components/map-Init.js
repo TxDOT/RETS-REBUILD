@@ -861,7 +861,7 @@ homeWidget.on("go", function() {
                     view.goTo(view.center)
                 }
                 else{
-                    view.goTo(resp.extent)
+                    // view.goTo(resp.extent)
                 }
             })
 });

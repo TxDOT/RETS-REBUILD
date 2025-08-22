@@ -36,7 +36,7 @@
                     <div style="flex: auto;">
                         <v-tooltip location="bottom">
                             <template v-slot:activator="{props}">
-                                <v-switch @click="console.log(store.roadHighlightObj)" style="position: relative; bottom: 4px;" v-bind="props" flat v-model="store.isShowSelected" density="compact" @update:modelValue="updateSelection(store.isShowSelected)" color="primary" :disabled="!store.roadHighlightObj.size"></v-switch>
+                                <v-switch style="position: relative; bottom: 4px;" v-bind="props" flat v-model="store.isShowSelected" density="compact" @update:modelValue="updateSelection(store.isShowSelected)" color="primary" :disabled="!store.roadHighlightObj.size"></v-switch>
                             </template>
                             <span>Show Selected Cards</span>
                         </v-tooltip>
@@ -116,7 +116,7 @@
 </template>
 
 <script>
-import {clickRetsPoint, getQueryLayer, getHighlightGraphic, removeHighlight, createtool, changeCursor, outlineFeedCards, openDetails, doubleClickRetsPoint, filterMapActivityFeed} from './utility.js'
+import {clickRetsPoint, getQueryLayer, getHighlightGraphic, removeHighlight, createtool, changeCursor, outlineFeedCards, openDetails, doubleClickRetsPoint, filterMapActivityFeed, zoomTo} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import {store} from './store.js'
@@ -240,15 +240,19 @@ export default{
         async isRetsParamOpen(retsParam){
             retsParam = Number(retsParam)
             let returnRets = store.roadObj.find(rets => rets.attributes.RETS_ID === retsParam)
-            console.log(returnRets)
             // let returnRets = await store.returnRetsNonFeed(retsParam)
             if(!returnRets){
-                store.isAlert = true
+               
                 store.alertTextInfo = {"text": `Rets not found try again.`, "color": "red", "type":"error", "toggle": true}
+                store.alertObject.push(store.alertTextInfo)
+                store.isAlert = true
                 return
             }
-            openDetails(returnRets)
-            view.goTo({'target': returnRets.geometry, 'scale': 1000})
+            zoomTo(returnRets.geometry)
+            .then((c) => {
+                openDetails(returnRets)
+            })
+            .catch(err => console.log(err))
             return
         },
         retsSubtitleUpdate(){

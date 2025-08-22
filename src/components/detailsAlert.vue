@@ -3,8 +3,7 @@
         <span >{{ store.alertTextInfo.text }}</span>
     </v-alert> -->
     <div style="overflow-y: auto; height: auto; max-height: 100vh;">
-
-         <v-alert v-for="value in store.alertObject"  :border-color="store.alertObject.color" :color="value.color" :type="value.type" closable variant="tonal" class="detailsAlert" border="start" max-width="550" width="527" >
+         <v-alert v-for="value in store.alertObject" :border-color="store.alertObject.color" :color="value.color" :type="value.type" closable variant="tonal" class="detailsAlert" border="start" max-width="550" width="527">
             <span id="alerttext">{{value.text}} </span>
         </v-alert>
     </div>
@@ -13,7 +12,6 @@
 </template>
 
 <script>
-    import { extractRuntimeEmits } from 'vue/compiler-sfc';
 import {store} from './store'
     export default{
         name: "detailsAlert",
@@ -22,64 +20,61 @@ import {store} from './store'
                 store
             }
         },
+        mounted(){
+            this.timeoutAlert()
+        },
+        updated(){
+            this.timeoutAlert()
+        },
         methods: {
-            async timeoutAlert(){
+            timeoutAlert(){
                 setTimeout(() => {
-                     store.alertObject.forEach((val, index) => {
-                            if (val.type === "success"){
-                                store.alertObject.splice(index, 1)
-                                return
-                            }
-                            
-                        })
-                  }, 10000);
-                 return
-                
+                    store.alertObject.splice(0,1)
+                }, 3000);
             }
 
         },
-        watch: {
-            'store.alertTextInfo': {
-                handler: function() { 
-                    const existing = (store.alertObject).some(
-                        (item) => item.text === 'Route and/or DFO are not valid. Use the Move (icon) to move to a valid location.'
-                    );
-                    if (existing && store.alertTextInfo.text === 'Route and/or DFO are not valid. Use the Move (icon) to move to a valid location.'){
-                        return
-                    }
-                    store.alertObject.push({
-                        'color' : store.alertTextInfo.color,
-                        'type' : store.alertTextInfo.type,
-                        'text' : store.alertTextInfo.text 
-                    })
-                    this.timeoutAlert()
+        // watch: {
+            // 'store.alertTextInfo': {
+            //     handler: function(n) {
+            //         console.log(n) 
+            //         // const existing = (store.alertObject).some(
+            //         //     (item) => item.text === 'Route and/or DFO are not valid. Use the Move (icon) to move to a valid location.'
+            //         // );
+            //         // if (existing && store.alertTextInfo.text === 'Route and/or DFO are not valid. Use the Move (icon) to move to a valid location.'){
+            //         //     return
+            //         // }
+            //         // console.log(n)
+            //         store.alertObject.push(n)
+            //         console.log(store.alertObject)
+            //         this.timeoutAlert()
                   
-                    return
+            //         return
 
-                },
-                immediate:true
-            },
-            'store.isDetailsPage': {
+            //     },
+            //     immediate:true
+            // },
+            // 'store.isDetailsPage': {
 
-                handler: function(){
-                    if (!store.isDetailsPage){
+            //     handler: function(){
+            //         if (!store.isDetailsPage){
 
-                        store.alertObject.forEach((val, index) => {
-                            if (val.type != "success"){
-                                store.alertObject.splice(index, 1)
-                            }
-                        })
-                    }
+            //             store.alertObject.forEach((val, index) => {
+            //                 if (val.type != "success"){
+            //                     store.alertObject.splice(index, 1)
+            //                 }
+            //             })
+            //         }
                    
                     
-                    return
-                },
-                immediate:true
+            //         return
+            //     },
+            //     immediate:true
 
-            }
+            // }
             
             
-        }
+        // }
 
 
     }

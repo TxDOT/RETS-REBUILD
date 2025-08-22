@@ -15,27 +15,6 @@ const authen = new OAuthInfo({
   portalUrl: "https://maps.txdot.gov/create"
 })
 
-// let routeParam = null
-
-// function checkURL(){
-//   router.afterEach((to, from)=>{
-//     console.log()
-//     if(!routeParam){
-//       localStorage.removeItem("retsParam")
-//     }
-
-//     if(to.query.retsid){
-//       routeParam = to.query.retsid
-//       localStorage.setItem("retsParam", to.query.retsid)
-//       return
-//     }
-//     // window.sessionStorage.removeItem("retsParam")
-//     return
-
-//   })
-//   return
-// }
-
 export function login(){
   // checkURL()
   esriId.registerOAuthInfos([authen]);
@@ -53,7 +32,6 @@ export function login(){
 
 async function signIn(){
   try{
-    console.log(store.retsParam)
     await getUniqueQueryValues(retsUserRole, appConstants.userRoles)
     const userId = await getUserId()
     await queryFlags(userId)
@@ -68,7 +46,7 @@ async function signIn(){
 
   appConstants.userQueryField = appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]
   let getSession = localStorage.getItem("retsParam")
-  console.log(getSession)
+
   !getSession ? router.push({name: "Maps"}) : router.push({name: "Map", params: {retsid: getSession}})
   
   //needs to be worked on//
@@ -98,7 +76,6 @@ async function signIn(){
 }
 
 function alreadySignedIn(){
-  console.log(esriId)
   let getSession = localStorage.getItem("retsParam")
   esriId.setOAuthRedirectionHandler(() => window.location = `${import.meta.env.BASE_URL}map/${getSession}`)
   signIn()

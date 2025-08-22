@@ -230,7 +230,6 @@
             }
         },
         mounted(){
-            console.log(store.retsObj.attributes.flagColor)
             const gem = document.getElementById('gem-id')
             gem.addEventListener("keyup", (event) =>{
                 if(event.target.value.length > 1){
@@ -533,6 +532,7 @@
             },
             async addHistoryNote(size){
                 try{
+                    
                     if(!this.addHistoryChat.length){
                         this.initRules = true
                         return
@@ -596,7 +596,6 @@
         watch:{
             'store.showRetsFlag': {
                 handler: function(n,o){
-                    console.log(n,o)
                     this.showRetsFlag = n
                 },
                 immediate: true

@@ -237,7 +237,6 @@ export default{
         const flagLabel = appConstants.defaultUserValue[0].labels
         if(!flagLabel) return
         let parseFlagLabel = JSON.parse(flagLabel)
-        console.log(flagLabel)
         this.setFlagLabels(parseFlagLabel)
         return
         //outlineFeedCards(store.roadHighlightObj)
@@ -252,15 +251,11 @@ export default{
         this.setLayer
         loadData()
         return
-        // loadData()
-        // store.toggleFeed = 1
-        // console.log('updated')
-        //store.activityBanner = "Activity Feed"
     },
     methods:{
         shareURL(retsid){
             let copyUrl = `${window.location.origin}${window.location.pathname}?retsid=${retsid}`
-            // navigator.clipboard.writeText(copyUrl)
+            navigator.clipboard.writeText(copyUrl)
             document.getElementById(`share${retsid}`).style.display = "flex"
             setTimeout(()=> {
                 document.getElementById(`share${retsid}`).style.display = "none"
@@ -288,21 +283,11 @@ export default{
         },
         showFlagLabels(rets){
             store.showRetsFlag = !this.showFlagLabel
-            console.log(rets)
             store.flagClickedId = rets.attributes.RETS_ID
             store.flagsChecked = rets.attributes.flagColor.FLAG
             
             return
         },
-        // isHighlighted(rets){
-        //     view.whenLayerView(retsLayer)
-        //     .then((lyrView) => {
-        //         //highlights Point by giving OBJECTID
-        //          console.log(lyrView._highlightIds)
-        //          console.log(rets.attributes.RETS_ID)
-                
-        //     })
-        // },
         checkhighlight(retsid){
             return checkhighlightfunction(retsid)
         },
@@ -370,7 +355,6 @@ export default{
     watch:{
         'store.showRetsFlag': {
             handler: function(n,o){
-                console.log(n,o)
                 this.showFlagLabel = n
             },
             immediate: true
@@ -379,7 +363,6 @@ export default{
     computed: {
         setLayer: () => {                                              
             store.updateRetsSearch = store.roadObj
-            console.log(store.updateRetsSearch)
         } 
     }
 }
