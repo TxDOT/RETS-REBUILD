@@ -197,9 +197,10 @@
 </template>
 
 <script>
-import {zoomTo, highlightRETSPoint, removeHighlight, checkhighlightfunction, loadData, openDetails, createCheckboxFlagObj, updateCheckboxFlag} from './utility.js'
+import {zoomTo, highlightRETSPoint, removeHighlight, checkhighlightfunction, loadData, openDetails, createCheckboxFlagObj, updateCheckboxFlag, includes} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {store} from './store.js'
+import { view, retsLayer } from './map-Init.js'
 
 export default{
     name: "RetsCards",
@@ -293,6 +294,15 @@ export default{
             
             return
         },
+        // isHighlighted(rets){
+        //     view.whenLayerView(retsLayer)
+        //     .then((lyrView) => {
+        //         //highlights Point by giving OBJECTID
+        //          console.log(lyrView._highlightIds)
+        //          console.log(rets.attributes.RETS_ID)
+                
+        //     })
+        // },
         checkhighlight(retsid){
             return checkhighlightfunction(retsid)
         },
@@ -314,10 +324,13 @@ export default{
             return
         },
         async zoomToRetsPt(rets){
-            removeHighlight("a", true)
-            if (!store.isShowSelected){
+            if (!await includes(rets.attributes)  ){
+                removeHighlight("a", true)
                 store.roadHighlightObj.clear()
-                store.roadHighlightObj.add(rets);
+                if (!store.isShowSelected){
+                    store.roadHighlightObj.add(rets);
+                }
+
             }
             
             highlightRETSPoint(rets.attributes)
@@ -341,7 +354,7 @@ export default{
 
             }   
             
-            if(!store.isSaveBtnDisable || (store.retsObj.attributes.GIS_ANALYST === null || store.retsObj.attributes.GRID_ANALYST === null || store.retsObj.attributes.DIST_ANALYST === null|| store.retsObj.attributes.DIST_NM === null || store.retsObj.attributes.CNTY_NM === null) ){
+            if(!store.isSaveBtnDisable || store.alertTextInfo.text ==='Route and/or DFO are not valid. Use the Move (icon) to move to a valid location.' || (store.retsObj.attributes.GIS_ANALYST === null || store.retsObj.attributes.GRID_ANALYST === null || store.retsObj.attributes.DIST_ANALYST === null|| store.retsObj.attributes.DIST_NM === null || store.retsObj.attributes.CNTY_NM === null) ){
                 clearTimeout(this.timer)
                 store.cancelpopup = true
                 return

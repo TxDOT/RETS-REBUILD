@@ -127,40 +127,54 @@
                     </template>
                 </v-switch>
 
-            <v-label style="font-size: 10px; color: #D9D9D9; margin-left: 10px;">Display selected basemap on load</v-label>
-            <v-select style="width: 22rem; margin-left: 10px; margin: top 0; margin-bottom: 0;" class="basemap-select" variant="underlined" density="compact" v-model=store.basemaptest :items=basemapArray></v-select>
-    </v-card-item>
-        <v-btn @click ="activateFeedback()" color="#4472C4" rounded  style="position: absolute; right: 25px; top: 212px; z-index: 99999;">
-            <span style="font-weight: 100;">Feedback</span>
-        </v-btn>
-    <v-card-item id = "notificationsitems" >
-        <v-card-item class="banner-txt" style="padding-left: 7px; padding-top: 0; padding-bottom: 0;"><span>Notifications</span></v-card-item>
-        <v-card-subtitle id = "notificationssub">Send notifications for:</v-card-subtitle>
-        <div id="notis">
-            <div id="notiswitches">
-                <v-card-item v-for="(item, index) in switches" :key="index" :id="'switch-container-' + index" class="switch-item">
-                    <v-switch v-model="item.value" color="primary" :style="switchStyle(item.fontColor)" @change="switchTurnedOn(index)" disabled>
+                <v-label style="font-size: 10px; color: #D9D9D9; margin-left: 10px;">Display selected basemap on load</v-label>
+                <v-select style="width: 22rem; margin-left: 10px; margin: top 0; margin-bottom: 0;" class="basemap-select" variant="underlined" density="compact" v-model=store.basemaptest :items=basemapArray></v-select>
+        </v-card-item>
+            <v-btn @click ="activateFeedback()" color="#4472C4" rounded  style="position: absolute; right: 25px; top: 212px; z-index: 99999;">
+                <span style="font-weight: 100;">Feedback</span>
+            </v-btn>
+        <v-card-item id = "notificationsitems" >
+            <v-card-item class="banner-txt" style="padding-left: 7px; padding-top: 0; padding-bottom: 0;"><span>Notifications</span></v-card-item>
+            <v-card-subtitle id = "notificationssub">Send notifications for:</v-card-subtitle>
+           <div id="notis">
+                <v-card-item v-for="(item, index) in switches" :key="index"  class="switch-item">
+                    <div style="height: auto;">
+                        <v-switch :model-value="item.value" color="primary"  @update:modelValue="item.value= $event" :disabled="isDisabled(index)"  :style="{color: fontColor, height: '50px', marginTop : '20px'}"   >
                         <template #prepend >
-                            <v-label >
+                            <v-label @mouseover="testfunction(index) " >
                                 {{ item.label }}
+                                
                             </v-label>
+                        <template v-if="item.label === 'No activty in ______ days'">
+                            <v-select :items="noActivityDays" class="daysDropdown" base-color="transparent" bg-color="transparent" :center-affix=true chips density="compact" variant="plain" max-width="20px" v-model="item.value3"></v-select>
+                        </template>
+
+
                         </template>
                     </v-switch>
-                </v-card-item>
+
+                    <v-select :key="index" v-if="addDropdown(index)" :disabled="isDisabled(index)" density="compact" variant="underlined" class="switchDropdown" v-model="item.value2" multiple :items=statuses  >
+                        <template #prepend>
+                            <v-label >
+                                Applies to: 
+                            </v-label>
+                        </template>
+                    </v-select> 
+                    </div>
+                    
+                </v-card-item>  
             </div>
             
-        </div>
-        
-    </v-card-item>
-    <v-card-item id="bottomitems">
-        <div style="width: 100%; position: relative; height: 100%;">
-            <div style="width: 100%; position: relative;">
-                <v-btn variant="plain" size="small" class="secondary-button"  prepend-icon="mdi-power" @click="logoutMethod()" >LOGOUT</v-btn>
-                <v-btn style="float: right;" variant="outlined" size="small" class="main-button-style" @click=" handleactiveclass(); saveSettings()">save</v-btn>
-                <v-btn style="float: right;" variant="plain" size="small" class="secondary-button"  @click="handleactiveclass(); cancelSettings()">CANCEL</v-btn>
+        </v-card-item>
+        <v-card-item id="bottomitems">
+            <div style="width: 100%; position: relative; height: 100%;">
+                <div style="width: 100%; position: relative;">
+                    <v-btn variant="plain" size="small" class="secondary-button"  prepend-icon="mdi-power" @click="logoutMethod()" >LOGOUT</v-btn>
+                    <v-btn style="float: right;" variant="outlined" size="small" class="main-button-style" @click=" handleactiveclass(); saveSettings()">save</v-btn>
+                    <v-btn style="float: right;" variant="plain" size="small" class="secondary-button"  @click="handleactiveclass(); cancelSettings()">CANCEL</v-btn>
+                </div>
             </div>
-        </div>
-    </v-card-item>
+        </v-card-item>
 
 </v-card>
 <v-card id="suggestionsSection" height="360px" width="350" style="border-radius: 0;" v-if="feedbackStatus">
@@ -240,6 +254,8 @@
     import { addSettings } from './crud.js';
     import { store } from './store';
     import { defineAsyncComponent } from 'vue'
+    import { setDefExpRets } from './login.js';
+      import { shallowRef } from 'vue'
 
     export default{
         name: "NavBar",
@@ -249,7 +265,7 @@
         },
         data(){
             return{
-                toggle: store.toggleFeed,
+                favorites : shallowRef([]),
                 openedVlist: ['New Updates'],
                 isNewReleaseOpen: true,
                 expandedIndex: null,
@@ -287,8 +303,14 @@
                 feedbackName: "",
                 notificationValue: false,
                 currentSwitchValue: [],
-                statuses: ['Not Started', 'In Progress', 'Completed', 'On Hold'],
+                statuses: ['In my district(s)', 'Assigned to me', "I'm tagged in ", 'Created by me', 'Any association with me (incl. history items)'],
                 showDropdown: false,
+                noActivityDays: [30,60,90],
+                numberOfDays: null,
+                noActivityAppliesTo: 0,
+                deleteAppliesTo: 0,
+                statusAppliesTo: 0,
+                testvmodel:null,
                 multiselectTool: 'rectangle',
                 latestReleaseNotes: [
                     [
@@ -371,9 +393,9 @@
                             { label: "RETS assigned to me", value: false},
                             { label: "Someone tags me", value: false},
                             { label: "RETS marked high priority", value: false},
-                            { label: "No activty in ______ days", value: false},
-                            { label: "A RETS is deleted", value: false},
-                            { label: "Status changes to", value: false},
+                            { label: "No activty in ______ days", value: false, value2: null, value3: this.numberOfDays},
+                            { label: "A RETS is deleted", value: false, value2: null},
+                            { label: "Status changes to", value: false, value2: null},
                         ],
                 retsToolsTop: [
                                {
@@ -399,7 +421,6 @@
                                     //open feed
                                     store.isCard = true
                                     store.isDetailsPage = false
-                                    this.toggle = 1
                                     store.toggleFeed = 1                                    
                                     
                                 },
@@ -416,7 +437,6 @@
                                     //open details pane
                                     store.isDetailsPage = true
                                     store.isCard = false
-                                    this.toggle = 2
                                     store.toggleFeed = 2
                                 },
                                 disabled: true
@@ -647,6 +667,21 @@
         },
         
         methods: {
+                    updateSwitchValue2(item, value2){
+                        console.log(item)
+                        console.log(value2)
+                        console.log(this.switches)
+
+                        for (let index = 0; index < this.switches.length; index++) {
+                            if (item === this.switches[index].label ){
+                                console.log("match")
+                                this.switches[index].value2 = value2
+
+                            }
+                            
+                        }
+
+                    },
             testfunction(index){
                 if (index === 4){
                 this.showDropdown = !this.showDropdown
@@ -658,69 +693,75 @@
                 if (index === 2){
                     return true
 
-                }
-                else{
-                    return false
-                }
-            },
-            addDropdown(index){
-                if (index > 3){
-                    return true
-                }
-                else{
-                    return false
-                }
-            },
-            updateuserSettings(){
-                store.userSettings = this.userSettings
-            },
-            setNotifications(){
-                const { notifications } = this.userSettings
-                if (notifications != null){
-                    for (let i = 0; i< notifications.length; i++ ){
-                        this.switches[i].value = notifications[i].value
-                    }
-                }
-                
-            },
-            isDisabled(index){
-                return
-                if (index > 0){
-                    return true
-                }
-                return false
-            },
-            setAutozoomExtentSwitch(){
-                const { autoZoomExtent } = this.userSettings;
-                if (autoZoomExtent != null){
-                    store.autozoomextent = autoZoomExtent
-                }
-                else{
-                    store.autozoomextent = false
-                }
-                return
-            },
-            setAutozoomSwitch(){
-                const { autoZoom } = this.userSettings;
-                if (autoZoom != null){
-                    store.autozoomtest = autoZoom
-                }
-                else{
-                    store.autozoomtest = true
-                }
-                return
-            },
-            async saveSettings(){
-                store.settings = {
-                    autoZoom : store.autozoomtest,
-                    autoZoomExtent: store.autozoomextent,
-                    basemap: store.basemaptest,
-                    notifications: this.switches
-                } 
-                this.isAutoZoom = store.autozoomtest
-                this.isAutoZoomExtent = store.autozoomextent
-                const settingsObject = {attributes: {OBJECTID : appConstants.defaultUserValue[0].objectid, SETTINGS : JSON.stringify(store.settings)}}
-                await addSettings(settingsObject)
+                        }
+                        else{
+                            return false
+                        }
+                    },
+                    addDropdown(index){
+                        if (index > 3){
+                            return true
+                        }
+                        else{
+                            return false
+                        }
+                    },
+                    updateuserSettings(){
+                        store.userSettings = this.userSettings
+                    },
+                    setNotifications(){
+                        const { notifications } = this.userSettings
+                        if (notifications != null){
+                            for (let i = 0; i< notifications.length; i++ ){
+                                this.switches[i].value = notifications[i].value
+                            }
+                        }
+                       
+                    },
+                    isDisabled(index){
+                        if (index => 0){
+                            return true
+                        }
+                        return false
+                    },
+                    setAutozoomExtentSwitch(){
+                        const { autoZoomExtent } = this.userSettings;
+                        if (autoZoomExtent != null){
+                            store.autozoomextent = autoZoomExtent
+                        }
+                        else{
+                            store.autozoomextent = false
+                        }
+                        return
+                    },
+                    setAutozoomSwitch(){
+                        const { autoZoom } = this.userSettings;
+                        if (autoZoom != null){
+                            store.autozoomtest = autoZoom
+                        }
+                        else{
+                            store.autozoomtest = true
+                        }
+                        return
+                    },
+                    async saveSettings(){
+                        store.settings = {
+                            autoZoom : store.autozoomtest,
+                            autoZoomExtent: store.autozoomextent,
+                            basemap: store.basemaptest,
+                            // notifications: this.switches
+                        } 
+
+                        // for (let index = 0; index < this.switches.length; index++) {
+                        //     const element = this.switches[index];
+                            
+                        // }
+
+                        this.isAutoZoom = store.autozoomtest
+                        this.isAutoZoomExtent = store.autozoomextent
+                        const settingsObject = {attributes: {OBJECTID : appConstants.defaultUserValue[0].objectid, SETTINGS : JSON.stringify(store.settings)}}
+                        await addSettings(settingsObject)
+                    //    console.log(store.settings)
 
                 const userOBJECTID = await getUserOBJECTID(store.loggedInUser)
                 this.userSettings = JSON.parse(userOBJECTID.SETTINGS)
@@ -1296,14 +1337,14 @@
         margin-left: 20px;
         margin-top: 0;
         height: 32px;
-        top: -20px;
+        top: -15px;
     }
     
     .switchDropdown .v-field__input{
         height: 20px;
         width: 300px !important;
         font-size: 10px;
-                        overflow-y: auto;
+                        overflow-x: hidden;
 
         
     }
@@ -1312,6 +1353,8 @@
         width: 190px;
         left: -50px;
         height: 33px;
+        /* padding-bottom: 20px; */
+
 
 
 
@@ -1328,18 +1371,52 @@
     }
 
     .daysDropdown{
-       position: absolute;
-       width: 30px;
-       height: 75px;
-       background-color: rgb(84, 79, 79);
+        position: absolute;
+       height: 1px;
         /*width: 0px; */
-        top: 234px;
-        left: 83.8px;
+        top: 204px;
+        left: 83px;
         border-radius: 0;
     }
 
+    .daysDropdown .v-chip__content{
+        position: relative;
+        font-size: 10px;
+        /* top: 3.5px; */
+    }
+
+    .daysDropdown .v-field__append-inner{
+        color: transparent;
+        left: -40px;
+        position: relative;
+    }
+
+    .daysDropdown .v-input__control{
+        /* width: 28px; */
+        
+    }
+
+    .daysDropdown .v-field__overlay{
+        color: transparent;
+
+    }
+
+    .daysDropdown .v-field .v-chip {
+        background-color: rgba(128,128,128,0)  !important;
+        border-radius: 2px;
+        height: 14px;
+        top: 3px;
+    }
+
+    .daysDropdown .v-field__append-inner{
+        left: -38px;
+    }
+ 
+     .daysDropdown .v-select--active-menu  {
+        width: 10px !important;
+    }
+
     
-        /* align-content: center; */
     
    
     

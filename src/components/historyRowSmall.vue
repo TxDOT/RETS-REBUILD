@@ -29,20 +29,20 @@
             <div v-for="(note, i) in histNotes" :key="note.OBJECTID" track-by="OBJECTID">
                 <v-banner :id="`${note.OBJECTID}Small`" v-model="note[i]" density="compact" class="note">
                     <div style="max-width: 84%;">
-                        <span v-if="note.PARENT_ID" style="margin:0% !important;">
+                        <span v-if="note.PARENT_ID" style="margin:0% !important; ">
                             <p id="replyingToCmnt">Replying to "{{store.historyChat.find(x => x.OBJECTID === note.PARENT_ID)?.CMNT ?? "Referenced Note has been deleted"}}"</p>
                         </span>
                         
                         <v-textarea class="history-note" rows="1" auto-grow density="compact" :disabled="note.OBJECTID !== updateOID" variant="plain" v-model="note.CMNT" placeholder="Enter Comment" autofocus></v-textarea>
                         
-                        <span v-for="(i,n) in note.URL" style="display: flex; flex-direction: row; max-width: 99%; font-size: 12px;">
+                        <span v-for="(i,n) in note.URL" style="display: flex; flex-direction: row; max-width: 99%; font-size: 12px; ">
                             <span v-html="returnHyperLink(i, n)" style="max-width: 99%;"></span>
                         </span>
                         
-                        <div style="flex: auto; position: relative; top: 00px; width: 100%;">
+                        <div style="flex: auto; position: relative; top: 0px; width: 100%;">
                             <span style="font-size: 10px; color: grey; padding-left: 2px; position: relative; bottom: 0px; padding: 0px;">{{ returnUserName(note.CMNT_NM) }} {{ returnDateFormat(note.CREATE_DT) }} <b v-if="note.CREATE_DT !== note.EDIT_DT && note.SYS_GEN === 0" class="main-color">{{ `Edited ${returnDateFormat(note.EDIT_DT)}` }}</b></span>
                         </div>
-                        <div style="position: relative; top: 0px;" v-if="note.attachments">
+                        <div style="position: relative;" v-if="note.attachments">
                             <span v-for="attach in note.attachments" style="padding-right: 3px;">
                                 <v-chip :text="attach.name" color="#4472C4" :closable="editContent && updateOID === note.OBJECTID ? true: false" density="compact" rounded="0" variant="flat" @click="openAttachement(attach.url)" @click:close="deleteAttach(note.OBJECTID, attach.name)"></v-chip>
                             </span>
@@ -330,7 +330,7 @@
         flex-direction: column;
         padding: 0px;
         padding-left: 5px;
-        border-left: 3px solid #4472C4 !important; 
+        border-left: 5px solid #4472C4 !important; 
         margin-bottom: 0px;
         gap: 5px;
     }
@@ -388,5 +388,11 @@
     :deep(.v-input__details){
         min-height: 0px !important;
         padding-top: 0px !important;
+        margin-bottom: -5px !important;
+    }
+
+     .note :deep(.v-input__details){
+        /* display: none !important; */
+        margin-top: -5px;
     }
 </style>

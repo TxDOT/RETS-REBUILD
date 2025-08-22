@@ -7,7 +7,8 @@ import {view, retsLayer, homeWidget, retsGraphicLayer, TxDOTRoadways, retsHistor
     hybridBasemap,
     googleVTBasemap,
     OSMVTBasemap,
-    lightVTBasemap} from './map-Init'
+    lightVTBasemap,
+    queryExtent} from './map-Init'
 import Query from "@arcgis/core/rest/support/Query.js";
 import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant.js";
@@ -82,14 +83,11 @@ reactiveUtils.once(() => !rdLayerView.dataUpdating)
 return
 }
 
-export function clickRetsPoint(){
-try{
-    view.on("click", (event)=>{
-        if (view.popup.visible === true){
-            view.closePopup()
-        }
+export async function clickRetsPoint(){
+try {
+    view.on("click", async (event)=>{
         event.stopPropagation()
-        view.hitTest(event, {include: [retsLayer, retsGraphicLayer, roadLayerView.layer]}).then((evt) =>{
+        view.hitTest(event, {include: [retsLayer, retsGraphicLayer, roadLayerView.layer]}).then(async (evt) =>{
             store.clickevent = event
             store.clickStatus = true
             console.log(evt)
@@ -102,95 +100,87 @@ try{
                 
                 // navigator.clipboard.writeText(coordinate);
                 store.latlonstring = coordinate
-                store.alertTextInfo = {"text": `${coordinate} has been copied to clipboard.
-                                                ${window.location.origin}${window.location.pathname}?retsid=${getRets.graphic.attributes.RETS_ID}`, "color": "#70ad47", "type":"success", "toggle": true}
-               
+                store.alertTextInfo = {"text": ` ${coordinate} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
+
                 store.isAlert = true
 
-                 setTimeout(() => {
-                    store.isAlert = false
-
-                  }, 10000);
+              
             }
-            else{
-           
-                highlightLayer.removeAll()
-                removeHighlightRoadways('a', true)
-                removeHighlight('a', true)
-                if(!evt.results.length){
-                    if (!store.isSaveBtnDisable){
-                        store.cancelpopup = true
-                        return
-                    }
-                    if (store.isShowSelected){
-                        store.isShowSelected = false
-                        store.roadHighlightObj.clear()
-                        setTimeout(() => {
-                            returntofeedcopy()
-
-                        }, 500);
-                        return
-                    }
-                    removeOutline()
-                    removeHighlight("a", true)
-                    clearRoadHighlightObj()
-                    store.isDetailsPage ? canceldetailsfunction() : null
+            else if (event.button === 0){
+                if (view.popup.visible === true){
+                    view.closePopup()
+                }
+                store.layerName = evt.results.length ?  evt.results[0].layer.title : null
+                if (!store.isSaveBtnDisable || store.isNewRets){
+                    store.cancelpopup = true
                     return
                 }
-                store.layerName = evt.results[0].layer.title
-                if (evt.results[0].layer.title === "TxDOT Roadways"){
-                    highlightRoadways(evt.results[0].graphic.attributes)
-                    if (evt.results.length === 1 && map.basemap.title === "Hybrid"){
-                        view.openPopup({
-                            fetchFeatures: true,
-                            location: event.mapPoint
-                        });
-                    }
+
+                switch (store.layerName){
+                    case "RETS UAT":
+                    case "RETS":
+
+                        let retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
+                        let retsId = evt.results[0].graphic.attributes.RETS_ID
+                        if (retsPt === undefined){
+                            await store.getRetsLayer(store.loggedInUser, `RETS_ID = ${retsId}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                            retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
+                            
+                        }
+
+                        includes(retsPt.attributes).then((value) => {
+                            if (!value){
+                                removeHighlight("", true)
+                                store.roadHighlightObj.clear()
+                                store.roadHighlightObj.add(retsPt)
+                                highlightRETSPoint(retsPt.attributes)
+
+                                
+                            }
+                            outlineFeedCards([retsPt])
+                            if (store.isDetailsPage && !store.isEmptyRow){
+                                openDetails(retsPt)
+
+                            }
+
+                        })
+
+                        break
+                    case "TxDOT Roadways":
+                        // removeHighlight("", true)
+                        // store.roadHighlightObj.clear()
+                        removeHighlightRoadways('a', true)
+                        if (store.isShowSelected && store.autozoomextent){
+                            queryExtent()
+                        }
+                        if (map.basemap.title === "Hybrid"){
+                            highlightRoadways(evt.results[0].graphic.attributes)
+                            view.openPopup({
+                                fetchFeatures: true,
+                                location: event.mapPoint
+                            });
+                        }
+                        //  if (store.isDetailsPage){
+                        //     canceldetailsfunction()
+                        // }
+
+                        break
+                    case null:
+                        removeHighlight("", true)
+                        store.roadHighlightObj.clear()
+                        removeHighlightRoadways('a', true)
+                        if (store.isShowSelected && store.autozoomextent){
+                            queryExtent()
+                        }
+                        if (store.isDetailsPage){
+                            canceldetailsfunction()
+                        }
+                        break
                     
                 }
-                else{
-                    if (store.isNewRets){
-                        return
-                    }
-                    store.roadHighlightObj.clear()
-                    let retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
-                    
-                    if (retsPt){
-                        store.roadHighlightObj.add(retsPt)
-
-                    }
-                    if (store.isDetailsPage && store.isSaveBtnDisable && !store.isEmptyRow){
-                        openDetails(retsPt)
-                        return
-                    }
-                    if (retsPt === undefined && store.isShowSelected){
-                        const retsId = evt.results[0].graphic.attributes.RETS_ID
-                        
-                   
-                        let sorting = store.CREATE_DT ? `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO` : "EDIT_DT DESC, PRIO"
-
-                        store.getRetsLayer(store.loggedInUser, `RETS_ID = ${evt.results[0].graphic.attributes.RETS_ID}`, "retsLayer", sorting).then((value) => {
-                            store.isShowSelected = true
-                            retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === retsId)
-                            store.roadHighlightObj.add(retsPt)
 
 
-                        
-                        })
-                    
-                    }
-                        if (store.isSaveBtnDisable && !store.isEmptyRow){
-                                removeOutline()
-                                removeHighlight("a", true)
-                                const firstResult = Array.isArray(evt.results) ? evt.results[0] : null;
-                                firstResult.graphic.layer.title ? highlightRETSPoint(firstResult.graphic.attributes) : highlightGraphicPt(firstResult.graphic.attributes)
-                                outlineFeedCards(evt.results.splice(0,1))
-                        
-                            }
-                        }
-               
-                
-            }
+                }
             
         })
     })
@@ -201,25 +191,38 @@ catch(err){
 
 }
 
-export function doubleClickRetsPoint(){
+export async function doubleClickRetsPoint(){
     try{
         view.on("double-click", (event)=> {
             event.stopPropagation()
-            view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then((evt)=>{
-                if (evt.results.length && !store.isDetailsPage){
-                    // openDetails(store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID))
+            view.hitTest(event, {include: [retsLayer, retsGraphicLayer]}).then(async (evt)=>{
+                if (evt.results.length ){
+                    if (!store.isSaveBtnDisable || store.isNewRets){
+                        store.cancelpopup = true
+                        return
+                    }
+                    if (view.popup.visible === true){
+                        view.popup.close()
+                    }
 
                     let retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
-                    openDetails(retsPt)
-
-                    ///////////////////////////////////ADD CLICKED RETS POINT TO THE HIGHLIGHR OBJECT//////////////////////////////////////////////////
-                    if (!store.roadHighlightObj.has(retsPt)){
-                        store.roadHighlightObj.clear()
-                        store.roadHighlightObj.add(retsPt)
-
+                    let retsId = evt.results[0].graphic.attributes.RETS_ID
+                    if (retsPt === undefined){
+                        await store.getRetsLayer(store.loggedInUser, `RETS_ID = ${retsId}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                        retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
+                    
                     }
-                    // openDetails(retsPt)
+                    includes(retsPt.attributes).then((value) => {
+                        if (!value){
+                            removeHighlight("", true)
+                            store.roadHighlightObj.clear()
+                            store.roadHighlightObj.add(retsPt)
+                            highlightRETSPoint(retsPt.attributes)
 
+                            
+                        }
+                    })
+                    openDetails(retsPt)
 
             }
         })
@@ -391,6 +394,7 @@ export async function filterMapActivityFeed(filterOpt,val,userId){
     let ACTV = []
     let JOB_TYPE = []
     let EDIT_DT = []
+    let ROUTE_TYPE = []
     
     let fullFilter = []
 
@@ -401,7 +405,24 @@ export async function filterMapActivityFeed(filterOpt,val,userId){
                     fullFilter.push(`ASSIGNED_TO in ('${store.loggedInUser}')`)
                 }
                 if(key === 'isAssociated' && value){
-                    fullFilter.push(`(CREATE_NM in ('${store.loggedInUser}') OR EDIT_NM in ('${store.loggedInUser}') )`)
+                    fullFilter.push(`(CREATE_NM in ('${store.loggedInUser}') OR EDIT_NM in ('${store.loggedInUser}')) `)
+                }
+                 if (key === "routeType" && value){
+                    let a;
+                    for ( a = 0; a < value.length; a++) {
+                        ROUTE_TYPE.push(value[a].value)
+                    }
+                        if (ROUTE_TYPE.length === 1 && ROUTE_TYPE.includes('null')){
+                            fullFilter.push('(SYSTYPE IS NULL)')
+                        }
+                        else if(ROUTE_TYPE.length > 1 && ROUTE_TYPE.includes('null')){
+                            fullFilter.push(`(SYSTYPE in (${ROUTE_TYPE.filter((value) => value != 'null').join(",")})`)
+                            fullFilter.push('OR SYSTYPE IS NULL)')
+                        }
+                        else if (ROUTE_TYPE.length && !ROUTE_TYPE.includes('null')) {
+                            fullFilter.push(`SYSTYPE in (${ROUTE_TYPE.filter((value) => value != 'null').join(",")})`)
+
+                        }
                 }
                 if(key === 'user' && !filterOpt.isAssignedTo && !filterOpt.isAssociated){
                     let a; 
@@ -421,7 +442,7 @@ export async function filterMapActivityFeed(filterOpt,val,userId){
                     }
                     //(GIS_ANALYST in () and GIS_ANALYST in () and DIST_ANALYST in () OR ASSIGNED_TO in ()) AND STAT (1,2,4) 
                     //[GIS_ANALYST in () , GIS_ANALYST in () , DIST_ANALYST in ()]
-                    GIS_ANALYST.length ? ANALYST.push(`GIS_ANALYST in (${GIS_ANALYST.join(" , ")})`) : null
+                    GIS_ANALYST.length ? ANALYST.push(`(GIS_ANALYST in (${GIS_ANALYST.join(" , ")}))`) : null
                     GRID_ANALYST.length ? ANALYST.push(`GRID_ANALYST in (${GRID_ANALYST.join(" , ")})`) : null
                     DIST_ANALYST.length ? ANALYST.push(`DIST_ANALYST like ${DIST_ANALYST.join(" or DIST_ANALYST like ")}`) : null
                     let mapAnalyst = ANALYST.map((analyst, index) =>{
@@ -493,16 +514,18 @@ export async function filterMapActivityFeed(filterOpt,val,userId){
         //     const assignedToQuery = [...GIS_ANALYST, ...GRID_ANALYST, ...DIST_ANALYST]
         //     assignedToQuery.map((i) => `${i}`).join(",")
         //     filterDef = filterDef.concat(' OR (ASSIGNED_TO in (', assignedToQuery, '))')
+        console.log(newFilter)
 
     // }
+        // return
     try{
-        const filterMapPromise = new Promise((res, rej) => {
+        // new Promise((res, rej) => {
             store.savedFilter = `${newFilter}`
             store.savedFilter = store.savedFilter.replace(/''/g, `'${userId}'`)
             let isRetsParam = localStorage.getItem("retsParam")
             retsLayer.definitionExpression = isRetsParam ? `${store.savedFilter} or RETS_ID in (${isRetsParam})` : store.savedFilter 
-            res(filterDef)
-        })
+            // res(filterDef)
+        // })
         if (val || (!store.autozoomtest)){
             return newFilter
         }
@@ -1828,6 +1851,7 @@ store.CNTY_NM = userFilterObject.cntyNM
 store.USER = userFilterObject.user
 store.isAssignedTo = userFilterObject.isAssignedTo
 store.isAssociated = userFilterObject.isAssociated
+store.routeType = userFilterObject.routeType
 return
 
 

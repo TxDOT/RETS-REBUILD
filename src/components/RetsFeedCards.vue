@@ -36,7 +36,7 @@
                     <div style="flex: auto;">
                         <v-tooltip location="bottom">
                             <template v-slot:activator="{props}">
-                                <v-switch style="position: relative; bottom: 4px;" v-bind="props" flat v-model="store.isShowSelected" density="compact" @update:modelValue="updateSelection(store.isShowSelected)" color="primary" :disabled="!store.roadHighlightObj.size"></v-switch>
+                                <v-switch @click="console.log(store.roadHighlightObj)" style="position: relative; bottom: 4px;" v-bind="props" flat v-model="store.isShowSelected" density="compact" @update:modelValue="updateSelection(store.isShowSelected)" color="primary" :disabled="!store.roadHighlightObj.size"></v-switch>
                             </template>
                             <span>Show Selected Cards</span>
                         </v-tooltip>
@@ -120,7 +120,7 @@ import {clickRetsPoint, getQueryLayer, getHighlightGraphic, removeHighlight, cre
 import {appConstants} from '../common/constant.js'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import {store} from './store.js'
-import {view, retsGraphicLayer} from './map-Init.js'
+import {view, retsGraphicLayer, queryExtent} from './map-Init.js'
 import { sketchWidgetcreate, createretssym } from './map-Init.js'
 import {addRETSPT} from '../components/crud.js'
 
@@ -395,6 +395,12 @@ export default{
                 store.roadObj = await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
                 store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                 outlineFeedCards(store.roadHighlightObj)
+                if (store.autozoomextent){
+                    queryExtent()
+                    return
+                }
+                store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+
                 return
             }
             store.updateRetsSearch = store.roadHighlightObj

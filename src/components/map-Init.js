@@ -881,44 +881,41 @@ retsPointRenderer.visualVariables = [
 ]
 
 
-export function queryExtent(){
+export async function queryExtent(){
   let query = retsLayer.createQuery();
-    query.geometry = view.extent
-    query.spatialRelationship = "intersects"
-    query.returnGeometry = false
-    query.outFields = ["RETS_ID"]
+  query.geometry = view.extent
+  query.spatialRelationship = "intersects"
+  query.returnGeometry = false
+  query.outFields = ["RETS_ID"]
   var appendstring = ''
-  retsLayer.queryFeatures(query)
-    .then(function(response){
-      if (!response.features.length){
-        store.roadObj.length = 0
-        return
+  const response = await retsLayer.queryFeatures(query)
+  if (!response.features.length ){
+      store.roadObj.length = 0
+      return
+  }
+  for (const feature of response.features)
+  {
+    
+      if (store.isShowSelected){
+        store.roadHighlightObj.forEach((value) => value.attributes.RETS_ID === feature.attributes.RETS_ID ?  appendstring = appendstring.concat(` OR RETS_ID = ${value.attributes.RETS_ID}`) : null )
+        continue
       }
-      for (const feature of response.features)
-        {
-          if (store.isShowSelected){
-            store.roadHighlightObj.forEach((value) => value.attributes.RETS_ID === feature.attributes.RETS_ID ?  appendstring = appendstring.concat(` OR RETS_ID = ${value.attributes.RETS_ID}`) : null )
-            continue
-          }
+        appendstring = appendstring.concat(` OR RETS_ID = ${feature.attributes.RETS_ID}`)
 
-          appendstring = appendstring.concat(` OR RETS_ID = ${feature.attributes.RETS_ID}`)
-          
-        }
+      
+  }
 
-    store.getRetsLayer(store.loggedInUser, appendstring.slice(4), "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
-
-    })
-
-  return
+  appendstring.length ?  await store.getRetsLayer(store.loggedInUser, appendstring.slice(4), "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`) : store.roadObj.length = 0
+ 
 }
 
 let vieww = null
 reactiveUtils.watch(
   () => [view.stationary],
-  ([stationary]) => {   
-    if(stationary && !store.isDetailsPage && store.autozoomextent === true){
+  async([stationary]) => {   
+    if(stationary && store.autozoomextent === true){
        if (vieww !== `${view.center.x},${view.center.y}`){
-        queryExtent()
+        await queryExtent(true)
         vieww = `${view.center.x},${view.center.y}`
       }
     }

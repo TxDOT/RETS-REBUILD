@@ -88,9 +88,10 @@
   padding: 0px !important;
   padding-bottom: 0px !important;
   font-weight: bold !important;
-  color: #8FAADC;
+  color: #4472C4 !important;
   text-overflow: unset !important;
   overflow: hidden;
+  opacity: 1 !important;
 }
 
 .v-icon{
