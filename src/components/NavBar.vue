@@ -314,12 +314,17 @@
                 multiselectTool: 'rectangle',
                 latestReleaseNotes: [
                     [
-                        `Latest Release Version ${store.retsVersion}`,'User Story 424: Refactor: Zoom To Rets', 'User Story 426: Refactor: Map Init', 'User Story 425: Refactor: Login', 
-                        'User Story 428: Refactor: History', 'User Story 423: Refactor: Multi-Select', 'User Story 427: Refactor: CRUD/Update', 
+                        `Latest Release Version ${store.retsVersion}`, 'User Story 194: Add URL parameters to enable linking from GEM', 'User Story 335: Update flag functionality','User Story 222: ALERT! This is a user story about alerts', 'User Story 206: History: expanded history pane should be resizable, plus other small fixes',
+                         'User Story 403: Selections: Gaps in OG requirements', 'User Story 160: Filter:  Create a filter option for on and off system jobs', 'User Story 106: Activity Feed Icons' , 'User Story 75: District Responsibility Map:  Part 1' ,'Bug 413: Restore Defaults button in Filter popup should not close popup', 'Bug 419: Title and subtitle overlaps on Activity Feed cards sometimes',
+                         'Bug 412: Basemap button hover popup sticks', "Bug 414: Don't reduce font size of subtitles"
                        
                     ]
                 ],
                 previousReleaseNotes: [
+                    ['Release 2.8.1', 'User Story 424: Refactor: Zoom To Rets', 'User Story 426: Refactor: Map Init', 'User Story 425: Refactor: Login', 
+                        'User Story 428: Refactor: History', 'User Story 423: Refactor: Multi-Select', 'User Story 427: Refactor: CRUD/Update', 
+
+                    ],
                 [
                         `Release 2.8`,'User Story 110: Multi Select Tool: Lasso', 'User Story 357: Card return to previous in feed pane', 'Bug 360: Selected features counter on the select button increases when opening a selected point', 
                         'Bug 359: Jump to SPM button opens a blank map', 'Bug 344: User filter returning results outside the scope of that filter', 'Bug 337: Route and subtitle overlap', 
