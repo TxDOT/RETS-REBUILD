@@ -291,6 +291,7 @@ export default{
                         }
                         retsLayer.definitionExpression = store.customquery
                         store.getRetsLayer(store.loggedInUser,store.customquery, 'retsLayerLayerView', 'EDIT_DT DESC')
+                        .then(res => store.roadObj = res)
                             retsLayer.queryExtent()
                                 .then((resp) =>{
                                     this.validationMessageColor = "green"

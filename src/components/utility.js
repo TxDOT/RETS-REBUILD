@@ -15,7 +15,7 @@ import { appConstants } from "../common/constant.js";
 import {store} from './store.js'
 //import {getDFOFromGRID} from './crud.js'
 import esriId from "@arcgis/core/identity/IdentityManager.js";
-import { addRETSPT, deleteRETSPT } from './crud.js';
+import { addRETSPT, deleteRETSPT, postUserFlagLabels, postFlagColor } from './crud.js';
 import esriRequest from "@arcgis/core/request.js";
 import * as geodesicUtils from "@arcgis/core/geometry/support/geodesicUtils.js";
 import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils.js";
@@ -91,6 +91,14 @@ try {
             store.clickevent = event
             store.clickStatus = true
             if (event.button === 2){
+                let getRets = evt.results.find(i => i.graphic.geometry.type === 'point')
+                if(getRets){
+                    navigator.clipboard.writeText(coordinate);
+                    store.alertTextInfo = {"text": ` ${window.location.origin}${window.location.pathname} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
+                    store.alertObject.push(store.alertTextInfo)
+                    store.isAlert = true
+                    return
+                }
                 let lat = Math.round(event.mapPoint.latitude * 100000000) / 100000000;
                 let lon = Math.round(event.mapPoint.longitude * 100000000) / 100000000;
                 let coordinate = lon + ", " + lat
@@ -98,6 +106,7 @@ try {
                 navigator.clipboard.writeText(coordinate);
                 store.latlonstring = coordinate
                 store.alertTextInfo = {"text": ` ${coordinate} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
+                store.alertObject.push(store.alertTextInfo)
 
                 store.isAlert = true
 
@@ -507,19 +516,16 @@ export async function filterMapActivityFeed(filterOpt,val,userId){
         let filterDef = removeEmpty.join(" AND ")
         //let newFilter = filterDef.replace("AND OR", "OR")
         let newFilter = filterDef.replace(/AND OR/g, 'OR')
-        // if(!filterOpt.isAssignedTo){
-        //     const assignedToQuery = [...GIS_ANALYST, ...GRID_ANALYST, ...DIST_ANALYST]
-        //     assignedToQuery.map((i) => `${i}`).join(",")
-        //     filterDef = filterDef.concat(' OR (ASSIGNED_TO in (', assignedToQuery, '))')
-        console.log(newFilter)
 
     // }
         // return
     try{
         // new Promise((res, rej) => {
             store.savedFilter = `${newFilter}`
-            retsLayer.definitionExpression = store.savedFilter = store.savedFilter.replace(/''/g, `'${userId}'`)
-        //     res(filterDef)
+            store.savedFilter = store.savedFilter.replace(/''/g, `'${userId}'`)
+            let isRetsParam = localStorage.getItem("retsParam")
+            retsLayer.definitionExpression = isRetsParam ? `${store.savedFilter} or RETS_ID in (${isRetsParam})` : store.savedFilter 
+            // res(filterDef)
         // })
         if (val || (!store.autozoomtest)){
             return newFilter
@@ -711,19 +717,19 @@ return
 }
 
 export function turnAllVisibleGraphicsOff(){
-    const isVisible = retsGraphicLayer.graphics.items.filter(x => x.visible === true)
-    isVisible.forEach(vis => vis.visible = false)
-    return
+const isVisible = retsGraphicLayer.graphics.items.filter(x => x.visible === true)
+isVisible.forEach(vis => vis.visible = false)
+return
 }
 export function removeRelatedRetsFromMap(retsoid, retsID){
-    if(!store.retsObj.attributes.RELATED_RETS){
-        return
-    }
-    let retsIndex = store.retsObj.attributes.RELATED_RETS.findIndex(ret => ret.RETS_ID === retsID)
-    store.retsObj.attributes.RELATED_RETS.splice(retsIndex,1)
-    const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === Number(retsoid))
-    retsGraphicLayer.removeMany(findGraphic)
+if(!store.retsObj.attributes.RELATED_RETS){
     return
+}
+let retsIndex = store.retsObj.attributes.RELATED_RETS.findIndex(ret => ret.RETS_ID === retsID)
+store.retsObj.attributes.RELATED_RETS.splice(retsIndex,1)
+const findGraphic = retsGraphicLayer.graphics.items.filter(x => x.attributes.OBJECTID === Number(retsoid))
+retsGraphicLayer.removeMany(findGraphic)
+return
 }
 
 export function zoomToRelatedRets(relatedRets){
@@ -1035,14 +1041,9 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                         let arr = []
                                         let string = ''
                                         store.retsSelection.forEach((value) => {
-                                        const existing = Array.from(store.roadHighlightObj).some(
-                                            (item) => item.attributes.OBJECTID === value.attributes.OBJECTID
-                                        );
+                                            store.roadHighlightObj.add(value)
 
-                                        if (!existing) {
-                                            store.roadHighlightObj.add(value);
-                                        }
-                                        });
+                                        })
 
                                         store.roadHighlightObj.forEach((value) => {
                                             arr.push(value.attributes.RETS_ID)
@@ -1099,7 +1100,7 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                     if (!store.isSaveBtnDisable){
                                         store.clickStatus = true
                                         store.cancelpopup = true
-                                        return
+                                        return selectretspoints
                                     }
                                     if (store.isDetailsPage && store.isSaveBtnDisable && (store.roadHighlightObj.size > 1)){
 
@@ -1130,7 +1131,6 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                 });          
                         }
                 });
-
         isSelectEnabled = !isSelectEnabled; 
         return selectretspoints
 
@@ -1218,7 +1218,6 @@ retsHistory.queryAttachments({
     let getAttachment = x[oid].find((attach) => attach.name === attachName) 
         retsHistory.deleteAttachments(attachGraphic, [getAttachment.id])
             .then((y) => {
-                console.log(y)
                 const chat = store.historyChat.find(z => z.OBJECTID === getAttachment.parentObjectId)
                 const index = chat.attachments.findIndex(att => att.name === getAttachment.name)
                 chat.attachments.splice(index, 1)
@@ -1258,12 +1257,19 @@ return
 }
 
 export async function queryFlags(userid){
-const returnRetsFlagUser = await flagRetsColor.queryFeatures({
-    where: `USERNAME = '${userid}'`,
-    outFields: ["*"]
-}) 
-returnRetsFlagUser.features.forEach(flag => store.userRetsFlag.push({FLAG: flag.attributes.FLAG, OBJECTID: flag.attributes.OBJECTID, RETS_ID: flag.attributes.RETS_ID, USERNAME: flag.attributes.USERNAME}))
-return
+    try{
+        const returnRetsFlagUser = await flagRetsColor.queryFeatures({
+            where: `USERNAME = '${userid}'`,
+            outFields: ["*"]
+        }) 
+    
+        returnRetsFlagUser.features.forEach(flag => store.userRetsFlag.push({FLAG: flag.attributes.FLAG, OBJECTID: flag.attributes.OBJECTID, RETS_ID: flag.attributes.RETS_ID, USERNAME: flag.attributes.USERNAME}))
+    }
+    catch(err){
+        console.log(err)
+    }
+    
+    return
 }
 
 export function isDFOInRange(rdSegments, DFO){
@@ -1491,68 +1497,69 @@ catch(err){
 }
 
 export function removeOutline(){
-const classList = document.querySelectorAll('.highlight-card');
-classList.forEach(element => {
-element.classList.remove('highlight-card'); // Remove each element individually
-});    
+    const classList = document.querySelectorAll('.highlight-card');
+    classList.forEach(element => {
+    element.classList.remove('highlight-card'); // Remove each element individually
+    });    
 }
 
 export function logoutUser(){
-esriId.destroyCredentials({
-})
+    localStorage.removeItem("retsParam")    
+    esriId.destroyCredentials({
+    })
 }
 
 export function buildDFOLines(rd, retsPt, dist){
-const constructLineA = new Graphic({
-    geometry: {
-        type: "polyline",
-        paths:[
-            rd.at(retsPt.vertexIndex),
-            rd.at(retsPt.vertexIndex+1)
-        ]
-    }
-})
+    const constructLineA = new Graphic({
+        geometry: {
+            type: "polyline",
+            paths:[
+                rd.at(retsPt.vertexIndex),
+                rd.at(retsPt.vertexIndex+1)
+            ]
+        }
+    })
 
-const distance = geometryEngine.intersects(constructLineA.geometry, retsPt.coordinate) ? rd.at(retsPt.vertexIndex)[2] + dist : rd.at(retsPt.vertexIndex)[2] - dist
-return distance
+    const distance = geometryEngine.intersects(constructLineA.geometry, retsPt.coordinate) ? rd.at(retsPt.vertexIndex)[2] + dist : rd.at(retsPt.vertexIndex)[2] - dist
+    return distance
 }
 
 export const changeCursor = (c) => view.cursor = c
 
 export function hideRetsPt(retsID){
-retsLayerView.layer.definitionExpression = `${appConstants['defaultQuery'](store.loggedInUser)} AND (RETS_ID not in (${retsID}))`
+    retsLayerView.layer.definitionExpression = `${appConstants['defaultQuery'](store.loggedInUser)} AND (RETS_ID not in (${retsID}))`
 }
 
 async function findDFOLocation(convertMapPts, gid){
-try{
-    const road = await queryRoads("GID", gid)
-    store.retsObj.attributes.RTE_NM = road.features[0].attributes.RTE_NM
+    try{
+        const road = await queryRoads("GID", gid)
+        store.retsObj.attributes.RTE_NM = road.features[0].attributes.RTE_NM
 
-    const roadConvertToGeo = webMercatorUtils.webMercatorToGeographic(road.features[0].geometry)
-                            
-    const returnCoord = geometryEngine.nearestCoordinate(roadConvertToGeo, convertMapPts)
-    const neareastVertexPoint = new Graphic({
-        geometry:{
-            type: "point",
-            longitude: roadConvertToGeo.paths[0].at(returnCoord.vertexIndex)[0],
-            latitude: roadConvertToGeo.paths[0].at(returnCoord.vertexIndex)[1]
-        },
-        spatialReference:{
-            wkid: 4326
-        }
-    })
-    
-    const {distance} = geodesicUtils.geodesicDistance(returnCoord.coordinate, neareastVertexPoint.geometry, "miles")
-    //store.isMoveRetsPt = false
-    const newDFO = buildDFOLines(roadConvertToGeo.paths[0], returnCoord, distance) //roadConvertToGeo.paths[0].at(vertexIndex)[2] + distance
-    store.retsObj.geometry = [returnCoord.coordinate.x, returnCoord.coordinate.y]
-    store.retsObj.attributes.DFO = newDFO.toFixed(3)
-    store.checkDetailsForComplete()
-    return newDFO
-}
-catch(err){
-    console.log(err)
-}
+        const roadConvertToGeo = webMercatorUtils.webMercatorToGeographic(road.features[0].geometry)
+                                
+        const returnCoord = geometryEngine.nearestCoordinate(roadConvertToGeo, convertMapPts)
+        const neareastVertexPoint = new Graphic({
+            geometry:{
+                type: "point",
+                longitude: roadConvertToGeo.paths[0].at(returnCoord.vertexIndex)[0],
+                latitude: roadConvertToGeo.paths[0].at(returnCoord.vertexIndex)[1]
+            },
+            spatialReference:{
+                wkid: 4326
+            }
+        })
+        
+        const {distance} = geodesicUtils.geodesicDistance(returnCoord.coordinate, neareastVertexPoint.geometry, "miles")
+        //store.isMoveRetsPt = false
+        const newDFO = buildDFOLines(roadConvertToGeo.paths[0], returnCoord, distance) //roadConvertToGeo.paths[0].at(vertexIndex)[2] + distance
+        store.retsObj.geometry = [returnCoord.coordinate.x, returnCoord.coordinate.y]
+        store.retsObj.attributes.DFO = newDFO.toFixed(3)
+        store.checkDetailsForComplete()
+        return newDFO
+    }
+    catch(err){
+        console.log(err)
+    }
 
 }
 
@@ -1607,97 +1614,98 @@ catch{
 }
 
 export function openDetails(road){
-clearGraphicsLayer()
-if (store.alertTextInfo.type == "error"){
-    store.isAlert = false
-}
-store.toggleFeed = 2
-store.isSaving = false
-//store.isSaveBtnDisable = true
-store.archiveRetsDataString = JSON.stringify(road)
-store.retsObj = road
-store.historyRetsId = road.attributes.RETS_ID
-returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
-//clearTimeout(this.timer)
-//this.timer=""
-store.isCard = false
-store.isDetailsPage = true
-store.activityBanner = `${road.attributes.RETS_ID}`
-//highlightRETSPoint(road.attributes)
-//outlineFeedCards()
-//this.zoomToRetsPt(road)
-//removeHighlight("a", true)
-highlightRETSPoint(road.attributes)
-toggleRelatedRets(JSON.stringify(road))
-window.document.title = `RETS: ${road.attributes.OBJECTID}`
-return
-}
-
-export function loadData(){
-const cards = document.querySelectorAll('.rets-card-row') 
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if(entry.isIntersecting){
-            store.retsHasAttachment(Number(entry.target.id))
-            getHistoryView(entry.target.id)
-        }
-        entry.target.classList.toggle("show", entry.isIntersecting)
-    })
-})
-
-cards.forEach(card => observer.observe(card))   
-}
-
-export function updateRetsObj(old, updated){
-old.attributes.ACTV = updated.attributes.ACTV
-old.attributes.ACTV_NBR = updated.attributes.ACTV_NBR
-old.attributes.ASSIGNED_TO = updated.attributes.ASSIGNED_TO
-old.attributes.CMNT = updated.attributes.CMNT
-old.attributes.DEADLINE = updated.attributes.DEADLINE
-old.attributes.DESC_ = updated.attributes.DESC_
-old.attributes.DFO = updated.attributes.DFO
-old.attributes.DIST_ANALYST = updated.attributes.DIST_ANALYST
-old.attributes.GEM_TASK_ID = updated.attributes.GEM_TASK_ID
-old.attributes.GIS_ANALYST = updated.attributes.GIS_ANALYST
-old.attributes.GRID_ANALYST = updated.attributes.GRID_ANALYST
-old.attributes.JOB_TYPE = updated.attributes.JOB_TYPE
-old.attributes.NO_RTE = updated.attributes.NO_RTE
-old.attributes.PRIO = updated.attributes.PRIO
-old.attributes.RELATED_RETS = updated.attributes.RELATED_RETS
-old.attributes.RETS_NM = updated.attributes.RETS_NM
-old.attributes.RTE_NM = updated.attributes.RTE_NM
-old.attributes.STAT = updated.attributes.STAT
-return 
-}
-
-export function returnToFeedFunction(){
-if(store.cancelEvent){
-    store.cancelEvent.remove()
-    cancelSketchPt()
-}
-store.isCard = true
-store.toggleFeed = 1
-store.isAlert = false
-clearGraphicsLayer()
-store.isDetailsPage = false
-store.isCancelBtnDisable = false
-store.activityBanner = "Activity Feed"
-window.document.title = 'RETS Application'
-store.isMoveRetsPt = false
-store.isCard = true
-store.historyChat.length = 0
-store.isSaveBtnDisable = true
-if (store.roadHighlightObj.size <= 1 && store.isSelectEnabled === false){
-    removeHighlight(store.retsObj)
-    const b = store.roadObj.find(rd => rd.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
-    store.roadHighlightObj.delete(b)
-    store.roadHighlightObj.clear()
-    store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
-    store.isShowSelected = false
+    clearGraphicsLayer()
+    if (store.alertTextInfo.type == "error"){
+        store.isAlert = false
+    }
+    store.toggleFeed = 2
+    store.isSaving = false
+    //store.isSaveBtnDisable = true
+    store.archiveRetsDataString = JSON.stringify(road)
+    store.retsObj = road
+    store.historyRetsId = road.attributes.RETS_ID
+    returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
+    //clearTimeout(this.timer)
+    //this.timer=""
+    store.isCard = false
+    store.isDetailsPage = true
+    store.activityBanner = `${road.attributes.RETS_ID}`
+    //highlightRETSPoint(road.attributes)
+    //outlineFeedCards()
+    //this.zoomToRetsPt(road)
+    //removeHighlight("a", true)
+    highlightRETSPoint(road.attributes)
+    toggleRelatedRets(JSON.stringify(road))
+    window.document.title = `RETS: ${road.attributes.OBJECTID}`
     return
 }
 
-return
+export function loadData(){
+    const cards = document.querySelectorAll('.rets-card-row') 
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if(entry.isIntersecting){
+                store.retsHasAttachment(Number(entry.target.id))
+                getHistoryView(entry.target.id)
+            }
+            entry.target.classList.toggle("show", entry.isIntersecting)
+        })
+    })
+
+    cards.forEach(card => observer.observe(card))   
+    return
+}
+
+export function updateRetsObj(old, updated){
+    old.attributes.ACTV = updated.attributes.ACTV
+    old.attributes.ACTV_NBR = updated.attributes.ACTV_NBR
+    old.attributes.ASSIGNED_TO = updated.attributes.ASSIGNED_TO
+    old.attributes.CMNT = updated.attributes.CMNT
+    old.attributes.DEADLINE = updated.attributes.DEADLINE
+    old.attributes.DESC_ = updated.attributes.DESC_
+    old.attributes.DFO = updated.attributes.DFO
+    old.attributes.DIST_ANALYST = updated.attributes.DIST_ANALYST
+    old.attributes.GEM_TASK_ID = updated.attributes.GEM_TASK_ID
+    old.attributes.GIS_ANALYST = updated.attributes.GIS_ANALYST
+    old.attributes.GRID_ANALYST = updated.attributes.GRID_ANALYST
+    old.attributes.JOB_TYPE = updated.attributes.JOB_TYPE
+    old.attributes.NO_RTE = updated.attributes.NO_RTE
+    old.attributes.PRIO = updated.attributes.PRIO
+    old.attributes.RELATED_RETS = updated.attributes.RELATED_RETS
+    old.attributes.RETS_NM = updated.attributes.RETS_NM
+    old.attributes.RTE_NM = updated.attributes.RTE_NM
+    old.attributes.STAT = updated.attributes.STAT
+    return 
+}
+
+export function returnToFeedFunction(){
+    if(store.cancelEvent){
+        store.cancelEvent.remove()
+        cancelSketchPt()
+    }
+    store.isCard = true
+    //store.toggleFeed = 1
+    store.isAlert = false
+    clearGraphicsLayer()
+    store.isDetailsPage = false
+    store.isCancelBtnDisable = false
+    store.activityBanner = "Activity Feed"
+    window.document.title = 'RETS Application'
+    store.isMoveRetsPt = false
+    store.isCard = true
+    store.historyChat.length = 0
+    store.isSaveBtnDisable = true
+    if (store.roadHighlightObj.size <= 1 && store.isSelectEnabled === false){
+        removeHighlight(store.retsObj)
+        const b = store.roadObj.find(rd => rd.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
+        store.roadHighlightObj.delete(b)
+        store.roadHighlightObj.clear()
+        store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+        store.isShowSelected = false
+        return
+    }
+
+    return
 }
 
 
@@ -1935,26 +1943,58 @@ export function applyOSM(){
     TxDOTRoadways.renderer.symbol.width = 1
 }
 
-export function applybasemap(basemap){
-
-}
-
 export async function deleteRets(){
-store.retsObj.attributes.isDelete = true
-await deleteRETSPT(store.retsObj)
-removeRelatedRetsFromMap(store.retsObj.attributes.OBJECTID)
-store.deleteRetsID()
-deleteRetsGraphic()
-//this.returnToFeed()
-store.toggleFeed = 1
+    store.retsObj.attributes.isDelete = true
+    await deleteRETSPT(store.retsObj)
+    removeRelatedRetsFromMap(store.retsObj.attributes.OBJECTID)
+    store.deleteRetsID()
+    deleteRetsGraphic()
+    //this.returnToFeed()
+    store.toggleFeed = 1
 return
 }
 
 export function restoreExtent(){
-return retsLayer.queryExtent().then((response) => {
-    view.goTo(response.extent)
-    .catch((error) => {
-      console.error(error);
+    return retsLayer.queryExtent().then((response) => {
+        view.goTo(response.extent)
+        .catch((error) => {
+        console.error(error);
+        });
     });
-  });
 }
+
+export function createCheckboxFlagObj(e){
+    let checkboxLabels = {"redLabel": store.flagLabels.redCheckbox, "orangeLabel": store.flagLabels.orangeCheckbox, "yellowLabel": store.flagLabels.yellowCheckbox, 
+                            "greenLabel": store.flagLabels.greenCheckbox, "blueLabel": store.flagLabels.blueCheckbox, "purpleLabel": store.flagLabels.purpleCheckbox}
+    let checkboxLabelsStringfy = JSON.stringify(checkboxLabels)
+    postUserFlagLabels(checkboxLabelsStringfy)
+        
+    return
+}
+
+export function updateCheckboxFlag(e, div){
+    const rets = store.updateRetsSearch.find(rd => rd.attributes.RETS_ID === store.flagClickedId)
+    if(!e || !e.length || !e.at(-1).label){
+        store.flagsChecked.splice(-1)
+        rets.attributes.flagColor.FLAG = store.flagsChecked
+        e.length ? errorValidate(div) : postFlagColor(rets)
+        return
+    }
+    removeLableError(div)
+    // const rets = store.updateRetsSearch.find(rd => rd.attributes.RETS_ID === this.flagClickedId)
+    rets.attributes.flagColor.FLAG = store.flagsChecked
+    postFlagColor(rets)
+    return
+}
+
+export function errorValidate(div){
+    document.getElementById(`${div}`).style.display = "flex"
+    return
+}
+
+export function removeLableError(id){
+    document.getElementById(`${id}`).style.display = "none"
+    return
+}
+
+

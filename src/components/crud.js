@@ -36,23 +36,23 @@ export async function updateRETSPT(retsObj){
         store.devStatus === "dev" ? sendWebhookEmail(enable.attributes.RETS_ID, getUserInfo.email) : null
     }
     
-    retsObj.attributes.flagColor.FLAG === "" ? null : postFlagColor(retsObj)
+    // retsObj.attributes.flagColor.FLAG === "" ? null : postFlagColor(retsObj)
     
-    delete enable.attributes?.retsPt
-    delete enable.attributes?.STATUS
-    delete enable.attributes?.index
-    delete enable.attributes?.logInUser
-    delete enable.attributes?.flagColor 
-    delete enable.attributes?.visibilty
-    delete enable.attributes?.mdiaccountgroup
-    delete enable.attributes?.mdipencilboxoutline
-    delete enable.attributes?.mdialarm
-    delete enable.attributes?.mdicheckdecagramoutline
-    delete enable.attributes?.mditimersand
-    delete enable.attributes?.mdiaccountmultiplecheck
-    delete enable.attributes?.mdiexclamation
-    delete enable.attributes?.historyUpdate 
-    delete enable.attributes?.mdipaperclip
+    // delete enable.attributes?.retsPt
+    // delete enable.attributes?.STATUS
+    // delete enable.attributes?.index
+    // delete enable.attributes?.logInUser
+    // delete enable.attributes?.flagColor 
+    // delete enable.attributes?.visibilty
+    // delete enable.attributes?.mdiaccountgroup
+    // delete enable.attributes?.mdipencilboxoutline
+    // delete enable.attributes?.mdialarm
+    // delete enable.attributes?.mdicheckdecagramoutline
+    // delete enable.attributes?.mditimersand
+    // delete enable.attributes?.mdiaccountmultiplecheck
+    // delete enable.attributes?.mdiexclamation
+    // delete enable.attributes?.historyUpdate 
+    // delete enable.attributes?.mdipaperclip
     
     let esriUpdateGraphic = createGraphic(enable)
     esriUpdateGraphic.geometry = createGeo
@@ -141,23 +141,40 @@ export async function sendChatHistory(chat, type){
 }
 
 export function postFlagColor(rets){
+    // let flagContainer = []
+    let newFlagGraphic = rets.attributes.flagColor.FLAG
+    if(newFlagGraphic[0] === ""){
+        newFlagGraphic.splice(0)
+    }
+    // Object.keys(newFlagGraphic).forEach((f) => {
+    //     flagContainer.push({...rets.attributes.flagColor.FLAG[f]})
+    // });
+
+    // console.log(flagContainer)
+    
     //if OBJECTID is blank, would mean its a new flag insert
-    const flagGraphic = createGraphic(rets.attributes.flagColor)
+    const flagGraphic = createGraphic({'FLAG': newFlagGraphic.length ? JSON.stringify(newFlagGraphic) : null, 'RETS_ID': rets.attributes.flagColor.RETS_ID, 'USERNAME': rets.attributes.flagColor.USERNAME})
 
     if(rets.attributes.flagColor.OBJECTID === ''){
-        flagGraphic.attributes.OBJECTID = rets.attributes.OBJECTID
-        flagGraphic.attributes.USERNAME = appConstants.defaultUserValue[0].value
+        // flagGraphic.attributes.OBJECTID = rets.attributes.OBJECTID
+        // flagGraphic.attributes.USERNAME = appConstants.defaultUserValue[0].value
         flagRetsColor.applyEdits({
             addFeatures: [flagGraphic]
         })
-        .then(() => {
+        .then((res) => {
             //do nothing
-            const findFlag = store.userRetsFlag.find(ret => ret.RETS_ID === flagGraphic.attributes.RETS_ID)
-            findFlag ? findFlag.FLAG = flagGraphic.attributes.FLAG : store.userRetsFlag.push({FLAG: flagGraphic.attributes.FLAG, OBJECTID: flagGraphic.attributes.OBJECTID, RETS_ID: flagGraphic.attributes.RETS_ID, USERNAME: flagGraphic.attributes.USERNAME})
+            // const findFlag = store.userRetsFlag.find(ret => ret.RETS_ID === flagGraphic.attributes.RETS_ID)
+            flagGraphic.attributes.OBJECTID = res.addFeatureResults[0].objectId
+            store.userRetsFlag.push(flagGraphic.attributes)
+            rets.attributes.flagColor.OBJECTID = res.addFeatureResults[0].objectId
+            // flagGraphic.attributes.OBJECTID = res.addFeatureResults[0].objectId
+            // findFlag ? findFlag.FLAG = JSON.stringify(flagGraphic.attributes.FLAG) : store.userRetsFlag.push({FLAG: JSON.stringify(flagGraphic.attributes.FLAG), OBJECTID: res.addFeatureResults[0].o, RETS_ID: flagGraphic.attributes.RETS_ID, USERNAME: flagGraphic.attributes.USERNAME})
         })
         .catch(err => console.log(err)) 
         return
     }
+
+    flagGraphic.attributes.OBJECTID = rets.attributes.flagColor.OBJECTID
     //if OBJECTID is filled, would mean its a update flag insert
     flagRetsColor.applyEdits({
         updateFeatures: [flagGraphic]
@@ -165,12 +182,28 @@ export function postFlagColor(rets){
     .then(() => {
         //do nothing
         const findFlag = store.userRetsFlag.find(ret => ret.RETS_ID === flagGraphic.attributes.RETS_ID)
+        findFlag.OBJECTID = !flagGraphic.attributes.FLAG ? "" : flagGraphic.attributes.OBJECTID
+        
         findFlag.FLAG = flagGraphic.attributes.FLAG
+        rets.attributes.flagColor.OBJECTID = findFlag.OBJECTID
     })
     .catch(err => console.log(err)) 
     return
 }
 
+export function postUserFlagLabels(labelString){
+    console.log(labelString)
+    let {objectid} = appConstants.defaultUserValue[0]
+    console.log(objectid)
+    retsRole.applyEdits({
+        updateFeatures:[{'attributes':{"OBJECTID": objectid, "LABEL": labelString}}]
+    })
+    .then((res) => console.log(res))
+    // .then((x) => console.log(x))
+
+    console.log(appConstants.defaultUserValue)
+    return
+}
 
 export async function addRETSFilter(customQuery){
     let esriUpdateGraphic = createGraphic(customQuery)

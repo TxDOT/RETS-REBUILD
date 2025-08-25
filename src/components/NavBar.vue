@@ -672,21 +672,13 @@
         },
         
         methods: {
-                    updateSwitchValue2(item, value2){
-                        console.log(item)
-                        console.log(value2)
-                        console.log(this.switches)
-
-                        for (let index = 0; index < this.switches.length; index++) {
-                            if (item === this.switches[index].label ){
-                                console.log("match")
-                                this.switches[index].value2 = value2
-
-                            }
-                            
-                        }
-
-                    },
+            updateSwitchValue2(item, value2){
+                for (let index = 0; index < this.switches.length; index++) {
+                    if (item === this.switches[index].label ){
+                        this.switches[index].value2 = value2
+                    }
+                }
+            },
             testfunction(index){
                 if (index === 4){
                 this.showDropdown = !this.showDropdown
@@ -766,36 +758,34 @@
                         this.isAutoZoomExtent = store.autozoomextent
                         const settingsObject = {attributes: {OBJECTID : appConstants.defaultUserValue[0].objectid, SETTINGS : JSON.stringify(store.settings)}}
                         await addSettings(settingsObject)
-                    //    console.log(store.settings)
 
-                const userOBJECTID = await getUserOBJECTID(store.loggedInUser)
-                this.userSettings = JSON.parse(userOBJECTID.SETTINGS)
-                store.userSettings = this.userSettings
+                        const userOBJECTID = await getUserOBJECTID(store.loggedInUser)
+                        this.userSettings = JSON.parse(userOBJECTID.SETTINGS)
+                        store.userSettings = this.userSettings
 
 
-                if (store.updateRetsSearch.length != store.retspointlength && store.autozoomextent == false){
-                    if (store.CREATE_DT){
-                        await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
-                    }
-                    else{
-                        await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
-                    }
-                    return  
-                }
-                
-                
-
-            },
-            cancelSettings(){
-                const { autoZoom, autoZoomExtent, notifications } = this.userSettings;
-                store.autozoomtest = this.isAutoZoom ?? autoZoom ?? true;
-                store.autozoomextent = this.isAutoZoomExtent ?? autoZoomExtent ?? false;
-        
-                if (!notifications){
-                    return
-                }
-                for (let i =0; i < this.switches.length; i++){
-                    this.switches[i].value = notifications[i].value
+                        if (store.updateRetsSearch.length != store.retspointlength && store.autozoomextent == false){
+                            if (store.CREATE_DT){
+                                store.roadObj = await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                            }
+                            else{
+                                store.roadObj = await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                            }
+                            return  
+                        }
+                       
+                        
+                    },
+                    cancelSettings(){
+                        const { autoZoom, autoZoomExtent, notifications } = this.userSettings;
+                        store.autozoomtest = this.isAutoZoom ?? autoZoom ?? true;
+                        store.autozoomextent = this.isAutoZoomExtent ?? autoZoomExtent ?? false;
+              
+                        if (!notifications){
+                            return
+                        }
+                        for (let i =0; i < this.switches.length; i++){
+                            this.switches[i].value = notifications[i].value
 
                 }
 
@@ -806,23 +796,6 @@
                 viewSurface.classList.toggle('translateX-500px');
                 return
             },
-            // newSwitchTurnedOn() {
-            //     if (this.switchValue) {
-            //         this.fontColor = '#FFFFFF';
-                    
-            //     } else {
-            //         this.fontColor = "#D9D9D9";
-            //     }
-            // },
-            // switchTurnedOn(index) {
-            //     if (this.switches[index].value) {
-            //         this.switches[index].fontColor = '#FFFFFF';
-            //     } 
-            //     else {
-            //         this.switches[index].fontColor = '#D9D9D9';
-            //     }
-                
-            //     },
             switchStyle(fontColor) {
                 return { color: fontColor };
             },

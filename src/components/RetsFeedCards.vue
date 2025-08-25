@@ -36,7 +36,7 @@
                     <div style="flex: auto;">
                         <v-tooltip location="bottom">
                             <template v-slot:activator="{props}">
-                                <v-switch @click="console.log(store.roadHighlightObj)" style="position: relative; bottom: 4px;" v-bind="props" flat v-model="store.isShowSelected" density="compact" @update:modelValue="updateSelection(store.isShowSelected)" color="primary" :disabled="!store.roadHighlightObj.size"></v-switch>
+                                <v-switch style="position: relative; bottom: 4px;" v-bind="props" flat v-model="store.isShowSelected" density="compact" @update:modelValue="updateSelection(store.isShowSelected)" color="primary" :disabled="!store.roadHighlightObj.size"></v-switch>
                             </template>
                             <span>Show Selected Cards</span>
                         </v-tooltip>
@@ -60,6 +60,13 @@
                     <v-icon icon="mdi-close" v-if="actvFeedSearch.length ? (true, store.isSearch = true) : (false, store.isSearch = false)" @click="clearContent"></v-icon>
                 </template>
             </v-text-field>
+        </div>
+        <div id="retsURL" v-if="isShowRetsUrl && !store.isDetailsPage" @click="isShowRetsUrl = false; restoreFilters();">
+            <v-banner icon="mdi-restore" text="Filter settings updated. Click to restore." id="retsURLBanner" @click="">
+                <!-- <template v-slot:prepend>
+                    <icon icon="mdi-restore"></icon>
+                </template> -->
+            </v-banner>
         </div>
         <div class="card-feed-div" v-show="store.isCard">
             <RetsCards/>
@@ -109,7 +116,7 @@
 </template>
 
 <script>
-import {clickRetsPoint, getQueryLayer, returnHistory, getHighlightGraphic, removeHighlight, createtool, toggleRelatedRets, zoomTo, changeCursor, outlineFeedCards, openDetails, doubleClickRetsPoint} from './utility.js'
+import {clickRetsPoint, getQueryLayer, getHighlightGraphic, removeHighlight, createtool, changeCursor, outlineFeedCards, openDetails, doubleClickRetsPoint, filterMapActivityFeed, zoomTo} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import {store} from './store.js'
@@ -118,12 +125,16 @@ import { sketchWidgetcreate, createretssym } from './map-Init.js'
 import {addRETSPT} from '../components/crud.js'
 
 import { defineAsyncComponent } from 'vue'
+
 export default{
     name: "RetsFeed",
     components: {RetsDetailPage: defineAsyncComponent(()=>import('./RetsDetail.vue')),
                  Filter: defineAsyncComponent(()=>import('./RetsFilter.vue')),
                  RetsCards: defineAsyncComponent(()=> import('./retsCards.vue'))
                 }, 
+    props:{
+        retsparam: String
+    },
     data(){
         return{
             countHeaderColor: "gray",
@@ -175,7 +186,7 @@ export default{
                 }}
                           
             ],
-
+            isShowRetsUrl: false,
             isShowSelected: false,
             isSwitchDisabled: false,
             searchTimer: null
@@ -184,8 +195,14 @@ export default{
     beforeMount(){
         clickRetsPoint(),
         doubleClickRetsPoint()
+
     },
     mounted(){
+        if(this.retsparam){
+            this.isRetsParamOpen(this.retsparam)
+            this.isShowRetsUrl = true
+        }
+        
         reactiveUtils.on(() => view.popup, "trigger-action",
             async (event) => {
                 if (event.action.id === "open-details") {
@@ -206,19 +223,46 @@ export default{
                     this.checkChanges()
                 }
         });
+
         this.retsFilters.loggedInUser = store.loggedInUser
         this.retsFilters[appConstants.queryField[appConstants.userRoles.find(x => x.value === store.loggedInUser).type]] = appConstants.defaultUserValue
         store.retspointlength = store.updateRetsSearch.length
     },
     methods:{
-        retsSubtitleUpdate(a){
-            store.checkDetailsForComplete()    
+        async restoreFilters(){
+            store.defaultFilterSetup()
+            filterMapActivityFeed(store.filter)
+            localStorage.removeItem("retsParam")
+            store.activityBanner = "Activity Feed"
+            await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+            return
+        },
+        async isRetsParamOpen(retsParam){
+            retsParam = Number(retsParam)
+            let returnRets = store.roadObj.find(rets => rets.attributes.RETS_ID === retsParam)
+            // let returnRets = await store.returnRetsNonFeed(retsParam)
+            if(!returnRets){
+               
+                store.alertTextInfo = {"text": `Rets not found try again.`, "color": "red", "type":"error", "toggle": true}
+                store.alertObject.push(store.alertTextInfo)
+                store.isAlert = true
+                return
+            }
+            zoomTo(returnRets.geometry)
+            .then((c) => {
+                openDetails(returnRets)
+            })
+            .catch(err => console.log(err))
+            return
+        },
+        retsSubtitleUpdate(){
+            store.checkDetailsForComplete()
+            return  
         },
         async clearContent(){
             store.isSearch = false
             this.actvFeedSearch = ""
-            //await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
-            //store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+            return
         },
         async processAddPt(newPointGraphic){
             try{
@@ -228,7 +272,6 @@ export default{
                 const obj = await addRETSPT(newPointGraphic, "rets")
                 const objectid = obj.addFeatureResults[0].objectId
                 await this.addretss(objectid)
-                //this.addrets = objectid
                 this.isSpinner = false
                 this.Spinneractive = true
                 store.activityBanner = objectid
@@ -242,10 +285,6 @@ export default{
             }
             //handleaddrets(newPointGraphic, this.addrets);
         },
-        alert(s){
-            window.alert(s)
-        },
-
         checkChanges(){
             const beforeAtt = JSON.parse(store.currentInfo)
             const afterAtt = JSON.parse(JSON.stringify(store.retsObj))
@@ -262,37 +301,11 @@ export default{
             }
             issue === 0 ? openDetails({attributes: this.stageData.attributes, geometry: [this.stageData.geometry.x, this.stageData.geometry.y]}, 1) : null
         },
-        double(road){
-            store.isSaving = false
-            store.isSaveBtnDisable = true
-            store.archiveRetsDataString = JSON.stringify(road)
-            store.retsObj = road
-            store.historyRetsId = road.attributes.RETS_ID
-            
-            returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
-            clearTimeout(this.searchTimer)
-            this.searchTimer=""
-            store.isCard = false
-            store.isDetailsPage = true
-            store.activityBanner = `${road.attributes.RETS_ID}`
-            //outlineFeedCards()
-            this.zoomToRetsPt(road)
-            toggleRelatedRets(JSON.stringify(road))
-            return
-        },
-        zoomToRetsPt(rets){
-            clearTimeout(this.searchTimer)
-            this.searchTimer = ""
-            this.searchTimer = setTimeout(()=>{
-                const zoomToRETS = rets.geometry
-                //highlightRETSPoint(rets.attributes)
-                zoomTo(zoomToRETS)
-            },250)
-        },
 
         async addretss(objectid){
             const querystring = {"whereString":`OBJECTID = ${objectid}`, "queryLayer": "retsLayer"}
-            try{const querypromise = await getQueryLayer(querystring, "PRIO, CREATE_DT DESC")
+            try{
+                const querypromise = await getQueryLayer(querystring, "PRIO, CREATE_DT DESC")
                 if (querypromise.features.length){
                     querypromise.features.forEach(
                         (feat)=> {
@@ -312,7 +325,7 @@ export default{
                             feat.attributes.DFO = store.retsObj.attributes.DFO ? store.retsObj.attributes.DFO : null
                             feat.attributes.NO_RTE = store.retsObj.attributes.NO_RTE
                             const addNewRetsPt = {attributes:feat.attributes, geometry:[feat.geometry.x,feat.geometry.y]}
-                            this.double(addNewRetsPt)
+                            openDetails(addNewRetsPt)
                         }
                     )
                     store.isCancelBtnDisable = true
@@ -328,12 +341,15 @@ export default{
             const input = document.createElement('input')
             input.type = 'file',
             input.click()
+            return
         },
         dragover(){
             document.getElementById("dragndrop").style.color = "green"
+            return
         },
         dragLeave(){
             document.getElementById("dragndrop").style.color = "white"
+            return
         },
         changeNumFilter(filter){
             if(filter === 'cancel'){
@@ -343,6 +359,7 @@ export default{
             store.retsFilters = filter
             this.isfilter = false
             store.setFilterFeed()
+            return
         },
         changeFlagIcon(color){
             if(color === '#FFFFFF'){
@@ -363,24 +380,23 @@ export default{
                 this.addbtntext = "New"  
                 this.buttonIcon = "mdi-plus"
                 
-                return newPointGraphic
-                            
-                } 
-            else {
-                changeCursor("default")
-                store.isMoveRetsPt = false
-                sketchWidgetcreate.cancel();
-                store.isAdd = false
-                this.isCreateEnabled = !this.isCreateEnabled;
-                this.addbtntext = "New"
-                this.buttonIcon = "mdi-plus"
-                return
-            }
+                return newPointGraphic       
+            } 
+          
+            changeCursor("default")
+            store.isMoveRetsPt = false
+            sketchWidgetcreate.cancel();
+            store.isAdd = false
+            this.isCreateEnabled = !this.isCreateEnabled;
+            this.addbtntext = "New"
+            this.buttonIcon = "mdi-plus"
+            return
         },
 
-        updateSelection(e){
+        async updateSelection(e){
             if(!e){
                 store.activityBanner = "Activity Feed"
+                store.roadObj = await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
                 store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                 outlineFeedCards(store.roadHighlightObj)
                 if (store.autozoomextent){
@@ -392,7 +408,6 @@ export default{
                 return
             }
             store.updateRetsSearch = store.roadHighlightObj
-            
             return
         },
     },
@@ -442,12 +457,7 @@ export default{
             },
             immediate: true
         },
-        // addrets:{
-        //     handler: async function(){
-        //         await this.addretss()
-        //     },
-        //     immediate: true
-        // },
+
         'store.retsObj.attributes.RETS_NM':{
             handler: function(b){
                 if(!b){
@@ -591,6 +601,7 @@ export default{
         overflow-y: auto;
         overflow-x: hidden;
         position: relative;
+        gap: 5px;
         padding-top: 5px !important;
     }
 
@@ -708,5 +719,24 @@ export default{
     :deep(.v-switch__track){
         height: 10px !important;
     }
-
+    #retsURL{
+        position: relative;
+        width: 100%;
+        margin-top: 0px;
+        bottom: 15px !important;
+    }
+    #retsURL:hover{
+        cursor: pointer;
+    }
+    #retsURLBanner{
+        background-color: #B35512;
+        border-left-style: solid;
+        border-left-width: 5px;
+        border-left-color: white;
+        padding: 5px;
+        font-size: 15px;
+    }
+    .v-banner-text{
+        font-size: 15px !important;
+    }
 </style>

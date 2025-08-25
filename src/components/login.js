@@ -16,10 +16,11 @@ const authen = new OAuthInfo({
 })
 
 export function login(){
-    esriId.registerOAuthInfos([authen]);
-    esriId.checkSignInStatus(`${authen.portalUrl}/sharing/rest`)
-      .then(() => alreadySignedIn()) //signed in
-      .catch(() => console.log("re-login"))// generateLogin() not signed in; proceed to sign in 
+  // checkURL()
+  esriId.registerOAuthInfos([authen]);
+  esriId.checkSignInStatus(`${authen.portalUrl}/sharing/rest`)
+    .then((x) => alreadySignedIn(x.userId)) //signed in
+    .catch(() => console.log("re-login"))// generateLogin() not signed in; proceed to sign in 
 }
 
 // function generateLogin(){
@@ -43,18 +44,21 @@ async function signIn(){
 
     await store.getRetsLayer(userId, store.savedFilter, "retsLayer", `${sortFilter} ${sortType}, PRIO`)
 
-    appConstants.userQueryField = appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]
-    router.push({name: "Map"})
-    //needs to be worked on//
-    view.when(() => {
-      [{name: 'JOB_TYPE', prop: "jobTypeDomainValues"},{name: 'STAT', prop: "statDomainValues"}, {name: 'DIST_NM', prop: "districtDomainValues"}, {name: 'CNTY_NM', prop: "countyDomainValues"}].forEach((layer) => {
-        getDomainValues(layer.name).codedValues.forEach((x) => {
-          appConstants[layer.prop].push({"name" : x.name, "value": x.code})
-        })
+  appConstants.userQueryField = appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]
+  let getSession = localStorage.getItem("retsParam")
+
+  !getSession ? router.push({name: "Maps"}) : router.push({name: "Map", params: {retsid: getSession}})
+  
+  //needs to be worked on//
+  view.when(() => {
+    [{name: 'JOB_TYPE', prop: "jobTypeDomainValues"},{name: 'STAT', prop: "statDomainValues"}, {name: 'DIST_NM', prop: "districtDomainValues"}, {name: 'CNTY_NM', prop: "countyDomainValues"}].forEach((layer) => {
+      getDomainValues(layer.name).codedValues.forEach((x) => {
+         appConstants[layer.prop].push({"name" : x.name, "value": x.code})
       })
-      ///////////////INSERT HERE/////////////////////////////////
-      appConstants.districtDomainValues.sort((a,b) => a.name.localeCompare(b.name))
-      appConstants.userRoles.sort((a,b) => a.name.localeCompare(b.name))
+    })
+    ///////////////INSERT HERE/////////////////////////////////
+    appConstants.districtDomainValues.sort((a,b) => a.name.localeCompare(b.name))
+    appConstants.userRoles.sort((a,b) => a.name.localeCompare(b.name))
 
       getDistinctAttributeValues('ACTV')
       getRetsLayerView()
@@ -72,16 +76,19 @@ async function signIn(){
 }
 
 function alreadySignedIn(){
+  let getSession = localStorage.getItem("retsParam")
+  esriId.setOAuthRedirectionHandler(() => window.location = `${import.meta.env.BASE_URL}map/${getSession}`)
   signIn()
+  return
 }
-
 
 export const setDefExpRets = async (userId) => {
   if(appConstants.defaultUserValue.length ) return
   const userOBJECTID = await getUserOBJECTID(userId)
-  appConstants.defaultUserValue.push({"name": "Username", "value": `${userId}`, "objectid" : userOBJECTID.OBJECTID, "webhook" : userOBJECTID.WEBHOOK, "email" : userOBJECTID.EMAIL, "filters" : userOBJECTID.FILTERS, "settings" : userOBJECTID.SETTINGS})
+  appConstants.defaultUserValue.push({"name": "Username", "value": `${userId}`, "objectid" : userOBJECTID.OBJECTID, "webhook" : userOBJECTID.WEBHOOK, "email" : userOBJECTID.EMAIL, "filters" : userOBJECTID.FILTERS, "settings" : userOBJECTID.SETTINGS, "labels": userOBJECTID.LABEL})
   if (userOBJECTID.FILTERS === null){
     retsLayer.definitionExpression = store.savedFilter = appConstants['defaultQuery'](userId)
+
     store.USER = [appConstants.userRoles.find(usr => usr.value === appConstants.defaultUserValue[0].value)]
     return
   }

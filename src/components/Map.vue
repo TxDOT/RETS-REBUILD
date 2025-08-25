@@ -43,6 +43,7 @@ import {store} from './store.js'
 // import ShowChanges from './showChanges.vue'
 //import ESRI JS ESM class
 import { defineAsyncComponent } from 'vue'
+
 export default{
     name: "Map",
     components: {detailsAlert: defineAsyncComponent(()=>import('./detailsAlert.vue'))},
@@ -57,8 +58,6 @@ export default{
             view.container = this.$el
             setBasemap();
             hoverRetsPoint();
-
-
     },
     methods:{
         async discardedits(){
@@ -88,12 +87,13 @@ export default{
                     store.activityBanner = `${store.openAfterDiscardRets.attributes.RETS_ID}`
                     return
                 }
-               
             }
 
             //runs when switching to other rets points by clicking on the points
             if (store.clickStatus && store.layerName === "TPP RETS"){
+                console.log(Array.from(store.roadHighlightObj))
                 const retsPt = Array.from(store.roadHighlightObj)[0]
+                console.log(retsPt)
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
                 let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
                 updateRetsObj(findItem, archiveRets)
@@ -119,11 +119,11 @@ export default{
                 }
             // store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
             if (store.CREATE_DT){
-                            await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                            store.roadObj = await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
 
                         }
                         else{
-                            await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                            store.roadObj = await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
 
                         }
 
