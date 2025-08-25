@@ -95,18 +95,17 @@ try {
                 if(getRets){
                     navigator.clipboard.writeText(coordinate);
                     store.alertTextInfo = {"text": ` ${window.location.origin}${window.location.pathname} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
-                    store.alertObject.push(store.alertTextInfo)
+                    // store.alertObject.push(store.alertTextInfo)
                     store.isAlert = true
                     return
                 }
                 let lat = Math.round(event.mapPoint.latitude * 100000000) / 100000000;
                 let lon = Math.round(event.mapPoint.longitude * 100000000) / 100000000;
                 let coordinate = lon + ", " + lat
-                
                 navigator.clipboard.writeText(coordinate);
                 store.latlonstring = coordinate
                 store.alertTextInfo = {"text": ` ${coordinate} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
-                store.alertObject.push(store.alertTextInfo)
+                // store.alertObject.push(store.alertTextInfo)
 
                 store.isAlert = true
 
