@@ -1,5 +1,5 @@
-import {view, retsLayer, homeWidget, retsGraphicLayer, TxDOTRoadways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate, 
-    retsPointRenderer, texasExtent, retsPointRendererout, retsRole, highlightLayer, map, retsPointRendererout2,
+import {view, retsLayer, retsGraphicLayer, TxDOTRoadways, retsHistory, graphics, flagRetsColor, sketchWidgetcreate, 
+    retsPointRenderer, texasExtent, retsRole, map,
     retsLabelclass,
     darkVTBasemap,
     standardVTBasemap,
@@ -93,8 +93,9 @@ try {
             if (event.button === 2){
                 let getRets = evt.results.find(i => i.graphic.geometry.type === 'point')
                 if(getRets){
-                    navigator.clipboard.writeText(coordinate);
-                    store.alertTextInfo = {"text": ` ${window.location.origin}${window.location.pathname} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
+                    let shareRetsUrl = `${window.location.origin}${window.location.pathname}`
+                    store.alertTextInfo = {"text": `${shareRetsUrl} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
+                    navigator.clipboard.writeText(shareRetsUrl);
                     store.alertObject.push(store.alertTextInfo)
                     store.isAlert = true
                     return
@@ -1618,6 +1619,8 @@ export function openDetails(road){
     if (store.alertTextInfo.type == "error"){
         store.isAlert = false
     }
+    store.flagClickedId = road.attributes.RETS_ID
+    store.flagsChecked = road.attributes.flagColor.FLAG
     store.toggleFeed = 2
     store.isSaving = false
     //store.isSaveBtnDisable = true
@@ -1684,7 +1687,7 @@ export function returnToFeedFunction(){
         cancelSketchPt()
     }
     store.isCard = true
-    //store.toggleFeed = 1
+    store.toggleFeed = 1
     store.isAlert = false
     clearGraphicsLayer()
     store.isDetailsPage = false
@@ -1974,14 +1977,15 @@ export function createCheckboxFlagObj(e){
 
 export function updateCheckboxFlag(e, div){
     const rets = store.updateRetsSearch.find(rd => rd.attributes.RETS_ID === store.flagClickedId)
-    if(!e || !e.length || !e.at(-1).label){
-        store.flagsChecked.splice(-1)
+    if(!e || !e.length || !store.flagLabels[e.at(-1).label].length){
         rets.attributes.flagColor.FLAG = store.flagsChecked
-        e.length ? errorValidate(div) : postFlagColor(rets)
+        if(!e.length) return
+        
+        !store.flagLabels[e.at(-1).label].length ? errorValidate(div) : null // postFlagColor(rets)
+        // store.flagsChecked.splice(-1)
         return
     }
     removeLableError(div)
-    // const rets = store.updateRetsSearch.find(rd => rd.attributes.RETS_ID === this.flagClickedId)
     rets.attributes.flagColor.FLAG = store.flagsChecked
     postFlagColor(rets)
     return

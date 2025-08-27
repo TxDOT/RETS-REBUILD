@@ -48,6 +48,9 @@
                         </template>
                     </v-checkbox>
                     <span class="labelCheckboxError" id="purpleCheckboxError">Enter a valid label</span>
+                    <div id="checkboxCloseBtnDiv">
+                        <v-btn size="small" id="checkboxCloseBtn" @click="showFlagLabels()">Close</v-btn>
+                    </div>
                 </div>
             </div>
         </div>
@@ -200,7 +203,6 @@
 import {zoomTo, highlightRETSPoint, removeHighlight, checkhighlightfunction, loadData, openDetails, createCheckboxFlagObj, updateCheckboxFlag, includes} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {store} from './store.js'
-import { view, retsLayer } from './map-Init.js'
 
 export default{
     name: "RetsCards",
@@ -283,9 +285,9 @@ export default{
         },
         showFlagLabels(rets){
             store.showRetsFlag = !this.showFlagLabel
+            if(!store.showRetsFlag) return
             store.flagClickedId = rets.attributes.RETS_ID
             store.flagsChecked = rets.attributes.flagColor.FLAG
-            
             return
         },
         checkhighlight(retsid){
@@ -325,6 +327,7 @@ export default{
         },
         double(road, index){  
             store.openAfterDiscardRets = road
+
             if ((store.retsObj.attributes.CREATE_DT != null && store.retsObj.attributes.EDIT_DT != null) && (store.retsObj.attributes.CREATE_DT === store.retsObj.attributes.EDIT_DT) && (store.activityBanner != "Activity Feed" )){
                 store.deleteafterdiscard = true
                 store.cancelpopup = true
@@ -358,7 +361,7 @@ export default{
                 this.showFlagLabel = n
             },
             immediate: true
-        }
+        },
     },
     computed: {
         setLayer: () => {                                              
@@ -415,7 +418,7 @@ export default{
     left: 488px;
     top: 2.7rem;
     width: 300px;
-    height: 225px;
+    height: auto;
     display: flex;
     flex-direction: column;
     gap: 45px;
@@ -538,5 +541,17 @@ export default{
     width: 100%;
     right:1px;
     z-index: 9999;
+}
+#checkboxCloseBtn{
+    border: 1px solid grey;
+    border-radius: 0px;
+}
+#checkboxCloseBtnDiv{
+    position: relative;
+    width: 100%; 
+    display: flex; 
+    flex-direction: row; 
+    justify-content: end;
+    margin-top: 7px;
 }
 </style>

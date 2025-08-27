@@ -235,6 +235,7 @@ export default{
             localStorage.removeItem("retsParam")
             store.activityBanner = "Activity Feed"
             await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+            removeHighlight("", true)
             return
         },
         async isRetsParamOpen(retsParam){
