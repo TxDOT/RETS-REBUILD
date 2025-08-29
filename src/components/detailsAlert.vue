@@ -17,64 +17,86 @@ import {store} from './store'
         name: "detailsAlert",
         data(){
             return{
-                store
+                store,
+                isHandling: false
             }
         },
         mounted(){
             this.timeoutAlert()
         },
         updated(){
-            this.timeoutAlert()
+               this.timeoutAlert()
         },
         methods: {
-            timeoutAlert(){
-                setTimeout(() => {
-                    store.alertObject.splice(0,1)
-                }, 3000);
+           async timeoutAlert(){  
+                if (this.isHandling){
+                    return
+                } 
+                this.isHandling = true;
+
+                for (let i = 0; i < store.alertObject.length; i++) {
+                    const item = store.alertObject[i];
+                    if (item.type === "success" || store.alertTextInfo.text === 'Rets not found try again.') {
+                        await this.delay(3000);
+                        store.alertObject.splice(i, 1)
+                        i--
+                    }
+                    
+                }
+                        
+                this.isHandling = false;
+
+               
+                return
+            },
+            async delay(milseconds){
+                return new Promise(resolve => {setTimeout(() => { resolve('') }, milseconds)})
             }
 
         },
-        // watch: {
-            // 'store.alertTextInfo': {
-            //     handler: function(n) {
-            //         console.log(n) 
-            //         // const existing = (store.alertObject).some(
-            //         //     (item) => item.text === 'Route and/or DFO are not valid. Use the Move (icon) to move to a valid location.'
-            //         // );
-            //         // if (existing && store.alertTextInfo.text === 'Route and/or DFO are not valid. Use the Move (icon) to move to a valid location.'){
-            //         //     return
-            //         // }
-            //         // console.log(n)
-            //         store.alertObject.push(n)
-            //         console.log(store.alertObject)
-            //         this.timeoutAlert()
-                  
-            //         return
+        watch: {
+            'store.alertTextInfo': {
+                handler: function(n) {
+                    // const existing = (store.alertObject).some(
+                    //     (item) => item.text === 'Route and/or DFO are not valid. Use the Move (icon) to move to a valid location.'
+                    // );
+                    // if (existing && store.alertTextInfo.text === 'Route and/or DFO are not valid. Use the Move (icon) to move to a valid location.'){
+                    //     return
+                    // }
+                    // console.log(n)
+                    if (!store.alertObject.some(item => item.text === store.alertTextInfo.text) || store.alertTextInfo.text === 'Rets not found try again.'){
+                        store.alertObject.push(n)
 
-            //     },
-            //     immediate:true
-            // },
-            // 'store.isDetailsPage': {
+                    }
 
-            //     handler: function(){
-            //         if (!store.isDetailsPage){
+   
+                          
+                    return
 
-            //             store.alertObject.forEach((val, index) => {
-            //                 if (val.type != "success"){
-            //                     store.alertObject.splice(index, 1)
-            //                 }
-            //             })
-            //         }
+                },
+                immediate:true
+            },
+            'store.isDetailsPage': {
+
+                handler: function(){
+                    if (!store.isDetailsPage){
+
+                        store.alertObject.forEach((val, index) => {
+                            if (val.type != "success"){
+                                store.alertObject.splice(index, 1)
+                            }
+                        })
+                    }
                    
                     
-            //         return
-            //     },
-            //     immediate:true
+                    return
+                },
+                immediate:true
 
-            // }
+            }
             
             
-        // }
+        }
 
 
     }
