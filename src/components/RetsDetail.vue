@@ -387,7 +387,8 @@ import { queryExtent } from './map-Init.js'
 
                 // await this.sendNotification(userSettings)
                 store.isNewRets = false
-                await queryExtent()
+                if ( store.autozoomextent === true) {await queryExtent()}
+
 
                 return
             },
@@ -437,6 +438,11 @@ import { queryExtent } from './map-Init.js'
                 }
                 
                 retsLayerView.layer.definitionExpression = store.savedFilter
+                let copy = Array.from(store.roadHighlightObj)
+                await this.returnToFeed()
+                if ( store.autozoomextent === true) {await queryExtent()}
+                 outlineFeedCards(copy)
+
                 store.toggleFeed = 1
                 store.cancelpopup = false
 
