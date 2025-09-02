@@ -70,12 +70,12 @@ export const store = reactive({
         userRetsFlag: [],
         isColorPicked: false,
         flagLabels:{
-                redCheckbox: "",
-                orangeCheckbox: "",
-                yellowCheckbox: "",
-                greenCheckbox: "",
-                blueCheckbox: "",
-                purpleCheckbox: ""
+                redCheckbox: null,
+                orangeCheckbox: null,
+                yellowCheckbox: null,
+                greenCheckbox: null,
+                blueCheckbox: null,
+                purpleCheckbox: null
         },
         flagsChecked: [],
         flagClickedId: null,
@@ -275,7 +275,7 @@ export const store = reactive({
         },
         setFlagColor(att){
                 const retsFlag = this.userRetsFlag.find((flag) => flag.RETS_ID === att.RETS_ID)    
-                const defaultValue = {FLAG: '', OBJECTID: '', RETS_ID: att.RETS_ID, USERNAME: this.loggedInUser}                
+                const defaultValue = {FLAG: null, OBJECTID: '', RETS_ID: att.RETS_ID, USERNAME: this.loggedInUser}                
                     
                 if(!retsFlag){
                         return defaultValue
@@ -290,6 +290,11 @@ export const store = reactive({
 
                 let retsFlagObj = JSON.parse(retsFlag.FLAG)
                 return {FLAG: retsFlagObj, OBJECTID: retsFlag.OBJECTID, RETS_ID: att.RETS_ID, USERNAME: this.loggedInUser}  
+        },
+
+        updateFlagArrState(f){
+                this.flagsChecked = f
+                return
         },
 
         async getRetsLayer(userid, where, layer, orderFields){

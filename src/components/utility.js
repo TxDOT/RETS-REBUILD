@@ -84,117 +84,100 @@ return
 }
 
 export async function clickRetsPoint(){
-try {
-    view.on("click", async (event)=>{
-        event.stopPropagation()
-        view.hitTest(event, {include: [retsLayer, retsGraphicLayer, roadLayerView.layer]}).then(async (evt) =>{
-            store.clickevent = event
-            store.clickStatus = true
-            if (event.button === 2){
-                let getRets = evt.results.find(i => i.graphic.geometry.type === 'point')
-                if(getRets){
-                    let shareRetsUrl = `${window.location.origin}${window.location.pathname}`
-                    store.alertTextInfo = {"text": `${shareRetsUrl} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
-                    navigator.clipboard.writeText(shareRetsUrl);
-                    // store.alertObject.push(store.alertTextInfo)
+    try {
+        view.on("click", async (event)=>{
+            event.stopPropagation()
+            view.hitTest(event, {include: [retsLayer, retsGraphicLayer, roadLayerView.layer]}).then(async (evt) =>{
+                store.clickevent = event
+                store.clickStatus = true
+
+                if (event.button === 2){
+                    let getRets = evt.results.find(i => i.graphic.geometry.type === 'point')
+                    if(getRets){
+                        let shareRetsUrl = `${window.location.origin}${window.location.pathname}?retsid=${getRets.graphic.attributes.RETS_ID}`
+                        store.alertTextInfo = {"text": `${shareRetsUrl} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
+                        navigator.clipboard.writeText(shareRetsUrl);
+                        store.isAlert = true
+                        return
+                    }
+                    let lat = Math.round(event.mapPoint.latitude * 100000000) / 100000000;
+                    let lon = Math.round(event.mapPoint.longitude * 100000000) / 100000000;
+                    let coordinate = lon + ", " + lat
+                    navigator.clipboard.writeText(coordinate);
+
+                    store.latlonstring = coordinate
+                    store.alertTextInfo = {"text": ` ${coordinate} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
                     store.isAlert = true
-                    return
-                }
-                let lat = Math.round(event.mapPoint.latitude * 100000000) / 100000000;
-                let lon = Math.round(event.mapPoint.longitude * 100000000) / 100000000;
-                let coordinate = lon + ", " + lat
-                navigator.clipboard.writeText(coordinate);
-                store.latlonstring = coordinate
-                store.alertTextInfo = {"text": ` ${coordinate} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
-                // store.alertObject.push(store.alertTextInfo)
-
-                store.isAlert = true
-
-              
-            }
-            else if (event.button === 0){
-                if (view.popup.visible === true){
-                    view.closePopup()
-                }
-                store.layerName = evt.results.length ?  evt.results[0].layer.title : null
-                if (!store.isSaveBtnDisable || store.isNewRets){
-                    store.cancelpopup = true
-                    return
                 }
 
-                switch (store.layerName){
-                    case "RETS UAT":
-                    case "RETS":
+                else if (event.button === 0){
+                    if (view.popup.visible === true){
+                        view.closePopup()
+                    }
+                    store.layerName = evt.results.length ?  evt.results[0].layer.title : null
+                    if (!store.isSaveBtnDisable || store.isNewRets){
+                        store.cancelpopup = true
+                        return
+                    }
 
-                        let retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
-                        let retsId = evt.results[0].graphic.attributes.RETS_ID
-                        if (retsPt === undefined){
-                            await store.getRetsLayer(store.loggedInUser, `RETS_ID = ${retsId}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
-                            retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
-                            
-                        }
-
-                        includes(retsPt.attributes).then((value) => {
-                            if (!value){
-                                removeHighlight("", true)
-                                store.roadHighlightObj.clear()
-                                store.roadHighlightObj.add(retsPt)
-                                highlightRETSPoint(retsPt.attributes)
-
-                                
-                            }
-                            outlineFeedCards([retsPt])
-                            if (store.isDetailsPage && !store.isEmptyRow){
-                                openDetails(retsPt)
-
+                    switch (store.layerName){
+                        case "RETS UAT":
+                        case "RETS":
+                            let retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
+                            let retsId = evt.results[0].graphic.attributes.RETS_ID
+                            if (retsPt === undefined){
+                                await store.getRetsLayer(store.loggedInUser, `RETS_ID = ${retsId}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                                retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
                             }
 
-                        })
+                            includes(retsPt.attributes).then((value) => {
+                                if (!value){
+                                    removeHighlight("", true)
+                                    store.roadHighlightObj.clear()
+                                    store.roadHighlightObj.add(retsPt)
+                                    highlightRETSPoint(retsPt.attributes)
+                                }
+                                outlineFeedCards([retsPt])
+                                if (store.isDetailsPage && !store.isEmptyRow){
+                                    openDetails(retsPt)
+                                }
 
-                        break
-                    case "TxDOT Roadways":
-                        // removeHighlight("", true)
-                        // store.roadHighlightObj.clear()
-                        removeHighlightRoadways('a', true)
-                        if (store.isShowSelected && store.autozoomextent){
-                            queryExtent()
-                        }
-                        if (map.basemap.title === "Hybrid"){
-                            highlightRoadways(evt.results[0].graphic.attributes)
-                            view.openPopup({
-                                fetchFeatures: true,
-                                location: event.mapPoint
-                            });
-                        }
-                        //  if (store.isDetailsPage){
-                        //     canceldetailsfunction()
-                        // }
+                            })
 
-                        break
-                    case null:
-                        removeHighlight("", true)
-                        store.roadHighlightObj.clear()
-                        removeHighlightRoadways('a', true)
-                        if (store.isShowSelected && store.autozoomextent){
-                            queryExtent()
-                        }
-                        if (store.isDetailsPage){
-                            canceldetailsfunction()
-                        }
-                        break
-                    
+                            break
+                        case "TxDOT Roadways":
+                            removeHighlightRoadways('a', true)
+                            if (store.isShowSelected && store.autozoomextent){
+                                queryExtent()
+                            }
+                            if (map.basemap.title === "Hybrid"){
+                                highlightRoadways(evt.results[0].graphic.attributes)
+                                view.openPopup({
+                                    fetchFeatures: true,
+                                    location: event.mapPoint
+                                });
+                            }
+                            break
+                        case null:
+                            removeHighlight("", true)
+                            store.roadHighlightObj.clear()
+                            removeHighlightRoadways('a', true)
+                            if (store.isShowSelected && store.autozoomextent){
+                                queryExtent()
+                            }
+                            if (store.isDetailsPage){
+                                canceldetailsfunction()
+                            }
+                            break
+                    }
                 }
-
-
-                }
-            
+                
+            })
         })
-    })
-}
-catch(err){
-    console.log(err)
-}
-
+    }
+    catch(err){
+        console.log(err)
+    }
 }
 
 export async function doubleClickRetsPoint(){
@@ -280,16 +263,15 @@ view.whenLayerView(TxDOTRoadways)
     })
 }
 
-export async function includes(feature){
-return view.whenLayerView(retsLayer)
-.then((lyrView) => {
-    if (lyrView._highlightIds.has(feature.OBJECTID)) {
-        return true;
-    } else {
-        return false;
-
-    }
-});
+export function includes(feature){
+    return view.whenLayerView(retsLayer)
+        .then((lyrView) => {
+            if (lyrView._highlightIds.has(feature.OBJECTID)) {
+                return true;
+            } else {
+                return false;
+            }
+    });
 }
 
 function highlightGraphicPt(feature){
@@ -1564,52 +1546,52 @@ async function findDFOLocation(convertMapPts, gid){
 }
 
 export function hitTestMoveRETS(){
-let destoryTimeout;
-const ogRTEName = JSON.parse(store.archiveRetsDataString).attributes.RTE_NM
-const movePointHitTest = view.on("pointer-move", (event) => {
-    view.hitTest(event, {include: roadLayerView.layer})
-        .then((hit) => {
-            if(destoryTimeout){
-                clearTimeout(destoryTimeout)
-            }
-            if(!hit.results.length){
-                store.addPtRd = ""
-                store.DFO = null
-                store.retsObj.attributes.RTE_NM = ogRTEName
-                return
-            }
-            destoryTimeout = setTimeout(()=>{
-                store.retsObj.attributes.RTE_NM = hit.results[0].graphic.attributes.RTE_NM
-            },300)
-                
-            return 
-        })
-        .catch(err => console.log(err))
-})
+    let destoryTimeout;
+    const ogRTEName = JSON.parse(store.archiveRetsDataString).attributes.RTE_NM
+    const movePointHitTest = view.on("pointer-move", (event) => {
+        view.hitTest(event, {include: roadLayerView.layer})
+            .then((hit) => {
+                if(destoryTimeout){
+                    clearTimeout(destoryTimeout)
+                }
+                if(!hit.results.length){
+                    store.addPtRd = ""
+                    store.DFO = null
+                    store.retsObj.attributes.RTE_NM = ogRTEName
+                    return
+                }
+                destoryTimeout = setTimeout(()=>{
+                    store.retsObj.attributes.RTE_NM = hit.results[0].graphic.attributes.RTE_NM
+                },300)
+                    
+                return 
+            })
+            .catch(err => console.log(err))
+    })
 
 return movePointHitTest
 }
 
 export async function isRoadExist(){
-const exist = await roadLayerView.queryFeatures({
-    where: `RTE_NM = '${store.retsObj.attributes.RTE_NM}'`
-})
+    const exist = await roadLayerView.queryFeatures({
+        where: `RTE_NM = '${store.retsObj.attributes.RTE_NM}'`
+    })
 
-if(!exist.features.length){
-    return true
-}
-return false
+    if(!exist.features.length){
+        return true
+    }
+    return false
 }
 
 export function checkhighlightfunction(retsid){
-try{
-    const objarray = Array.from(store.roadHighlightObj)
-    const found = objarray.some(feature => feature.attributes.RETS_ID.toString() === retsid);
-    return found ? "card-rets highlight-card" : "card-rets";
-}
-catch{
-    //nada
-}
+    try{
+        const objarray = Array.from(store.roadHighlightObj)
+        const found = objarray.some(feature => feature.attributes.RETS_ID.toString() === retsid);
+        return found ? "card-rets highlight-card" : "card-rets";
+    }
+    catch(err){
+        console.log(err)
+    }
 
 }
 
@@ -1622,20 +1604,16 @@ export function openDetails(road){
     store.flagsChecked = road.attributes.flagColor.FLAG
     store.toggleFeed = 2
     store.isSaving = false
-    //store.isSaveBtnDisable = true
+
     store.archiveRetsDataString = JSON.stringify(road)
     store.retsObj = road
     store.historyRetsId = road.attributes.RETS_ID
     returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
-    //clearTimeout(this.timer)
-    //this.timer=""
+
     store.isCard = false
     store.isDetailsPage = true
     store.activityBanner = `${road.attributes.RETS_ID}`
-    //highlightRETSPoint(road.attributes)
-    //outlineFeedCards()
-    //this.zoomToRetsPt(road)
-    //removeHighlight("a", true)
+
     highlightRETSPoint(road.attributes)
     toggleRelatedRets(JSON.stringify(road))
     window.document.title = `RETS: ${road.attributes.OBJECTID}`
@@ -1976,16 +1954,23 @@ export function createCheckboxFlagObj(e){
 
 export function updateCheckboxFlag(e, div){
     const rets = store.updateRetsSearch.find(rd => rd.attributes.RETS_ID === store.flagClickedId)
+    console.log(e)
+    console.log(store.flagsChecked)
     if(!e || !e.length || !store.flagLabels[e.at(-1).label].length){
-        rets.attributes.flagColor.FLAG = store.flagsChecked
-        if(!e.length) return
+        rets.attributes.flagColor.FLAG = store.flagsChecked = e
+
+        if(!e.length){
+            postFlagColor(rets)
+            return
+        }
         
-        !store.flagLabels[e.at(-1).label].length ? errorValidate(div) : null // postFlagColor(rets)
-        // store.flagsChecked.splice(-1)
+
+        !store.flagLabels[e.at(-1).label].length ? errorValidate(div) : postFlagColor(rets)
+        store.flagsChecked.splice(-1)
         return
     }
     removeLableError(div)
-    rets.attributes.flagColor.FLAG = store.flagsChecked
+    rets.attributes.flagColor.FLAG = store.flagsChecked = e
     postFlagColor(rets)
     return
 }

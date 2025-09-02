@@ -398,6 +398,7 @@
             },
             async cancelDetailsMetadata(){
                 removeHighlight("", true)
+
                 if(!store.isSaveBtnDisable){
                     store.clickStatus = false
                     store.cancelpopup = true
@@ -406,9 +407,11 @@
                 if (store.archiveRetsDataString){
                     const archiveRets = JSON.parse(store.archiveRetsDataString)
                     this.replaceArchiveContent(archiveRets)
+
                 }
                 
                 retsLayerView.layer.definitionExpression = store.savedFilter
+                await this.returnToFeed()
                 store.toggleFeed = 1
                 store.cancelpopup = false
 
