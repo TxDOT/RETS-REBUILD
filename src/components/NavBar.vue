@@ -314,7 +314,7 @@
                 multiselectTool: 'rectangle',
                 latestReleaseNotes: [
                     [
-                        `Latest Release Version ${store.retsVersion}`, 'User Story 194: Add URL parameters to enable linking from GEM', 'User Story 335: Update flag functionality','User Story 222: ALERT! This is a user story about alerts', 'User Story 206: History: expanded history pane should be resizable, plus other small fixes',
+                        `Latest Release Version ${store.retsVersion}`, 'User Story 194: Add URL parameters to enable linking from GEM', 'User Story 335: Update flag functionality','User Story 222: ALERT! This is a user story about alerts', 'User Story 206: History: small fixes',
                          'User Story 403: Selections: Gaps in OG requirements', 'User Story 160: Filter:  Create a filter option for on and off system jobs', 'User Story 106: Activity Feed Icons' , 'User Story 75: District Responsibility Map:  Part 1' ,'Bug 413: Restore Defaults button in Filter popup should not close popup', 'Bug 419: Title and subtitle overlaps on Activity Feed cards sometimes',
                          'Bug 412: Basemap button hover popup sticks', "Bug 414: Don't reduce font size of subtitles"
                        

@@ -178,6 +178,7 @@
     import {store} from './store.js'
 
     import { defineAsyncComponent } from 'vue'
+import { queryExtent } from './map-Init.js'
     export default{
         name: "RetsDetailPage",
         components: {DetailsCard: defineAsyncComponent(()=> import('./detailsCard.vue')),
@@ -386,6 +387,7 @@
 
                 // await this.sendNotification(userSettings)
                 store.isNewRets = false
+                await queryExtent()
 
                 return
             },
