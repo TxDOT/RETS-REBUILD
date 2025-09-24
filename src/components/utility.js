@@ -1962,7 +1962,7 @@ export function updateCheckboxFlag(e, div){
     const rets = store.updateRetsSearch.find(rd => rd.attributes.RETS_ID === store.flagClickedId)
     console.log(e)
     console.log(store.flagsChecked)
-    if(!e || !e.length || !store.flagLabels[e.at(-1).label].length){
+    if(!e || !e.length || !store.flagLabels[e.at(-1)?.label]?.length){
         rets.attributes.flagColor.FLAG = store.flagsChecked = e
 
         if(!e.length){
@@ -1971,7 +1971,7 @@ export function updateCheckboxFlag(e, div){
         }
         
 
-        !store.flagLabels[e.at(-1).label].length ? errorValidate(div) : postFlagColor(rets)
+        !store.flagLabels[e.at(-1).label]?.length ? errorValidate(div) : postFlagColor(rets)
         store.flagsChecked.splice(-1)
         return
     }
