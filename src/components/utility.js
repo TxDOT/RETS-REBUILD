@@ -144,32 +144,38 @@ export async function clickRetsPoint(){
 
                             })
 
-                            break
-                        case "TxDOT Roadways":
-                            removeHighlightRoadways('a', true)
-                            if (store.isShowSelected && store.autozoomextent){
-                                queryExtent()
-                            }
-                            if (map.basemap.title === "Hybrid"){
-                                highlightRoadways(evt.results[0].graphic.attributes)
-                                view.openPopup({
-                                    fetchFeatures: true,
-                                    location: event.mapPoint
-                                });
-                            }
-                            break
-                        case null:
-                            removeHighlight("", true)
-                            store.roadHighlightObj.clear()
-                            removeHighlightRoadways('a', true)
-                            if (store.isShowSelected && store.autozoomextent){
-                                queryExtent()
-                            }
-                            if (store.isDetailsPage){
-                                canceldetailsfunction()
-                            }
-                            break
-                    }
+                        break
+                    case "TxDOT Roadways":
+                        // removeHighlight("", true)
+                        // store.roadHighlightObj.clear()
+                        removeHighlightRoadways('a', true)
+                        if (map.basemap.title === "Hybrid"){
+                            highlightRoadways(evt.results[0].graphic.attributes)
+                            view.openPopup({
+                                fetchFeatures: true,
+                                location: event.mapPoint
+                            });
+                        }
+                        //  if (store.isDetailsPage){
+                        //     canceldetailsfunction()
+                        // }
+
+                        break
+                    case null:
+                        removeHighlight("", true)
+                        store.roadHighlightObj.clear()
+                        removeHighlightRoadways('a', true)
+                        if (store.isShowSelected && store.autozoomextent){
+                           queryExtent()
+                        }
+                        if (store.isDetailsPage){
+                            canceldetailsfunction()
+                        }
+                        break
+                    
+                }
+
+
                 }
                 
             })

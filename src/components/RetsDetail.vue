@@ -359,7 +359,7 @@
 
                 // await this.sendNotification(userSettings)
                 store.isNewRets = false
-
+                if (store.autozoomextent){queryExtent()}
                 return
             },
             async sendNotification(userSettings){
@@ -411,7 +411,6 @@
                 }
                 
                 retsLayerView.layer.definitionExpression = store.savedFilter
-                await this.returnToFeed()
                 store.toggleFeed = 1
                 store.cancelpopup = false
 
