@@ -1960,8 +1960,6 @@ export function createCheckboxFlagObj(e){
 
 export function updateCheckboxFlag(e, div){
     const rets = store.updateRetsSearch.find(rd => rd.attributes.RETS_ID === store.flagClickedId)
-    console.log(e)
-    console.log(store.flagsChecked)
     if(!e || !e.length || !store.flagLabels[e.at(-1)?.label]?.length){
         rets.attributes.flagColor.FLAG = store.flagsChecked = e
 

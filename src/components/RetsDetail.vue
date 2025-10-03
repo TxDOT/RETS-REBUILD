@@ -290,7 +290,7 @@
                 store.isCard = true
                 store.historyChat.length = 0
                 store.isSaveBtnDisable = true
-                //store.roadHighlightObj.clear()
+                
                 if (store.roadHighlightObj.size <= 1 && store.isSelectEnabled === false){
                     // if (store.roadHighlightObj.size === 0){
                     removeHighlight(store.retsObj)
@@ -314,7 +314,7 @@
                     //     store.roadHighlightObj.add(store.retsObj)
 
                     // }
-                    //store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+                    
                     return
                 }
                 return
@@ -340,6 +340,7 @@
                     store.closeIsRoadExist = true
                     return
                 }
+                store.retsObj.attributes.mdialarm = store.isDeadline(store.retsObj.attributes.DEADLINE)
                 store.isEmptyRow = false
                 store.isSaving = true
                 store.retsObj.attributes.ACTV = !store.retsObj.attributes.ACTV ? null : store.retsObj.attributes.ACTV.value ?? store.retsObj.attributes.ACTV
@@ -348,6 +349,7 @@
                 await updateRETSPT(store.retsObj)
                 
                 await this.returnToFeed()
+
                 store.isShowSelected = false
                 deleteRetsGraphic()
                 retsLayerView.layer.definitionExpression = store.savedFilter
@@ -359,7 +361,9 @@
 
                 // await this.sendNotification(userSettings)
                 store.isNewRets = false
-                if (store.autozoomextent){queryExtent()}
+                if (store.autozoomextent){
+                    queryExtent()
+                }
                 return
             },
             async sendNotification(userSettings){

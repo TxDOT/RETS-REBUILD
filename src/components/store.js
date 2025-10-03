@@ -406,7 +406,7 @@ export const store = reactive({
                                 updateItem.attributes.mdicheckdecagramoutline = this.isComplete(obj.features[0].attributes.STAT)
                                 updateItem.attributes.mditimersand = this.isNoActivity(obj.features[0].attributes.STAT, obj.features[0].attributes.EDIT_DT)
                                 updateItem.attributes.mdiexclamation = this.isPrio(obj.features[0].attributes.PRIO)
-                                updateItem.attributes.mdipaperclip = this.retsHasAttachment(x.attributes.OBJECTID)
+                                updateItem.attributes.mdipaperclip = this.retsHasAttachment(obj.features[0].attributes.OBJECTID)
                                 updateItem.attributes.historyUpdate = "Loading"
                                 //this.retsObj = updateItem
                                 //const retsIndex = this.roadObj.findIndex(x => x.attributes.RETS_ID === obj.features[0].attributes.RETS_ID)
@@ -415,10 +415,10 @@ export const store = reactive({
                                 // }
                                 // else{
                                 //         this.roadObj.splice(retsIndex, 1, updateItem)
-                                // }
-                                        
+                                // }     
                                         //sort by no activity setting (no activity sand thingy)
                                 this.roadObj.sort((a,b) => new Date(b.attributes.EDIT_DT) - new Date(a.attributes.EDIT_DT))
+                                console.log(this.roadObj)
                                 this.updateRetsSearch = this.roadObj
                                 const cloneRets = [...this.roadObj]
                                 this.archiveRetsData = cloneRets
@@ -426,7 +426,6 @@ export const store = reactive({
                                 this.isNoRets = false
                                 return
                         }
-                this.
                 this.isDetailsPage = false
                 this.isNoRets = true
                 return

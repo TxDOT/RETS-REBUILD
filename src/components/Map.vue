@@ -91,9 +91,7 @@ export default{
 
             //runs when switching to other rets points by clicking on the points
             if (store.clickStatus && store.layerName === "TPP RETS"){
-                console.log(Array.from(store.roadHighlightObj))
                 const retsPt = Array.from(store.roadHighlightObj)[0]
-                console.log(retsPt)
                 const archiveRets = JSON.parse(store.archiveRetsDataString)
                 let findItem = store.roadObj.find((ret) => ret.attributes.OBJECTID === archiveRets.attributes.RETS_ID)
                 updateRetsObj(findItem, archiveRets)
@@ -103,7 +101,6 @@ export default{
                 store.isDetailsPage = true
 
                 store.activityBanner = `${retsPt.attributes.RETS_ID}`
-
                 return
 
             }
@@ -115,18 +112,15 @@ export default{
             removeHighlight("a", true)
             removeOutline()
             if (store.isAlert && store.alertTextInfo.type == "error"){
-                    store.isAlert = false
-                }
+                store.isAlert = false
+            }
             // store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
             if (store.CREATE_DT){
-                            store.roadObj = await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
-
-                        }
-                        else{
-                            store.roadObj = await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
-
-                        }
-
+                store.roadObj = await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+            }
+            else{
+                store.roadObj = await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+            }
             return
         },
         

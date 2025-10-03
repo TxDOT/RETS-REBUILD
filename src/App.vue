@@ -29,7 +29,7 @@ export default{
   },
   mounted(){
     this.checkURL()
-    this.auth = login(this.routeParam)
+    this.auth = login()
   },
   methods:{
     checkURL(){

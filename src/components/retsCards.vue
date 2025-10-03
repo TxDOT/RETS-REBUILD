@@ -262,10 +262,8 @@ export default{
         shareURL(retsid){
             let copyUrl = `${window.location.origin}${window.location.pathname}?retsid=${retsid}`
             navigator.clipboard.writeText(copyUrl)
-            document.getElementById(`share${retsid}`).style.display = "flex"
-            setTimeout(()=> {
-                document.getElementById(`share${retsid}`).style.display = "none"
-            },2500)
+            store.alertTextInfo = {"text": `${copyUrl} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
+            store.isAlert = true
             return
         },
         setFlagLabels(labels){
@@ -288,7 +286,6 @@ export default{
             return
         },
         showFlagLabels(rets){
-            console.log(rets)
             store.showRetsFlag = !this.showFlagLabel
             if(!store.showRetsFlag) return
             store.flagClickedId = rets.attributes.RETS_ID

@@ -200,7 +200,7 @@
 </v-card>
 <v-card id="releasenotesSection" v-if="isReleaseNotes" height="655" width="400" style="border-radius: 0;">
     <v-card-title style="font-weight: 400;">Release Notes</v-card-title>
-    <div  class="releaseNotesItems">
+    <div class="releaseNotesItems">
         <v-list v-model:opened="openedVlist">
             <!-- New Updates Section -->
             <v-list-group value="New Updates" class="release-notes">
@@ -250,12 +250,9 @@
     import { appConstants } from '../common/constant.js';
     import { graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, map } from '../components/map-Init.js';
     import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM, getUserOBJECTID} from '../components/utility.js';
-    import { vuetify } from '../main.js';
     import { addSettings } from './crud.js';
     import { store } from './store';
     import { defineAsyncComponent } from 'vue'
-    import { setDefExpRets } from './login.js';
-      import { shallowRef } from 'vue'
 
     export default{
         name: "NavBar",
@@ -265,7 +262,6 @@
         },
         data(){
             return{
-                favorites : shallowRef([]),
                 openedVlist: ['New Updates'],
                 isNewReleaseOpen: true,
                 expandedIndex: null,
