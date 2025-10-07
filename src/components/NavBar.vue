@@ -255,7 +255,6 @@
     import { store } from './store';
     import { defineAsyncComponent } from 'vue'
     import { setDefExpRets } from './login.js';
-      import { shallowRef } from 'vue'
 
     export default{
         name: "NavBar",
@@ -265,7 +264,6 @@
         },
         data(){
             return{
-                favorites : shallowRef([]),
                 openedVlist: ['New Updates'],
                 isNewReleaseOpen: true,
                 expandedIndex: null,

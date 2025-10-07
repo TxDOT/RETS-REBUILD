@@ -133,7 +133,7 @@ try {
                             
                         }
 
-                        includes(retsPt.attributes).then((value) => {
+                        isHighlighted(retsPt.attributes).then((value) => {
                             if (!value){
                                 removeHighlight("", true)
                                 store.roadHighlightObj.clear()
@@ -214,7 +214,7 @@ export async function doubleClickRetsPoint(){
                         retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
                     
                     }
-                    includes(retsPt.attributes).then((value) => {
+                    isHighlighted(retsPt.attributes).then((value) => {
                         if (!value){
                             removeHighlight("", true)
                             store.roadHighlightObj.clear()
@@ -276,7 +276,7 @@ view.whenLayerView(TxDOTRoadways)
     })
 }
 
-export async function includes(feature){
+export async function isHighlighted(feature){
 return view.whenLayerView(retsLayer)
 .then((lyrView) => {
     if (lyrView._highlightIds.has(feature.OBJECTID)) {
