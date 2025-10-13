@@ -172,7 +172,7 @@
 
 <script>
     import { appConstants } from '../common/constant.js'
-    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, updateRetsObj, openDetails, outlineFeedCards, highlightRETSPoint, getAllUserSettings} from './utility.js'
+    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, updateRetsObj, openDetails, outlineFeedCards, highlightRETSPoint, getAllUserSettings, updateSelectionUtil} from './utility.js'
 
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
@@ -324,26 +324,34 @@ import { queryExtent } from './map-Init.js'
                     removeHighlight(store.retsObj)
                     store.roadHighlightObj.clear()
                     if(!store.isSearch){
-                        if (store.CREATE_DT){
                             store.roadObj = await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
-
-                        }
-                        else{
-                            store.roadObj = await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
-
-                        }
-                        store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+                            store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                     }
-                    // }
-                    
-                    // if (store.roadHighlightObj.size === 1){
-                    //     highlightRETSPoint(store.retsObj)
-                    //     store.roadHighlightObj.clear()
-                    //     store.roadHighlightObj.add(store.retsObj)
+                    else{
+                                              //  store.updateRetsSearch.sort((a,b) => new Date(b.attributes.EDIT_DT) - new Date(a.attributes.EDIT_DT))
 
-                    // }
-                    //store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
-                    return
+                        store.roadObj = store.updateRetsSearch
+                        // store.roadObj.sort((a,b) => new Date(b.attributes.EDIT_DT) - new Date(a.attributes.EDIT_DT))
+                        for (const item of store.roadObj) {
+                            if (item.attributes.RETS_ID === store.retsObj.attributes.RETS_ID){
+                                item.attributes.mdialarm = store.retsObj.attributes.DEADLINE ? store.isDeadline(store.retsObj.attributes.DEADLINE) : false
+                                item.attributes.mdicheckdecagramoutline = store.retsObj.attributes.STAT ? store.isComplete(store.retsObj.attributes.STAT) : false
+                                item.attributes.mditimersand = store.retsObj.attributes.STAT && store.retsObj.attributes.EDIT_DT ? store.isNoActivity(store.retsObj.attributes.STAT, store.retsObj.attributes.EDIT_DT) : false
+                                item.attributes.mdiexclamation = store.retsObj.attributes.PRIO ? store.isPrio(store.retsObj.attributes.PRIO) : false
+                            }
+                        }
+                         store.roadObj = store.roadObj.sort((a,b) => new Date(a.attributes.EDIT_DT) - new Date(b.attributes.EDIT_DT))
+                        console.log(store.roadObj)
+
+
+                        
+                    }
+                    if (store.autozoomextent){
+                        store.currentView = "a"
+                    }
+                }
+                if (store.roadHighlightObj.size > 1){
+                    updateSelectionUtil()
                 }
                 return
             },
@@ -374,7 +382,6 @@ import { queryExtent } from './map-Init.js'
                 store.retsObj.attributes.PRIO = store.retsObj.attributes.PRIO ?? 1
                 store.retsObj.attributes.JOB_TYPE = this.isAsset === true ? 2 : 1
                 await updateRETSPT(store.retsObj)
-                
                 await this.returnToFeed()
                 store.isShowSelected = false
                 deleteRetsGraphic()

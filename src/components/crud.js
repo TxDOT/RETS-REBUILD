@@ -22,6 +22,7 @@ export async function updateRETSPT(retsObj){
     const enable = JSON.parse(copyRetsObj)
     enable.attributes.CREATE_DT = new Date(retsObj.attributes.CREATE_DT).getTime()
     enable.attributes.EDIT_DT = new Date(retsObj.attributes.EDIT_DT).getTime()
+    console.log(new Date(enable.attributes.EDIT_DT).toString())
     enable.attributes.EDIT_NM = appConstants.userRoles.find(usr => usr.name === retsObj.attributes.EDIT_NM)?.value ?? retsObj.attributes.EDIT_NM
     enable.attributes.CREATE_NM = appConstants.userRoles.find(usr => usr.name === retsObj.attributes.CREATE_NM)?.value ?? retsObj.attributes.CREATE_NM
     enable.attributes.NO_RTE = enable.attributes.NO_RTE === true ? 1 : 0

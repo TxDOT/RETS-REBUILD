@@ -917,6 +917,7 @@ reactiveUtils.watch(
        if (vieww !== `${view.center.x},${view.center.y}`){
         await queryExtent(true)
         vieww = `${view.center.x},${view.center.y}`
+        store.currentView = vieww
       }
     }
   }

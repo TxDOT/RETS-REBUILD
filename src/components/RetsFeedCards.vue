@@ -262,6 +262,7 @@ export default{
         async clearContent(){
             store.isSearch = false
             this.actvFeedSearch = ""
+            this.updateSelection() ///////////////////////NOTE TO SELF: I REUSED THIS FUNCTION HERE SO THAT IT UPDATES TO THE OG FEED WHENEVER THE SEARCH GETS CLEARED
             return
         },
         async processAddPt(newPointGraphic){
@@ -407,53 +408,55 @@ export default{
 
                 return
             }
-            store.updateRetsSearch = store.roadHighlightObj
+            store.updateRetsSearch = store.roadHighlightObj            
             return
         },
+        handlerRetsSearch(a){
+            try{
+                if(this.searchTimer){
+                    clearTimeout(this.searchTimer)
+                }
+                this.searchTimer = setTimeout(async () => {
+                    if(!a.length || !a){
+                        store.updateRetsSearch = !store.isShowSelected ? store.roadObj.slice().sort((a,b) => b.EDIT_DT - a.EDIT_DT) : store.roadHighlightObj
+                        outlineFeedCards(store.roadHighlightObj)
+                        return
+                    }
+                    const searchString = a.toLowerCase()
+                    let s;
+
+                    //search for history items
+                    //apply it card metadata
+                    let returnHist = await getQueryLayer({"whereString": `Lower(CMNT) like '%${searchString}%' and SYS_GEN = 0`, "queryLayer": "retsHistory"}, "CREATE_DT DESC")
+                    
+                    const acceptedObj = []
+                    for(s of !store.isShowSelected ? store.roadObj : store.roadHighlightObj){
+                        s.attributes.Hist = returnHist.features.find(hist => hist.attributes.RETS_ID === s.attributes.RETS_ID)?.attributes?.CMNT ?? ""
+                        // const createObjKey = Object.values(s.attributes)
+                        for(const [key, value] of Object.entries(s.attributes)){
+                            if(key === "RETS_ID" || key === "RETS_NM" || key === "DESC_" || key === "RTE_NM" || key === "ACTV" || key === "ACTV_NBR" || key === "Hist"){
+                                if(String(value).toLowerCase().includes(searchString) && (acceptedObj.findIndex(oid => oid.attributes.OBJECTID === s.attributes.OBJECTID) === -1)){
+                                    // if(acceptedObj.length === 10){
+                                    //     store.updateRetsSearch = acceptedObj.sort((a,b) => b.EDIT_DT - a.EDIT_DT)
+                                    //     return
+                                    // }
+                                    acceptedObj.push(s)
+                                }
+                            }
+                        } 
+                    }
+                    store.updateRetsSearch = acceptedObj.sort((a,b) => b.EDIT_DT - a.EDIT_DT)
+                },600)
+            }
+            catch(a){
+                console.log("err", a)
+            }
+        }
     },
     watch:{
         actvFeedSearch:{
             handler: async function(a){
-                try{
-
-                    if(this.searchTimer){
-                        clearTimeout(this.searchTimer)
-                    }
-                    this.searchTimer = setTimeout(async () => {
-                        if(!a.length || !a){
-                            store.updateRetsSearch = !store.isShowSelected ? store.roadObj.slice().sort((a,b) => b.EDIT_DT - a.EDIT_DT) : store.roadHighlightObj
-                            outlineFeedCards(store.roadHighlightObj)
-                            return
-                        }
-                        const searchString = a.toLowerCase()
-                        let s;
-
-                        //search for history items
-                        //apply it card metadata
-                        let returnHist = await getQueryLayer({"whereString": `Lower(CMNT) like '%${searchString}%' and SYS_GEN = 0`, "queryLayer": "retsHistory"}, "CREATE_DT DESC")
-                        
-                        const acceptedObj = []
-                        for(s of !store.isShowSelected ? store.roadObj : store.roadHighlightObj){
-                            s.attributes.Hist = returnHist.features.find(hist => hist.attributes.RETS_ID === s.attributes.RETS_ID)?.attributes?.CMNT ?? ""
-                            // const createObjKey = Object.values(s.attributes)
-                            for(const [key, value] of Object.entries(s.attributes)){
-                                if(key === "RETS_ID" || key === "RETS_NM" || key === "DESC_" || key === "RTE_NM" || key === "ACTV" || key === "ACTV_NBR" || key === "Hist"){
-                                    if(String(value).toLowerCase().includes(searchString) && (acceptedObj.findIndex(oid => oid.attributes.OBJECTID === s.attributes.OBJECTID) === -1)){
-                                        // if(acceptedObj.length === 10){
-                                        //     store.updateRetsSearch = acceptedObj.sort((a,b) => b.EDIT_DT - a.EDIT_DT)
-                                        //     return
-                                        // }
-                                        acceptedObj.push(s)
-                                    }
-                                }
-                            } 
-                        }
-                        store.updateRetsSearch = acceptedObj.sort((a,b) => b.EDIT_DT - a.EDIT_DT)
-                    },600)
-                }
-                catch(a){
-                    console.log("err", a)
-                }
+               this.handlerRetsSearch(a)
             },
             immediate: true
         },
@@ -488,6 +491,15 @@ export default{
             },
             immediate: true // Runs the watcher immediately upon creation
         },
+        'store.currentView' : {
+            handler: function() {
+                if (store.isSearch){
+                    this.handlerRetsSearch(this.actvFeedSearch)
+
+                }
+            },
+            immediate: true
+        }
     },
     computed:{
         retsInProgressCount(){
@@ -502,8 +514,7 @@ export default{
         retsCompleteCount(){
             return store.updateRetsSearch.filter(item => item.attributes.STAT === 3).length;
         },
-    },
-        
+    }
 
 }
 </script>

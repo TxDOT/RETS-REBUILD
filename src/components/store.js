@@ -146,6 +146,7 @@ export const store = reactive({
         userSettings: null,
         retsSelection: new Set(),
         retsParam: null,
+        currentView: null,
         defaultFilterSetup(){
                 // this.CREATE_DT.push({title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"})
                 // this.STAT = appConstants.defaultStatValues

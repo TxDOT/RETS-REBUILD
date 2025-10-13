@@ -1993,4 +1993,21 @@ export function removeLableError(id){
     return
 }
 
+export async function updateSelectionUtil(e){
+    if(!e){
+                store.activityBanner = "Activity Feed"
+                store.roadObj = await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+                outlineFeedCards(store.roadHighlightObj)
+                if (store.autozoomextent){
+                    queryExtent()
+                    return
+                }
+                store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+
+                return
+            }
+            store.updateRetsSearch = store.roadHighlightObj
+}
+
 

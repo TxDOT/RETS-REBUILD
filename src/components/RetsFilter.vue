@@ -181,8 +181,8 @@ export default{
     data(){
         return{
             filterSort: [
-                         {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, 
-                         {title: "Date: Oldest to Newest", sortType: "ASC", filter: "CREATE_DT"},
+                         {title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"}, 
+                         {title: "Date: Oldest to Newest", sortType: "ASC", filter: "EDIT_DT"},
                          {title: "Status: Ascending", sortType: "ASC", filter: "STAT"}, 
                          {title: "Status: Descending", sortType: "DESC", filter: "STAT"}
                         ],
