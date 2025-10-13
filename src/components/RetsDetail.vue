@@ -146,6 +146,7 @@
 <script>
     import { appConstants } from '../common/constant.js'
     import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, updateRetsObj, openDetails, outlineFeedCards, highlightRETSPoint, getAllUserSettings} from './utility.js'
+    import { queryExtent } from './map-Init.js'
 
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
@@ -401,8 +402,6 @@
     
             },
             async cancelDetailsMetadata(){
-                removeHighlight("", true)
-
                 if(!store.isSaveBtnDisable){
                     store.clickStatus = false
                     store.cancelpopup = true

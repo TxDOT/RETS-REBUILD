@@ -890,8 +890,9 @@ export async function queryExtent(){
   var appendstring = ''
   const response = await retsLayer.queryFeatures(query)
   if (!response.features.length ){
-      store.roadObj.length = 0
-      return
+    store.roadObj = []
+    store.roadObj.length = 0
+    return
   }
   for (const feature of response.features)
   {

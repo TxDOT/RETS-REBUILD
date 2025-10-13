@@ -371,7 +371,14 @@ export const store = reactive({
                                 const query = {"whereString": `${resp}`, "queryLayer": "retsLayerLayerView"}
                                 const orderField = `${this.filter.createDt.filter} ${this.filter.createDt.sortType}`
                                 this.getRetsLayer(this.loggedInUser, query.whereString, query.queryLayer, orderField)
-                                        .then(res => this.roadObj = res)
+                                        .then(res => {
+                                                if (res == null){
+                                                       this.roadObj = [] 
+                                                       return
+                                                }
+                                        this.roadObj = res
+
+                                        })
                                         .catch(err => console.log(err))
                                 this.isDetailsPage = false
                                 this.isNoRets = true
