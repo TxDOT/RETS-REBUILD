@@ -8,7 +8,7 @@ import {view, retsLayer, retsGraphicLayer, TxDOTRoadways, retsHistory, graphics,
     googleVTBasemap,
     OSMVTBasemap,
     lightVTBasemap,
-    queryExtent} from './map-Init'
+    } from './map-Init'
 import Query from "@arcgis/core/rest/support/Query.js";
 import Graphic from "@arcgis/core/Graphic.js";
 import { appConstants } from "../common/constant.js";
@@ -941,14 +941,16 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                     graphics.removeAll();
                                     var selectedFeatures = result.features;
                                     store.retsSelection = selectedFeatures.map((feature) => {
-                                    return {
-                                            attributes: { ...feature.attributes, flagColor: {FLAG: null}, historyUpdate : null, mdiaccountgroup : null, mdiaccountmultiplecheck :  null, mdialarm :  {bool: null, color: null}, mdicheckdecagramoutline : null, mdiexclamation : null, mdipaperclip : null,
-                                                mdipencilboxoutline : null, mditimersand : {bool: null, numDays: null}
-                                            },
-                                            geometry: feature.geometry, // or clone if needed
-                                        
-                                       
-                                    };
+                                        console.log(feature)
+                                        return {
+                                                attributes: { ...feature.attributes, flagColor: {FLAG: null}, historyUpdate : null, mdiaccountgroup : null, mdiaccountmultiplecheck :  null, mdialarm :  {bool: null, color: null}, mdicheckdecagramoutline : null, mdiexclamation : null, mdipaperclip : null,
+                                                    mdipencilboxoutline : null, mditimersand : {bool: null, numDays: null}
+                                                },
+                                                //needs to be reprojected
+                                                geometry: [selectedFeatures[0].geometry.longitude, selectedFeatures[0].geometry.latitude], // or clone if needed
+                                            
+                                            
+                                        };
                                     });
                                     
                                     if (pressedkey === false){
@@ -1610,6 +1612,7 @@ export function openDetails(road){
     store.flagsChecked = road.attributes.flagColor.FLAG
     store.toggleFeed = 2
     store.isSaving = false
+    
 
     store.archiveRetsDataString = JSON.stringify(road)
     store.retsObj = road
@@ -1959,8 +1962,10 @@ export function createCheckboxFlagObj(e){
 }
 
 export function updateCheckboxFlag(e, div){
+    console.log(e, div)
     const rets = store.updateRetsSearch.find(rd => rd.attributes.RETS_ID === store.flagClickedId)
-    if(!e || !e.length || !store.flagLabels[e.at(-1)?.label]?.length){
+    store.retsObj.attributes.flagColor = rets.attributes.flagColor
+    if(!e || !e.length){
         rets.attributes.flagColor.FLAG = store.flagsChecked = e
 
         if(!e.length){
@@ -1969,7 +1974,7 @@ export function updateCheckboxFlag(e, div){
         }
         
 
-        !store.flagLabels[e.at(-1).label]?.length ? errorValidate(div) : postFlagColor(rets)
+        postFlagColor(rets)
         store.flagsChecked.splice(-1)
         return
     }
@@ -1989,4 +1994,45 @@ export function removeLableError(id){
     return
 }
 
+export function enableFilterMapByExtent(){
+    reactiveUtils.watch(
+        () => [view.stationary, view.updating],
+        async([isStationary, isUpdate]) => {
+            if(store.autozoomextent && isStationary && !isUpdate){
+                await queryExtent()
+                return
+            }
+            return
+        }
+    )
+    return
+}
+
+export async function queryExtent(){
+  let query = retsLayer.createQuery();
+  query.geometry = view.extent
+  query.spatialRelationship = "intersects"
+  query.returnGeometry = false
+  query.outFields = ["RETS_ID"]
+  var appendstring = ''
+  const response = await retsLayer.queryFeatures(query)
+  if (!response.features.length ){
+      store.roadObj.length = 0
+      return
+  }
+  for (const feature of response.features)
+  {
+    
+      if (store.isShowSelected){
+        store.roadHighlightObj.forEach((value) => value.attributes.RETS_ID === feature.attributes.RETS_ID ?  appendstring = appendstring.concat(` OR RETS_ID = ${value.attributes.RETS_ID}`) : null )
+        continue
+      }
+        appendstring = appendstring.concat(` OR RETS_ID = ${feature.attributes.RETS_ID}`)
+
+      
+  }
+
+  appendstring.length ?  await store.getRetsLayer(store.loggedInUser, appendstring.slice(4), "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`) : store.roadObj.length = 0
+  
+}
 

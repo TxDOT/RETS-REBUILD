@@ -301,7 +301,7 @@ export const store = reactive({
                 this.loggedInUser = userid
                 where = localStorage.getItem("retsParam") ? `${where} or RETS_ID in (${localStorage.getItem("retsParam")})` : where
                 orderFields = localStorage.getItem("retsParam") ? `CASE RETS_ID WHEN ${localStorage.getItem("retsParam")} THEN 0 ELSE 1 END, EDIT_DT DESC` : orderFields
-                
+                console.log(where, orderFields)
                 const queryString = {"whereString": where, "queryLayer": layer}
                 //const orderField = "EDIT_DT DESC, PRIO"
                 try{

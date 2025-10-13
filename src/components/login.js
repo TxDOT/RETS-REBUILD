@@ -2,7 +2,7 @@ import OAuthInfo from "@arcgis/core/identity/OAuthInfo.js";
 import esriId from "@arcgis/core/identity/IdentityManager.js";
 import { view, retsUserRole, retsLayer} from './map-Init.js'
 import {getDomainValues, getDistinctAttributeValues, getUniqueQueryValues, queryFlags, getRetsLayerView, getTxDotRdWayLayerView, 
-        home, getUserOBJECTID, filterMapActivityFeed, setFilterProperties} from './utility.js'
+        home, getUserOBJECTID, filterMapActivityFeed, setFilterProperties, enableFilterMapByExtent} from './utility.js'
 import { appConstants } from "../common/constant.js";
 import router from '../router/index.js'
 import {store} from './store.js'
@@ -44,25 +44,26 @@ async function signIn(){
 
     await store.getRetsLayer(userId, store.savedFilter, "retsLayer", `${sortFilter} ${sortType}, PRIO`)
 
-  appConstants.userQueryField = appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]
-  let getSession = localStorage.getItem("retsParam")
+    appConstants.userQueryField = appConstants.queryField[appConstants.userRoles.find(x => x.value === userId).type]
+    let getSession = localStorage.getItem("retsParam")
 
-  !getSession ? router.push({name: "Maps"}) : router.push({name: "Map", params: {retsid: getSession}})
+    !getSession ? router.push({name: "Maps"}) : router.push({name: "Map", params: {retsid: getSession}})
   
-  //needs to be worked on//
-  view.when(() => {
-    [{name: 'JOB_TYPE', prop: "jobTypeDomainValues"},{name: 'STAT', prop: "statDomainValues"}, {name: 'DIST_NM', prop: "districtDomainValues"}, {name: 'CNTY_NM', prop: "countyDomainValues"}].forEach((layer) => {
-      getDomainValues(layer.name).codedValues.forEach((x) => {
-         appConstants[layer.prop].push({"name" : x.name, "value": x.code})
+    //needs to be worked on//
+    view.when(() => {
+      [{name: 'JOB_TYPE', prop: "jobTypeDomainValues"},{name: 'STAT', prop: "statDomainValues"}, {name: 'DIST_NM', prop: "districtDomainValues"}, {name: 'CNTY_NM', prop: "countyDomainValues"}].forEach((layer) => {
+        getDomainValues(layer.name).codedValues.forEach((x) => {
+          appConstants[layer.prop].push({"name" : x.name, "value": x.code})
+        })
       })
-    })
-    ///////////////INSERT HERE/////////////////////////////////
-    appConstants.districtDomainValues.sort((a,b) => a.name.localeCompare(b.name))
-    appConstants.userRoles.sort((a,b) => a.name.localeCompare(b.name))
+      ///////////////INSERT HERE/////////////////////////////////
+      appConstants.districtDomainValues.sort((a,b) => a.name.localeCompare(b.name))
+      appConstants.userRoles.sort((a,b) => a.name.localeCompare(b.name))
 
       getDistinctAttributeValues('ACTV')
       getRetsLayerView()
       getTxDotRdWayLayerView()
+      enableFilterMapByExtent()
       // getHistoryView()
       //home(true)
       home(true)

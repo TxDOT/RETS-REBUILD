@@ -16,7 +16,7 @@
                         <span v-if="(store.retsObj.attributes.DIST_ANALYST.length - 1) !== index">,</span>
                     </span>
 
-                    <span v-if="index === 3"> +{{ store.retsObj.attributes.DIST_ANALYST.length }}</span>
+                    <span v-if="index === 3"> +{{ store.retsObj.attributes.DIST_ANALYST.length - 3 }}</span>
                 </template>
             </v-autocomplete>
         </div>

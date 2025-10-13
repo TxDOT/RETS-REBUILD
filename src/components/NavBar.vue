@@ -119,7 +119,7 @@
                         </v-label>
                     </template>
                 </v-switch>
-                <v-switch v-model="store.autozoomextent"   class="autozoom-switch" color="primary" :style="{color: fontColor}" density="compact" >
+                <v-switch v-model="store.autozoomextent" class="autozoom-switch" color="primary" :style="{color: fontColor}" density="compact" >
                     <template #prepend >
                         <v-label>
                             Automatically filter the activity feed based on the map extent
@@ -213,12 +213,12 @@
                 </template>
                 <!-- Bulleted Items -->
                 <v-list-item v-for="(value, i) in latestReleaseNotes[0].slice(1)" :key="`latest-item-${i}`"  class="wrap-text" :disabled="true" >
-                        <div style="border-width: 2px;">
-                            <v-list-item-title class="bullet-item">
-                                <v-icon small class="mr-2">mdi-circle-small</v-icon> <!-- Bullet -->
-                                {{ value }}
-                            </v-list-item-title>
-                        </div>
+                    <div style="border-width: 2px;">
+                        <v-list-item-title class="bullet-item">
+                            <v-icon small class="mr-2">mdi-circle-small</v-icon> <!-- Bullet -->
+                            {{ value }}
+                        </v-list-item-title>
+                    </div>
                 </v-list-item>
             </v-list-group>
             
@@ -719,7 +719,7 @@
                     },
                     setAutozoomExtentSwitch(){
                         const { autoZoomExtent } = this.userSettings;
-                        if (autoZoomExtent != null){
+                        if (autoZoomExtent !== null){
                             store.autozoomextent = autoZoomExtent
                         }
                         else{
@@ -729,7 +729,7 @@
                     },
                     setAutozoomSwitch(){
                         const { autoZoom } = this.userSettings;
-                        if (autoZoom != null){
+                        if (autoZoom !== null){
                             store.autozoomtest = autoZoom
                         }
                         else{
@@ -760,7 +760,7 @@
                         store.userSettings = this.userSettings
 
 
-                        if (store.updateRetsSearch.length != store.retspointlength && store.autozoomextent == false){
+                        if (store.updateRetsSearch.length !== store.retspointlength && store.autozoomextent == false){
                             if (store.CREATE_DT){
                                 store.roadObj = await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
                             }
@@ -783,187 +783,187 @@
                         for (let i =0; i < this.switches.length; i++){
                             this.switches[i].value = notifications[i].value
 
-                }
+                         }
 
-                return
-            },
-            shiftDiv(){
-                const viewSurface = document.querySelector('.esri-view');
-                viewSurface.classList.toggle('translateX-500px');
-                return
-            },
-            switchStyle(fontColor) {
-                return { color: fontColor };
-            },
-            handleactiveclass(){
-                this.settingsstatus = false
-                this.retsToolsBottom[4].isActive = false
+                    return
+                },
+                shiftDiv(){
+                    const viewSurface = document.querySelector('.esri-view');
+                    viewSurface.classList.toggle('translateX-500px');
+                    return
+                },
+                switchStyle(fontColor) {
+                    return { color: fontColor };
+                },
+                handleactiveclass(){
+                    this.settingsstatus = false
+                    this.retsToolsBottom[4].isActive = false
 
-            },
-            logoutMethod(){
-                logoutUser();
-                location.reload()
-            },
-            resizemap(){
-                togglemenu(this.isActOpen, this.shift);
-                this.isActOpen =! this.isActOpen
-            },
-            mouseleavebasemap(){
-                this.basemapcard = false;
-            },
-            mouseleavejumpto(){
-                this.jumptocard = false;
-            },
-            mouseleaveselect(){
-                this.selecttoggle = false;
-            },
+                },
+                logoutMethod(){
+                    logoutUser();
+                    location.reload()
+                },
+                resizemap(){
+                    togglemenu(this.isActOpen, this.shift);
+                    this.isActOpen =! this.isActOpen
+                },
+                mouseleavebasemap(){
+                    this.basemapcard = false;
+                },
+                mouseleavejumpto(){
+                    this.jumptocard = false;
+                },
+                mouseleaveselect(){
+                    this.selecttoggle = false;
+                },
 
-            async handleCreateTool() {
-                if (this.isCreateEnabled === true) {
-                    this.isCreateEnabled = !this.isCreateEnabled;
-                    const newPointGraphic = await createtool(sketchWidgetcreate, createretssym);
-                    // Process the newPointGraphic as needed
-                    this.isCreateEnabled = !this.isCreateEnabled;
-                    return newPointGraphic
-                    
-                } else {
-                    sketchWidgetcreate.cancel();
-                    this.isCreateEnabled = !this.isCreateEnabled;
-                }
-                
-                
-                
-            },
-
-
-
-
-            handleSelectTool() {
-                if (sketchWidgetselect.state === "active"){
-                    sketchWidgetselect.cancel()
+                async handleCreateTool() {
+                    if (this.isCreateEnabled === true) {
+                        this.isCreateEnabled = !this.isCreateEnabled;
+                        const newPointGraphic = await createtool(sketchWidgetcreate, createretssym);
+                        // Process the newPointGraphic as needed
+                        this.isCreateEnabled = !this.isCreateEnabled;
+                        return newPointGraphic
+                        
+                    } else {
+                        sketchWidgetcreate.cancel();
+                        this.isCreateEnabled = !this.isCreateEnabled;
                     }
-                if (this.multiselectTool === 'rectangle') {
-                    this.multiselectOptions[0].isActive = true;
-                    selecttool(true, sketchWidgetselect, graphics, "rectangle","freehand")
-                } else if (this.multiselectTool === 'selecttoolfreehand') {
-                    this.multiselectOptions[1].isActive = true;
-                    selecttool(true, sketchWidgetselect, graphics, "polygon","freehand")
-                }
+                    
+                    
+                    
+                },
+
+
+
+
+                handleSelectTool() {
+                    if (sketchWidgetselect.state === "active"){
+                        sketchWidgetselect.cancel()
+                        }
+                    if (this.multiselectTool === 'rectangle') {
+                        this.multiselectOptions[0].isActive = true;
+                        selecttool(true, sketchWidgetselect, graphics, "rectangle","freehand")
+                    } else if (this.multiselectTool === 'selecttoolfreehand') {
+                        this.multiselectOptions[1].isActive = true;
+                        selecttool(true, sketchWidgetselect, graphics, "polygon","freehand")
+                    }
+                    
                 
-            
-            },
+                },
 
 
 
-            handleJumpToToolGoogle() {
-                var ctr = view.center;                
-                var lat = ctr.latitude;                
-                var lon = ctr.longitude;     
-                var level = view.zoom ;
-                window.open("https://www.google.com/maps/@"+lat+","+lon+","+level+"z");
-                this.jumptocard = false;
+                handleJumpToToolGoogle() {
+                    var ctr = view.center;                
+                    var lat = ctr.latitude;                
+                    var lon = ctr.longitude;     
+                    var level = view.zoom ;
+                    window.open("https://www.google.com/maps/@"+lat+","+lon+","+level+"z");
+                    this.jumptocard = false;
 
-            },
-            handleJumpToToolSPM() {
-                var ctr = view.center;                
-                var lat = ctr.latitude;                
-                var lon = ctr.longitude;                
-                var level = view.zoom -1 ;                
-                window.open("https://www.txdot.gov/apps/statewide_mapping/StatewidePlanningMap.html?map=txdot&coords="+lat+","+lon+","+level);
-                this.jumptocard = false;
-            },
+                },
+                handleJumpToToolSPM() {
+                    var ctr = view.center;                
+                    var lat = ctr.latitude;                
+                    var lon = ctr.longitude;                
+                    var level = view.zoom -1 ;                
+                    window.open("https://www.txdot.gov/apps/statewide_mapping/StatewidePlanningMap.html?map=txdot&coords="+lat+","+lon+","+level);
+                    this.jumptocard = false;
+                },
 
-            handleLegendTool() {
-                this.isLegendVisible =! this.isLegendVisible
-                if(this.isLegendVisible === true){
-                    legendWidget.visible = true;
-                }
-                else{
-                    legendWidget.visible = false;
-                }
+                handleLegendTool() {
+                    this.isLegendVisible =! this.isLegendVisible
+                    if(this.isLegendVisible === true){
+                        legendWidget.visible = true;
+                    }
+                    else{
+                        legendWidget.visible = false;
+                    }
                 },
 
                 handleSettingsTool(){
-                if (this.feedbackStatus){
-                    this.feedbackStatus = false
-                    this.settingsstatus = false
-                    return
-                }
-                if (this.settingsstatus){
-                    this.cancelSettings()
-                }
-                this.settingsstatus = !this.settingsstatus;
+                    if (this.feedbackStatus){
+                        this.feedbackStatus = false
+                        this.settingsstatus = false
+                        return
+                    }
+                    if (this.settingsstatus){
+                        this.cancelSettings()
+                    }
+                    this.settingsstatus = !this.settingsstatus;
 
                 },
-            toggledarkgrey(){
-                applyDarkGrey()
-            },
-            togglelightgrey(){
-                applyLightGrey()
-            },
-            togglestandard(){
-                applyStandard()
+                toggledarkgrey(){
+                    applyDarkGrey()
+                },
+                togglelightgrey(){
+                    applyLightGrey()
+                },
+                togglestandard(){
+                    applyStandard()
 
-            },  
-            toggleimagery(){
-                applyImagery()
-            },
-            togglehybrid(){
-                applyHybrid()
-            },
-            togglegoogle(){
-                applyGoogle()
-            },
-            toggleosm(){
-                applyOSM()
-            },
+                },  
+                toggleimagery(){
+                    applyImagery()
+                },
+                togglehybrid(){
+                    applyHybrid()
+                },
+                togglegoogle(){
+                    applyGoogle()
+                },
+                toggleosm(){
+                    applyOSM()
+                },
 
-            toggledarkmode(){
-                vuetify.theme.defaultTheme = 'light';
+                toggledarkmode(){
+                    vuetify.theme.defaultTheme = 'light';
 
-            },
-            cancelFeedback(){
-                this.feedbackStatus = false
-                this.settingsstatus = true
-                this.feedbackText = ""
-                this.isAnonymous = false
+                },
+                cancelFeedback(){
+                    this.feedbackStatus = false
+                    this.settingsstatus = true
+                    this.feedbackText = ""
+                    this.isAnonymous = false
 
-            },
-            activateFeedback(){
-                this.feedbackStatus = true
-                this.settingsstatus = false
-                
-            },
-            async sendWebhookRequest(feedbackString, user){
-                this.feedbackSubmitStatus = true
-                let url = `https://gis-batch-dev.txdot.gov/fmejobsubmitter/TPP/TPP_DEV_RETS_Emailer.fmw?FEEDBACK=${feedbackString}&USERNAME=${user}&opt_showresult=false&opt_servicemode=sync&token=ad45d24d78f7234c2f1be76bed25d279e81419cd`
-                try{
-                    const response = await fetch(url)
-                    if (!response.ok){
+                },
+                activateFeedback(){
+                    this.feedbackStatus = true
+                    this.settingsstatus = false
+                    
+                },
+                async sendWebhookRequest(feedbackString, user){
+                    this.feedbackSubmitStatus = true
+                    let url = `https://gis-batch-dev.txdot.gov/fmejobsubmitter/TPP/TPP_DEV_RETS_Emailer.fmw?FEEDBACK=${feedbackString}&USERNAME=${user}&opt_showresult=false&opt_servicemode=sync&token=ad45d24d78f7234c2f1be76bed25d279e81419cd`
+                    try{
+                        const response = await fetch(url)
+                        if (!response.ok){
+                        }
+                        else{
+                            this.feedbackStatus = false
+                            this.settingsstatus = true
+                            this.feedbackText = ""
+                            this.isAnonymous = false
+                            store.alertTextInfo = {"text": "Thank you for your feedback!", "color": "#70ad47", "type":"success", "toggle": true}
+                            store.isAlert = true
+                            this.feedbackSubmitStatus = false
+
+                            setTimeout(() => {
+                                store.isAlert = false
+
+                            }, 10000);
+                        }
                     }
-                    else{
-                        this.feedbackStatus = false
-                        this.settingsstatus = true
-                        this.feedbackText = ""
-                        this.isAnonymous = false
-                        store.alertTextInfo = {"text": "Thank you for your feedback!", "color": "#70ad47", "type":"success", "toggle": true}
-                        store.isAlert = true
-                        this.feedbackSubmitStatus = false
-
-                        setTimeout(() => {
-                            store.isAlert = false
-
-                        }, 10000);
+                    catch(error){
+                        console.log(error)
                     }
+                },
+                submitFeedback(){
+                    this.isAnonymous ? this.sendWebhookRequest(this.feedbackText, 'Anonymous') : this.sendWebhookRequest(this.feedbackText, store.loggedInUser)
+                    
                 }
-                catch(error){
-                    console.log(error)
-                }
-            },
-            submitFeedback(){
-                this.isAnonymous ? this.sendWebhookRequest(this.feedbackText, 'Anonymous') : this.sendWebhookRequest(this.feedbackText, store.loggedInUser)
-                
-            }
 
             
         },

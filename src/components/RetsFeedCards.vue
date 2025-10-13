@@ -62,7 +62,7 @@
             </v-text-field>
         </div>
         <div id="retsURL" v-if="isShowRetsUrl && !store.isDetailsPage" @click="isShowRetsUrl = false; restoreFilters();">
-            <v-banner icon="mdi-restore" text="Filter settings updated. Click to restore." id="retsURLBanner" >
+            <v-banner icon="mdi-restore" text="Shared URL Bypasses filters. Click to restore." id="retsURLBanner" >
                 <!-- <template v-slot:prepend>
                     <icon icon="mdi-restore"></icon>
                 </template> -->
@@ -105,11 +105,7 @@
             &nbsp;&nbsp;
             <span :style="{ color: onHoldColor, width: '5ch', display: 'inline-block', textAlign: 'left', fontWeight: 'bold'  }">{{ retsOnHoldCount }}</span>
             <span :style="{ color: 'lightgray' }">&nbsp;&nbsp; On Hold</span><br>
-
-             
            
-
-            
         </span>
     </v-card>
         <!-- </div> -->
@@ -120,8 +116,7 @@ import {clickRetsPoint, getQueryLayer, getHighlightGraphic, removeHighlight, cre
 import {appConstants} from '../common/constant.js'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import {store} from './store.js'
-import {view, retsGraphicLayer, queryExtent} from './map-Init.js'
-import { sketchWidgetcreate, createretssym } from './map-Init.js'
+import {view, retsGraphicLayer, sketchWidgetcreate, createretssym } from './map-Init.js'
 import {addRETSPT} from '../components/crud.js'
 
 import { defineAsyncComponent } from 'vue'
@@ -236,6 +231,8 @@ export default{
             store.activityBanner = "Activity Feed"
             await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
             removeHighlight("", true)
+            history.replaceState(null, '', `${window.location.origin}${window.location.pathname}`)
+            console.log(window.location)
             return
         },
         async isRetsParamOpen(retsParam){
@@ -397,13 +394,13 @@ export default{
         async updateSelection(e){
             if(!e){
                 store.activityBanner = "Activity Feed"
-                store.roadObj = await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                store.roadObj = store.autozoomextent ? queryExtent : await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
                 store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                 outlineFeedCards(store.roadHighlightObj)
-                if (store.autozoomextent){
-                    queryExtent()
-                    return
-                }
+                // if (store.autozoomextent){
+                //     queryExtent()
+                //     return
+                // }
                 store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
 
                 return

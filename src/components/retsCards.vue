@@ -6,42 +6,42 @@
         <div v-if="showFlagLabel" class="color-picker">
             <div style="padding: 0px !important;">
                 <div style="display: flex; flex-direction: column; gap: 35px; height: 100%; justify-content: center; align-items: center;"> 
-                    <v-checkbox density="compact" class="checkbox" :false-value="false" :error="!store.flagLabels.redCheckbox?.length" multiple :value="redValue" v-model="store.flagsChecked" @update:modelValue="updateCheckbox($event, 'redCheckboxError')">
+                    <v-checkbox density="compact" class="checkbox" multiple :value="redValue" v-model="store.flagsChecked" @update:modelValue="updateCheckbox($event, 'redCheckboxError')">
                         <template v-slot:append>
                             <v-icon icon="mdi-flag" color="#FF0000" class="checkbox-flag"></v-icon>
                             <input v-model="store.flagLabels.redCheckbox" placeholder="Add label" style="border: 2px solid #FF0000;" class="checkbox-input" density="compact" @input="checkboxFlagObj()"></input>
                         </template>
                     </v-checkbox>
                     <span class="labelCheckboxError" id="redCheckboxError">Enter a valid label</span>
-                    <v-checkbox density="compact" class="checkbox" :false-value="false" :error="!store.flagLabels.orangeCheckbox?.length" multiple :value="orangeValue" v-model="store.flagsChecked" @update:modelValue="updateCheckbox($event, 'orangeCheckboxError')">
+                    <v-checkbox density="compact" class="checkbox" multiple :value="orangeValue" v-model="store.flagsChecked" @update:modelValue="updateCheckbox($event, 'orangeCheckboxError')">
                         <template v-slot:append>
                             <v-icon icon="mdi-flag" color="#FF7F00" class="checkbox-flag"></v-icon>
                             <input v-model="store.flagLabels.orangeCheckbox" placeholder="Add label" style="border: 2px solid #FF7F00;" class="checkbox-input" @input="checkboxFlagObj()"></input>
                         </template>
                     </v-checkbox>
                     <span class="labelCheckboxError" id="orangeCheckboxError">Enter a valid label</span>
-                    <v-checkbox density="compact" class="checkbox" :false-value="false" :error="!store.flagLabels.yellowCheckbox?.length" multiple :value="yellowValue" v-model="store.flagsChecked" @update:modelValue="updateCheckbox($event, 'yellowCheckboxError')">
+                    <v-checkbox density="compact" class="checkbox" :false-value="false" multiple :value="yellowValue" v-model="store.flagsChecked" @update:modelValue="updateCheckbox($event, 'yellowCheckboxError')">
                         <template v-slot:append>
                             <v-icon icon="mdi-flag" color="#FFFF00" class="checkbox-flag"></v-icon>
                             <input v-model="store.flagLabels.yellowCheckbox" placeholder="Add label" style="border: 2px solid #FFFF00;" class="checkbox-input" @input="checkboxFlagObj()"></input>
                         </template>
                     </v-checkbox>
                     <span class="labelCheckboxError" id="yellowCheckboxError">Enter a valid label</span>
-                    <v-checkbox density="compact" class="checkbox" :false-value="false" :error="!store.flagLabels.greenCheckbox?.length" multiple :value="greenValue" v-model="store.flagsChecked" @update:modelValue="updateCheckbox($event, 'greenCheckboxError')"> 
+                    <v-checkbox density="compact" class="checkbox" multiple :value="greenValue" v-model="store.flagsChecked" @update:modelValue="updateCheckbox($event, 'greenCheckboxError')"> 
                         <template v-slot:append>
                             <v-icon icon="mdi-flag" color="#008000" class="checkbox-flag"></v-icon>
                             <input v-model="store.flagLabels.greenCheckbox" placeholder="Add label" style="border: 2px solid #008000;" class="checkbox-input" @input="checkboxFlagObj()"></input>
                         </template>
                     </v-checkbox>
                     <span class="labelCheckboxError" id="greenCheckboxError">Enter a valid label</span>
-                    <v-checkbox density="compact" class="checkbox" :false-value="false" :error="!store.flagLabels.blueCheckbox?.length" multiple :value="blueValue" v-model="store.flagsChecked" @update:modelValue="updateCheckbox($event, 'blueCheckboxError')">
+                    <v-checkbox density="compact" class="checkbox" :false-value="false" multiple :value="blueValue" v-model="store.flagsChecked" @update:modelValue="updateCheckbox($event, 'blueCheckboxError')">
                         <template v-slot:append>
                             <v-icon icon="mdi-flag" color="#4472C4" class="checkbox-flag"></v-icon>
                             <input v-model="store.flagLabels.blueCheckbox" placeholder="Add label" style="border: 2px solid #4472C4;" class="checkbox-input" @input="checkboxFlagObj()"></input>
                         </template>
                     </v-checkbox>
                     <span class="labelCheckboxError" id="blueCheckboxError">Enter a valid label</span>
-                <v-checkbox density="compact" class="checkbox" :false-value="false" :error="!store.flagLabels.purpleCheckbox?.length" multiple :value="purpleValue" v-model="store.flagsChecked" @update:modelValue="updateCheckbox($event, 'purpleCheckboxError')">
+                <v-checkbox density="compact" class="checkbox" :false-value="false" multiple :value="purpleValue" v-model="store.flagsChecked" @update:modelValue="updateCheckbox($event, 'purpleCheckboxError')">
                         <template v-slot:append>
                             <v-icon icon="mdi-flag" color="#B75CFF" class="checkbox-flag"></v-icon>
                             <input v-model="store.flagLabels.purpleCheckbox" placeholder="Add label" style="border: 2px solid #B75CFF;" class="checkbox-input" @input="checkboxFlagObj()"></input>
@@ -66,7 +66,7 @@
         <!-- <div> -->
 
             <v-lazy :options="{'threshold': 0, 'scrollMargin': '0px'}" transition="expand-transition" height="100" width="100%" >
-                <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `5px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="checkhighlight(String(rd.attributes.RETS_ID)) ?? 'card-rets'"  @dblclick="double(rd, road);" @click="zoomToRetsPt(rd)">
+                <v-card :id="String(rd.attributes.RETS_ID).concat('-',rd.attributes.OBJECTID)" :style="{borderLeft: `5px solid ${colorTable[rd.attributes.STAT] ? colorTable[rd.attributes.STAT]: 'Red'}`}" hover v-ripple :class="checkhighlight(String(rd.attributes.RETS_ID)) ?? 'card-rets'"  @dblclick="double(rd, road)" @click="zoomToRetsPt(rd)">
                     <div>
                         <div>
                             <div class="shareUrlAlert" :id="'share'+rd.attributes.OBJECTID">
@@ -117,7 +117,7 @@
                                     <v-icon size="medium" icon="mdi-flag-outline" color="'#FFFFFF'"></v-icon>
                                 </div>
                                 <div v-for="flag in rd.attributes.flagColor.FLAG">
-                                    <v-tooltip :text="store.flagLabels[`${flag.label}`] ?? 'No Flag'" location="top">
+                                    <v-tooltip :text="store.flagLabels[`${flag.label}`] ?? 'No Label'" location="top">
                                         <template v-slot:activator="{props}">
                                             <v-icon v-bind="props" size="medium" icon="mdi-flag" :color="flag.color ?? '#FFFFFF'"></v-icon>
                                         </template>
@@ -234,7 +234,8 @@ export default{
             yellowValue: {'color': '#FFFF00', 'label': 'yellowCheckbox'},
             greenValue: {'color': '#008000', 'label': 'greenCheckbox'},
             blueValue: {'color': '#4472C4', 'label': 'blueCheckbox'},
-            purpleValue: {'color': '#B75CFF', 'label': 'purpleCheckbox'}
+            purpleValue: {'color': '#B75CFF', 'label': 'purpleCheckbox'},
+            singleClickTimeout: null
         }
     },
 
@@ -311,20 +312,20 @@ export default{
             return
         },
         async zoomToRetsPt(rets){
-            if (!await includes(rets.attributes)  ){
+            console.log('finished')
+            if (!includes(rets.attributes)){
                 removeHighlight("a", true)
                 store.roadHighlightObj.clear()
                 if (!store.isShowSelected){
                     store.roadHighlightObj.add(rets);
                 }
-
             }
-            
+        
             highlightRETSPoint(rets.attributes)
             zoomTo(rets.geometry)
             return
         },
-        double(road, index){  
+        double(road, index){
             store.openAfterDiscardRets = road
 
             if ((store.retsObj.attributes.CREATE_DT != null && store.retsObj.attributes.EDIT_DT != null) && (store.retsObj.attributes.CREATE_DT === store.retsObj.attributes.EDIT_DT) && (store.activityBanner != "Activity Feed" )){
@@ -332,14 +333,15 @@ export default{
                 store.cancelpopup = true
                 return
             }
-            if (store.archiveRetsDataString.length){
-                const archiveRets = JSON.parse(store.archiveRetsDataString)
-                if (archiveRets.attributes.RETS_ID === road.attributes.RETS_ID ){
-                    openDetails(road)
-                    return
-                }
+            // if (store.archiveRetsDataString.length){
+            //     console.log(road)
+            //     const archiveRets = JSON.parse(store.archiveRetsDataString)
+            //     if (archiveRets.attributes.RETS_ID === road.attributes.RETS_ID ){
+            //         openDetails(road)
+            //         return
+            //     }
 
-            }   
+            // }   
             
             if(!store.isSaveBtnDisable || store.alertTextInfo.text ==='Route and/or DFO are not valid. Use the Move (icon) to move to a valid location.' || (store.retsObj.attributes.GIS_ANALYST === null || store.retsObj.attributes.GRID_ANALYST === null || store.retsObj.attributes.DIST_ANALYST === null|| store.retsObj.attributes.DIST_NM === null || store.retsObj.attributes.CNTY_NM === null) ){
                 clearTimeout(this.timer)
@@ -347,7 +349,6 @@ export default{
                 return
             }
 
-           
             openDetails(road)
             return
         },

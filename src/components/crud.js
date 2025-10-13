@@ -55,7 +55,6 @@ export async function updateRETSPT(retsObj){
     // delete enable.attributes?.mdipaperclip
     
     let esriUpdateGraphic = createGraphic(enable)
-    console.log(esriUpdateGraphic)
     esriUpdateGraphic.geometry = createGeo
     try{
         let updateResp = await retsLayer.applyEdits({

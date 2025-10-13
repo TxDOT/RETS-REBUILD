@@ -19,7 +19,7 @@ import TileInfo from "@arcgis/core/layers/support/TileInfo.js";
 import Legend from "@arcgis/core/widgets/Legend";
 import LegendViewModel from "@arcgis/core/widgets/Legend/LegendViewModel";
 import Graphic from "@arcgis/core/Graphic";
-import { outlineFeedCards, removeOutline, scrollToTopOfFeed} from "./utility.js";
+import { outlineFeedCards, removeOutline, scrollToTopOfFeed, enableFilterMapByExtent} from "./utility.js";
 import Extent from "@arcgis/core/geometry/Extent.js";
 import {store} from './store.js'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
@@ -880,49 +880,6 @@ retsPointRenderer.visualVariables = [
   }
 ]
 
-
-export async function queryExtent(){
-  let query = retsLayer.createQuery();
-  query.geometry = view.extent
-  query.spatialRelationship = "intersects"
-  query.returnGeometry = false
-  query.outFields = ["RETS_ID"]
-  var appendstring = ''
-  const response = await retsLayer.queryFeatures(query)
-  if (!response.features.length ){
-      store.roadObj.length = 0
-      return
-  }
-  for (const feature of response.features)
-  {
-    
-      if (store.isShowSelected){
-        store.roadHighlightObj.forEach((value) => value.attributes.RETS_ID === feature.attributes.RETS_ID ?  appendstring = appendstring.concat(` OR RETS_ID = ${value.attributes.RETS_ID}`) : null )
-        continue
-      }
-        appendstring = appendstring.concat(` OR RETS_ID = ${feature.attributes.RETS_ID}`)
-
-      
-  }
-
-  appendstring.length ?  await store.getRetsLayer(store.loggedInUser, appendstring.slice(4), "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`) : store.roadObj.length = 0
- 
-}
-
-let vieww = null
-reactiveUtils.watch(
-  () => [view.stationary],
-  async([stationary]) => {   
-    if(stationary && store.autozoomextent === true){
-       if (vieww !== `${view.center.x},${view.center.y}`){
-        await queryExtent(true)
-        vieww = `${view.center.x},${view.center.y}`
-      }
-    }
-  }
- );
-  
-  
 
 //remove attribution and zoom information
 view.ui.remove("attribution")

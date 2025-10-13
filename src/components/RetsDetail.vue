@@ -3,7 +3,7 @@
         <div id="detailsHeaderIcon">
             <div style="display: flex; flex-direction: row; gap: 5px; align-items: center;">
                 <div>
-                    <div v-click-outside="closeFlagDiv" @click="store.showRetsFlag = !store.showRetsFlag">
+                    <div @click="store.showRetsFlag = !store.showRetsFlag">
                         <v-icon v-if="!store.retsObj.attributes.flagColor.FLAG || !store.retsObj.attributes.flagColor.FLAG.length" size="20px" :id="`${store.retsObj.attributes.RETS_ID}Icon`" :icon="store.retsObj.attributes.flagColor.FLAG ? changeFlagIcon(store.retsObj.attributes.flagColor.FLAG) : 'mdi-flag-outline' " style="position: relative; left: 6px;"></v-icon>
                         <v-icon style="position: relative; padding: 0px !important; margin: 0px !important;" size="20px" v-for="i in store.retsObj.attributes.flagColor.FLAG " :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="i.color"></v-icon>
                     </div> 
@@ -145,7 +145,7 @@
 
 <script>
     import { appConstants } from '../common/constant.js'
-    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, updateRetsObj, openDetails, outlineFeedCards, highlightRETSPoint, getAllUserSettings} from './utility.js'
+    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, updateRetsObj, openDetails, outlineFeedCards, highlightRETSPoint} from './utility.js'
 
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
@@ -197,7 +197,6 @@
                     required: value => !!value || "Write a note. Submit your thought to History!"
                 },
                 initRules: false,
-                userArray: [],
                 retCmnt: {err: null},
                 retCmntL: {}
             }
@@ -291,21 +290,27 @@
                 store.historyChat.length = 0
                 store.isSaveBtnDisable = true
                 
-                if (store.roadHighlightObj.size <= 1 && store.isSelectEnabled === false){
+                if (store.isSelectEnabled === false){
                     // if (store.roadHighlightObj.size === 0){
                     removeHighlight(store.retsObj)
                     store.roadHighlightObj.clear()
                     if(!store.isSearch){
-                        if (store.CREATE_DT){
-                            store.roadObj = await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                        console.log("hekllo")
+                        // if (store.CREATE_DT){
+                            await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
 
-                        }
-                        else{
-                            store.roadObj = await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                        // }
+                        // else{
+                        //     await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
 
-                        }
+                        // }
                         store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+                        return
                     }
+
+                    // store.updateRetsSearch
+
+                    
                     // }
                     
                     // if (store.roadHighlightObj.size === 1){
@@ -340,7 +345,7 @@
                     store.closeIsRoadExist = true
                     return
                 }
-                store.retsObj.attributes.mdialarm = store.isDeadline(store.retsObj.attributes.DEADLINE)
+                // store.retsObj.attributes.mdialarm = store.isDeadline(store.retsObj.attributes.DEADLINE)
                 store.isEmptyRow = false
                 store.isSaving = true
                 store.retsObj.attributes.ACTV = !store.retsObj.attributes.ACTV ? null : store.retsObj.attributes.ACTV.value ?? store.retsObj.attributes.ACTV
@@ -355,15 +360,12 @@
                 retsLayerView.layer.definitionExpression = store.savedFilter
                 store.isSaveBtnDisable = true
                 
-                this.userArray.push(`${store.retsObj.attributes.GIS_ANALYST}`)
-                
-                // let userSettings = await getAllUserSettings(this.userArray)
 
                 // await this.sendNotification(userSettings)
                 store.isNewRets = false
-                if (store.autozoomextent){
-                    queryExtent()
-                }
+                // if (store.autozoomextent){
+                //     queryExtent()
+                // }
                 return
             },
             async sendNotification(userSettings){
@@ -408,6 +410,7 @@
                     store.cancelpopup = true
                     return
                 }
+                
                 if (store.archiveRetsDataString){
                     const archiveRets = JSON.parse(store.archiveRetsDataString)
                     this.replaceArchiveContent(archiveRets)
@@ -417,7 +420,6 @@
                 retsLayerView.layer.definitionExpression = store.savedFilter
                 store.toggleFeed = 1
                 store.cancelpopup = false
-
                 window.document.title = `RETS Application`
                 store.activityBanner = "Activity Feed"
                 return
@@ -451,12 +453,17 @@
                 return
             },
             async replaceArchiveContent(old){
+                //delete flags
+                // console.log(old)
+                old.attributes.flagColor.FLAG = store.flagsChecked
+                console.log(old.attributes.flagColor)
+                console.log(store.flagsChecked)
                 const filter = !store.isShowSelected ? store.updateRetsSearch : [...store.roadHighlightObj]
-                const currDate = filter?.find(x => x.attributes.RETS_ID === old.attributes.RETS_ID)?.attributes?.EDIT_DT ?? await this.returnToFeed()
+                // const currDate = filter?.find(x => x.attributes.RETS_ID === old.attributes.RETS_ID)?.attributes?.EDIT_DT ?? await this.returnToFeed()
                 const rd = filter.findIndex(x => x.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)
-                if(currDate !== old.attributes.EDIT_DT){
-                    old.attributes.EDIT_DT === currDate
-                }
+                // if(currDate !== old.attributes.EDIT_DT){
+                //     old.attributes.EDIT_DT === currDate
+                // }
                 filter.splice(rd, 1, old)
                 !store.isShowSelected ? filter.splice(rd, 1, old) : store.roadHighlightObj = new Set(filter)
                 return

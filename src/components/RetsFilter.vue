@@ -181,8 +181,8 @@ export default{
     data(){
         return{
             filterSort: [
-                         {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, 
-                         {title: "Date: Oldest to Newest", sortType: "ASC", filter: "CREATE_DT"},
+                         {title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"}, 
+                         {title: "Date: Oldest to Newest", sortType: "ASC", filter: "EDIT_DT"},
                          {title: "Status: Ascending", sortType: "ASC", filter: "STAT"}, 
                          {title: "Status: Descending", sortType: "DESC", filter: "STAT"}
                         ],
@@ -194,7 +194,7 @@ export default{
             filterActivity: appConstants.activityList,
             filterRouteType: [{label: 'On system', value : 1}, {label: 'Off system', value : 2}, {label: 'No Route', value : 'null'}],
             numFilters: 0,
-            defaultFilter: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "CREATE_DT"}, "JOB_TYPE": appConstants.defaultJobtypeValues, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
+            defaultFilter: {"CREATE_DT": {title: "Date: Newest to Oldest", sortType: "DESC", filter: "EDIT_DT"}, "JOB_TYPE": appConstants.defaultJobtypeValues, "EDIT_DT": null, "STAT": appConstants.defaultStatValues, 
                      "ACTV": null, "DIST_NM" : null, "CNTY_NM": null, 
                      "filterTotal": 2},
             isDate: false,
