@@ -403,8 +403,6 @@
     
             },
             async cancelDetailsMetadata(){
-                removeHighlight("", true)
-
                 if(!store.isSaveBtnDisable){
                     store.clickStatus = false
                     store.cancelpopup = true

@@ -23,7 +23,7 @@
         <div id="displayHistoryL">
                 <div v-for="(note, i) in histNotes" :key="note.OBJECTID" track-by="OBJECTID" v-if="!isHistNotesEmpty">
                     <v-banner :id="`${note.OBJECTID}Expand`" v-model="note[i]" density="compact" style="padding: 0px; padding-left: 5px; border-left: 5px solid #4472C4 !important;">
-                        <div style="max-width: 100%;">
+                        <div style="width: 89%;">
                             <span v-if="note.PARENT_ID" style="margin:0% !important; ">
                                 <p id="replyingToCmnt" >Replying to "{{store.historyChat.find(x => x.OBJECTID === note.PARENT_ID)?.CMNT ?? "Referenced Note has been deleted"}}"</p>
                             </span>
@@ -394,8 +394,8 @@
         bottom: 2px;
     }
     .history-note{
-        width: 700px;
         z-index: 9999;
+        width: 98%;
         /* position: relative; 
         width: 380px;
         position: relative;

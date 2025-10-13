@@ -200,7 +200,7 @@
 </template>
 
 <script>
-import {zoomTo, highlightRETSPoint, removeHighlight, checkhighlightfunction, loadData, openDetails, createCheckboxFlagObj, updateCheckboxFlag, includes} from './utility.js'
+import {zoomTo, highlightRETSPoint, removeHighlight, checkhighlightfunction, loadData, openDetails, createCheckboxFlagObj, updateCheckboxFlag, isHighlighted} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {store} from './store.js'
 
@@ -312,8 +312,7 @@ export default{
             return
         },
         async zoomToRetsPt(rets){
-            console.log('finished')
-            if (!includes(rets.attributes)){
+            if (!await isHighlighted(rets.attributes)  ){
                 removeHighlight("a", true)
                 store.roadHighlightObj.clear()
                 if (!store.isShowSelected){

@@ -130,17 +130,20 @@ export async function clickRetsPoint(){
                                 retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
                             }
 
-                            includes(retsPt.attributes).then((value) => {
-                                if (!value){
-                                    removeHighlight("", true)
-                                    store.roadHighlightObj.clear()
-                                    store.roadHighlightObj.add(retsPt)
-                                    highlightRETSPoint(retsPt.attributes)
-                                }
-                                outlineFeedCards([retsPt])
-                                if (store.isDetailsPage && !store.isEmptyRow){
-                                    openDetails(retsPt)
-                                }
+                        isHighlighted(retsPt.attributes).then((value) => {
+                            if (!value){
+                                removeHighlight("", true)
+                                store.roadHighlightObj.clear()
+                                store.roadHighlightObj.add(retsPt)
+                                highlightRETSPoint(retsPt.attributes)
+
+                                
+                            }
+                            outlineFeedCards([retsPt])
+                            if (store.isDetailsPage && !store.isEmptyRow){
+                                openDetails(retsPt)
+
+                            }
 
                             })
 
@@ -207,7 +210,7 @@ export async function doubleClickRetsPoint(){
                         retsPt = store.roadObj.find(rd => rd.attributes.OBJECTID === evt.results[0].graphic.attributes.OBJECTID)
                     
                     }
-                    includes(retsPt.attributes).then((value) => {
+                    isHighlighted(retsPt.attributes).then((value) => {
                         if (!value){
                             removeHighlight("", true)
                             store.roadHighlightObj.clear()
@@ -269,15 +272,16 @@ view.whenLayerView(TxDOTRoadways)
     })
 }
 
-export function includes(feature){
-    return view.whenLayerView(retsLayer)
-        .then((lyrView) => {
-            if (lyrView._highlightIds.has(feature.OBJECTID)) {
-                return true;
-            } else {
-                return false;
-            }
-    });
+export async function isHighlighted(feature){
+return view.whenLayerView(retsLayer)
+.then((lyrView) => {
+    if (lyrView._highlightIds.has(feature.OBJECTID)) {
+        return true;
+    } else {
+        return false;
+
+    }
+});
 }
 
 function highlightGraphicPt(feature){

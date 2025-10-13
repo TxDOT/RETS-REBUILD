@@ -174,7 +174,7 @@ import {filterMapActivityFeed} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import { store } from './store'
 import {addRETSFilter} from './crud.js'
-import { retsLayer, view } from './map-Init.js';
+import { retsLayer, view, queryExtent } from './map-Init.js';
 
 export default{
     name: "Filter",
@@ -291,7 +291,13 @@ export default{
                         }
                         retsLayer.definitionExpression = store.customquery
                         store.getRetsLayer(store.loggedInUser,store.customquery, 'retsLayerLayerView', 'EDIT_DT DESC')
-                        .then(res => store.roadObj = res)
+                        .then(res => {
+                            if (res == null){
+                                store.roadObj = [] 
+                                return
+                            }
+                            store.roadObj = res
+                        })
                             retsLayer.queryExtent()
                                 .then((resp) =>{
                                     this.validationMessageColor = "green"
@@ -416,6 +422,9 @@ export default{
             store.setFilterFeed()
             store.isfilter = false
             this.cancelsaveQuery(store.filter)
+            if (store.autozoomextent){
+                    queryExtent()
+                }
             return
         },
         addNumFilter(){

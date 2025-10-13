@@ -3,7 +3,7 @@
         <span >{{ store.alertTextInfo.text }}</span>
     </v-alert> -->
     <div style="overflow-y: auto; height: auto; max-height: 100vh;">
-         <v-alert v-for="(value, i) in store.alertObject" :border-color="store.alertObject.color" :key=i :color="value.color" :type="value.type" closable variant="tonal" class="detailsAlert" border="start" max-width="550" width="527">
+         <v-alert v-for="(value, i) in store.alertObject" :border-color="store.alertObject.color" :key=i :color="value.color" :type="value.type" closable  class="detailsAlert" border="start" max-width="550" width="527">
             <span id="alerttext">{{value.text}} </span>
         </v-alert>
     </div>
@@ -112,12 +112,6 @@ import {store} from './store'
         min-height: fit-content;
         margin-bottom: 10px;
     }
-
-    .detailsAlert :deep(.v-alert__underlay){
-        opacity: .4 !important;
-        
-    }
-
     .detailsAlert :deep(.v-alert__close){
         position: absolute;
         right:15px;
@@ -129,9 +123,5 @@ import {store} from './store'
 
     #alerttext{
         position: relative; 
-        font-size: 15px;
-        opacity: 1;
-        text-shadow: black 1px 1px 1px ;
-        font-weight: bolder;
     }
 </style>
