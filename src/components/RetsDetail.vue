@@ -14,33 +14,6 @@
                     </v-btn-toggle>   
                 </div>
             </div>
-
-            <!-- <div v-click-outside="closeFlagDiv" style="display: flex; flex-direction: row; border: 1px solid green; align-items: center;">
-                <v-icon style="position: relative; padding: 0px !important; margin: 0px !important;" size="20px" v-for="i in store.retsObj.attributes.flagColor.FLAG " :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])"></v-icon>
-            </div>  -->
-            <!-- <div style="display: flex; flex-direction: row; gap: 0px;">
-                <div>
-                    <div v-click-outside="closeFlagDiv" style="display: flex; flex-direction: row; border: 1px solid green; align-items: center;">
-                        <v-icon style="position: relative; padding: 0px !important; margin: 0px !important;" size="20px" v-for="i in store.retsObj.attributes.flagColor.FLAG " :icon="swatchColor[i] === '#FFFFFF' ? 'mdi-flag-outline' : 'mdi-flag'" :color="swatchColor[i]" @click="assignColorToFlag(swatchColor[i])"></v-icon>
-                    </div>  -->
-                    <!-- <v-btn density="compact" flat @click="changeColor(store.retsObj.attributes.RETS_ID);" id="flagBtnDetails">
-                        <template v-slot:prepend>
-                            <v-icon size="20px" :id="`${store.retsObj.attributes.RETS_ID}Icon`" :icon="store.retsObj.attributes.flagColor.FLAG ? changeFlagIcon(store.retsObj.attributes.flagColor.FLAG) : 'mdi-flag-outline' " style="position: relative; left: 6px;"></v-icon>
-                        </template>
-                    </v-btn> -->
-                <!-- </div>
-                <div>
-                    <v-btn-toggle v-model="store.retsObj.attributes.PRIO" density="compact" @update:modelValue="updatePRIO">
-                        <v-btn icon="mdi-exclamation" density="compact" style="color: #d9d9d9; opacity: 1; font-size: 15px;" selected-class="toggle-exclamation" variant="plain" active></v-btn>
-                    </v-btn-toggle>   
-                </div>
-            </div> -->
-            <!-- <div>
-
-            </div>-->
-
-
-
         </div>
         <div style="height: 100%; width: 100%;">
             <div class="container-div">
@@ -178,7 +151,6 @@
     import {store} from './store.js'
 
     import { defineAsyncComponent } from 'vue'
-import { queryExtent } from './map-Init.js'
     export default{
         name: "RetsDetailPage",
         components: {DetailsCard: defineAsyncComponent(()=> import('./detailsCard.vue')),
@@ -290,7 +262,6 @@ import { queryExtent } from './map-Init.js'
                 return
             },
             changeColor(id){
-                this.flagClickedId = ""
                 this.flagClickedId = id
                 this.isColorPicked = true;
                 return
@@ -308,6 +279,7 @@ import { queryExtent } from './map-Init.js'
                     store.cancelEvent.remove()
                     cancelSketchPt()
                 }
+                
                 store.isAlert = false
                 clearGraphicsLayer()
                 store.isDetailsPage = false
@@ -318,7 +290,7 @@ import { queryExtent } from './map-Init.js'
                 store.isCard = true
                 store.historyChat.length = 0
                 store.isSaveBtnDisable = true
-                //store.roadHighlightObj.clear()
+                
                 if (store.roadHighlightObj.size <= 1 && store.isSelectEnabled === false){
                     // if (store.roadHighlightObj.size === 0){
                     removeHighlight(store.retsObj)
@@ -342,7 +314,7 @@ import { queryExtent } from './map-Init.js'
                     //     store.roadHighlightObj.add(store.retsObj)
 
                     // }
-                    //store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
+                    
                     return
                 }
                 return
@@ -368,6 +340,7 @@ import { queryExtent } from './map-Init.js'
                     store.closeIsRoadExist = true
                     return
                 }
+                store.retsObj.attributes.mdialarm = store.isDeadline(store.retsObj.attributes.DEADLINE)
                 store.isEmptyRow = false
                 store.isSaving = true
                 store.retsObj.attributes.ACTV = !store.retsObj.attributes.ACTV ? null : store.retsObj.attributes.ACTV.value ?? store.retsObj.attributes.ACTV
@@ -376,6 +349,7 @@ import { queryExtent } from './map-Init.js'
                 await updateRETSPT(store.retsObj)
                 
                 await this.returnToFeed()
+
                 store.isShowSelected = false
                 deleteRetsGraphic()
                 retsLayerView.layer.definitionExpression = store.savedFilter
@@ -387,7 +361,9 @@ import { queryExtent } from './map-Init.js'
 
                 // await this.sendNotification(userSettings)
                 store.isNewRets = false
-                if (store.autozoomextent){queryExtent()}
+                if (store.autozoomextent){
+                    queryExtent()
+                }
                 return
             },
             async sendNotification(userSettings){
@@ -425,6 +401,8 @@ import { queryExtent } from './map-Init.js'
     
             },
             async cancelDetailsMetadata(){
+                removeHighlight("", true)
+
                 if(!store.isSaveBtnDisable){
                     store.clickStatus = false
                     store.cancelpopup = true
@@ -433,6 +411,7 @@ import { queryExtent } from './map-Init.js'
                 if (store.archiveRetsDataString){
                     const archiveRets = JSON.parse(store.archiveRetsDataString)
                     this.replaceArchiveContent(archiveRets)
+
                 }
                 
                 retsLayerView.layer.definitionExpression = store.savedFilter
@@ -809,7 +788,6 @@ import { queryExtent } from './map-Init.js'
     padding-right: 0px;
     left: 250px;
     justify-content: end;
-    border: 2px solid blue;
 }
 
 .details-color-picker{

@@ -6,48 +6,51 @@
         <div v-if="showFlagLabel" class="color-picker">
             <div style="padding: 0px !important;">
                 <div style="display: flex; flex-direction: column; gap: 35px; height: 100%; justify-content: center; align-items: center;"> 
-                    <v-checkbox density="compact" class="checkbox" :error="!store.flagLabels.redCheckbox.length" multiple v-model="store.flagsChecked" :value="{'color': '#FF0000', 'label': 'redCheckbox'}" @update:modelValue="updateCheckbox($event, 'redCheckboxError')">
+                    <v-checkbox density="compact" class="checkbox" :false-value="false" :error="!store.flagLabels.redCheckbox?.length" multiple :value="redValue" v-model="store.flagsChecked" @update:modelValue="updateCheckbox($event, 'redCheckboxError')">
                         <template v-slot:append>
                             <v-icon icon="mdi-flag" color="#FF0000" class="checkbox-flag"></v-icon>
                             <input v-model="store.flagLabels.redCheckbox" placeholder="Add label" style="border: 2px solid #FF0000;" class="checkbox-input" density="compact" @input="checkboxFlagObj()"></input>
                         </template>
                     </v-checkbox>
                     <span class="labelCheckboxError" id="redCheckboxError">Enter a valid label</span>
-                    <v-checkbox density="compact" class="checkbox" :error="!store.flagLabels.orangeCheckbox.length" multiple v-model="store.flagsChecked" :value="{'color': '#FF7F00', 'label': 'orangeCheckbox'}" @update:modelValue="updateCheckbox($event, 'orangeCheckboxError')">
+                    <v-checkbox density="compact" class="checkbox" :false-value="false" :error="!store.flagLabels.orangeCheckbox?.length" multiple :value="orangeValue" v-model="store.flagsChecked" @update:modelValue="updateCheckbox($event, 'orangeCheckboxError')">
                         <template v-slot:append>
                             <v-icon icon="mdi-flag" color="#FF7F00" class="checkbox-flag"></v-icon>
                             <input v-model="store.flagLabels.orangeCheckbox" placeholder="Add label" style="border: 2px solid #FF7F00;" class="checkbox-input" @input="checkboxFlagObj()"></input>
                         </template>
                     </v-checkbox>
                     <span class="labelCheckboxError" id="orangeCheckboxError">Enter a valid label</span>
-                    <v-checkbox density="compact" class="checkbox" :error="!store.flagLabels.yellowCheckbox.length" multiple v-model="store.flagsChecked" :value="{'color': '#FFFF00', 'label': 'yellowCheckbox'}" @update:modelValue="updateCheckbox($event, 'yellowCheckboxError')">
+                    <v-checkbox density="compact" class="checkbox" :false-value="false" :error="!store.flagLabels.yellowCheckbox?.length" multiple :value="yellowValue" v-model="store.flagsChecked" @update:modelValue="updateCheckbox($event, 'yellowCheckboxError')">
                         <template v-slot:append>
                             <v-icon icon="mdi-flag" color="#FFFF00" class="checkbox-flag"></v-icon>
                             <input v-model="store.flagLabels.yellowCheckbox" placeholder="Add label" style="border: 2px solid #FFFF00;" class="checkbox-input" @input="checkboxFlagObj()"></input>
                         </template>
                     </v-checkbox>
                     <span class="labelCheckboxError" id="yellowCheckboxError">Enter a valid label</span>
-                    <v-checkbox density="compact" class="checkbox" :error="!store.flagLabels.greenCheckbox.length" multiple v-model="store.flagsChecked" :value="{'color': '#008000', 'label': 'greenCheckbox'}" @update:modelValue="updateCheckbox($event, 'greenCheckboxError')"> 
+                    <v-checkbox density="compact" class="checkbox" :false-value="false" :error="!store.flagLabels.greenCheckbox?.length" multiple :value="greenValue" v-model="store.flagsChecked" @update:modelValue="updateCheckbox($event, 'greenCheckboxError')"> 
                         <template v-slot:append>
                             <v-icon icon="mdi-flag" color="#008000" class="checkbox-flag"></v-icon>
                             <input v-model="store.flagLabels.greenCheckbox" placeholder="Add label" style="border: 2px solid #008000;" class="checkbox-input" @input="checkboxFlagObj()"></input>
                         </template>
                     </v-checkbox>
                     <span class="labelCheckboxError" id="greenCheckboxError">Enter a valid label</span>
-                    <v-checkbox density="compact" class="checkbox" :error="!store.flagLabels.blueCheckbox.length" multiple v-model="store.flagsChecked" :value="{'color': '#4472C4', 'label': 'blueCheckbox'}" @update:modelValue="updateCheckbox($event, 'blueCheckboxError')">
+                    <v-checkbox density="compact" class="checkbox" :false-value="false" :error="!store.flagLabels.blueCheckbox?.length" multiple :value="blueValue" v-model="store.flagsChecked" @update:modelValue="updateCheckbox($event, 'blueCheckboxError')">
                         <template v-slot:append>
                             <v-icon icon="mdi-flag" color="#4472C4" class="checkbox-flag"></v-icon>
                             <input v-model="store.flagLabels.blueCheckbox" placeholder="Add label" style="border: 2px solid #4472C4;" class="checkbox-input" @input="checkboxFlagObj()"></input>
                         </template>
                     </v-checkbox>
                     <span class="labelCheckboxError" id="blueCheckboxError">Enter a valid label</span>
-                    <v-checkbox density="compact" class="checkbox" :error="!store.flagLabels.purpleCheckbox.length" multiple v-model="store.flagsChecked" :value="{'color': '#B75CFF', 'label': 'purpleCheckbox'}" @update:modelValue="updateCheckbox($event, 'purpleCheckboxError')">
+                <v-checkbox density="compact" class="checkbox" :false-value="false" :error="!store.flagLabels.purpleCheckbox?.length" multiple :value="purpleValue" v-model="store.flagsChecked" @update:modelValue="updateCheckbox($event, 'purpleCheckboxError')">
                         <template v-slot:append>
                             <v-icon icon="mdi-flag" color="#B75CFF" class="checkbox-flag"></v-icon>
                             <input v-model="store.flagLabels.purpleCheckbox" placeholder="Add label" style="border: 2px solid #B75CFF;" class="checkbox-input" @input="checkboxFlagObj()"></input>
                         </template>
                     </v-checkbox>
                     <span class="labelCheckboxError" id="purpleCheckboxError">Enter a valid label</span>
+                    <div id="checkboxCloseBtnDiv">
+                        <v-btn size="small" id="checkboxCloseBtn" @click="showFlagLabels()">Close</v-btn>
+                    </div>
                 </div>
             </div>
         </div>
@@ -200,7 +203,6 @@
 import {zoomTo, highlightRETSPoint, removeHighlight, checkhighlightfunction, loadData, openDetails, createCheckboxFlagObj, updateCheckboxFlag, isHighlighted} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import {store} from './store.js'
-import { view, retsLayer } from './map-Init.js'
 
 export default{
     name: "RetsCards",
@@ -220,17 +222,23 @@ export default{
             ],
             store,
             flagLabels: [],
+            flagsChecked: [],
             isColorPicked: true,
             roads: [],
             currIter: 0,
             nextIter: 100,
             showFlagLabel: false,
-            labelTimeout: null
+            labelTimeout: null,
+            redValue: {'color': '#FF0000', 'label': 'redCheckbox'},
+            orangeValue: {'color': '#FF7F00', 'label': 'orangeCheckbox'},
+            yellowValue: {'color': '#FFFF00', 'label': 'yellowCheckbox'},
+            greenValue: {'color': '#008000', 'label': 'greenCheckbox'},
+            blueValue: {'color': '#4472C4', 'label': 'blueCheckbox'},
+            purpleValue: {'color': '#B75CFF', 'label': 'purpleCheckbox'}
         }
     },
 
     mounted(){
-        //outlineFeedCards()
         this.setLayer
         store.isSaving = false
         loadData()
@@ -239,11 +247,9 @@ export default{
         let parseFlagLabel = JSON.parse(flagLabel)
         this.setFlagLabels(parseFlagLabel)
         return
-        //outlineFeedCards(store.roadHighlightObj)
     },
 
     updated(){
-        //store.toggleFeed = 1
         if(store.isSearch){
             loadData()
             return
@@ -256,10 +262,8 @@ export default{
         shareURL(retsid){
             let copyUrl = `${window.location.origin}${window.location.pathname}?retsid=${retsid}`
             navigator.clipboard.writeText(copyUrl)
-            document.getElementById(`share${retsid}`).style.display = "flex"
-            setTimeout(()=> {
-                document.getElementById(`share${retsid}`).style.display = "none"
-            },2500)
+            store.alertTextInfo = {"text": `${copyUrl} has been copied to clipboard.`, "color": "#70ad47", "type":"success", "toggle": true}
+            store.isAlert = true
             return
         },
         setFlagLabels(labels){
@@ -283,9 +287,9 @@ export default{
         },
         showFlagLabels(rets){
             store.showRetsFlag = !this.showFlagLabel
+            if(!store.showRetsFlag) return
             store.flagClickedId = rets.attributes.RETS_ID
             store.flagsChecked = rets.attributes.flagColor.FLAG
-            
             return
         },
         checkhighlight(retsid){
@@ -300,11 +304,9 @@ export default{
         },
         closeFlagDiv(){
             store.flagClickedId = null
+            return
         },
         updateCheckbox(e, div){
-            // if(store.flagsChecked[0] === ""){
-            //     store.flagsChecked.splice(0)
-            // }
             updateCheckboxFlag(e, div)
             return
         },
@@ -321,10 +323,10 @@ export default{
             highlightRETSPoint(rets.attributes)
             zoomTo(rets.geometry)
             return
-            
         },
         double(road, index){  
             store.openAfterDiscardRets = road
+
             if ((store.retsObj.attributes.CREATE_DT != null && store.retsObj.attributes.EDIT_DT != null) && (store.retsObj.attributes.CREATE_DT === store.retsObj.attributes.EDIT_DT) && (store.activityBanner != "Activity Feed" )){
                 store.deleteafterdiscard = true
                 store.cancelpopup = true
@@ -358,7 +360,7 @@ export default{
                 this.showFlagLabel = n
             },
             immediate: true
-        }
+        },
     },
     computed: {
         setLayer: () => {                                              
@@ -415,7 +417,7 @@ export default{
     left: 488px;
     top: 2.7rem;
     width: 300px;
-    height: 225px;
+    height: auto;
     display: flex;
     flex-direction: column;
     gap: 45px;
@@ -538,5 +540,17 @@ export default{
     width: 100%;
     right:1px;
     z-index: 9999;
+}
+#checkboxCloseBtn{
+    border: 1px solid grey;
+    border-radius: 0px;
+}
+#checkboxCloseBtnDiv{
+    position: relative;
+    width: 100%; 
+    display: flex; 
+    flex-direction: row; 
+    justify-content: end;
+    margin-top: 7px;
 }
 </style>

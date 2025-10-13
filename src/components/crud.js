@@ -55,6 +55,7 @@ export async function updateRETSPT(retsObj){
     // delete enable.attributes?.mdipaperclip
     
     let esriUpdateGraphic = createGraphic(enable)
+    console.log(esriUpdateGraphic)
     esriUpdateGraphic.geometry = createGeo
     try{
         let updateResp = await retsLayer.applyEdits({
@@ -142,7 +143,8 @@ export async function sendChatHistory(chat, type){
 
 export function postFlagColor(rets){
     // let flagContainer = []
-    let newFlagGraphic = rets.attributes.flagColor.FLAG
+    let newFlagGraphic = [...rets.attributes.flagColor.FLAG]
+
     if(newFlagGraphic[0] === ""){
         newFlagGraphic.splice(0)
     }
@@ -192,13 +194,13 @@ export function postFlagColor(rets){
 }
 
 export function postUserFlagLabels(labelString){
-    console.log(labelString)
     let {objectid} = appConstants.defaultUserValue[0]
-    console.log(objectid)
+
     retsRole.applyEdits({
         updateFeatures:[{'attributes':{"OBJECTID": objectid, "LABEL": labelString}}]
     })
-    .then((res) => console.log(res))
+    .then(() => 'flagged added')
+    .catch(err => console.log(err))
     // .then((x) => console.log(x))
 
     console.log(appConstants.defaultUserValue)
@@ -227,7 +229,6 @@ export async function addSettings(settingsObject){
         await retsRole.applyEdits({
             updateFeatures: [esriUpdateGraphic]
         })
-        console.log(`RETSROLE updated`)
         return
     }
     catch(err){

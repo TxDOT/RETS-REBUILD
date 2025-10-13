@@ -70,12 +70,12 @@ export const store = reactive({
         userRetsFlag: [],
         isColorPicked: false,
         flagLabels:{
-                redCheckbox: "",
-                orangeCheckbox: "",
-                yellowCheckbox: "",
-                greenCheckbox: "",
-                blueCheckbox: "",
-                purpleCheckbox: ""
+                redCheckbox: null,
+                orangeCheckbox: null,
+                yellowCheckbox: null,
+                greenCheckbox: null,
+                blueCheckbox: null,
+                purpleCheckbox: null
         },
         flagsChecked: [],
         flagClickedId: null,
@@ -275,7 +275,7 @@ export const store = reactive({
         },
         setFlagColor(att){
                 const retsFlag = this.userRetsFlag.find((flag) => flag.RETS_ID === att.RETS_ID)    
-                const defaultValue = {FLAG: '', OBJECTID: '', RETS_ID: att.RETS_ID, USERNAME: this.loggedInUser}                
+                const defaultValue = {FLAG: null, OBJECTID: '', RETS_ID: att.RETS_ID, USERNAME: this.loggedInUser}                
                     
                 if(!retsFlag){
                         return defaultValue
@@ -290,6 +290,11 @@ export const store = reactive({
 
                 let retsFlagObj = JSON.parse(retsFlag.FLAG)
                 return {FLAG: retsFlagObj, OBJECTID: retsFlag.OBJECTID, RETS_ID: att.RETS_ID, USERNAME: this.loggedInUser}  
+        },
+
+        updateFlagArrState(f){
+                this.flagsChecked = f
+                return
         },
 
         async getRetsLayer(userid, where, layer, orderFields){
@@ -401,7 +406,7 @@ export const store = reactive({
                                 updateItem.attributes.mdicheckdecagramoutline = this.isComplete(obj.features[0].attributes.STAT)
                                 updateItem.attributes.mditimersand = this.isNoActivity(obj.features[0].attributes.STAT, obj.features[0].attributes.EDIT_DT)
                                 updateItem.attributes.mdiexclamation = this.isPrio(obj.features[0].attributes.PRIO)
-                                updateItem.attributes.mdipaperclip = this.retsHasAttachment(x.attributes.OBJECTID)
+                                updateItem.attributes.mdipaperclip = this.retsHasAttachment(obj.features[0].attributes.OBJECTID)
                                 updateItem.attributes.historyUpdate = "Loading"
                                 //this.retsObj = updateItem
                                 //const retsIndex = this.roadObj.findIndex(x => x.attributes.RETS_ID === obj.features[0].attributes.RETS_ID)
@@ -410,10 +415,10 @@ export const store = reactive({
                                 // }
                                 // else{
                                 //         this.roadObj.splice(retsIndex, 1, updateItem)
-                                // }
-                                        
+                                // }     
                                         //sort by no activity setting (no activity sand thingy)
                                 this.roadObj.sort((a,b) => new Date(b.attributes.EDIT_DT) - new Date(a.attributes.EDIT_DT))
+                                console.log(this.roadObj)
                                 this.updateRetsSearch = this.roadObj
                                 const cloneRets = [...this.roadObj]
                                 this.archiveRetsData = cloneRets
@@ -421,7 +426,6 @@ export const store = reactive({
                                 this.isNoRets = false
                                 return
                         }
-                this.
                 this.isDetailsPage = false
                 this.isNoRets = true
                 return

@@ -3,7 +3,7 @@
         <span >{{ store.alertTextInfo.text }}</span>
     </v-alert> -->
     <div style="overflow-y: auto; height: auto; max-height: 100vh;">
-         <v-alert v-for="value in store.alertObject" :border-color="store.alertObject.color" :color="value.color" :type="value.type" closable variant="tonal" class="detailsAlert" border="start" max-width="550" width="527">
+         <v-alert v-for="(value, i) in store.alertObject" :border-color="store.alertObject.color" :key=i :color="value.color" :type="value.type" closable variant="tonal" class="detailsAlert" border="start" max-width="550" width="527">
             <span id="alerttext">{{value.text}} </span>
         </v-alert>
     </div>
@@ -32,6 +32,7 @@ import {store} from './store'
                 if (this.isHandling){
                     return
                 } 
+
                 this.isHandling = true;
 
                 for (let i = 0; i < store.alertObject.length; i++) {
@@ -41,16 +42,17 @@ import {store} from './store'
                         store.alertObject.splice(i, 1)
                         i--
                     }
-                    
-                }
-                        
+                }    
                 this.isHandling = false;
-
-               
                 return
             },
+            
             async delay(milseconds){
-                return new Promise(resolve => {setTimeout(() => { resolve('') }, milseconds)})
+                return new Promise(resolve => {
+                    setTimeout(() =>{ 
+                        resolve('Promise Resolved')
+                    }, milseconds)
+                })
             }
 
         },
@@ -66,7 +68,6 @@ import {store} from './store'
                     // console.log(n)
                     if (!store.alertObject.some(item => item.text === store.alertTextInfo.text) || store.alertTextInfo.text === 'Rets not found try again.'){
                         store.alertObject.push(n)
-
                     }
 
    

@@ -62,7 +62,7 @@
             </v-text-field>
         </div>
         <div id="retsURL" v-if="isShowRetsUrl && !store.isDetailsPage" @click="isShowRetsUrl = false; restoreFilters();">
-            <v-banner icon="mdi-restore" text="Filter settings updated. Click to restore." id="retsURLBanner" @click="">
+            <v-banner icon="mdi-restore" text="Filter settings updated. Click to restore." id="retsURLBanner" >
                 <!-- <template v-slot:prepend>
                     <icon icon="mdi-restore"></icon>
                 </template> -->
@@ -235,6 +235,7 @@ export default{
             localStorage.removeItem("retsParam")
             store.activityBanner = "Activity Feed"
             await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+            removeHighlight("", true)
             return
         },
         async isRetsParamOpen(retsParam){

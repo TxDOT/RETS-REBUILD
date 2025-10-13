@@ -12,8 +12,6 @@
 <script >
 import {login} from './components/login.js'
 import router from './router/index.js'
-import { store } from './components/store.js'
-// import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 
 export default{
   name: "App",
@@ -23,7 +21,7 @@ export default{
       routeParam: null
     }
   },
-  beforeRouteLeave(to, from){
+  beforeRouteLeave(){
     localStorage.removeItem("retsParam")
   },
   beforeUnmount(){
@@ -31,31 +29,21 @@ export default{
   },
   mounted(){
     this.checkURL()
-    this.auth = login(this.routeParam)
+    this.auth = login()
   },
   methods:{
     checkURL(){
-      
-      router.afterEach((to, from)=>{
+      router.afterEach((to)=>{
         if(to.matched[0].name === "Inital") return
         
-        // if(!to.query){
-          localStorage.removeItem("retsParam")
-        // }
-        // if(!this.routeParam){
-        //   localStorage.removeItem("retsParam")
-        // }
+        localStorage.removeItem("retsParam")
 
         if(to.query.retsid){
-          // routeParam = to.query.retsid
           localStorage.removeItem("retsParam")
           localStorage.setItem("retsParam", to.query.retsid)
-          // sessionStorage.setItem("retsParam", to.query.retsid)
           this.routeParam = to.query.retsid
           return 
         }
-        // localStorage.removeItem("retsParam")
-        // window.sessionStorage.removeItem("retsParam")
         return
 
       })
@@ -70,20 +58,6 @@ export default{
       },
       immediate: true,
     },
-    
-    $route(to, from){
-      console.log(to,from)
-      // if(to.query.retsid){
-      //   sessionStorage.setItem("retsParam", to.query.retsid)
-      //   return
-      // }
-      // let getSessionStorage = sessionStorage.getItem("retsParam")
-      // console.log(getSessionStorage)
-      // if(getSessionStorage){
-      //   sessionStorage.removeItem("retsParam")
-      // }
-      // console.log(to,from)
-    }
   }
 }
 
