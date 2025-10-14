@@ -960,7 +960,7 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                         
                                         removeHighlight("a", true); 
                                         store.roadHighlightObj.clear()
-                                        store.retsSelection.clear
+                                        store.retsSelection.clear()
                                         if (!selectedFeatures.length){
                                             store.roadHighlightObj.clear()
                                              setTimeout(() => {
@@ -1615,13 +1615,13 @@ export function openDetails(road){
     store.flagsChecked = road.attributes.flagColor.FLAG
     store.toggleFeed = 2
     store.isSaving = false
-    
 
     store.archiveRetsDataString = JSON.stringify(road)
     store.retsObj = road
     store.historyRetsId = road.attributes.RETS_ID
     returnHistory(`RETS_ID = ${road.attributes.RETS_ID}`)
 
+    store.rets
     store.isCard = false
     store.isDetailsPage = true
     store.activityBanner = `${road.attributes.RETS_ID}`
@@ -1967,7 +1967,7 @@ export function createCheckboxFlagObj(e){
 export function updateCheckboxFlag(e, div){
     // let searchArray = store.isShowSelected ? [...store.retsSelection] : store.updateRetsSearch
     const rets = store.updateRetsSearch.find(rd => rd.attributes.RETS_ID === store.flagClickedId)
-    // store.retsObj.attributes.flagColor = rets.attributes.flagColor
+    store.retsObj.attributes.flagColor = rets.attributes.flagColor
     if(!e || !e.length){
         rets.attributes.flagColor.FLAG = store.flagsChecked = e
 

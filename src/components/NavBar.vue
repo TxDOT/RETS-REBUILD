@@ -95,14 +95,13 @@
    
    <v-list id='Selecticons' hover @mouseleave="mouseleaveselect" v-if = "selecttoggle" >
         <v-list-item  v-for="(tool, i) in multiselectOptions" :key="i" :value="tool" @click="tool.action()":active="tool.isActive" style="margin: 0; padding: 0 !important;  width:39px; height: 39px; justify-items: center;">    
-                <v-tooltip location="right bottom" :text=tool.name >
-                    <template v-slot:activator="{ props}">
-                        <v-icon size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" style="justify-items: center; align-self: center;"></v-icon>
-                    </template>
-                </v-tooltip>
-                
-            </v-list-item>
-        </v-list>
+            <v-tooltip location="right bottom" :text=tool.name >
+                <template v-slot:activator="{ props}">
+                    <v-icon size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" style="justify-items: center; align-self: center;"></v-icon>
+                </template>
+            </v-tooltip>
+        </v-list-item>
+    </v-list>
    <v-card id = "containersettings" height = "655" v-show = "settingsstatus">
     <v-card-item>
         <span class="banner-txt">Settings</span>
@@ -246,8 +245,8 @@
 <script>
 
     import { appConstants } from '../common/constant.js';
-    import { graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect, map } from '../components/map-Init.js';
-    import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM, getUserOBJECTID} from '../components/utility.js';
+    import { graphics, createretssym, view, legendWidget, sketchWidgetcreate, sketchWidgetselect } from '../components/map-Init.js';
+    import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM, getUserOBJECTID, queryExtent} from '../components/utility.js';
     import { addSettings } from './crud.js';
     import { store } from './store';
     import { defineAsyncComponent } from 'vue'
@@ -766,14 +765,16 @@
 
                         if (store.updateRetsSearch.length !== store.retspointlength && store.autozoomextent == false){
                             if (store.CREATE_DT){
-                                store.roadObj = await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                                await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
                             }
                             else{
-                                store.roadObj = await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                                await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
                             }
                             return  
                         }
-                       
+
+                        await queryExtent()
+                        return
                         
                     },
                     cancelSettings(){

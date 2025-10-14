@@ -333,7 +333,7 @@ export default{
 
             return
         },
-        double(road, index){
+        async double(road, index){
             store.openAfterDiscardRets = road
             zoomTo(road.geometry)
             if ((store.retsObj.attributes.CREATE_DT != null && store.retsObj.attributes.EDIT_DT != null) && (store.retsObj.attributes.CREATE_DT === store.retsObj.attributes.EDIT_DT) && (store.activityBanner != "Activity Feed" )){
@@ -356,6 +356,11 @@ export default{
                 return
             }
 
+            if(!await isHighlighted(road.attributes)){
+                store.roadHighlightObj.clear()
+                removeHighlight("a", true)
+            }
+            store.roadHighlightObj.add(road)
             openDetails(road)
             return
         },

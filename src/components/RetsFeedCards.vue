@@ -62,7 +62,7 @@
             </v-text-field>
         </div>
         <div id="retsURL" v-if="isShowRetsUrl && !store.isDetailsPage" @click="isShowRetsUrl = false; restoreFilters();">
-            <v-banner icon="mdi-restore" text="Shared URL Bypasses filters. Click to restore." id="retsURLBanner" >
+            <v-banner icon="mdi-restore" text="Shared URL bypasses filters. Click to restore." id="retsURLBanner" single-line width="100">
                 <!-- <template v-slot:prepend>
                     <icon icon="mdi-restore"></icon>
                 </template> -->
@@ -733,8 +733,10 @@ export default{
         border-left-color: white;
         padding: 5px;
         font-size: 15px;
+        width: 100% !important;
     }
-    .v-banner-text{
+    :deep(.v-banner-text){
         font-size: 15px !important;
+        padding-inline-end: 7px !important; 
     }
 </style>
