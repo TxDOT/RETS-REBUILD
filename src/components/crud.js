@@ -155,7 +155,6 @@ export function postFlagColor(rets){
     
     //if OBJECTID is blank, would mean its a new flag insert
     const flagGraphic = createGraphic({'FLAG': newFlagGraphic.length ? JSON.stringify(newFlagGraphic) : null, 'RETS_ID': rets.attributes.flagColor.RETS_ID, 'USERNAME': rets.attributes.flagColor.USERNAME})
-
     if(rets.attributes.flagColor.OBJECTID === ''){
         // flagGraphic.attributes.OBJECTID = rets.attributes.OBJECTID
         // flagGraphic.attributes.USERNAME = appConstants.defaultUserValue[0].value
@@ -202,7 +201,6 @@ export function postUserFlagLabels(labelString){
     .catch(err => console.log(err))
     // .then((x) => console.log(x))
 
-    console.log(appConstants.defaultUserValue)
     return
 }
 

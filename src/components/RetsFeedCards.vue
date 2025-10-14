@@ -112,7 +112,7 @@
 </template>
 
 <script>
-import {clickRetsPoint, getQueryLayer, getHighlightGraphic, removeHighlight, createtool, changeCursor, outlineFeedCards, openDetails, doubleClickRetsPoint, filterMapActivityFeed, zoomTo} from './utility.js'
+import {clickRetsPoint, getQueryLayer, getHighlightGraphic, removeHighlight, createtool, changeCursor, outlineFeedCards, openDetails, doubleClickRetsPoint, filterMapActivityFeed, zoomTo, queryExtent} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import {store} from './store.js'
@@ -232,7 +232,6 @@ export default{
             await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
             removeHighlight("", true)
             history.replaceState(null, '', `${window.location.origin}${window.location.pathname}`)
-            console.log(window.location)
             return
         },
         async isRetsParamOpen(retsParam){
@@ -394,18 +393,19 @@ export default{
         async updateSelection(e){
             if(!e){
                 store.activityBanner = "Activity Feed"
-                store.roadObj = store.autozoomextent ? queryExtent : await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                store.autozoomextent ? await queryExtent() : await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
                 store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
-                outlineFeedCards(store.roadHighlightObj)
+                // console.log(store.updateRetsSearch)
+                // outlineFeedCards(store.roadHighlightObj)
                 // if (store.autozoomextent){
                 //     queryExtent()
                 //     return
                 // }
-                store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
+                // store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
 
                 return
             }
-            store.updateRetsSearch = store.roadHighlightObj
+            store.updateRetsSearch = [...store.roadHighlightObj]
             return
         },
     },

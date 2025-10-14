@@ -945,9 +945,8 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                     graphics.removeAll();
                                     var selectedFeatures = result.features;
                                     store.retsSelection = selectedFeatures.map((feature) => {
-                                        console.log(feature)
                                         return {
-                                                attributes: { ...feature.attributes, flagColor: {FLAG: null}, historyUpdate : null, mdiaccountgroup : null, mdiaccountmultiplecheck :  null, mdialarm :  {bool: null, color: null}, mdicheckdecagramoutline : null, mdiexclamation : null, mdipaperclip : null,
+                                                attributes: { ...feature.attributes, flagColor: {FLAG: null, OBJECTID: '', RETS_ID: feature.attributes.RETS_ID, USERNAME: store.loggedInUser}, historyUpdate : null, mdiaccountgroup : null, mdiaccountmultiplecheck :  null, mdialarm :  {bool: null, color: null}, mdicheckdecagramoutline : null, mdiexclamation : null, mdipaperclip : null,
                                                     mdipencilboxoutline : null, mditimersand : {bool: null, numDays: null}
                                                 },
                                                 //needs to be reprojected
@@ -1966,9 +1965,9 @@ export function createCheckboxFlagObj(e){
 }
 
 export function updateCheckboxFlag(e, div){
-    console.log(e, div)
+    // let searchArray = store.isShowSelected ? [...store.retsSelection] : store.updateRetsSearch
     const rets = store.updateRetsSearch.find(rd => rd.attributes.RETS_ID === store.flagClickedId)
-    store.retsObj.attributes.flagColor = rets.attributes.flagColor
+    // store.retsObj.attributes.flagColor = rets.attributes.flagColor
     if(!e || !e.length){
         rets.attributes.flagColor.FLAG = store.flagsChecked = e
 
@@ -1999,15 +1998,16 @@ export function removeLableError(id){
 }
 
 export function enableFilterMapByExtent(){
+
     reactiveUtils.watch(
-        () => [view.stationary, view.updating],
-        async([isStationary, isUpdate]) => {
-            if(store.autozoomextent && isStationary && !isUpdate){
+        () => view.interacting,
+        async(isUpdating) => {
+            if(!isUpdating && store.autozoomextent && !store.isShowSelected){
                 await queryExtent()
                 return
             }
             return
-        }
+        },
     )
     return
 }

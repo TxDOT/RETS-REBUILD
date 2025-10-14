@@ -301,7 +301,6 @@ export const store = reactive({
                 this.loggedInUser = userid
                 where = localStorage.getItem("retsParam") ? `${where} or RETS_ID in (${localStorage.getItem("retsParam")})` : where
                 orderFields = localStorage.getItem("retsParam") ? `CASE RETS_ID WHEN ${localStorage.getItem("retsParam")} THEN 0 ELSE 1 END, EDIT_DT DESC` : orderFields
-                console.log(where, orderFields)
                 const queryString = {"whereString": where, "queryLayer": layer}
                 //const orderField = "EDIT_DT DESC, PRIO"
                 try{
@@ -309,6 +308,7 @@ export const store = reactive({
                         this.updateRetsSearch.length = 0
                         let obj = await getQueryLayer(queryString, orderFields)
                                 //.then((obj) => {
+                                        // console.log(obj.features)
                                         if(obj.features.length){
                                                 let holdingArr = []
                                                 obj.features.forEach((x, i) => {
@@ -330,6 +330,7 @@ export const store = reactive({
                                                         holdingArr.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]}) 
                                                         //store.archiveRetsData.push({attributes: x.attributes, geometry: [x.geometry.x, x.geometry.y]})
                                                 })
+
                                                 this.roadObj = holdingArr
                                                 return holdingArr
 
@@ -394,7 +395,7 @@ export const store = reactive({
         async updateRetsID(){
                 //find updated rets
                 //find rets in roadObj and update that index
-                const resp = `${this.savedFilter}`
+                const resp = `RETS_ID = ${this.retsObj.attributes.RETS_ID}`
                 const query = {"whereString": `${resp}`, "queryLayer": "retsLayer"}
                 const orderField = `${this.CREATE_DT.filter} ${this.CREATE_DT.sortType}`
                 const obj = await getQueryLayer(query, orderField)
@@ -424,11 +425,11 @@ export const store = reactive({
                                 //         this.roadObj.splice(retsIndex, 1, updateItem)
                                 // }     
                                         //sort by no activity setting (no activity sand thingy)
-                                this.roadObj.sort((a,b) => new Date(b.attributes.EDIT_DT) - new Date(a.attributes.EDIT_DT))
-                                console.log(this.roadObj)
-                                this.updateRetsSearch = this.roadObj
-                                const cloneRets = [...this.roadObj]
-                                this.archiveRetsData = cloneRets
+                                // this.roadObj.sort((a,b) => new Date(b.attributes.EDIT_DT) - new Date(a.attributes.EDIT_DT))
+                                // console.log(this.roadObj)
+                                // this.updateRetsSearch = this.roadObj
+                                // const cloneRets = [...this.roadObj]
+                                // this.archiveRetsData = cloneRets
 
                                 this.isNoRets = false
                                 return

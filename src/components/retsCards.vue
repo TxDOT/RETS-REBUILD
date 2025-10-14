@@ -1,6 +1,6 @@
 <template>
     <div>
-        <v-text-field v-if="!store.roadObj.length" disabled variant="plain" style="position: relative; left: 15px;">{{store.RetsCardStatus}}</v-text-field>
+        <v-text-field v-if="!store.roadObj.length ?? !store.roadObj.size " disabled variant="plain" style="position: relative; left: 15px;">{{store.RetsCardStatus}}</v-text-field>
     </div>
     <Teleport to="body">
         <div v-if="showFlagLabel" class="color-picker">
@@ -311,22 +311,30 @@ export default{
             updateCheckboxFlag(e, div)
             return
         },
-        async zoomToRetsPt(rets){
-            if (!await isHighlighted(rets.attributes)  ){
-                removeHighlight("a", true)
-                store.roadHighlightObj.clear()
-                if (!store.isShowSelected){
-                    store.roadHighlightObj.add(rets);
-                }
+        zoomToRetsPt(rets){
+            if(this.singleClickTimeout){
+                clearTimeout(this.singleClickTimeout)
+                this.singleClickTimeout = null
+                return
             }
+            this.singleClickTimeout = setTimeout(async () => {
+                if (!await isHighlighted(rets.attributes) ){
+                    removeHighlight("a", true)
+                    store.roadHighlightObj.clear()
+                    if (!store.isShowSelected){
+                        store.roadHighlightObj.add(rets);
+                    }
+                }
         
-            highlightRETSPoint(rets.attributes)
-            zoomTo(rets.geometry)
+                highlightRETSPoint(rets.attributes)
+                zoomTo(rets.geometry)
+            }, 500)
+
             return
         },
         double(road, index){
             store.openAfterDiscardRets = road
-
+            zoomTo(road.geometry)
             if ((store.retsObj.attributes.CREATE_DT != null && store.retsObj.attributes.EDIT_DT != null) && (store.retsObj.attributes.CREATE_DT === store.retsObj.attributes.EDIT_DT) && (store.activityBanner != "Activity Feed" )){
                 store.deleteafterdiscard = true
                 store.cancelpopup = true
@@ -343,7 +351,6 @@ export default{
             // }   
             
             if(!store.isSaveBtnDisable || store.alertTextInfo.text ==='Route and/or DFO are not valid. Use the Move (icon) to move to a valid location.' || (store.retsObj.attributes.GIS_ANALYST === null || store.retsObj.attributes.GRID_ANALYST === null || store.retsObj.attributes.DIST_ANALYST === null|| store.retsObj.attributes.DIST_NM === null || store.retsObj.attributes.CNTY_NM === null) ){
-                clearTimeout(this.timer)
                 store.cancelpopup = true
                 return
             }

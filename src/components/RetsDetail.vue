@@ -145,8 +145,7 @@
 
 <script>
     import { appConstants } from '../common/constant.js'
-    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, updateRetsObj, openDetails, outlineFeedCards, highlightRETSPoint} from './utility.js'
-
+    import {getGEMTasks, removeHighlight, removeRelatedRetsFromMap, deleteRetsGraphic, clearGraphicsLayer, isRoadExist, cancelSketchPt, retsLayerView, updateRetsObj, openDetails, outlineFeedCards, highlightRETSPoint, queryExtent} from './utility.js'
     import {updateRETSPT, deleteRETSPT} from './crud.js'
     import {store} from './store.js'
 
@@ -290,29 +289,23 @@
                 store.historyChat.length = 0
                 store.isSaveBtnDisable = true
                 
-                if (store.isSelectEnabled === false){
+                if (store.isShowSelected === false){
                     // if (store.roadHighlightObj.size === 0){
                     removeHighlight(store.retsObj)
                     store.roadHighlightObj.clear()
                     if(!store.isSearch){
-                        console.log("hekllo")
-                        // if (store.CREATE_DT){
-                            await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
-
-                        // }
-                        // else{
-                        //     await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", "EDIT_DT DESC, PRIO")
-
-                        // }
+                        store.autozoomextent ? await queryExtent() : await store.getRetsLayer(store.loggedInUser, store.savedFilter, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                        
                         store.updateRetsSearch = store.roadObj.sort((a,b) => new Date(b.EDIT_DT) - new Date(a.EDIT_DT))
                         return
                     }
 
                     // store.updateRetsSearch
 
-                    
-                    // }
-                    
+                    return    
+                }
+                
+                store.updateRetsID()
                     // if (store.roadHighlightObj.size === 1){
                     //     highlightRETSPoint(store.retsObj)
                     //     store.roadHighlightObj.clear()
@@ -321,8 +314,8 @@
                     // }
                     
                     return
-                }
-                return
+                // }
+                // return
             },
 
             async deleteRets(){
@@ -355,7 +348,7 @@
                 
                 await this.returnToFeed()
 
-                store.isShowSelected = false
+                // store.isShowSelected = false
                 deleteRetsGraphic()
                 retsLayerView.layer.definitionExpression = store.savedFilter
                 store.isSaveBtnDisable = true
@@ -452,10 +445,7 @@
             },
             async replaceArchiveContent(old){
                 //delete flags
-                // console.log(old)
                 old.attributes.flagColor.FLAG = store.flagsChecked
-                console.log(old.attributes.flagColor)
-                console.log(store.flagsChecked)
                 const filter = !store.isShowSelected ? store.updateRetsSearch : [...store.roadHighlightObj]
                 // const currDate = filter?.find(x => x.attributes.RETS_ID === old.attributes.RETS_ID)?.attributes?.EDIT_DT ?? await this.returnToFeed()
                 const rd = filter.findIndex(x => x.attributes.OBJECTID === store.retsObj.attributes.OBJECTID)

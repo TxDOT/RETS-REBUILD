@@ -174,7 +174,7 @@ import {filterMapActivityFeed} from './utility.js'
 import {appConstants} from '../common/constant.js'
 import { store } from './store'
 import {addRETSFilter} from './crud.js'
-import { retsLayer, view, queryExtent } from './map-Init.js';
+import { retsLayer, view } from './map-Init.js';
 
 export default{
     name: "Filter",
