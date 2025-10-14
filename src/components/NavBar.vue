@@ -14,28 +14,26 @@
             <v-list-item id="popoutitems" class="iconList-item" v-for="(tool, i) in retsToolsBottom" :key="i" :value="tool" @mouseover="tool.hover(tool.title)" @mouseleave="tool.hoverout(tool.title)" @click="tool.action()" :active="tool.isActive" :active-class="tool.name !== 'Jump To' || tool.name !== 'Basemaps' ? 'btn-left-brder' : ''" >
                 <template v-if="tool.name !== 'Basemaps' && tool.name !== 'Jump To' && tool.name !=='Multi-Select' ">
                     <v-tooltip location="right" :text="tool.name"> 
-                            <template v-if="tool.name !== 'Multi-Select'" v-slot:activator="{ props }">
-                                    <v-icon class="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
-                            </template>
-                            <template v-else  v-slot:activator="{ props }">           
-                                <v-badge location="end" color="#4472C4" :content="store.roadHighlightObj.size" id="badge"> 
-                                    <v-icon class="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
-                                </v-badge>
-                            </template>
+                        <template v-if="tool.name !== 'Multi-Select'" v-slot:activator="{ props }">
+                                <v-icon class="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'" ></v-icon>
+                        </template>
+                        <template v-else  v-slot:activator="{ props }">           
+                            <v-badge location="end" color="#4472C4" :content="store.roadHighlightObj.size" id="badge"> 
+                                <v-icon class="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" v-bind="props" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
+                            </v-badge>
+                        </template>
                     </v-tooltip>
                 </template>
                 <template v-else>
-                         <template v-if="tool.name == 'Multi-Select'">
-                                    <v-badge location="end" color="#4472C4" :content="store.roadHighlightObj.size" id="badge"> 
-                                        <v-icon class="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
-                                </v-badge>
-                            </template>
-                            <template v-else>
-                                <v-icon class="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
-
-                            </template>
-                        
+                    <template v-if="tool.name == 'Multi-Select'">
+                        <v-badge location="end" color="#4472C4" :content="store.roadHighlightObj.size" id="badge"> 
+                            <v-icon class="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
+                        </v-badge>
                     </template>
+                    <template v-else>
+                        <v-icon class="topIcon" size="20" :icon="tool.icon" :color="tool.color" :name="tool.name" @mouseover="tool.color='#FFFFFF'" @mouseleave="tool.color='#D9D9D9'"></v-icon>
+                    </template>
+                </template>
             </v-list-item>
         </v-list>
 
@@ -321,7 +319,7 @@
                         'User Story 428: Refactor: History', 'User Story 423: Refactor: Multi-Select', 'User Story 427: Refactor: CRUD/Update', 
 
                     ],
-                [
+                    [
                         `Release 2.8`,'User Story 110: Multi Select Tool: Lasso', 'User Story 357: Card return to previous in feed pane', 'Bug 360: Selected features counter on the select button increases when opening a selected point', 
                         'Bug 359: Jump to SPM button opens a blank map', 'Bug 344: User filter returning results outside the scope of that filter', 'Bug 337: Route and subtitle overlap', 
                         'Bug 338: Save enabled with no description', 
@@ -342,52 +340,58 @@
                         'Bug 228: Update the format of the RETS number in the browser tab','Bug 232: Date Filter','Bug 233: Custom Query/ filter interaction',
                         'Bug 255: Filter: Date sorting reverts'
 
-                ],
-            ['Release 2.6',
-                'User Story 83: Imagery/Roadway Hyrbrid Basemap',
-                'User Story 169: Add ability to double-click to open a RETS point from the map pane', 
-                'User Story 185: Expand search on Activity Feed to search all history items, especially comments',
-                'User Story 188: Add a feedback option to the Settings menu for users to send idea',
-                'User Story 199: Add RETS number to browser tab Title Bar text',
-                'User Story 200: Add attachment icon to Activity Feed cards',
-                'User Story 9: Filters: styling updates',
-                'User Story 10: Job Detail Pane: Update 2',
-                "Bug 122: Search isn't respected after opening a card then closing it",
-                'Bug 6: Save issues when changing District Analyst',
-                'Bug 11: Messages for field change triggers incorrect',
-                'Bug 12: Remove counter from Details Pane header',
-                'Bug 217: Description field validation missing when adding a new point',
-                'Bug 220: New, Proposed check box in wrong place'
-
-
-                ],
-                ['Release 2.5', ' User Story 95: Add a count to the header', 'User Story 111: Use most recent history item in the card footer ', 'User Story 133: Filter: Add Custom Filter option',
-                'User Story 146: Job Detail Pane: Update', 'User Story 171: Resize app','User Sory 150: Add ability to save custom filters', 'User Story 170: Add update triggers for all updates made to a RETS',
-                'User Story 195: Add time-gated limiter to triggers to prevent 3 or more comments being added when new RETS is created', 'User Story 205: Update tables and filter for multiple district users',
-                 'Bug 178: Activity feed detail pane selection interaction', 'Bug 192: Changing status duplicates job feed', 'Bug 176: 1969 date corrupting history update in card footer',
-                'Bug 180: New job cards are not at the top of the feed', 'Bug 181: No route check box not checked for new jobs', 'Bug 123: Map Pane Search still not working properly for Minute Orders'],
-                ['Release 2.4', 'User Story 146: Job Detail Pane: Update', ' Bug 158: Selection not respected when JD pane is open', 'Bug 172: RETS number and subtitle too close'],
-                ['Release 2.3', 'User Story 107: Create tab buttons for Activity Feed and Details', 'User Story 108: Cancel button warning popup for unsaved changes', 'User Story 137: Add "Created" by info to metadata tab',
-                'User Story 146: Job Detail Pane: Update', 'User Story 148: Update trigger for history items to reflect username instead of RETSBOT','User Story 156: Add right click to get coordinates function',
-                'Bug 120: Flags not persisting', 'Bug 161: Assigned to default incorrect', 'Bug 210: Search: Value that does not exist zooms to random street', 'Bug 221: Double Click of RETS doesnt ask to save/discard changes on RETS',
-                'Bug 223: Discard popup appears when right click while details pane is open'],
-                ['Release 2.2', 'User Story 79: Related RETS Interaction', 'User Story 109: Add Activity and Detail Pane tabs', 'User Story 144: Job Detail Pane: Disable GEM task icon',
-                'User Story 149: Set up a test environment', 'User Story 139: Update default filter (to show all RETS with your name associated with it, anywhere)', 'Bug 116: Activity feed/Filter interaction',
-                'Bug 117: Card Selection', 'Bug 86: Add new point spinner is off center for certain screen sizes', 'Bug 93: Save not enabled after changes', 'Bug 97: Add attachment issues','Bug 98: Filter: User drop down not sorted',
-                'Bug 99: Filter: Count bubble', 'Bug 100: Add new point: New points show at bottom of feed', 'Bug 101: DFO field: Limit to 3 decimal places', 'Bug 102: Add new point: Orange route remains',
-                'Bug 145: Detail Pane Save button errors', 'Bug 125: Invalid route data and description lost when making new point', 'Bug 127: Date Picker in Detail Pane cant be closed unless a date is picked',
-                'Bug 114: Marking a RETS as Complete still shows in feed even if that filter is off', 'Bug 115: Center map on Texas when no cards are loaded in the feed (not off the coast of Africa)',
-                'Bug 118: "Add" comment button does not scroll to the entry location', 'Bug 121: Left Nav Bar: Icons shift when activated', 'Bug 124: Cursor in Map Pan still shows as pointer when hovering over a road in some circumstances',
-                'Bug 126: Points remain selected in the map after cards are unselected/closed','Bug 129: Filter popup dropdowns close method', 'Bug 132: Filter: Calendar allows too many dates to be selected',
-                'Bug 141: Form field validation bugs', 'Bug 128: Filter: Count doesnt reset','Bug 134: Form Validation: MO/TxDOT Connect number', 'Bug 135: Form Validation: Number field can not be NULL',
-                'Bug 136: Route field editable','Bug 140: Setting', 'Bug 142: Show Selected: Feed does not return when selection is cleared', 'Bug 143: Show Selected: Clears selection when diactivated',
-                'Bug 151: Activity Feed does not refresh after making a change to a RETS that would exclude that card from the feed based on the current filters', 'Bug 189: Linework is not aligning with basemap in RETS'],
-                ['Release 2.1','User Story 41: Map Pane', 'User Story 42: Initial Schema','User Story 44: Activity Feed Pane','User Story 45: Left Nav Menu Bar','User Story 46: Job Detail Pane',
-                'User Story 47: Add New Job Point','User Story 50: UI: Style Guide','User Story 52: Filter','User Story 55: Form Field Validations','User Story 58: Triggers','User Story 60: Show Selected',
-                'User Story 61: History','User Story 65: History Enhancements','User Story 66: Settings','User Story 74: RETS Subtitle','User Story 76: Archive RETS jobs','User Story 77: Move existing point',
-                'Bug 84: Filter: Cancel button doesnt cancel and count doesnt reset','Bug 87: DFO error notification','Bug 88: MO link greyed out','Bug 89: Home button zooms to wrong location',
-                'Bug 91: Default deadline date','Bug 103: Map pane: Home button, filter interaction zoom', 'Bug 104: Route Name field validation and auto-update' ],  
-                ['Release 2.0','RETS V2 first release'],  
+                    ],
+                    [
+                        'Release 2.6',
+                        'User Story 83: Imagery/Roadway Hyrbrid Basemap',
+                        'User Story 169: Add ability to double-click to open a RETS point from the map pane', 
+                        'User Story 185: Expand search on Activity Feed to search all history items, especially comments',
+                        'User Story 188: Add a feedback option to the Settings menu for users to send idea',
+                        'User Story 199: Add RETS number to browser tab Title Bar text',
+                        'User Story 200: Add attachment icon to Activity Feed cards',
+                        'User Story 9: Filters: styling updates',
+                        'User Story 10: Job Detail Pane: Update 2',
+                        "Bug 122: Search isn't respected after opening a card then closing it",
+                        'Bug 6: Save issues when changing District Analyst',
+                        'Bug 11: Messages for field change triggers incorrect',
+                        'Bug 12: Remove counter from Details Pane header',
+                        'Bug 217: Description field validation missing when adding a new point',
+                        'Bug 220: New, Proposed check box in wrong place'
+                    ],
+                    [
+                        'Release 2.5', ' User Story 95: Add a count to the header', 'User Story 111: Use most recent history item in the card footer ', 'User Story 133: Filter: Add Custom Filter option',
+                        'User Story 146: Job Detail Pane: Update', 'User Story 171: Resize app','User Sory 150: Add ability to save custom filters', 'User Story 170: Add update triggers for all updates made to a RETS',
+                        'User Story 195: Add time-gated limiter to triggers to prevent 3 or more comments being added when new RETS is created', 'User Story 205: Update tables and filter for multiple district users',
+                        'Bug 178: Activity feed detail pane selection interaction', 'Bug 192: Changing status duplicates job feed', 'Bug 176: 1969 date corrupting history update in card footer',
+                        'Bug 180: New job cards are not at the top of the feed', 'Bug 181: No route check box not checked for new jobs', 'Bug 123: Map Pane Search still not working properly for Minute Orders'
+                    ],
+                    [   
+                        'Release 2.4', 
+                        'User Story 146: Job Detail Pane: Update', 
+                        'Bug 158: Selection not respected when JD pane is open', 
+                        'Bug 172: RETS number and subtitle too close'
+                    ],
+                    ['Release 2.3', 'User Story 107: Create tab buttons for Activity Feed and Details', 'User Story 108: Cancel button warning popup for unsaved changes', 'User Story 137: Add "Created" by info to metadata tab',
+                    'User Story 146: Job Detail Pane: Update', 'User Story 148: Update trigger for history items to reflect username instead of RETSBOT','User Story 156: Add right click to get coordinates function',
+                    'Bug 120: Flags not persisting', 'Bug 161: Assigned to default incorrect', 'Bug 210: Search: Value that does not exist zooms to random street', 'Bug 221: Double Click of RETS doesnt ask to save/discard changes on RETS',
+                    'Bug 223: Discard popup appears when right click while details pane is open'],
+                    ['Release 2.2', 'User Story 79: Related RETS Interaction', 'User Story 109: Add Activity and Detail Pane tabs', 'User Story 144: Job Detail Pane: Disable GEM task icon',
+                    'User Story 149: Set up a test environment', 'User Story 139: Update default filter (to show all RETS with your name associated with it, anywhere)', 'Bug 116: Activity feed/Filter interaction',
+                    'Bug 117: Card Selection', 'Bug 86: Add new point spinner is off center for certain screen sizes', 'Bug 93: Save not enabled after changes', 'Bug 97: Add attachment issues','Bug 98: Filter: User drop down not sorted',
+                    'Bug 99: Filter: Count bubble', 'Bug 100: Add new point: New points show at bottom of feed', 'Bug 101: DFO field: Limit to 3 decimal places', 'Bug 102: Add new point: Orange route remains',
+                    'Bug 145: Detail Pane Save button errors', 'Bug 125: Invalid route data and description lost when making new point', 'Bug 127: Date Picker in Detail Pane cant be closed unless a date is picked',
+                    'Bug 114: Marking a RETS as Complete still shows in feed even if that filter is off', 'Bug 115: Center map on Texas when no cards are loaded in the feed (not off the coast of Africa)',
+                    'Bug 118: "Add" comment button does not scroll to the entry location', 'Bug 121: Left Nav Bar: Icons shift when activated', 'Bug 124: Cursor in Map Pan still shows as pointer when hovering over a road in some circumstances',
+                    'Bug 126: Points remain selected in the map after cards are unselected/closed','Bug 129: Filter popup dropdowns close method', 'Bug 132: Filter: Calendar allows too many dates to be selected',
+                    'Bug 141: Form field validation bugs', 'Bug 128: Filter: Count doesnt reset','Bug 134: Form Validation: MO/TxDOT Connect number', 'Bug 135: Form Validation: Number field can not be NULL',
+                    'Bug 136: Route field editable','Bug 140: Setting', 'Bug 142: Show Selected: Feed does not return when selection is cleared', 'Bug 143: Show Selected: Clears selection when diactivated',
+                    'Bug 151: Activity Feed does not refresh after making a change to a RETS that would exclude that card from the feed based on the current filters', 'Bug 189: Linework is not aligning with basemap in RETS'],
+                    ['Release 2.1','User Story 41: Map Pane', 'User Story 42: Initial Schema','User Story 44: Activity Feed Pane','User Story 45: Left Nav Menu Bar','User Story 46: Job Detail Pane',
+                    'User Story 47: Add New Job Point','User Story 50: UI: Style Guide','User Story 52: Filter','User Story 55: Form Field Validations','User Story 58: Triggers','User Story 60: Show Selected',
+                    'User Story 61: History','User Story 65: History Enhancements','User Story 66: Settings','User Story 74: RETS Subtitle','User Story 76: Archive RETS jobs','User Story 77: Move existing point',
+                    'Bug 84: Filter: Cancel button doesnt cancel and count doesnt reset','Bug 87: DFO error notification','Bug 88: MO link greyed out','Bug 89: Home button zooms to wrong location',
+                    'Bug 91: Default deadline date','Bug 103: Map pane: Home button, filter interaction zoom', 'Bug 104: Route Name field validation and auto-update' ],  
+                    ['Release 2.0','RETS V2 first release'],  
                 ],
                 switches: [
                             { label: "New RETS in my district(s)", value: false},
@@ -845,6 +849,7 @@
                     if (this.multiselectTool === 'rectangle') {
                         this.multiselectOptions[0].isActive = true;
                         selecttool(true, sketchWidgetselect, graphics, "rectangle","freehand")
+                     
                     } else if (this.multiselectTool === 'selecttoolfreehand') {
                         this.multiselectOptions[1].isActive = true;
                         selecttool(true, sketchWidgetselect, graphics, "polygon","freehand")

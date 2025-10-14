@@ -328,6 +328,7 @@ export default{
         
                 highlightRETSPoint(rets.attributes)
                 zoomTo(rets.geometry)
+                this.singleClickTimeout = null
             }, 500)
 
             return
