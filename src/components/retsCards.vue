@@ -355,6 +355,10 @@ export default{
                 store.cancelpopup = true
                 return
             }
+             if (!await isHighlighted(road.attributes)){
+                store.roadHighlightObj.clear()
+                removeHighlight("a", true)
+            }
 
             if(!await isHighlighted(road.attributes)){
                 store.roadHighlightObj.clear()
