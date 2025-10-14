@@ -885,7 +885,7 @@ export function createtool(sketchWidgetcreate, createretssym) {
                             store.alertTextInfo = {"text": `No Route has been detected`, "color": "yellow", "type":"info", "toggle": true}
                             store.isMoveRetsPt = false
                             completeMovePtSketch()
-                            // store.checkDetailsForComplete()
+                            store.checkDetailsForComplete()
                             return
                         }
                         store.retsObj.attributes.NO_RTE = false
