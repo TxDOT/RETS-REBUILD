@@ -2000,9 +2000,9 @@ export function removeLableError(id){
 export function enableFilterMapByExtent(){
 
     reactiveUtils.watch(
-        () => view.interacting,
+        () => view.stationary,
         async(isUpdating) => {
-            if(!isUpdating && store.autozoomextent && !store.isShowSelected){
+            if(isUpdating && store.autozoomextent && !store.isShowSelected){
                 await queryExtent()
                 return
             }
