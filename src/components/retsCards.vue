@@ -360,10 +360,6 @@ export default{
                 removeHighlight("a", true)
             }
 
-            if(!await isHighlighted(road.attributes)){
-                store.roadHighlightObj.clear()
-                removeHighlight("a", true)
-            }
             store.roadHighlightObj.add(road)
             openDetails(road)
             return
