@@ -960,7 +960,7 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                         
                                         removeHighlight("a", true); 
                                         store.roadHighlightObj.clear()
-                                        store.retsSelection.clear()
+                                        // store.retsSelection = 0
                                         if (!selectedFeatures.length){
                                             store.roadHighlightObj.clear()
                                              setTimeout(() => {
@@ -995,21 +995,19 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                                        store.retsSelection.forEach((value) => {
                                                         store.roadHighlightObj.add(value)
                                                         arr.push(value.attributes.RETS_ID)
-                                                        })
+                                                    })
 
-                                                                      string = arr.join(" OR RETS_ID = ")
+                                                    string = arr.join(" OR RETS_ID = ")
 
-                                                                    if (store.autozoomextent  && store.isShowSelected && i == 0){
-                                                                          if (store.CREATE_DT ){
-                                                                            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
-                                                                            //check if features are highlighted, if they are run the outlinefeedcards
-
-                                                                        }
-                                                                        else{
-                                                                            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", "EDIT_DT DESC, PRIO")
-
-                                                                        }
-                                                                    }
+                                                    if ((store.autozoomextent || store.isShowSelected) && i == 0){
+                                                        if (store.CREATE_DT ){
+                                                            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
+                                                            //check if features are highlighted, if they are run the outlinefeedcards
+                                                        }
+                                                        else{
+                                                            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", "EDIT_DT DESC, PRIO")
+                                                        }
+                                                    }
                                                                    
 
 

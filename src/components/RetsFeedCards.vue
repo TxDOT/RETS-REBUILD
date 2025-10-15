@@ -62,7 +62,7 @@
             </v-text-field>
         </div>
         <div id="retsURL" v-if="isShowRetsUrl && !store.isDetailsPage" @click="isShowRetsUrl = false; restoreFilters();">
-            <v-banner icon="mdi-restore" text="Shared URL bypasses filters. Click to restore." id="retsURLBanner" single-line width="100">
+            <v-banner icon="mdi-restore" text="Shared URL bypasses filters. Click to restore." id="retsURLBanner">
                 <!-- <template v-slot:prepend>
                     <icon icon="mdi-restore"></icon>
                 </template> -->
