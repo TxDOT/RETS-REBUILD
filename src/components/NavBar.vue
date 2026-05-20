@@ -151,7 +151,8 @@
                         </template>
                     </v-switch>
 
-                    <v-select :key="index" v-if="addDropdown(index)" :disabled="isDisabled(index)" density="compact" variant="underlined" class="switchDropdown" v-model="item.value2" multiple :items=statuses  >
+                    <v-select :key="index" v-if="addDropdown(index)" disabled density="compact" variant="underlined" class="switchDropdown" v-model="item.value2" multiple :items=statuses  > 
+                        <!-- :disabled="isDisabled(index)" -->
                         <template #prepend>
                             <v-label >
                                 Applies to: 
@@ -250,7 +251,7 @@
     import { createtool, selecttool, togglemenu, logoutUser, applyDarkGrey, applyLightGrey, applyStandard, applyImagery, applyHybrid, applyGoogle, applyOSM, getUserOBJECTID} from '../components/utility.js';
     import { addSettings } from './crud.js';
     import { store } from './store';
-    import { defineAsyncComponent } from 'vue'
+    import { defineAsyncComponent, toRaw } from 'vue'
 
     export default{
         name: "NavBar",
@@ -716,7 +717,10 @@
                        
                     },
                     isDisabled(index){
-                        if (index => 0){
+                        // if (index => 0){
+                        //     return true
+                        // }
+                        if (index == 1 || index == 2 || index == 4 || index == 6){
                             return true
                         }
                         return false
@@ -742,11 +746,21 @@
                         return
                     },
                     async saveSettings(){
+                        const settingsjson = []
+                        for (let index = 0; index < this.switches.length; index++) {
+                            const element = this.switches[index];
+                            if (!this.isDisabled(index)){
+                                settingsjson.push(toRaw(element))
+                            }   
+                            
+                        }
                         store.settings = {
                             autoZoom : store.autozoomtest,
                             autoZoomExtent: store.autozoomextent,
                             basemap: store.basemaptest,
-                            // notifications: this.switches
+                            //   notifications: this.switches
+                            notifications: settingsjson
+
                         } 
 
                         // for (let index = 0; index < this.switches.length; index++) {
@@ -1354,7 +1368,7 @@
         position: absolute;
        height: 1px;
         /*width: 0px; */
-        top: 204px;
+        top: 220px;
         left: 83px;
         border-radius: 0;
     }
