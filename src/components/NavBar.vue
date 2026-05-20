@@ -799,7 +799,9 @@
                             return
                         }
                         for (let i =0; i < this.switches.length; i++){
-                            this.switches[i].value = notifications[i].value
+                                this.switches[i].value = notifications[i]?.value
+
+                            
 
                          }
 
