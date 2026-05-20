@@ -964,6 +964,10 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                         if (!selectedFeatures.length){
                                             store.roadHighlightObj.clear()
                                              setTimeout(() => {
+                                                if (store.autozoomextent){
+                                                    queryExtent()
+                                                    return
+                                                }
                                                 returntofeedcopy()
 
                                             }, 500);
@@ -974,46 +978,19 @@ export function selecttool(isSelectEnabled, sketchWidgetselect, graphics, toolty
                                                 highlightRETSPoint(selectedFeatures[i].attributes, true); 
 
                                             }
-                                            if (store.isShowSelected){
-                                                
-                                                    // store.roadHighlightObj.forEach((value) => {
-                                                    //      if (!value){
-                                                    //         console.log("ran")
-                                                    //         store.roadHighlightObj.clear()
-                                                    //         store.retsSelection.forEach((value) => {
-                                                    //             store.roadHighlightObj.add(value)
-                                                                
-                                                                
-                                                    //         })
-                                                            
-                                                            
-                                                    //     }
-                                                    // })
+                                            if (store.isShowSelected ){
                                                     let arr = []
                                                     let string = ''
                                                     store.roadHighlightObj.clear()
                                                        store.retsSelection.forEach((value) => {
+
                                                         store.roadHighlightObj.add(value)
                                                         arr.push(value.attributes.RETS_ID)
                                                         })
 
-                                                                      string = arr.join(" OR RETS_ID = ")
 
-                                                                    if (store.autozoomextent  && store.isShowSelected && i == 0){
-                                                                          if (store.CREATE_DT ){
-                                                                            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
-                                                                            //check if features are highlighted, if they are run the outlinefeedcards
-
-                                                                        }
-                                                                        else{
-                                                                            store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", "EDIT_DT DESC, PRIO")
-
-                                                                        }
-                                                                    }
-                                                                   
-
-
-                                                    
+                                                        string = arr.join(" OR RETS_ID = ")
+                                                        store.getRetsLayer(store.loggedInUser, `RETS_ID = ${string}`, "retsLayer", `${store.CREATE_DT.filter} ${store.CREATE_DT.sortType}, PRIO`)
                                                    
                                             }
                                                     
@@ -1735,7 +1712,7 @@ store.isCard = true
 store.historyChat.length = 0
 store.isSaveBtnDisable = true
 //store.roadHighlightObj.clear()
-if (store.roadHighlightObj.size <= 1 && store.isSelectEnabled === false){
+if (store.roadHighlightObj.size <= 1){
     if (store.roadHighlightObj.size === 0){
         removeHighlight(store.retsObj)
         store.roadHighlightObj.clear()
