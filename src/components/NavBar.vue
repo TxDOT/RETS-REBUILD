@@ -151,7 +151,7 @@
                         </template>
                     </v-switch>
 
-                    <v-select :key="index" v-if="addDropdown(index)" disabled density="compact" variant="underlined" class="switchDropdown" v-model="item.value2" multiple :items=statuses  > 
+                    <v-select :key="index" v-if="addDropdown(index)" :disabled="isDisabled(index)" density="compact" variant="underlined" class="switchDropdown" v-model="item.value2" multiple :items=statuses  > 
                         <!-- :disabled="isDisabled(index)" -->
                         <template #prepend>
                             <v-label >
@@ -707,20 +707,22 @@
                     updateuserSettings(){
                         store.userSettings = this.userSettings
                     },
-                    setNotifications(){
-                        const { notifications } = this.userSettings
-                        if (notifications != null){
-                            for (let i = 0; i< notifications.length; i++ ){
-                                this.switches[i].value = notifications[i].value
-                            }
+                   setNotifications() {
+                        const { notifications } = this.userSettings;
+
+                        if (!notifications) return;
+
+                        for (const sw of this.switches) {
+                            const match = notifications.find(n => n.label === sw.label);
+
+                            sw.value = match ? match.value : false;
                         }
-                       
                     },
                     isDisabled(index){
                         // if (index => 0){
                         //     return true
                         // }
-                        if (index == 1 || index == 2 || index == 4 || index == 6){
+                        if (index == 1 || index == 2 || index == 6){
                             return true
                         }
                         return false

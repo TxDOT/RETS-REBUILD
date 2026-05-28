@@ -352,7 +352,7 @@
                 deleteRetsGraphic()
                 retsLayerView.layer.definitionExpression = store.savedFilter
                 store.isSaveBtnDisable = true
-                let url = `https://gis-batch-dev.txdot.gov/fmejobsubmitter/TPP-MB/RETS_NOTIFY_V2_DEV.fmw?NewPoint=${encodeURI(store.isNewRets)}&DelPoint=No&BEFORE_STAT=${encodeURI(store.archiveRetsDataString)}&AFTER_STAT=${encodeURI(JSON.stringify(store.retsObj))}&opt_showresult=false&opt_servicemode=sync&token=0bf9eeac1a531cc5313477783a7c06b34986366b`
+                let url = `https://testportal.txdot.gov/fmejobsubmitter/TPP-MB/RETS_NOTIFY_V2_DEV.fmw?NewPoint=${encodeURI(store.isNewRets)}&DelPoint=false&BEFORE_STAT=${encodeURI(store.archiveRetsDataString)}&AFTER_STAT=${encodeURI(JSON.stringify(store.retsObj))}&opt_showresult=false&opt_servicemode=sync&token=0bf9eeac1a531cc5313477783a7c06b34986366b`
                   const response = await fetch(url)
                 if (response.ok){
                     console.log("success")

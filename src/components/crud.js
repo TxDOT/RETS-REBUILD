@@ -84,7 +84,7 @@ export async function deleteRETSPT(retsObj){
     await retsLayer.applyEdits({
         deleteFeatures: [esriDelGraphic]
     })
-    let url = `https://gis-batch-dev.txdot.gov/fmejobsubmitter/TPP-MB/RETS_NOTIFY_V2_DEV.fmw?NewPoint=No&DelPoint=Yes&BEFORE_STAT=${encodeURI(store.archiveRetsDataString)}&AFTER_STAT=${encodeURI(JSON.stringify(store.retsObj))}&opt_showresult=false&opt_servicemode=sync&token=0bf9eeac1a531cc5313477783a7c06b34986366b`
+    let url = `https://testportal.txdot.gov/fmejobsubmitter/TPP-MB/RETS_NOTIFY_V2_DEV.fmw?NewPoint=false&DelPoint=true&BEFORE_STAT=${encodeURI(store.archiveRetsDataString)}&AFTER_STAT=${encodeURI(JSON.stringify(store.retsObj))}&opt_showresult=false&opt_servicemode=sync&token=0bf9eeac1a531cc5313477783a7c06b34986366b`
     const response = await fetch(url)
     if (response.ok){
         console.log("success")
