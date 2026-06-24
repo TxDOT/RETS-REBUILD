@@ -135,31 +135,75 @@
             <v-card-item class="banner-txt" style="padding-left: 7px; padding-top: 0; padding-bottom: 0;"><span>Notifications</span></v-card-item>
             <v-card-subtitle id = "notificationssub">Send notifications for:</v-card-subtitle>
            <div id="notis">
-                <v-card-item v-for="(item, index) in switches" :key="index"  class="switch-item">
-                    <div style="height: auto;">
-                        <v-switch :model-value="item.value" color="primary"  @update:modelValue="item.value= $event" :disabled="isDisabled(index)"  :style="{color: fontColor, height: '50px', marginTop : '20px'}"   >
-                        <template #prepend >
-                            <v-label @mouseover="testfunction(index) " >
-                                {{ item.label }}
+                <v-card-item v-for="(item, index) in switches" :key="index"  class="switch-item" >
+                    <!-- <div style="height: auto;"> -->
+                        
+                    <v-switch :model-value="item.value" color="primary"   @update:modelValue="item.value= $event" :disabled="isDisabled(index)"  :style="{color: fontColor, height: '50px', marginTop : '20px'}" v-if="item.label != 'Someone tags me'"  >
+                        
+                        <template #prepend  >
+
+
+                            
+                            <v-tooltip text="Please select a value from the dropdown to enable this notification" location="start">
+                                <template #activator="{ props }">
+                                    <v-btn v-bind="props" icon="mdi-exclamation" density="compact" v-if="item.label ===  'Status changes to' && toggleWarning1()" style="color: red; opacity: 1; font-size: 15px; position: absolute; left: 0px ; padding-right: 10px;" selected-class="toggle-exclamation" variant="plain" active></v-btn>
+
+                                </template>
+                            </v-tooltip>
+                            <v-tooltip text="Please select a value from the dropdowns to enable this notification" location="start" >
+                                <template #activator="{ props }">
+                                    <v-btn v-bind="props" icon="mdi-exclamation" density="compact" v-if="item.label === 'No activty in ______ days' && toggleWarning2() " style="color: red; opacity: 1; font-size: 15px; position: absolute; left: 0px ; padding-right: 10px;" selected-class="toggle-exclamation" variant="plain" active></v-btn>
+                                </template>
+                            </v-tooltip>
+                            <v-label @mouseover="testfunction(index) " v-if="item.label != 'No activty in ______ days'" >
+                            
+                                {{ item.label }} <span v-if="item.label == 'Status changes to'">:</span>
                                 
                             </v-label>
-                        <template v-if="item.label === 'No activty in ______ days'">
-                            <v-select :items="noActivityDays" class="daysDropdown" base-color="transparent" bg-color="transparent" :center-affix=true chips density="compact" variant="plain" max-width="20px" v-model="item.value3"></v-select>
+                        <template v-if="item.label === 'No activty in ______ days'"  style="position: relative; margin-left:20px ;">
+
+                        <div class="d-flex align-center" style="margin-left: 10px; width: fit-content;">
+                        <span class="labelClass">No activity in</span>
+                        
+                        <v-select
+                            :items="noActivityDays"
+                            v-model="item.value3"
+                            density="compact"
+                            variant="underlined"
+                            hide-details
+                            indent-details
+                            class="daysSelector"
+                            single-line
+                            style="padding: 0; margin: 0 !important;"
+                            :disabled="disableDropdowns(item)"
+                        />
+
+                        <span class="labelClass">days</span>
+                        
+                        </div>
+                             <!-- <v-select   
+                             density="compact"
+                            variant="underlined"
+                            hide-details
+                            indent-details
+                            single-line></v-select> -->
                         </template>
+                    <v-select class="statusSelector" :key="index" hide-details closable-chips v-if="addDropdown(index) && item.label == 'Status changes to' " v-model="item.value2" :items="['Not Started', 'In Progress', 'Complete', 'On Hold']" multiple chips density="compact" variant="underlined" :disabled="disableDropdowns(item)"></v-select>
 
 
                         </template>
+                        
                     </v-switch>
 
-                    <v-select :key="index" v-if="addDropdown(index)" :disabled="isDisabled(index)" density="compact" variant="underlined" class="switchDropdown" v-model="item.value2" multiple :items=statuses  > 
-                        <!-- :disabled="isDisabled(index)" -->
+                    <v-select :key="index" v-if="addDropdown(index) && item.label == 'No activty in ______ days' " :disabled="isDisabled(index) || disableDropdowns(item)" density="compact" variant="underlined" class="switchDropdown" v-model="item.value2" multiple :items=statuses clearable > 
                         <template #prepend>
                             <v-label >
                                 Applies to: 
                             </v-label>
                         </template>
                     </v-select> 
-                    </div>
+                    <!-- </div> -->
+                     
                     
                 </v-card-item>  
             </div>
@@ -169,7 +213,7 @@
             <div style="width: 100%; position: relative; height: 100%;">
                 <div style="width: 100%; position: relative;">
                     <v-btn variant="plain" size="small" class="secondary-button"  prepend-icon="mdi-power" @click="logoutMethod()" >LOGOUT</v-btn>
-                    <v-btn style="float: right;" variant="outlined" size="small" class="main-button-style" @click=" handleactiveclass(); saveSettings()">save</v-btn>
+                    <v-btn style="float: right;" variant="outlined" size="small" class="main-button-style" @click=" handleactiveclass(); saveSettings()" :disabled="disableSave()">save</v-btn>
                     <v-btn style="float: right;" variant="plain" size="small" class="secondary-button"  @click="handleactiveclass(); cancelSettings()">CANCEL</v-btn>
                 </div>
             </div>
@@ -298,7 +342,7 @@
                 feedbackName: "",
                 notificationValue: false,
                 currentSwitchValue: [],
-                statuses: ['In my district(s)', 'Assigned to me', "I'm tagged in ", 'Created by me', 'Any association with me (incl. history items)'],
+                statuses: ['In my district(s)', 'Assigned to me', 'Created by me', 'Any association with me (incl. history items)'],
                 showDropdown: false,
                 noActivityDays: [30,60,90],
                 numberOfDays: null,
@@ -399,9 +443,9 @@
                             { label: "RETS assigned to me", value: false},
                             { label: "Someone tags me", value: false},
                             { label: "RETS marked high priority", value: false},
-                            { label: "No activty in ______ days", value: false, value2: null, value3: this.numberOfDays},
                             { label: "A RETS is deleted", value: false, value2: null},
                             { label: "Status changes to", value: false, value2: null},
+                            { label: "No activty in ______ days", value: false, value2: null, value3: this.numberOfDays},
                         ],
                 retsToolsTop: [
                                {
@@ -697,7 +741,7 @@
                         }
                     },
                     addDropdown(index){
-                        if (index > 3){
+                        if (index > 2){
                             return true
                         }
                         else{
@@ -711,21 +755,32 @@
                         const { notifications } = this.userSettings;
 
                         if (!notifications) return;
-
                         for (const sw of this.switches) {
                             const match = notifications.find(n => n.label === sw.label);
 
                             sw.value = match ? match.value : false;
+                            
+                            if (match && match.value2 && match.value2.length > 0){
+                                sw.value2 = match.value2
+                            }
+                            if (match && match.value3 && match.value3 > 0){
+                                sw.value3 = match.value3
+                            }
+                          
+
                         }
                     },
                     isDisabled(index){
+                        if (index == 2){
+                            return true
+                        }
                         // if (index => 0){
                         //     return true
                         // }
-                        if (index == 1 || index == 2 || index == 6){
-                            return true
-                        }
-                        return false
+                        // if ( index == 2 || index == 6){
+                        //     return true
+                        // }
+                        // return false
                     },
                     setAutozoomExtentSwitch(){
                         const { autoZoomExtent } = this.userSettings;
@@ -751,24 +806,19 @@
                         const settingsjson = []
                         for (let index = 0; index < this.switches.length; index++) {
                             const element = this.switches[index];
-                            if (!this.isDisabled(index)){
+                            // if (!this.isDisabled(index)){
                                 settingsjson.push(toRaw(element))
-                            }   
+                            // }   
                             
                         }
                         store.settings = {
                             autoZoom : store.autozoomtest,
                             autoZoomExtent: store.autozoomextent,
                             basemap: store.basemaptest,
-                            //   notifications: this.switches
                             notifications: settingsjson
 
                         } 
 
-                        // for (let index = 0; index < this.switches.length; index++) {
-                        //     const element = this.switches[index];
-                            
-                        // }
 
                         this.isAutoZoom = store.autozoomtest
                         this.isAutoZoomExtent = store.autozoomextent
@@ -800,12 +850,27 @@
                         if (!notifications){
                             return
                         }
-                        for (let i =0; i < this.switches.length; i++){
-                                this.switches[i].value = notifications[i]?.value
+                        for (const sw of this.switches) {
+                        const match = notifications.find(n => n.label === sw.label);
 
-                            
+                        sw.value = match ? match.value : false;
+                        if (sw.value2){
+                            sw.value2 = match && match.value2 ? match.value2 : null;
 
-                         }
+                        }
+                        if (sw.value3){
+                            sw.value3 = match && match.value3 ? match.value3 : null;
+
+                        }
+                        if (match && match.value2 && match.value2.length > 0){
+                            sw.value2 = match.value2
+                        }
+                        if (match && match.value3 && match.value3 > 0){
+                            sw.value3 = match.value3
+                        }
+                        
+
+                        }
 
                     return
                 },
@@ -986,7 +1051,42 @@
                 submitFeedback(){
                     this.isAnonymous ? this.sendWebhookRequest(this.feedbackText, 'Anonymous') : this.sendWebhookRequest(this.feedbackText, store.loggedInUser)
                     
+                },
+                disableDropdowns(item){
+                    if (item.value == false){
+
+                        return true
+                    }
+                },
+                disableSave(){
+                    for (let index = 0; index < this.switches.length; index++) {
+                        const item = this.switches[index];
+                    if (item.label === "Status changes to" && item.value == true && (!item.value2 || item.value2 && !item.value2.length)){
+                        return true
+                    }
+                    if (item.label === "No activty in ______ days" && item.value == true && ((!item.value2 || item.value2 && !item.value2.length) ||(!item.value3 ) )){
+                        return true
+                    }
+                    }
+                },
+                toggleWarning1(){
+                    for (let index = 0; index < this.switches.length; index++) {
+                        const item = this.switches[index];
+                    if (item.label === "Status changes to" && item.value == true && (!item.value2 || item.value2 && !item.value2.length)){
+                        return true
+                    }
+                    }
+                },
+                toggleWarning2(){
+                    
+                    for (let index = 0; index < this.switches.length; index++) {
+                    const item = this.switches[index];
+                    if (item.label === "No activty in ______ days" && item.value == true && ((!item.value2 || item.value2 && !item.value2.length) ||(!item.value3 ) )){
+                        return true
+                    }
+                    }
                 }
+
 
             
         },
@@ -1333,7 +1433,7 @@
         /* left: -200px; */
         /* width: 200px; */
         margin-left: 20px;
-        margin-top: 0;
+        margin-top: 10px;
         height: 32px;
         top: -15px;
     }
@@ -1366,6 +1466,16 @@
 
     .switchDropdown .v-chip__content{
         font-size: 9px;
+    }
+
+    .switchDropdown .v-field__append-inner{
+        display: none;
+    }
+
+    .switchDropdown .v-field__clearable{
+        position: absolute;
+        font-size: 12px;
+        align-self: center;
     }
 
     .daysDropdown{
@@ -1412,6 +1522,94 @@
  
      .daysDropdown .v-select--active-menu  {
         width: 10px !important;
+    }
+
+    .labelClass{
+            align-items: center;
+    color: inherit;
+    display: inline-flex;
+    font-size: 10px;
+    letter-spacing: 0.009375em;
+    min-width: 0;
+    opacity: var(--v-medium-emphasis-opacity);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    }
+
+    .daysSelector{
+        padding-bottom: 14px !important;
+        padding-left: 0px !important;
+        padding-right:0px !important;
+        width: 55px;
+        
+    }
+    .daysSelector .v-field__input{
+        margin: 0;
+        padding: 0;
+        align-content: end;
+        
+
+    }
+    .daysSelector .mdi-menu-down{
+        font-size: 16px;
+        padding-top: 12px;
+
+    }
+    .daysSelector .v-input__control{
+        margin: 0;
+        justify-self: center;
+
+    }
+
+    .statusSelector{
+        padding-left: 10px;
+        width: fit-content;
+        max-height: 50px;
+        max-width: 190px;
+        overflow:auto;
+        
+    }
+
+     .statusSelector .v-field__input{
+        width: 180px !important;
+        padding-right: 0;
+        
+
+    }
+   
+    .statusSelector .v-input__control{
+        /* width: 190px !important; */
+        margin-right: 0 !important;
+        
+
+    }
+    .statusSelector .v-field__append-inner{
+        padding: 0 !important;
+        display: none !important;
+        
+        
+    }
+
+    .statusSelector .v-input{
+        max-height: 50px !important;
+        
+    }
+
+     .statusSelector .v-chip__content{
+        font-size: 10px;
+    }
+
+    .statusSelector .v-chip__close{
+        font-size: 12px;
+        margin-left: 0px !important;
+    }
+  
+    .statusSelector .v-chip{
+        width: 82px !important;
+
+        display: flex;
+        justify-content: space-between;
     }
 
     

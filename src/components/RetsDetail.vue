@@ -134,7 +134,7 @@
                     
                 <v-btn-toggle class="trigger-buttons" density="compact" style="position: relative; top: 20px; left: 11px;">
                     <v-btn variant="plain" size="small" class="secondary-button"  @click="handlearchive()">CANCEL</v-btn>
-                    <v-btn class="main-button-style" variant="outlined" size="small" @click="deleteRets()">DELETE</v-btn>
+                    <v-btn class="main-button-style" variant="outlined" size="small" @click="deleteRets()" :disabled="store.toggleDeleteDisabled">DELETE</v-btn>
                 </v-btn-toggle>
             </div>
         </v-card>  
@@ -197,7 +197,7 @@
                 },
                 initRules: false,
                 retCmnt: {err: null},
-                retCmntL: {}
+                retCmntL: {},
             }
         },
         mounted(){
@@ -319,6 +319,7 @@
             },
 
             async deleteRets(){
+                store.toggleDeleteDisabled = true
                 store.retsObj.attributes.isDelete = true
                 await deleteRETSPT(store.retsObj)
                 removeRelatedRetsFromMap(store.retsObj.attributes.OBJECTID)
@@ -352,7 +353,11 @@
                 deleteRetsGraphic()
                 retsLayerView.layer.definitionExpression = store.savedFilter
                 store.isSaveBtnDisable = true
-                let url = `https://testportal.txdot.gov/fmejobsubmitter/TPP-MB/RETS_NOTIFY_V2_DEV.fmw?NewPoint=${encodeURI(store.isNewRets)}&DelPoint=false&BEFORE_STAT=${encodeURI(store.archiveRetsDataString)}&AFTER_STAT=${encodeURI(JSON.stringify(store.retsObj))}&opt_showresult=false&opt_servicemode=sync&token=0bf9eeac1a531cc5313477783a7c06b34986366b`
+                let url = store.devStatus === "dev" ?
+                `https://testportal.txdot.gov/fmejobsubmitter/TPP-MB/RETS_NOTIFY_V2_DEV.fmw?NewPoint=${encodeURI(store.isNewRets)}&DelPoint=false&BEFORE_STAT=${encodeURI(store.archiveRetsDataString)}&AFTER_STAT=${encodeURI(JSON.stringify(store.retsObj))}&opt_showresult=false&opt_servicemode=sync&token=0bf9eeac1a531cc5313477783a7c06b34986366b`
+                 :
+                `https://maps.txdot.gov/fmejobsubmitter/TPP-MB/RETS_NOTIFY_V2_PROD.fmw?NewPoint=${encodeURI(store.isNewRets)}&DelPoint=false&BEFORE_STAT=${encodeURI(store.archiveRetsDataString)}&AFTER_STAT=${encodeURI(JSON.stringify(store.retsObj))}&opt_showresult=false&opt_servicemode=sync&token=4e48225e9ab1967ea9147ab3da7b35b59e86aa1e`
+
                   const response = await fetch(url)
                 if (response.ok){
                     console.log("success")
