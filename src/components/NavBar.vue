@@ -188,7 +188,7 @@
                             indent-details
                             single-line></v-select> -->
                         </template>
-                    <v-select class="statusSelector" :key="index" hide-details closable-chips v-if="addDropdown(index) && item.label == 'Status changes to' " v-model="item.value2" :items="['Not Started', 'In Progress', 'Complete', 'On Hold']" multiple chips density="compact" variant="underlined" :disabled="disableDropdowns(item)"></v-select>
+                    <v-select class="statusSelector" :key="index" hide-details closable-chips v-if="addDropdown(index) && item.label == 'Status changes to' " v-model="item.value2" :items="['Not Started', 'In Progress', 'Completed', 'On Hold']" multiple chips density="compact" variant="underlined" :disabled="disableDropdowns(item)"></v-select>
 
 
                         </template>
